@@ -1,4 +1,5 @@
 # GAMS Engine UI
+![GAMS Engine Logo](https://gams.com/engine/assets/images/logo-bg-dark.png)
 This repository contains the code for the management UI for [GAMS Engine](https://gams.com/engine). The UI is a React app for managing jobs, models, users and more. Feel free to extend the code and send us a pull request if you think others would benefit from your changes.
 
 # Installing
