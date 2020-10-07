@@ -1,0 +1,135 @@
+$theme-colors: (
+  "primary": #f39619,
+  "secondary": #494d55
+);
+
+$border-color: #adb5bd;
+$border-radius: 0;
+$border-radius-lg: 0;
+$border-radius-sm: 0;
+
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+.navbar-logo {
+  height: 50px;
+}
+
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 77px 0 0;
+}
+
+.sidebar-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 77px);
+  padding-top: 0.5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.sidebar .nav-link:hover {
+  color: #b66c09;
+}
+
+.sidebar .nav-link.active {
+  color: #f39619;
+}
+
+.sidebar .nav-link .feather {
+  margin-right: 8px;
+}
+
+[role="main"] {
+  padding-top: 77px;
+}
+
+.nav-link {
+  padding: 2em 1rem;
+}
+
+.sidebar-nav {
+  display: flex;
+}
+
+@media only screen and (max-width: 767px) {
+  .sidebar-container {
+    width: 100%;
+    position: fixed;
+    z-index: 999;
+    bottom:0;
+  }
+  .nav-top {
+    width: 100%;
+    position: fixed;
+    z-index: 999;
+    padding: 77px 0 0;
+    border-bottom: 1px solid #adb5bd !important;
+    top:0;
+  }
+  .nav-top .nav-link {
+    display: inline-block;
+  }
+  .nav-link {
+    padding: 0.5em 1rem;
+    padding-bottom: 16px;
+  }
+  .sidebar-sticky {
+    height: auto;
+  }
+  [role="main"] {
+    padding-top: 138px;
+    padding-bottom: 184px;
+  }
+  .sidebar {
+    border-top: 1px solid #adb5bd !important;
+    padding-top:0;
+  }
+  .nav-link-text {
+    display: block;
+  }
+  .sidebar-nav {
+    justify-content: space-between !important;
+    flex-direction: row;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .sidebar-container {
+    width: 140px;
+  }
+  .sidebar {
+    border-right: 1px solid #adb5bd !important;
+  }
+  .sidebar-nav {
+    flex-direction: column;
+  }
+}
+
+.alert-fixed {
+  position:fixed; 
+  width: 100%;
+  z-index:10;
+}
