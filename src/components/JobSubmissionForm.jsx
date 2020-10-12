@@ -179,7 +179,6 @@ const JobSubmissionForm = props => {
                 });
         })
             .catch(err => {
-                console.log(err);
                 setSubmissionErrorMsg(`Problems while posting job.`);
             });
         setIsSubmitting(false);
