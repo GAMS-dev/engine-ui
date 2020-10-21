@@ -1,4 +1,4 @@
-import React, {useState, useContext} from "react";
+import React, { useState, useContext } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { AuthContext } from "../AuthContext";
@@ -12,7 +12,7 @@ import ChangePasswordModal from "./ChangePasswordModal";
 import Job from "./Job";
 import Models from "./Models";
 import Users from "./Users";
-import {AlertContext, Alert} from "./Alert";
+import { AlertContext, Alert } from "./Alert";
 
 import { Switch, Route, useHistory } from "react-router-dom";
 import Cleanup from "./Cleanup";
@@ -37,7 +37,7 @@ const Layout = () => {
         <div className="container-fluid">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
-              <Sidebar changePasswordHandler={changePasswordHandler}/>
+              <Sidebar changePasswordHandler={changePasswordHandler} />
             </div>
             <main className="col" role="main">
               <Alert />
@@ -60,9 +60,6 @@ const Layout = () => {
                 <Route exact path="/models">
                   <Models />
                 </Route>
-                <Route exact path={["/", "/jobs"]}>
-                  <Jobs />
-                </Route>
                 {(roles && roles.length > 0) &&
                   <Route exact path="/users">
                     <Users />
@@ -78,11 +75,14 @@ const Layout = () => {
                     <Cleanup />
                   </Route>
                 }
+                <Route>
+                  <Jobs />
+                </Route>
               </Switch>
-              <ChangePasswordModal 
-                showDialog={showChangePasswordDialog} 
+              <ChangePasswordModal
+                showDialog={showChangePasswordDialog}
                 setShowDialog={setShowChangePasswordDialog}
-                handleSuccess={logOutUser}/>
+                handleSuccess={logOutUser} />
             </main>
           </div>
         </div>
