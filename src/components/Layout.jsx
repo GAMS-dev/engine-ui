@@ -16,6 +16,7 @@ import { AlertContext, Alert } from "./Alert";
 
 import { Switch, Route, useHistory } from "react-router-dom";
 import Cleanup from "./Cleanup";
+import LicenseUpdateForm from "./LicenseUpdateForm";
 
 const Layout = () => {
   const [{ roles }] = useContext(AuthContext);
@@ -65,9 +66,14 @@ const Layout = () => {
                     <Users />
                   </Route>
                 }
-                {(roles && roles.find(role => role === "admin") !== undefined) &&
+                {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
                   <Route exact path="/users/:username">
                     <UserUpdateForm />
+                  </Route>
+                }
+                {(roles && roles.includes('admin') !== undefined) &&
+                  <Route exact path="/licenses/:username">
+                    <LicenseUpdateForm />
                   </Route>
                 }
                 {(roles && roles.find(role => role === "admin") !== undefined) &&

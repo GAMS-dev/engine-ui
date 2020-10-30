@@ -17,7 +17,7 @@ const Users = () => {
 
   const [users, setUsers] = useState([]);
   const [userToDelete, setUserToDelete] = useState("");
-  const [deleteInvitation ,setDeleteInvitation] = useState(false);
+  const [deleteInvitation, setDeleteInvitation] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,14 +30,14 @@ const Users = () => {
       field: "username",
       column: "User",
       sorter: "alphabetical",
-      displayer: e => e === ""? <span className="badge badge-pill badge-info">unregistered</span>: 
-        (e === username? 
-        <>
-          {e}
-          <sup>
-            <span className="badge badge-pill badge-primary ml-1">me</span>
-          </sup>
-        </>: e)
+      displayer: e => e === "" ? <span className="badge badge-pill badge-info">unregistered</span> :
+        (e === username ?
+          <>
+            {e}
+            <sup>
+              <span className="badge badge-pill badge-primary ml-1">me</span>
+            </sup>
+          </> : e)
     },
     {
       field: "roles",
@@ -49,7 +49,7 @@ const Users = () => {
       field: "inviter_name",
       column: "Invited by",
       sorter: "alphabetical",
-      displayer: e => e === null? "": String(e)
+      displayer: e => e === null ? "" : String(e)
     },
     {
       field: "created",
@@ -60,13 +60,14 @@ const Users = () => {
     {
       field: "id,username",
       column: "Actions",
-      displayer: (id, name) => <UserActionsButtonGroup 
-        id={id} 
+      displayer: (id, name) => <UserActionsButtonGroup
+        id={id}
         username={name}
         me={username}
-        setUserToDelete={setUserToDelete} 
+        isAdmin={roles.includes("admin")}
+        setUserToDelete={setUserToDelete}
         setDeleteInvitation={setDeleteInvitation}
-        handleShowDeleteConfirmDialog={handleShowDeleteConfirmDialog}/>
+        handleShowDeleteConfirmDialog={handleShowDeleteConfirmDialog} />
     }
   ]);
 
@@ -79,10 +80,10 @@ const Users = () => {
   const deleteUser = () => {
     axios
       .delete(
-        deleteInvitation? 
-        `${server}/users/invitation?token=${userToDelete}`: 
-        `${server}/users/?username=${userToDelete}`,
-        deleteInvitation? {}: {
+        deleteInvitation ?
+          `${server}/users/invitation?token=${userToDelete}` :
+          `${server}/users/?username=${userToDelete}`,
+        deleteInvitation ? {} : {
           params: {
             delete_results: deleteResults
           }
@@ -117,51 +118,51 @@ const Users = () => {
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted" }
       })
       .then(res => {
-          if (res.status !== 200) {
-            setAlertMsg("Problems fetching user information.");
-            setIsLoading(false);
-            return;
-          }
-          axios
-            .get(`${server}/users/invitation`, {
-              headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" }
-            })
-            .then(resInv => {
-                if (resInv.status !== 200) {
-                  setAlertMsg("Problems fetching invitation information.");
-                  setIsLoading(false);
-                  return;
-                }
-                setUsers(res.data
-                  .filter(user => user.deleted === false)
-                  .map(user => {
-                    const newUserInfo = user;
-                    newUserInfo.id = newUserInfo.username;
-                    newUserInfo.created = newUserInfo.invitation_time;
-                    return newUserInfo;
-                  })
-                  .concat(resInv.data
-                  .filter(invitation => invitation.used === false)
-                  .map(invitation => {
-                    const newInvitation = invitation;
-                    newInvitation.id = newInvitation.token;
-                    newInvitation.username = "";
-                    return newInvitation;
-                  }))
-                  .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
-                setIsLoading(false);
-            })
-            .catch(err => {
-              setAlertMsg(`Problems fetching invitation information. Error message: ${err.message}`);
+        if (res.status !== 200) {
+          setAlertMsg("Problems fetching user information.");
+          setIsLoading(false);
+          return;
+        }
+        axios
+          .get(`${server}/users/invitation`, {
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" }
+          })
+          .then(resInv => {
+            if (resInv.status !== 200) {
+              setAlertMsg("Problems fetching invitation information.");
               setIsLoading(false);
-            });
+              return;
+            }
+            setUsers(res.data
+              .filter(user => user.deleted === false)
+              .map(user => {
+                const newUserInfo = user;
+                newUserInfo.id = newUserInfo.username;
+                newUserInfo.created = newUserInfo.invitation_time;
+                return newUserInfo;
+              })
+              .concat(resInv.data
+                .filter(invitation => invitation.used === false)
+                .map(invitation => {
+                  const newInvitation = invitation;
+                  newInvitation.id = newInvitation.token;
+                  newInvitation.username = "";
+                  return newInvitation;
+                }))
+              .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
+            setIsLoading(false);
+          })
+          .catch(err => {
+            setAlertMsg(`Problems fetching invitation information. Error message: ${err.message}`);
+            setIsLoading(false);
+          });
       })
       .catch(err => {
         setAlertMsg(`Problems fetching user information. Error message: ${err.message}`);
         setIsLoading(false);
       });
   }, [jwt, server, roles, refresh, displayFields, setAlertMsg]);
-  
+
 
   return (
     <div>
@@ -175,7 +176,7 @@ const Users = () => {
                 <Send width="12px" className="ml-2" />
               </button>
             </Link>
-            {roles.length && 
+            {roles.length &&
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
@@ -190,35 +191,35 @@ const Users = () => {
           </div>
         </div>
       </div>
-      {roles.length && 
-        <Table data={users} 
-          noDataMsg="No User Found" 
-          displayFields={displayFields} 
+      {roles.length &&
+        <Table data={users}
+          noDataMsg="No User Found"
+          displayFields={displayFields}
           sortedAsc={false}
           isLoading={isLoading}
           sortedCol="created"
-          idFieldName="id"/>}
+          idFieldName="id" />}
       <Modal show={showDeleteConfirmDialog} onHide={handleCloseDeleteConfirmDialog}>
         <form
           onSubmit={e => {
-              e.preventDefault();
-              deleteUser();
-              return false;
+            e.preventDefault();
+            deleteUser();
+            return false;
           }}
         >
           <Modal.Header closeButton>
             <Modal.Title>Please Confirm</Modal.Title>
           </Modal.Header>
-            <Modal.Body>
-              <fieldset disabled={isSubmitting}>
-                Are you sure you want to delete this {deleteInvitation? 'invitation': 'user'}? This cannot be undone!
+          <Modal.Body>
+            <fieldset disabled={isSubmitting}>
+              Are you sure you want to delete this {deleteInvitation ? 'invitation' : 'user'}? This cannot be undone!
                 {!deleteInvitation && <div className="form-check mt-3">
-                  <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
-                    id="deleteData"/>
-                  <label className="form-check-label" htmlFor="deleteData">Delete all data associated with this user?</label>
-                </div>}
-              </fieldset>
-            </Modal.Body>
+                <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
+                  id="deleteData" />
+                <label className="form-check-label" htmlFor="deleteData">Delete all data associated with this user?</label>
+              </div>}
+            </fieldset>
+          </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseDeleteConfirmDialog}>
               Cancel
