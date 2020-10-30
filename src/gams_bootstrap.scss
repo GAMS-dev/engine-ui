@@ -128,6 +128,12 @@ body {
   }
 }
 
+.namespace-list {
+  max-height: 500px;
+  max-height: 60vh;
+  overflow: auto;
+}
+
 .alert-fixed {
   position:fixed; 
   width: 100%;

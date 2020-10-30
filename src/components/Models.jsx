@@ -179,7 +179,7 @@ const Models = () => {
           </div>
         </div>
         <div className="col-md-4 col-12 order-1 order-md-2 mt-1">
-          <ul className="list-group" id="list-tab" role="tablist" onClick={updateNamespace}>
+          <ul className="list-group namespace-list" id="list-tab" role="tablist" onClick={updateNamespace}>
             {availableNamespaces.length ? availableNamespaces.map(ns => (
               <li
                 key={ns.name}
