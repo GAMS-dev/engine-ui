@@ -35,20 +35,20 @@ const SidebarRaw = props => {
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">
           <li className="nav-item">
-            <Link to="/jobs" className={`nav-link${["/models", "/users", "/cleanup"].includes(pathname) ? "" : " active"}`}>
+            <Link to="/jobs" className={`nav-link${["/models", "/new-model", "/new-user", "/users", "/cleanup", "/licenses"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/models" className={`nav-link${pathname === "/models" ? " active" : ""}`}>
+            <Link to="/models" className={`nav-link${["/models", "/new-model"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
               <Package className="feather" />
               <span className="nav-link-text">Models</span>
             </Link>
           </li>
           {(roles && roles.length > 0) &&
             <li className="nav-item">
-              <Link to="/users" className={`nav-link${pathname === "/users" ? " active" : ""}`}>
+              <Link to="/users" className={`nav-link${["/users", "/licenses", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
                 <User className="feather" />
                 <span className="nav-link-text">Users</span>
               </Link>
