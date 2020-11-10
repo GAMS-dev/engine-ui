@@ -9,7 +9,9 @@ const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENG
 
 const LoginForm = props => {
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState(false);
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   const [server, setServer] = useState(SERVER_NAME);
   const [invitationCode, setInvitationCode] = useState("");
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
@@ -17,6 +19,12 @@ const LoginForm = props => {
   const register = props.register === "true";
 
   const [login, setLogin] = useContext(AuthContext);
+
+  function clearRegisterErrors(){
+    setUsernameError(false);
+    setPasswordError(false);
+  }
+
 
   function handleLogin() {
     setIsSubmitting(true);
@@ -70,6 +78,7 @@ const LoginForm = props => {
     setIsSubmitting(false);
   }
   function handleRegistration() {
+    clearRegisterErrors();
     setIsSubmitting(true);
     axios
       .post(
@@ -92,6 +101,14 @@ const LoginForm = props => {
           setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
         } else {
           setLoginErrorMsg(err.response.data.message);
+          if(err.response.data.hasOwnProperty('errors')){
+            if(err.response.data.errors.hasOwnProperty('username')){
+              setUsernameError(err.response.data.errors.username);
+            }
+            if(err.response.data.errors.hasOwnProperty('password')){
+              setPasswordError(err.response.data.errors.password);
+            }
+          }
         }
       });
     setIsSubmitting(false);
@@ -174,7 +191,7 @@ const LoginForm = props => {
             </label>
             <input
               type="text"
-              className="form-control"
+              className={"form-control" +  (usernameError ? " is-invalid" : "")}
               id="username"
               placeholder="Username"
               autoComplete="username"
@@ -183,6 +200,7 @@ const LoginForm = props => {
               onChange={updateUsername}
               required
             />
+            <div className="invalid-feedback"> {usernameError} </div>
           </div>
           <div className="form-group">
             <label htmlFor="inputPassword" className="sr-only">
@@ -190,7 +208,7 @@ const LoginForm = props => {
             </label>
             <input
               type="password"
-              className="form-control"
+              className={"form-control" +  (passwordError ? " is-invalid" : "")}
               id="password"
               placeholder="Password"
               autoComplete="current-password"
@@ -199,6 +217,7 @@ const LoginForm = props => {
               onChange={updatePassword}
               required
             />
+            <div className="invalid-feedback"> {passwordError} </div>
           </div>
         </fieldset>
         <SubmitButton isSubmitting={isSubmitting}>
@@ -206,7 +225,7 @@ const LoginForm = props => {
         </SubmitButton>
         <div className="mt-2">
           <small>
-            <Link to={register ? "/login" : "/register"}>{register ? "Login" : "Register"}</Link>
+            <Link to={register ? "/login" : "/register"} onClick={clearRegisterErrors}>{register ? "Login" : "Register"}</Link>
           </small>
         </div>
         {login ? <Redirect to="/" /> : ""}
