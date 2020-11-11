@@ -38,8 +38,7 @@ const Job = () => {
         .get(`${server}/hypercube/`, {
           params: {
             hypercube_token: token.substring(3)
-          },
-          headers: { "X-Fields": fields.join(", ") }
+          }
         })
         .then(res => {
           if (!Array.isArray(res.data) || res.data.length === 0) {
