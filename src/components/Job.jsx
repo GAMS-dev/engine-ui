@@ -28,7 +28,7 @@ const Job = () => {
       "stdout_filename",
       "stream_entries",
       "submitted_at",
-      "text_entries{entry_name, entry_size}",
+      "text_entries{entry_name, entry_size, entry_value}",
       "token"
     ];
     let jobDataPromise;
