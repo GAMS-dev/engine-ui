@@ -41,11 +41,11 @@ const Job = () => {
           }
         })
         .then(res => {
-          if (!Array.isArray(res.data) || res.data.length === 0) {
+          if (!Array.isArray(res.data.results) || res.data.results.length === 0) {
             setAlertMsg("Problems fetching Hypercube job information. Please try again later.");
             return;
           }
-          const hcJobData = res.data[0];
+          const hcJobData = res.data.results[0];
           hcJobData.status = hcJobData.cancelled? -3: 
             (hcJobData.finished === hcJobData.job_count? 10: 
               (hcJobData.finished > 0? 1: 0));
