@@ -69,7 +69,7 @@ const Jobs = () => {
     displayFieldsDefault);
 
   const noRows = (jobPageInformation ? jobPageInformation.total : 0) + (hypercubePageInformation ? hypercubePageInformation.total : 0);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
   const noPages = Math.ceil(noRows / rowsPerPage);
 
 
