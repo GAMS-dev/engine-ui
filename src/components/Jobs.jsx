@@ -4,18 +4,24 @@ import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
-import moment from "moment";
 import JobActionsButtonGroup from "./JobActionsButtonGroup";
+import { ArrowUp, ArrowDown } from "react-feather";
+import ClipLoader from "react-spinners/ClipLoader";
+import Pagination from 'react-bootstrap/Pagination';
 
 const Jobs = () => {
-  const [jobs, setJobs] = useState([]);
   const [statusCodes, setStatusCodes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
+  const [jobPageInformation, setJobPageInformation] = useState(null);
+  const [hypercubePageInformation, setHypercubePageInformation] = useState(null);
+  const [view, setView] = useState(null);
   const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortAsc, setSortAsc] = useState(false);
+  const [sortedCol, setSortedCol] = useState("submitted_at");
+  const [needMore, setNeedMore] = useState(null);
   const displayFieldsDefault = [
     {
       field: "model,token",
@@ -43,7 +49,6 @@ const Jobs = () => {
     {
       field: "status",
       column: "Status",
-      sorter: "numerical",
       displayer: String
     },
     {
@@ -63,45 +68,86 @@ const Jobs = () => {
     }].concat(displayFieldsDefault) :
     displayFieldsDefault);
 
+  const noRows = (jobPageInformation ? jobPageInformation.total : 0) + (hypercubePageInformation ? hypercubePageInformation.total : 0);
+  const rowsPerPage = 5;
+  const noPages = Math.ceil(noRows / rowsPerPage);
+
+
+  const gotoFirstPage = () => {
+    setCurrentPage(1);
+  }
+  const gotoLastPage = () => {
+    setCurrentPage(noPages);
+  }
+  const gotoNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  }
+  const gotoPreviousPage = () => {
+    setCurrentPage(currentPage - 1);
+  }
+  const updateCurrentPage = e => {
+    const newPage = parseInt(e.target.text, 10);
+    if (!isNaN(newPage)) {
+      setCurrentPage(newPage);
+    }
+  }
   const statusCodeReducer = (accumulator, currentValue) => {
     accumulator[currentValue.status_code] = currentValue.description;
     return accumulator;
   };
 
+  const sortCol = e => {
+    if (!e.target.dataset.field)
+      return;
+    const field = e.target.dataset.field.split(",")[0];
+    const asc = (field === sortedCol && sortAsc) ? 1 : -1;
+    setSortAsc(asc === -1);
+    setSortedCol(field);
+  }
+
+  //init the list
   useEffect(() => {
-    setIsLoading(true);
     axios
       .get(server + `/jobs/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined },
+        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage, order_by: sortedCol, order_asc: sortAsc },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
       })
       .then(res => {
-        axios
-          .get(server + `/hypercube/`, {
-            params: { everyone: roles.find(role => role === "admin") !== undefined },
-            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
-          })
-          .then(resHc => {
-            setJobs(res.data.concat(resHc.data.map(hc => {
-              const newHc = hc;
-              newHc.token = `hc:${hc.token}`;
-              newHc.status = hc.cancelled ? -3 : (hc.finished === hc.job_count ? 10 : (hc.finished > 0 ? 1 : 0));
-              return newHc;
-            })).sort((a, b) => moment.utc(b.submitted_at) -
-              moment.utc(a.submitted_at)));
-            setIsLoading(false);
-          })
-          .catch(err => {
-            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
-            setIsLoading(false);
-          });
+        setJobPageInformation({
+          "total": res.data.count,
+          "hasNext": res.data.next !== null,
+          "hasPrevious": res.data.previous !== null,
+          "currentPage": 1,
+          "rowsPerPage": rowsPerPage,
+          "results": res.data.results
+        });
       })
       .catch(err => {
         setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
-        setIsLoading(false);
       });
-  }, [jwt, server, roles, refresh, displayFields, setAlertMsg]);
 
+    axios
+      .get(server + `/hypercube/`, {
+        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage, order_by: sortedCol, order_asc: sortAsc },
+        headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
+      })
+      .then(resHc => {
+        setHypercubePageInformation({
+          "total": resHc.data.count,
+          "hasNext": resHc.data.next !== null,
+          "hasPrevious": resHc.data.previous !== null,
+          "currentPage": 1,
+          "rowsPerPage": rowsPerPage,
+          "results": resHc.data.results
+        });
+      })
+      .catch(err => {
+        setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
+      });
+
+  }, [jwt, server, roles, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
+
+  //fetch status codes
   useEffect(() => {
     // Only fetch status codes if not already fetched
     if (statusCodes.length === 0) {
@@ -121,6 +167,132 @@ const Jobs = () => {
         });
     }
   }, [server, displayFields, statusCodes, setAlertMsg]);
+
+  useEffect(() => {
+    if (jobPageInformation !== null && hypercubePageInformation !== null) {
+      const normalizeHypercube = hcube => {
+        const newHc = hcube;
+        newHc.token = `hc:${newHc.token}`;
+        newHc.status = newHc.cancelled ? -3 : (newHc.finished === newHc.job_count ? 10 : (newHc.finished > 0 ? 1 : 0));
+        return newHc;
+      }
+
+      const comparators = {
+        "user": (a, b, eq) => { return eq !== 1 ? (a['user']['username'] > b['user']['username']) : (a['user']['username'] === b['user']['username']) },
+        "model": (a, b, eq) => { return eq !== 1 ? (a['model'] > b['model']) : (a['model'] === b['model']) },
+        "namespace": (a, b, eq) => { return eq !== 1 ? (a['namespace'] > b['namespace']) : (a['namespace'] === b['namespace']) },
+        "submitted_at": (a, b, eq) => { return eq !== 1 ? (a['submitted_at'] > b['submitted_at']) : (a['submitted_at'] === b['submitted_at']) }
+      }
+
+      const lenJobPage = jobPageInformation.results.length;
+      const lenHypercubePage = hypercubePageInformation.results.length;
+      let i = 0;
+      let j = 0;
+      const newView = [];
+
+      while (i < lenJobPage && j < lenHypercubePage) {
+        if (comparators[sortedCol](jobPageInformation.results[i], hypercubePageInformation.results[j], 1) && sortedCol !== 'submitted_at') {
+          if (jobPageInformation.results[i]['submitted_at'] > hypercubePageInformation.results[j]['submitted_at']) {
+            newView.push(jobPageInformation.results[i]);
+            i++;
+          } else {
+            newView.push(normalizeHypercube(hypercubePageInformation.results[j]));
+            j++;
+          }
+        }
+        else if (comparators[sortedCol](jobPageInformation.results[i], hypercubePageInformation.results[j], 0) == sortAsc) {
+          newView.push(normalizeHypercube(hypercubePageInformation.results[j]));
+          j++;
+        }
+        else {
+          newView.push(jobPageInformation.results[i]);
+          i++;
+        }
+      }
+
+      if (i === lenJobPage) {
+        if (!jobPageInformation.hasNext) {
+          for (let index = j; index < lenHypercubePage; index++) {
+            newView.push(normalizeHypercube(hypercubePageInformation.results[index]));
+          }
+          if (hypercubePageInformation.hasNext)
+            setNeedMore(hypercubePageInformation.hasNext ? 'H' : null);
+        } else {
+          setNeedMore('J');
+        }
+      } else {
+        if (!hypercubePageInformation.hasNext) {
+          for (let index = i; index < lenJobPage; index++) {
+            newView.push(jobPageInformation.results[index]);
+          }
+          setNeedMore(jobPageInformation.hasNext ? 'J' : null);
+        } else {
+          setNeedMore('H');
+        }
+      }
+      setView(newView);
+    }
+  }, [jobPageInformation, hypercubePageInformation, sortedCol, sortAsc]);
+
+  useEffect(() => {
+    const numberOfRows = (jobPageInformation ? jobPageInformation.total : 0) + (hypercubePageInformation ? hypercubePageInformation.total : 0);
+    const numberOfPages = Math.ceil(numberOfRows / rowsPerPage);
+
+    if (needMore !== null && view !== null && (
+      (currentPage !== numberOfPages && view.length < currentPage * rowsPerPage) ||
+      (currentPage === numberOfPages && view.length < numberOfRows))
+    ) {
+      const valueOfNeedMore = needMore;
+      setNeedMore(null);
+      if (valueOfNeedMore === 'J') {
+        axios
+          .get(server + `/jobs/`, {
+            params: {
+              everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage,
+              order_by: sortedCol, order_asc: sortAsc, page: jobPageInformation.currentPage + 1
+            },
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
+          })
+          .then(res => {
+            const newJobInformation = {
+              "total": res.data.count,
+              "hasNext": res.data.next !== null,
+              "hasPrevious": res.data.previous !== null,
+              "currentPage": jobPageInformation.currentPage + 1,
+              "rowsPerPage": rowsPerPage,
+              "results": [...jobPageInformation.results, ...res.data.results]
+            };
+            setJobPageInformation(newJobInformation);
+          })
+          .catch(err => {
+            setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
+          });
+      } else if (needMore === 'H') {
+        axios
+          .get(server + `/hypercube/`, {
+            params: {
+              everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage,
+              order_by: sortedCol, order_asc: sortAsc, page: hypercubePageInformation.currentPage + 1
+            },
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
+          })
+          .then(resHc => {
+            const newHcInformation = {
+              "total": resHc.data.count,
+              "hasNext": resHc.data.next !== null,
+              "hasPrevious": resHc.data.previous !== null,
+              "currentPage": hypercubePageInformation.currentPage + 1,
+              "rowsPerPage": rowsPerPage,
+              "results": [...hypercubePageInformation.results, ...resHc.data.results]
+            }
+            setHypercubePageInformation(newHcInformation);
+          })
+          .catch(err => {
+            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
+          });
+      }
+    }
+  }, [currentPage, view, hypercubePageInformation, jobPageInformation, needMore, displayFields, roles, server, setAlertMsg, sortAsc, sortedCol])
 
   return (
     <div>
@@ -153,15 +325,62 @@ const Jobs = () => {
           </div>
         </div>
       </div>
-      <Table
-        data={jobs}
-        noDataMsg="No Job Found"
-        displayFields={displayFields}
-        idFieldName="token"
-        sortedAsc={false}
-        isLoading={isLoading}
-        sortedCol="submitted_at"
-      />
+      <div className="table-responsive">
+        <table className="table">
+          <thead className="thead-dark">
+            <tr>
+              {displayFields.map(e => (
+                <th scope="col" key={e.field}
+                  data-field={e.field}
+                  data-sorter={e.sorter}
+                  style={e.sorter == null ? {} : { cursor: "pointer" }}
+                  onClick={e.sorter == null ? undefined : sortCol}>
+                  {e.column}
+                  {(e.field.split(",")[0] === sortedCol) && (sortAsc ?
+                    <ArrowUp width="12px" /> :
+                    <ArrowDown width="12px" />)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {view ?
+              view.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map(sub => {
+                return <tr key={sub["token"]}>
+                  {displayFields.map(e => (
+                    <td key={sub["token"] + "_" + e.field}>
+                      {e.displayer(...e.field.split(",").map(subEl => sub[subEl]))}
+                    </td>
+                  ))}
+                </tr>
+              }) :
+              <tr>
+                <td colSpan="5">{view === null ? <ClipLoader /> : "No Job Found"}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        {noRows > rowsPerPage &&
+          <><small>{(jobPageInformation === null ? 0 : jobPageInformation.total) + (hypercubePageInformation === null ? 0 : hypercubePageInformation.total)} items</small>
+            <Pagination>
+              <Pagination.First disabled={currentPage === 1} onClick={gotoFirstPage} />
+              <Pagination.Prev disabled={currentPage === 1} onClick={gotoPreviousPage} />
+              {[...Array(noPages).keys()].map(i => {
+                const pageDistance = (i === 0 || i === noPages - 1) ? 0 :
+                  Math.abs(currentPage - i);
+                if (pageDistance === 2) {
+                  return <Pagination.Ellipsis key={i} disabled={true} />
+                } else if (pageDistance > 1) {
+                  return undefined
+                }
+                return <Pagination.Item key={i} active={currentPage === i + 1} onClick={updateCurrentPage}>
+                  {++i}
+                </Pagination.Item>
+              })}
+              <Pagination.Next disabled={currentPage === noPages} onClick={gotoNextPage} />
+              <Pagination.Last disabled={currentPage === noPages} onClick={gotoLastPage} />
+            </Pagination></>}
+      </div>
     </div>
   );
 };
