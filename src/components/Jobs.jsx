@@ -200,7 +200,7 @@ const Jobs = () => {
             j++;
           }
         }
-        else if (comparators[sortedCol](jobPageInformation.results[i], hypercubePageInformation.results[j], 0) == sortAsc) {
+        else if (comparators[sortedCol](jobPageInformation.results[i], hypercubePageInformation.results[j], 0) === sortAsc) {
           newView.push(normalizeHypercube(hypercubePageInformation.results[j]));
           j++;
         }
@@ -344,7 +344,7 @@ const Jobs = () => {
             </tr>
           </thead>
           <tbody>
-            {view ?
+            {view && view.length > 0 ?
               view.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map(sub => {
                 return <tr key={sub["token"]}>
                   {displayFields.map(e => (
