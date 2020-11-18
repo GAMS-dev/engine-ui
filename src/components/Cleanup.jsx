@@ -21,6 +21,10 @@ const Cleanup = () => {
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const [showHousekeepingDialog, setShowHousekeepingDialog] = useState(false);
     const [refresh, setRefresh] = useState(0);
+    const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortedCol, setSortedCol] = useState("upload_date");
+    const [sortAsc, setSortAsc] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -80,6 +84,10 @@ const Cleanup = () => {
         setIsLoading(true);
         axios
             .get(`${server}/cleanup/results`, {
+                params: {
+                    per_page: 10, page: currentPage,
+                    order_by: sortedCol, order_asc: sortAsc
+                },
                 headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
             })
             .then(res => {
@@ -88,26 +96,21 @@ const Cleanup = () => {
                     setIsLoading(false);
                     return;
                 }
-                if (res.data.length) {
-                    setTotalFileSize(res.data.map(el => el.length).reduce((accumulator, currentValue) =>
-                        (accumulator + currentValue)));
-                }
-
-                setDatasets(res.data
-                    .map(el => {
-                        const newData = el;
-                        newData.id = el.filename;
-                        newData.username = el.user.deleted ? "" : el.user.username;
-                        return newData;
-                    })
-                    .sort((a, b) => (moment.utc(b.upload_date) - moment.utc(a.upload_date))));
+                setTotalFileSize(res.data.total_length);
+                setTotal(res.data.count);
+                setDatasets(res.data.results.map(el => {
+                    const newData = el;
+                    newData.id = el.filename;
+                    newData.username = el.user.deleted ? "" : el.user.username;
+                    return newData;
+                }));
                 setIsLoading(false);
             })
             .catch(err => {
                 setAlertMsg(`Problems fetching cleanup information. Error message: ${err.message}`);
                 setIsLoading(false);
             });
-    }, [jwt, server, roles, refresh, displayFields, setAlertMsg]);
+    }, [jwt, server, roles, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
 
     const handleCloseDeleteConfirmDialog = () => {
         setShowDeleteConfirmDialog(false);
@@ -202,9 +205,15 @@ const Cleanup = () => {
             <Table data={datasets}
                 noDataMsg="No Datasets found"
                 displayFields={displayFields}
-                sortedAsc={false}
+                sortedAsc={sortAsc}
+                total={total}
+                onChange={(currentPage, sortedCol, sortAsc) => {
+                    setCurrentPage(currentPage + 1)
+                    setSortedCol(sortedCol)
+                    setSortAsc(sortAsc)
+                }}
                 isLoading={isLoading}
-                sortedCol="upload_date"
+                sortedCol={sortedCol}
                 idFieldName="filename" />
             <Modal show={showHousekeepingDialog} onHide={handleCloseHousekeepingDialog}>
                 <form
