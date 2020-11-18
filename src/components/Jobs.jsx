@@ -109,7 +109,7 @@ const Jobs = () => {
   useEffect(() => {
     axios
       .get(server + `/jobs/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage, order_by: sortedCol, order_asc: sortAsc },
+        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
       })
       .then(res => {
@@ -118,7 +118,7 @@ const Jobs = () => {
           "hasNext": res.data.next !== null,
           "hasPrevious": res.data.previous !== null,
           "currentPage": 1,
-          "rowsPerPage": rowsPerPage,
+          "rowsPerPage": rowsPerPage * 10,
           "results": res.data.results
         });
       })
@@ -128,7 +128,7 @@ const Jobs = () => {
 
     axios
       .get(server + `/hypercube/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage, order_by: sortedCol, order_asc: sortAsc },
+        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
       })
       .then(resHc => {
@@ -137,14 +137,13 @@ const Jobs = () => {
           "hasNext": resHc.data.next !== null,
           "hasPrevious": resHc.data.previous !== null,
           "currentPage": 1,
-          "rowsPerPage": rowsPerPage,
+          "rowsPerPage": rowsPerPage * 10,
           "results": resHc.data.results
         });
       })
       .catch(err => {
         setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
       });
-
   }, [jwt, server, roles, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
 
   //fetch status codes
@@ -248,8 +247,8 @@ const Jobs = () => {
         axios
           .get(server + `/jobs/`, {
             params: {
-              everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage,
-              order_by: sortedCol, order_asc: sortAsc, page: jobPageInformation.currentPage + 1
+              everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
+              order_by: sortedCol, order_asc: sortAsc, page: 1
             },
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
           })
@@ -258,9 +257,9 @@ const Jobs = () => {
               "total": res.data.count,
               "hasNext": res.data.next !== null,
               "hasPrevious": res.data.previous !== null,
-              "currentPage": jobPageInformation.currentPage + 1,
-              "rowsPerPage": rowsPerPage,
-              "results": [...jobPageInformation.results, ...res.data.results]
+              "currentPage": 1,
+              "rowsPerPage": currentPage * rowsPerPage,
+              "results": res.data.results
             };
             setJobPageInformation(newJobInformation);
           })
@@ -271,8 +270,8 @@ const Jobs = () => {
         axios
           .get(server + `/hypercube/`, {
             params: {
-              everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage,
-              order_by: sortedCol, order_asc: sortAsc, page: hypercubePageInformation.currentPage + 1
+              everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
+              order_by: sortedCol, order_asc: sortAsc, page: 1
             },
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
           })
@@ -281,9 +280,9 @@ const Jobs = () => {
               "total": resHc.data.count,
               "hasNext": resHc.data.next !== null,
               "hasPrevious": resHc.data.previous !== null,
-              "currentPage": hypercubePageInformation.currentPage + 1,
-              "rowsPerPage": rowsPerPage,
-              "results": [...hypercubePageInformation.results, ...resHc.data.results]
+              "currentPage": 1,
+              "rowsPerPage": currentPage * rowsPerPage,
+              "results": resHc.data.results
             }
             setHypercubePageInformation(newHcInformation);
           })
@@ -344,7 +343,7 @@ const Jobs = () => {
             </tr>
           </thead>
           <tbody>
-            {view && view.length > 0 ?
+            {view && view.length >= currentPage * rowsPerPage ?
               view.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map(sub => {
                 return <tr key={sub["token"]}>
                   {displayFields.map(e => (
@@ -355,7 +354,7 @@ const Jobs = () => {
                 </tr>
               }) :
               <tr>
-                <td colSpan="5">{view === null ? <ClipLoader /> : "No Job Found"}</td>
+                <td colSpan="5">{view && view.length === 0 ? "No Job Found" : <ClipLoader />}</td>
               </tr>
             }
           </tbody>
