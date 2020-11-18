@@ -5,14 +5,14 @@ import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
 
 const Table = props => {
-  const { displayFields, noDataMsg, idFieldName, isLoading } = props;
+  const { displayFields, noDataMsg, idFieldName, isLoading, onChange, total } = props;
 
   const [currentPage, setCurrentPage] = useState(0);
   const [data, setData] = useState([...props.data]);
   const [sortAsc, setSortAsc] = useState(props.sortedAsc === true);
   const [sortedCol, setSortedCol] = useState(props.sortedCol);
 
-  const noRows = data.length;
+  const noRows = onChange == null ? data.length : total;
   const rowsPerPage = 10;
   const noPages = Math.ceil(noRows / rowsPerPage);
 
@@ -21,6 +21,12 @@ const Table = props => {
     setSortAsc(props.sortedAsc === true);
     setSortedCol(props.sortedCol)
   }, [props.data, props.sortedAsc, props.sortedCol])
+
+  useEffect(() => {
+    if (onChange != null) {
+      onChange(currentPage, sortedCol, sortAsc)
+    }
+  }, [currentPage, sortedCol, sortAsc, onChange])
 
   const gotoFirstPage = () => {
     setCurrentPage(0);
@@ -39,6 +45,15 @@ const Table = props => {
     if (!isNaN(newPage)) {
       setCurrentPage(newPage - 1);
     }
+  }
+  const createRow = sub => {
+    return <tr key={sub[idFieldName]}>
+      {displayFields.map(e => (
+        <td key={sub[idFieldName] + "_" + e.field}>
+          {e.displayer(...e.field.split(",").map(subEl => sub[subEl]))}
+        </td>
+      ))}
+    </tr>
   }
   const sortCol = e => {
     if (!e.target.dataset.field) {
@@ -116,16 +131,9 @@ const Table = props => {
           </tr>
         </thead>
         <tbody>
-          {noRows ?
-            data.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage).map(sub => {
-              return <tr key={sub[idFieldName]}>
-                {displayFields.map(e => (
-                  <td key={sub[idFieldName] + "_" + e.field}>
-                    {e.displayer(...e.field.split(",").map(subEl => sub[subEl]))}
-                  </td>
-                ))}
-              </tr>
-            }) :
+          {noRows && isLoading === false ? (onChange == null ?
+            data.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage).map(createRow) :
+            data.map(createRow)) :
             <tr>
               <td colSpan="5">{isLoading === true ? <ClipLoader /> : noDataMsg}</td>
             </tr>
@@ -133,7 +141,7 @@ const Table = props => {
         </tbody>
       </table>
       {noRows > rowsPerPage &&
-        <><small>{data.length} items</small>
+        <><small>{noRows} items</small>
           <Pagination>
             <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
             <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
