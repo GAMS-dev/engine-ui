@@ -343,7 +343,7 @@ const Jobs = () => {
             </tr>
           </thead>
           <tbody>
-            {view && view.length >= currentPage * rowsPerPage ?
+            {view && view.length >= (currentPage - 1) * rowsPerPage ?
               view.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map(sub => {
                 return <tr key={sub["token"]}>
                   {displayFields.map(e => (
