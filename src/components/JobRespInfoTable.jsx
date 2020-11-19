@@ -2,11 +2,26 @@ import React, { useState } from "react";
 import { FileText } from "react-feather";
 import DownloadLink from "./DownloadLink";
 import StreamEntryView from "./StreamEntryView";
+import SolveTraceEntryView from "./SolveTraceEntryView";
 
 const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
+  let solveTraceEntries;
+  if (isHcJob) {
+    solveTraceEntries = [];
+  } else if (job.status >= 10) {
+    solveTraceEntries = job.text_entries.map(el => el.entry_name).filter(v =>
+      v.toLowerCase().endsWith('.solvetrace')
+    );
+  } else {
+    solveTraceEntries = job.stream_entries.filter(v =>
+      v.toLowerCase().endsWith('.solvetrace')
+    );
+  }
+
   const [streamEntry, setStreamEntry] = useState(isHcJob ? null :
     (job.stream_entries.length ? (job.stream_entries[0] ? job.stream_entries[0] : null) : job.stdout_filename));
+  const [solveTraceEntry, setSolveTraceEntry] = useState(solveTraceEntries[0]);
   const [textEntry, setTextEntry] = useState(isHcJob ? null : (job.text_entries[0] ? job.text_entries[0].entry_name : null));
   return (
     <table className="table table-sm">
@@ -63,31 +78,58 @@ const JobRespInfoTable = props => {
                 </div>
               </td>
             </tr>}
-            {job.status > 0 && job.status < 10 && <tr>
-              <th>Stream entries</th>
-              <td>
-                <div className="form-group form-inline">
-                  <select
-                    className="form-control form-control-sm"
-                    name="stream-entry"
-                    id="stream-entry"
-                    value={streamEntry}
-                    onChange={e => setStreamEntry(e.target.value)}
-                  >
-                    {job.stream_entries.concat(job.stdout_filename).map(e => (
-                      <option key={e} value={e}>{e}</option>
-                    ))}
-                  </select>
+            {job.status > 0 && job.status < 10 &&
+              <tr>
+                <th>Stream entries</th>
+                <td>
+                  <div className="form-group form-inline">
+                    <select
+                      className="form-control form-control-sm"
+                      name="stream-entry"
+                      id="stream-entry"
+                      value={streamEntry}
+                      onChange={e => setStreamEntry(e.target.value)}
+                    >
+                      {job.stream_entries.concat(job.stdout_filename).map(e => (
+                        <option key={e} value={e}>{e}</option>
+                      ))}
+                    </select>
                 &nbsp;
                 <StreamEntryView
+                      server={server}
+                      streamEntry={streamEntry}
+                      setRefreshJob={setRefreshJob}
+                      isStdOut={streamEntry === job.stdout_filename}
+                    />
+                  </div>
+                </td>
+              </tr>}
+            {job.status > 0 && solveTraceEntries.length > 0 &&
+              <tr>
+                <th>Solve trace</th>
+                <td>
+                  <div className="form-group form-inline">
+                    <select
+                      className="form-control form-control-sm"
+                      name="solve-trace"
+                      id="solve-trace"
+                      value={solveTraceEntry}
+                      onChange={e => setSolveTraceEntry(e.target.value)}
+                    >
+                      {solveTraceEntries.map(e => (
+                        <option key={e} value={e}>{e}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <SolveTraceEntryView
                     server={server}
-                    streamEntry={streamEntry}
+                    solveTraceEntry={solveTraceEntry}
                     setRefreshJob={setRefreshJob}
-                    isStdOut={streamEntry === job.stdout_filename}
+                    jobFinished={job.status >= 10}
                   />
-                </div>
-              </td>
-            </tr>}
+                </td>
+              </tr>
+            }
           </>
         }
         {job.status >= 10 && <tr>
