@@ -23,9 +23,10 @@ const UserActionsButtonGroup = props => {
           <Link to={`/licenses/${username}`} className="btn btn-sm btn-outline-info">
             Update license
           </Link>
-          <Link to={`/usage/${username}`} className="btn btn-sm btn-outline-info">
-            Show usage
-          </Link>
+          {username !== "" &&
+            <Link to={`/usage/${username}`} className="btn btn-sm btn-outline-info">
+              Show usage
+          </Link>}
         </>
       }
       {username !== "admin" && (
