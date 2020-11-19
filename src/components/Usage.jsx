@@ -82,7 +82,51 @@ const Usage = () => {
                     setIsLoading(false);
                     return;
                 }
-                const aggregatedUsageData = Object.values(res.data.job_usage.reduce((a, c) => {
+                let aggregatedUsageData = Object.values(res.data.job_usage.concat(res.data.hypercube_job_usage).reduce((a, c) => {
+                    if ("job_count" in c) {
+                        // is Hypercube job
+                        let solveTime;
+                        solveTime = c.jobs.reduce((a, c) => {
+                            if (c.times.length === 0) {
+                                return a + 0;
+                            } else if (c.times[c.times.length - 1].finish) {
+                                return a + ((new Date(c.times[c.times.length - 1].finish) -
+                                    new Date(c.times[c.times.length - 1].start)) / 1000);
+                            }
+                            return a + ((new Date() -
+                                new Date(c.times[c.times.length - 1].start)) / 1000);
+                        }, 0);
+                        if (a[c.username]) {
+                            // User already exists
+                            a[c.username].solvetime += solveTime;
+                            // TODO: Once finished is implemented
+                            //(new Date(isFinished && c.finished) -
+                            //new Date(c.submitted)) / 1000
+                            a[c.username].totaltime += 0;
+                            a[c.username].queuetime += c.jobs[0].times.length ?
+                                (new Date(c.jobs[0].times[0].start) - new Date(c.submitted)) / 1000 : 0;
+                            a[c.username].nocrash += c.jobs.reduce((a, c) => {
+                                return Math.max(0, a + c.times.length - 1);
+                            }, 0);
+                            a[c.username].nojobs += 1;
+                            return a;
+                        }
+                        a[c.username] = {
+                            username: c.username,
+                            nojobs: 1,
+                            nocrash: c.jobs.reduce((a, c) => {
+                                return Math.max(0, a + c.times.length - 1);
+                            }, 0),
+                            queuetime: c.jobs[0].times.length ?
+                                (new Date(c.jobs[0].times[0].start) - new Date(c.submitted)) / 1000 : 0,
+                            solvetime: solveTime,
+                            // TODO: Once finished is implemented
+                            //(new Date(isFinished && c.finished) -
+                            //new Date(c.submitted)) / 1000
+                            totaltime: 0
+                        };
+                        return a;
+                    }
                     const isFinished = c.finished != null;
                     let solveTime;
                     if (isFinished && (c.times.length === 0 || c.times[c.times.length - 1].finish == null)) {
