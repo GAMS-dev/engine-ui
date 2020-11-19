@@ -35,7 +35,7 @@ const SidebarRaw = props => {
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">
           <li className="nav-item">
-            <Link to="/jobs" className={`nav-link${["/models", "/new-model", "/new-user", "/users", "/cleanup", "/licenses"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+            <Link to="/jobs" className={`nav-link${["/models", "/new-model", "/new-user", "/users", "/cleanup", "/licenses", "/usage"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
@@ -48,7 +48,7 @@ const SidebarRaw = props => {
           </li>
           {(roles && roles.length > 0) &&
             <li className="nav-item">
-              <Link to="/users" className={`nav-link${["/users", "/licenses", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
+              <Link to="/users" className={`nav-link${["/users", "/licenses", "/usage", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
                 <User className="feather" />
                 <span className="nav-link-text">Users</span>
               </Link>
