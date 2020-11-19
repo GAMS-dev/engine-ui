@@ -85,6 +85,7 @@ const Usage = () => {
                 let aggregatedUsageData = Object.values(res.data.job_usage.concat(res.data.hypercube_job_usage).reduce((a, c) => {
                     if ("job_count" in c) {
                         // is Hypercube job
+                        const isFinished = c.completed === c.job_count;
                         let solveTime;
                         solveTime = c.jobs.reduce((a, c) => {
                             if (c.times.length === 0) {
@@ -96,13 +97,17 @@ const Usage = () => {
                             return a + ((new Date() -
                                 new Date(c.times[c.times.length - 1].start)) / 1000);
                         }, 0);
+                        let totalTime;
+                        if (isFinished && c.finished == null) {
+                            totalTime = NaN;
+                        } else {
+                            totalTime = ((isFinished ? new Date(c.finished) :
+                                new Date()) - new Date(c.submitted)) / 1000;
+                        }
                         if (a[c.username]) {
                             // User already exists
                             a[c.username].solvetime += solveTime;
-                            // TODO: Once finished is implemented
-                            //(new Date(isFinished && c.finished) -
-                            //new Date(c.submitted)) / 1000
-                            a[c.username].totaltime += 0;
+                            a[c.username].totaltime += totalTime;
                             a[c.username].queuetime += c.jobs[0].times.length ?
                                 (new Date(c.jobs[0].times[0].start) - new Date(c.submitted)) / 1000 : 0;
                             a[c.username].nocrash += c.jobs.reduce((a, c) => {
@@ -120,17 +125,14 @@ const Usage = () => {
                             queuetime: c.jobs[0].times.length ?
                                 (new Date(c.jobs[0].times[0].start) - new Date(c.submitted)) / 1000 : 0,
                             solvetime: solveTime,
-                            // TODO: Once finished is implemented
-                            //(new Date(isFinished && c.finished) -
-                            //new Date(c.submitted)) / 1000
-                            totaltime: 0
+                            totaltime: totalTime
                         };
                         return a;
                     }
                     const isFinished = c.finished != null;
                     let solveTime;
                     if (isFinished && (c.times.length === 0 || c.times[c.times.length - 1].finish == null)) {
-                        solveTime = 0;
+                        solveTime = NaN;
                     } else {
                         solveTime = (new Date(isFinished && c.times[c.times.length - 1].finish) -
                             new Date(c.times[c.times.length - 1].start)) / 1000;
@@ -138,7 +140,7 @@ const Usage = () => {
                     if (a[c.username]) {
                         // User already exists
                         a[c.username].solvetime += solveTime;
-                        a[c.username].totaltime += (new Date(isFinished && c.finished) -
+                        a[c.username].totaltime += ((isFinished ? new Date(c.finished) : new Date()) -
                             new Date(c.submitted)) / 1000;
                         a[c.username].queuetime += c.times.length ?
                             (new Date(c.times[0].start) - new Date(c.submitted)) / 1000 : 0;
@@ -152,7 +154,7 @@ const Usage = () => {
                         nocrash: Math.max(0, c.times.length - 1),
                         queuetime: c.times.length ? (new Date(c.times[0].start) - new Date(c.submitted)) / 1000 : 0,
                         solvetime: solveTime,
-                        totaltime: (new Date(isFinished && c.finished) - new Date(c.submitted)) / 1000
+                        totaltime: ((isFinished ? new Date(c.finished) : new Date()) - new Date(c.submitted)) / 1000
                     };
                     return a;
                 }, Object.create(null)));
