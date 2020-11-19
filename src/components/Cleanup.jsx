@@ -32,8 +32,8 @@ const Cleanup = () => {
     const [{ jwt, server, roles }] = useContext(AuthContext);
     const [displayFields] = useState([
         {
-            field: "filename,type",
-            column: "Filename",
+            field: "token,type",
+            column: "Job token",
             sorter: "alphabetical",
             displayer: (name, type) => <>
                 {name}{type === "hypercube_result" &&
@@ -69,8 +69,8 @@ const Cleanup = () => {
         {
             field: "id",
             column: "Actions",
-            displayer: filename => <CleanupActionsButtonGroup
-                filename={filename}
+            displayer: token => <CleanupActionsButtonGroup
+                token={token}
                 setDataToRemove={setDataToRemove}
                 setShowDeleteConfirmDialog={setShowDeleteConfirmDialog} />
         }
@@ -100,7 +100,7 @@ const Cleanup = () => {
                 setTotal(res.data.count);
                 setDatasets(res.data.results.map(el => {
                     const newData = el;
-                    newData.id = el.filename;
+                    newData.id = el.token;
                     newData.username = el.user.deleted ? "" : el.user.username;
                     return newData;
                 }));
@@ -123,22 +123,22 @@ const Cleanup = () => {
     }
     const deleteData = () => {
         setIsSubmitting(true);
-        let filenamesToRemove;
+        let tokensToRemove;
         if (showHousekeepingDialog) {
             const daysThresholdTmp = parseInt(deleteDataThreshold, 10);
             if (isNaN(daysThresholdTmp)) {
                 setSubmissionErrorMsg("The number of days you entered is not a valid integer!");
                 return;
             }
-            filenamesToRemove = datasets
+            tokensToRemove = datasets
                 .filter(el => (el.user.deleted === deletedUsersOnly &&
                     moment().diff(moment.utc(el.upload_date), 'days') >= daysThresholdTmp))
-                .map(el => el.filename);
+                .map(el => el.token);
         } else {
-            filenamesToRemove = dataToRemove;
+            tokensToRemove = dataToRemove;
 
         }
-        if (filenamesToRemove.length === 0) {
+        if (tokensToRemove.length === 0) {
             setSubmissionErrorMsg("Nothing to remove");
             setIsSubmitting(false);
             return;
@@ -150,7 +150,7 @@ const Cleanup = () => {
             .delete(
                 `${server}/cleanup/results`,
                 {
-                    data: filenamesToRemove.map(el => "filename=" + el).join("&"),
+                    data: tokensToRemove.map(el => "token=" + el).join("&"),
                     headers: httpReqHeaders
                 }
             )
@@ -214,7 +214,7 @@ const Cleanup = () => {
                 }}
                 isLoading={isLoading}
                 sortedCol={sortedCol}
-                idFieldName="filename" />
+                idFieldName="token" />
             <Modal show={showHousekeepingDialog} onHide={handleCloseHousekeepingDialog}>
                 <form
                     onSubmit={e => {
