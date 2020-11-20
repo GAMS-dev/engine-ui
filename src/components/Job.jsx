@@ -46,9 +46,9 @@ const Job = () => {
             return;
           }
           const hcJobData = res.data.results[0];
-          hcJobData.status = hcJobData.cancelled? -3: 
-            (hcJobData.finished === hcJobData.job_count? 10: 
-              (hcJobData.finished > 0? 1: 0));
+          hcJobData.status = hcJobData.cancelled ? -3 :
+            (hcJobData.finished === hcJobData.job_count ? 10 :
+              (hcJobData.finished > 0 ? 1 : 0));
           return hcJobData;
         })
         .catch(err => {
@@ -79,22 +79,22 @@ const Job = () => {
               },
               headers: { "X-Fields": "arguments" }
             })
-            .then(res => {
-              if (res.data.length === 1) {
-                const newJobData = jobData;
-                newJobData.includes_model_args = true;
-                newJobData.arguments.push(...res.data[0].arguments);
-                setJob(newJobData);
-              } else {
-                setJob(jobData);
-              }
-            })
-            .catch(err => {
-              if (err.response.status !== 403) {
-                setAlertMsg(`Problems fetching model information. Error message: ${err.message}`);
-              }
-            });
-          }          
+              .then(res => {
+                if (res.data.length === 1) {
+                  const newJobData = jobData;
+                  newJobData.includes_model_args = true;
+                  newJobData.arguments.push(...res.data[0].arguments);
+                  setJob(newJobData);
+                } else {
+                  setJob(jobData);
+                }
+              })
+              .catch(err => {
+                if (err.response.status !== 403) {
+                  setAlertMsg(`Problems fetching model information. Error message: ${err.message}`);
+                }
+              });
+          }
         }
       });
   }, [jwt, server, token, setAlertMsg, refresh]);
@@ -126,10 +126,10 @@ const Job = () => {
       {job ? (
         <div className="mt-4">
           <div className="row">
-            <div className={`col-md-6 ${isHcJob? "": "col-xl-4"}`}>
+            <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
               <JobReqInfoTable job={job} isHcJob={isHcJob} />
             </div>
-            <div className={`col-md-6 ${isHcJob? "": "col-xl-4"}`}>
+            <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
               <JobRespInfoTable
                 job={job}
                 statusCodes={statusCodes}
@@ -138,14 +138,14 @@ const Job = () => {
                 server={server}
               />
             </div>
-            {!isHcJob && job.text_entries.length > 0 && job.status >= 10 && 
-            <div className="col-md-12 col-xl-4">
-              <TextEntryView
-                textEntries={job.text_entries}
-                setTextEntries={setTextEntries}
-                server={server}
-              />
-            </div>}
+            {job.result_exists &&
+              <div className="col-md-12 col-xl-4">
+                <TextEntryView
+                  textEntries={job.text_entries}
+                  setTextEntries={setTextEntries}
+                  server={server}
+                />
+              </div>}
           </div>
         </div>
       ) : null}
