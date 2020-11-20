@@ -14,7 +14,11 @@ const TimeDiffDisplay = props => {
     if (timeDisplay.endsWith(", ")) {
         timeDisplay = timeDisplay.slice(0, -2);
     } else if (timeDisplay === " ") {
-        timeDisplay = "< 1 second"
+        if (isNaN(props.time)) {
+            timeDisplay = "NaN"
+        } else {
+            timeDisplay = "< 1 second"
+        }
     }
 
     return (
