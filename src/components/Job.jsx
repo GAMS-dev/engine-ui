@@ -138,7 +138,7 @@ const Job = () => {
                 server={server}
               />
             </div>
-            {job.result_exists &&
+            {job.text_entries.length > 0 && job.status >= 10 &&
               <div className="col-md-12 col-xl-4">
                 <TextEntryView
                   textEntries={job.text_entries}
