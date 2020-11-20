@@ -14,6 +14,7 @@ const ModelSubmissionForm = () => {
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [modelName, setModelName] = useState("");
+    const [runName, setRunName] = useState("");
     const [modelFiles, setModelFiles] = useState();
     const [clArgs, setClArgs] = useState("");
     const [inexJSON, setInexJSON] = useState("");
@@ -57,6 +58,9 @@ const ModelSubmissionForm = () => {
             modelSubmissionForm.append("inex_file", new Blob([inexJSON],
                 { type: "application/json" }), "inex.json");
         }
+        if (runName && runName !== `${modelName}.gms`) {
+            modelSubmissionForm.append("run", runName);
+        }
         Promise.all(promisesToAwait).then(() => {
             axios
                 .post(
@@ -84,20 +88,15 @@ const ModelSubmissionForm = () => {
             });
         setIsSubmitting(false);
     }
-    const updateModelName = e => {
-        setModelName(e.target.value);
-    }
     const updateModelFiles = e => {
         setModelFiles([...e.target.files]);
+        const modelNameTmp = e.target.files[0].name.split(".")[0];
         if (modelName === "") {
-            setModelName(e.target.files[0].name.split(".")[0])
+            setModelName(modelNameTmp)
         }
-    }
-    const updateClArgs = e => {
-        setClArgs(e.target.value);
-    }
-    const updateInexJSON = e => {
-        setInexJSON(e);
+        if (runName === "") {
+            setRunName(`${modelNameTmp}.gms`)
+        }
     }
 
     return (
@@ -140,10 +139,25 @@ const ModelSubmissionForm = () => {
                             type="text"
                             className="form-control"
                             id="modelName"
-                            placeholder="Name of the main gms file"
+                            placeholder="Identifier for the model"
                             autoComplete="on"
                             value={modelName}
-                            onChange={updateModelName}
+                            onChange={e => setModelName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="runName" className="sr-only">
+                            Name of the main file
+                        </label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="runName"
+                            placeholder="Name of the main file"
+                            autoComplete="on"
+                            value={runName}
+                            onChange={e => setRunName(e.target.value)}
                             required
                         />
                     </div>
@@ -158,10 +172,11 @@ const ModelSubmissionForm = () => {
                             placeholder="Command line arguments (comma-separated, optional)"
                             autoComplete="on"
                             value={clArgs}
-                            onChange={updateClArgs}
+                            onChange={e => setClArgs(e.target.value)}
                         />
                     </div>
-                    <InexJSONSelector label="Filter results (e.g. to reduce the size of the results archive or to restrict users from seeing certain files)?" onChangeHandler={updateInexJSON} />
+                    <InexJSONSelector label="Filter results (e.g. to reduce the size of the results archive or to restrict users from seeing certain files)?"
+                        onChangeHandler={e => setInexJSON(e)} />
                 </fieldset>
                 <div className="mt-3">
                     <SubmitButton isSubmitting={isSubmitting}>
