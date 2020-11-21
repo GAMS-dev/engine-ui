@@ -106,7 +106,7 @@ const JobRespInfoTable = props => {
                   </div>
                 </td>
               </tr>}
-              {job.status > 0 && job.status < 10 &&
+              {(job.status > 0 || job.status === -2) && job.status < 10 &&
                 <>
                   <tr>
                     <th>Stream entries</th>
