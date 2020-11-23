@@ -171,7 +171,9 @@ const Jobs = () => {
     if (jobPageInformation !== null && hypercubePageInformation !== null) {
       const normalizeHypercube = hcube => {
         const newHc = hcube;
-        newHc.token = `hc:${newHc.token}`;
+        if (!newHc.token.startsWith('hc:')) {
+          newHc.token = `hc:${newHc.token}`;
+        }
         newHc.status = newHc.cancelled ? -3 : (newHc.finished === newHc.job_count ? 10 : (newHc.finished > 0 ? 1 : 0));
         return newHc;
       }
