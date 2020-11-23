@@ -1,10 +1,10 @@
 import React from "react";
 
 const HousekeepingActionsButtonGroup = props => {
-  const { token, setDataToRemove, setShowDeleteConfirmDialog } = props;
+  const { token, type, setDataToRemove, setShowDeleteConfirmDialog } = props;
 
   const setDeleteId = () => {
-    setDataToRemove([token]);
+    setDataToRemove([{ token: token, type: type }]);
     setShowDeleteConfirmDialog(true);
   }
 

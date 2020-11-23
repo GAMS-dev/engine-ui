@@ -67,10 +67,11 @@ const Cleanup = () => {
             displayer: e => <TimeDisplay time={e} />
         },
         {
-            field: "id",
+            field: "id,type",
             column: "Actions",
-            displayer: token => <CleanupActionsButtonGroup
+            displayer: (token, type) => <CleanupActionsButtonGroup
                 token={token}
+                type={type}
                 setDataToRemove={setDataToRemove}
                 setShowDeleteConfirmDialog={setShowDeleteConfirmDialog} />
         }
@@ -133,7 +134,7 @@ const Cleanup = () => {
             tokensToRemove = datasets
                 .filter(el => (el.user.deleted === deletedUsersOnly &&
                     moment().diff(moment.utc(el.upload_date), 'days') >= daysThresholdTmp))
-                .map(el => el.token);
+                .map(el => ({ token: el.token, type: el.type }));
         } else {
             tokensToRemove = dataToRemove;
 
@@ -150,7 +151,8 @@ const Cleanup = () => {
             .delete(
                 `${server}/cleanup/results`,
                 {
-                    data: tokensToRemove.map(el => "token=" + el).join("&"),
+                    data: tokensToRemove.map(el =>
+                        `${el.type === "hypercube_result" ? "hypercube_token" : "token"}=${el.token}`).join("&"),
                     headers: httpReqHeaders
                 }
             )
