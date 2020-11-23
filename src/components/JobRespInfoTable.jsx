@@ -23,7 +23,6 @@ const JobRespInfoTable = props => {
       v.toLowerCase().endsWith('.solvetrace')
     );
   }
-
   const [streamEntry, setStreamEntry] = useState(isHcJob ? null :
     (job.stream_entries.length ? (job.stream_entries[0] ? job.stream_entries[0] : null) : job.stdout_filename));
   const [solveTraceEntry, setSolveTraceEntry] = useState(solveTraceEntries[0]);
@@ -68,10 +67,23 @@ const JobRespInfoTable = props => {
             </td>
           </tr>
           {isHcJob ?
-            <tr>
-              <th>Progress</th>
-              <td>{`${job.finished}/${job.job_count} (${job.successfully_finished} successful)`}</td>
-            </tr> :
+            <>
+              <tr>
+                <th>Progress</th>
+                <td>{`${job.finished}/${job.job_count} (${job.successfully_finished} successful)`}</td>
+              </tr>
+              {(job.status > 0 || job.status === -2) && job.status < 10 &&
+                <tr>
+                  <th>Terminate job</th>
+                  <td>
+                    <TerminateJobButton
+                      token={job.token}
+                      setRefresh={setRefreshJob}
+                      server={server}
+                      status={job.status} />
+                  </td>
+                </tr>}
+            </> :
             <>
               <tr>
                 <th>Process status</th>
@@ -173,7 +185,7 @@ const JobRespInfoTable = props => {
               }
             </>
           }
-          {(job.result_exists && job.status >= 10) ? <tr>
+          {job.result_exists && (job.status >= 10 || (isHcJob && job.status === -3)) ? <tr>
             <th>Result zip</th>
             <td>
               <DownloadLink url={isHcJob ? `${server}/hypercube/${job.token}/result` : `${server}/jobs/${job.token}/result`} filename="results.zip"
