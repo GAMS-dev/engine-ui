@@ -38,7 +38,7 @@ export const AuthProvider = props => {
         axios.interceptors.response.use(
           response => response,
           function (error) {
-            if (
+            if (!axios.isCancel(error) &&
               (login.server.startsWith('/') || error.request.responseURL.startsWith(login.server)) &&
               error.response.status === 401
             ) {
