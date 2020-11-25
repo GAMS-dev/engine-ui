@@ -185,7 +185,6 @@ const JobSubmissionForm = props => {
                 .then(res => {
                     if (res.status !== 201 || !("token" in res.data || "hypercube_token" in res.data)) {
                         setSubmissionErrorMsg("An error occurred while posting job. Please try again later.");
-                        setIsSubmitting(false);
                         return;
                     }
                     setAlertMsg("success:Job successfully submitted!");
@@ -199,7 +198,6 @@ const JobSubmissionForm = props => {
             .catch(err => {
                 setSubmissionErrorMsg(`Problems while posting job.`);
             });
-        setIsSubmitting(false);
     }
     const updateModelFiles = e => {
         if (modelName === "" || modelName === modelFiles[0].name.split(".")[0]) {

@@ -53,6 +53,7 @@ const UserInvitationForm = () => {
                 }
             )
             .then(res => {
+                setIsSubmitting(false);
                 if (res.status !== 201 || !("invitation_token" in res.data)) {
                     setSubmissionErrorMsg("An error occurred while creating an invitation code. Please try again later.");
                     setIsSubmitting(false);
@@ -62,8 +63,8 @@ const UserInvitationForm = () => {
             })
             .catch(err => {
                 setSubmissionErrorMsg(`An error occurred while creating an invitation code. Error message: ${err.response.data.messa}.`);
+                setIsSubmitting(false);
             });
-        setIsSubmitting(false);
     }
     const updateRole = e => {
         setRole(e.target.value);

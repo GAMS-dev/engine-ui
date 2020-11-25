@@ -39,6 +39,7 @@ const ChangePasswordModal = props => {
                 }
             )
             .then(res => {
+                setIsSubmitting(false);
                 if (res.status === 200) {
                     handleSuccess();
                 } else {
@@ -47,8 +48,8 @@ const ChangePasswordModal = props => {
             })
             .catch(err => {
                 setSubmissionErrorMsg(`Some error occurred while trying to change your password. Error message: ${err.response.data.messa}.`);
+                setIsSubmitting(false);
             });
-        setIsSubmitting(false);
     }
 
     return (

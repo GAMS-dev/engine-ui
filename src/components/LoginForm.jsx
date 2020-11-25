@@ -20,7 +20,7 @@ const LoginForm = props => {
 
   const [login, setLogin] = useContext(AuthContext);
 
-  function clearRegisterErrors(){
+  function clearRegisterErrors() {
     setUsernameError(false);
     setPasswordError(false);
   }
@@ -63,9 +63,11 @@ const LoginForm = props => {
             } else {
               setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
             }
+            setIsSubmitting(false);
           })
           .catch(err => {
             setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+            setIsSubmitting(false);
           });
       })
       .catch(err => {
@@ -74,8 +76,8 @@ const LoginForm = props => {
         } else {
           setLoginErrorMsg("Invalid username and/or password");
         }
+        setIsSubmitting(false);
       });
-    setIsSubmitting(false);
   }
   function handleRegistration() {
     clearRegisterErrors();
@@ -90,6 +92,7 @@ const LoginForm = props => {
         }
       )
       .then(res => {
+        setIsSubmitting(false);
         if (res.status === 201) {
           handleLogin();
         } else {
@@ -97,21 +100,21 @@ const LoginForm = props => {
         }
       })
       .catch(err => {
+        setIsSubmitting(false);
         if (err.response == null || err.response.status !== 400) {
           setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
         } else {
           setLoginErrorMsg(err.response.data.message);
-          if(err.response.data.hasOwnProperty('errors')){
-            if(err.response.data.errors.hasOwnProperty('username')){
+          if (err.response.data.hasOwnProperty('errors')) {
+            if (err.response.data.errors.hasOwnProperty('username')) {
               setUsernameError(err.response.data.errors.username);
             }
-            if(err.response.data.errors.hasOwnProperty('password')){
+            if (err.response.data.errors.hasOwnProperty('password')) {
               setPasswordError(err.response.data.errors.password);
             }
           }
         }
       });
-    setIsSubmitting(false);
   }
 
   function updateUsername(e) {
@@ -191,7 +194,7 @@ const LoginForm = props => {
             </label>
             <input
               type="text"
-              className={"form-control" +  (usernameError ? " is-invalid" : "")}
+              className={"form-control" + (usernameError ? " is-invalid" : "")}
               id="username"
               placeholder="Username"
               autoComplete="username"
@@ -208,7 +211,7 @@ const LoginForm = props => {
             </label>
             <input
               type="password"
-              className={"form-control" +  (passwordError ? " is-invalid" : "")}
+              className={"form-control" + (passwordError ? " is-invalid" : "")}
               id="password"
               placeholder="Password"
               autoComplete="current-password"

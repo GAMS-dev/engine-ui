@@ -76,17 +76,19 @@ const ModelSubmissionForm = () => {
                         setIsSubmitting(false);
                         return;
                     }
+                    setIsSubmitting(false);
                     setAlertMsg("success:Model successfully added!");
                     setModelAdded(true);
                 })
                 .catch(err => {
                     setSubmissionErrorMsg(`Problems while registering model. Error message: ${err.response.data.messa}.`);
+                    setIsSubmitting(false);
                 });
         })
             .catch(err => {
                 setSubmissionErrorMsg(`Problems while registering model. Error message: ${err.message}.`);
+                setIsSubmitting(false);
             });
-        setIsSubmitting(false);
     }
     const updateModelFiles = e => {
         setModelFiles([...e.target.files]);

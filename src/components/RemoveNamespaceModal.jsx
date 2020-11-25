@@ -6,7 +6,7 @@ import SubmitButton from "./SubmitButton";
 import axios from "axios";
 
 const RemoveNamespaceModal = props => {
-  const {showDialog, setShowDialog, handleSuccess, namespace} = props;
+  const { showDialog, setShowDialog, handleSuccess, namespace } = props;
   const [{ server }] = useContext(AuthContext);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,47 +22,48 @@ const RemoveNamespaceModal = props => {
         `${server}/namespaces/${namespace}`
       )
       .then(res => {
+        setIsSubmitting(false);
         if (res.status === 200) {
-            handleCloseDialog();
-            handleSuccess();
-        }else{
-            setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
+          handleCloseDialog();
+          handleSuccess();
+        } else {
+          setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
         }
       })
       .catch(err => {
         setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${err.message}.`);
+        setIsSubmitting(false);
       });
-      setIsSubmitting(false);
   }
 
   return (
     <Modal show={showDialog} onHide={handleCloseDialog}>
-        <form
+      <form
         onSubmit={e => {
-            e.preventDefault();
-            handleRemoveNamespace();
-            return false;
+          e.preventDefault();
+          handleRemoveNamespace();
+          return false;
         }}
-        >
-            <Modal.Header closeButton>
-                <Modal.Title>Please confirm</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <div className="invalid-feedback" style={{display: submissionErrorMsg !== ""? "block": "none"}}> 
-                    {submissionErrorMsg}
-                </div>
-                <p>Are you sure you want to remove the namespace: <code>{props.namespace}</code>?</p>
-                <p>This will also remove all the models registered in this namespace as well as cancel all jobs currently running in this namespace!</p>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseDialog}>
-                    Cancel
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Please confirm</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+            {submissionErrorMsg}
+          </div>
+          <p>Are you sure you want to remove the namespace: <code>{props.namespace}</code>?</p>
+          <p>This will also remove all the models registered in this namespace as well as cancel all jobs currently running in this namespace!</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseDialog}>
+            Cancel
                 </Button>
-                <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
-                    Remove Namespace
+          <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
+            Remove Namespace
                 </SubmitButton>
-            </Modal.Footer>
-        </form>
+        </Modal.Footer>
+      </form>
     </Modal>
   );
 };
