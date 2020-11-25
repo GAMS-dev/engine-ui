@@ -85,7 +85,7 @@ const Usage = () => {
                 let aggregatedUsageData = Object.values(res.data.job_usage.concat(res.data.hypercube_job_usage).reduce((a, c) => {
                     if ("job_count" in c) {
                         // is Hypercube job
-                        const isFinished = c.completed === c.job_count;
+                        const isFinished = c.finished != null || c.completed === c.job_count;
                         let solveTime;
                         solveTime = c.jobs.reduce((a, c) => {
                             if (c.times.length === 0) {
@@ -108,10 +108,10 @@ const Usage = () => {
                             // User already exists
                             a[c.username].solvetime += solveTime;
                             a[c.username].totaltime += totalTime;
-                            a[c.username].queuetime += c.jobs[0].times.length ?
-                                (new Date(c.jobs[0].times[0].start) - new Date(c.submitted)) / 1000 : 0;
+                            a[c.username].queuetime += (c.jobs[0].times.length ?
+                                new Date(c.jobs[0].times[0].start) : new Date() - new Date(c.submitted)) / 1000;
                             a[c.username].nocrash += c.jobs.reduce((a, c) => {
-                                return Math.max(0, a + c.times.length - 1);
+                                return a + Math.max(0, c.times.length - 1);
                             }, 0);
                             a[c.username].nojobs += 1;
                             return a;
@@ -120,10 +120,10 @@ const Usage = () => {
                             username: c.username,
                             nojobs: 1,
                             nocrash: c.jobs.reduce((a, c) => {
-                                return Math.max(0, a + c.times.length - 1);
+                                return a + Math.max(0, c.times.length - 1);
                             }, 0),
-                            queuetime: c.jobs[0].times.length ?
-                                (new Date(c.jobs[0].times[0].start) - new Date(c.submitted)) / 1000 : 0,
+                            queuetime: (c.jobs[0].times.length ?
+                                new Date(c.jobs[0].times[0].start) : new Date() - new Date(c.submitted)) / 1000,
                             solvetime: solveTime,
                             totaltime: totalTime
                         };
@@ -134,7 +134,7 @@ const Usage = () => {
                     if (isFinished && (c.times.length === 0 || c.times[c.times.length - 1].finish == null)) {
                         solveTime = NaN;
                     } else {
-                        solveTime = (new Date(isFinished && c.times[c.times.length - 1].finish) -
+                        solveTime = (isFinished ? new Date(c.times[c.times.length - 1].finish) : new Date() -
                             new Date(c.times[c.times.length - 1].start)) / 1000;
                     }
                     if (a[c.username]) {
@@ -142,8 +142,8 @@ const Usage = () => {
                         a[c.username].solvetime += solveTime;
                         a[c.username].totaltime += ((isFinished ? new Date(c.finished) : new Date()) -
                             new Date(c.submitted)) / 1000;
-                        a[c.username].queuetime += c.times.length ?
-                            (new Date(c.times[0].start) - new Date(c.submitted)) / 1000 : 0;
+                        a[c.username].queuetime += (c.times.length ?
+                            new Date(c.times[0].start) : new Date() - new Date(c.submitted)) / 1000;
                         a[c.username].nocrash += Math.max(0, c.times.length - 1);
                         a[c.username].nojobs += 1;
                         return a;
@@ -152,7 +152,8 @@ const Usage = () => {
                         username: c.username,
                         nojobs: 1,
                         nocrash: Math.max(0, c.times.length - 1),
-                        queuetime: c.times.length ? (new Date(c.times[0].start) - new Date(c.submitted)) / 1000 : 0,
+                        queuetime: (c.times.length ?
+                            new Date(c.times[0].start) : new Date() - new Date(c.submitted)) / 1000,
                         solvetime: solveTime,
                         totaltime: ((isFinished ? new Date(c.finished) : new Date()) - new Date(c.submitted)) / 1000
                     };
