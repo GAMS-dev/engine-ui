@@ -92,30 +92,34 @@ const JobRespInfoTable = props => {
               {job.status >= 10 && <tr>
                 <th>Text entries</th>
                 <td>
-                  <div className="form-group form-inline">
-                    <select
-                      className="form-control form-control-sm"
-                      name="text-entry"
-                      id="text-entry"
-                      value={textEntry}
-                      onChange={e => setTextEntry(e.target.value)}
-                    >
-                      {job.text_entries.map(e => (
-                        <option key={e.entry_name} value={e.entry_name}>
-                          {e.entry_name}
-                        </option>
-                      ))}
-                    </select>
+                  {job.text_entries && job.text_entries.length > 0 ?
+                    <div className="form-group form-inline">
+                      <select
+                        className="form-control form-control-sm"
+                        name="text-entry"
+                        id="text-entry"
+                        value={textEntry}
+                        onChange={e => setTextEntry(e.target.value)}
+                      >
+                        {job.text_entries.map(e => (
+                          <option key={e.entry_name} value={e.entry_name}>
+                            {e.entry_name}
+                          </option>
+                        ))}
+                      </select>
                 &nbsp;
                 {textEntry &&
-                      <DownloadLink
-                        url={`${server}/jobs/${job.token}/text-entry/${textEntry}`}
-                        filename={textEntry}
-                        jsonSubkey="entry_value">
-                        <FileText size={18} />
-                      </DownloadLink>
-                    }
-                  </div>
+                        <DownloadLink
+                          url={`${server}/jobs/${job.token}/text-entry/${textEntry}`}
+                          filename={textEntry}
+                          jsonSubkey="entry_value">
+                          <FileText size={18} />
+                        </DownloadLink>
+                      }
+                    </div> :
+                    <span className="badge badge-danger">
+                      {job.result_exists ? 'No text entries.' : 'Job results were deleted.'}
+                    </span>}
                 </td>
               </tr>}
               {(job.status > 0 || job.status === -2) && job.status < 10 &&
