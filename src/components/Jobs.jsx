@@ -13,6 +13,7 @@ import Pagination from 'react-bootstrap/Pagination';
 const Jobs = () => {
   const [statusCodes, setStatusCodes] = useState([]);
   const [refresh, setRefresh] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [jobPageInformation, setJobPageInformation] = useState(null);
   const [hypercubePageInformation, setHypercubePageInformation] = useState(null);
   const [view, setView] = useState(null);
@@ -107,6 +108,8 @@ const Jobs = () => {
 
   //init the list
   useEffect(() => {
+    let requestsFinished = 0;
+    setIsLoading(true);
     axios
       .get(server + `/jobs/`, {
         params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
@@ -121,9 +124,15 @@ const Jobs = () => {
           "rowsPerPage": rowsPerPage * 10,
           "results": res.data.results
         });
+        if (requestsFinished > 0) {
+          setIsLoading(false);
+        } else {
+          requestsFinished++;
+        }
       })
       .catch(err => {
         setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
+        setIsLoading(false);
       });
 
     axios
@@ -140,9 +149,15 @@ const Jobs = () => {
           "rowsPerPage": rowsPerPage * 10,
           "results": resHc.data.results
         });
+        if (requestsFinished > 0) {
+          setIsLoading(false);
+        } else {
+          requestsFinished++;
+        }
       })
       .catch(err => {
         setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
+        setIsLoading(false);
       });
   }, [jwt, server, roles, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
 
@@ -345,7 +360,7 @@ const Jobs = () => {
             </tr>
           </thead>
           <tbody>
-            {view && view.length >= (currentPage - 1) * rowsPerPage ?
+            {!isLoading && view && view.length >= (currentPage - 1) * rowsPerPage ?
               view.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map(sub => {
                 return <tr key={sub["token"]}>
                   {displayFields.map(e => (
@@ -356,7 +371,7 @@ const Jobs = () => {
                 </tr>
               }) :
               <tr>
-                <td colSpan="5">{view && view.length === 0 ? "No Job Found" : <ClipLoader />}</td>
+                <td colSpan="5">{!isLoading && view && view.length === 0 ? "No Job Found" : <ClipLoader />}</td>
               </tr>
             }
           </tbody>
