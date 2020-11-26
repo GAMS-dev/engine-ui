@@ -104,12 +104,14 @@ const Usage = () => {
                             totalTime = ((isFinished ? new Date(c.finished) :
                                 new Date()) - new Date(c.submitted)) / 1000;
                         }
+                        const queuetime = ((c.jobs[0].times.length ?
+                            new Date(c.jobs[0].times[0].start) : (isFinished ? NaN : new Date())) -
+                            new Date(c.submitted)) / 1000;
                         if (a[c.username]) {
                             // User already exists
                             a[c.username].solvetime += solveTime;
                             a[c.username].totaltime += totalTime;
-                            a[c.username].queuetime += (c.jobs[0].times.length ?
-                                new Date(c.jobs[0].times[0].start) : new Date() - new Date(c.submitted)) / 1000;
+                            a[c.username].queuetime += queuetime;
                             a[c.username].nocrash += c.jobs.reduce((a, c) => {
                                 return a + Math.max(0, c.times.length - 1);
                             }, 0);
@@ -122,8 +124,7 @@ const Usage = () => {
                             nocrash: c.jobs.reduce((a, c) => {
                                 return a + Math.max(0, c.times.length - 1);
                             }, 0),
-                            queuetime: (c.jobs[0].times.length ?
-                                new Date(c.jobs[0].times[0].start) : new Date() - new Date(c.submitted)) / 1000,
+                            queuetime: queuetime,
                             solvetime: solveTime,
                             totaltime: totalTime
                         };
@@ -134,16 +135,18 @@ const Usage = () => {
                     if (isFinished && (c.times.length === 0 || c.times[c.times.length - 1].finish == null)) {
                         solveTime = NaN;
                     } else {
-                        solveTime = (isFinished ? new Date(c.times[c.times.length - 1].finish) : new Date() -
+                        solveTime = ((isFinished ? new Date(c.times[c.times.length - 1].finish) : new Date()) -
                             new Date(c.times[c.times.length - 1].start)) / 1000;
                     }
+                    const queuetime = ((c.times.length ?
+                        new Date(c.times[0].start) : (isFinished ? NaN : new Date())) -
+                        new Date(c.submitted)) / 1000;
                     if (a[c.username]) {
                         // User already exists
                         a[c.username].solvetime += solveTime;
                         a[c.username].totaltime += ((isFinished ? new Date(c.finished) : new Date()) -
                             new Date(c.submitted)) / 1000;
-                        a[c.username].queuetime += (c.times.length ?
-                            new Date(c.times[0].start) : new Date() - new Date(c.submitted)) / 1000;
+                        a[c.username].queuetime += queuetime;
                         a[c.username].nocrash += Math.max(0, c.times.length - 1);
                         a[c.username].nojobs += 1;
                         return a;
@@ -152,8 +155,7 @@ const Usage = () => {
                         username: c.username,
                         nojobs: 1,
                         nocrash: Math.max(0, c.times.length - 1),
-                        queuetime: (c.times.length ?
-                            new Date(c.times[0].start) : new Date() - new Date(c.submitted)) / 1000,
+                        queuetime: queuetime,
                         solvetime: solveTime,
                         totaltime: ((isFinished ? new Date(c.finished) : new Date()) - new Date(c.submitted)) / 1000
                     };
