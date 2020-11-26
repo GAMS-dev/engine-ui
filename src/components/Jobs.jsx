@@ -360,7 +360,7 @@ const Jobs = () => {
             </tr>
           </thead>
           <tbody>
-            {!isLoading && view && view.length >= (currentPage - 1) * rowsPerPage ?
+            {!isLoading && view && view.length > 0 && view.length >= (currentPage - 1) * rowsPerPage ?
               view.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map(sub => {
                 return <tr key={sub["token"]}>
                   {displayFields.map(e => (
@@ -371,7 +371,7 @@ const Jobs = () => {
                 </tr>
               }) :
               <tr>
-                <td colSpan="5">{!isLoading && view && view.length === 0 ? "No Job Found" : <ClipLoader />}</td>
+                <td colSpan="5">{(!isLoading && view && view.length === 0) ? "No Job Found" : <ClipLoader />}</td>
               </tr>
             }
           </tbody>
