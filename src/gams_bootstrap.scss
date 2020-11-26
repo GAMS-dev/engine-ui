@@ -129,9 +129,14 @@ body {
 }
 
 .namespace-list {
-  max-height: 500px;
-  max-height: 60vh;
+  max-height: 200px;
   overflow: auto;
+}
+@media only screen and (min-width: 768px) {
+  .namespace-list {
+    max-height: 500px;
+    max-height: 60vh;
+  }
 }
 
 .alert-fixed {
