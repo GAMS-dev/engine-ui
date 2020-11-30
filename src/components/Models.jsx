@@ -59,11 +59,13 @@ const Models = () => {
             return;
           }
           if (res.data.length > 0) {
-            setModels(res.data.map(model => {
-              const newModel = model;
-              newModel.id = model.name;
-              return newModel;
-            }));
+            setModels(res.data
+              .map(model => {
+                const newModel = model;
+                newModel.id = model.name;
+                return newModel;
+              })
+              .sort((a, b) => ('' + a.name).localeCompare(b.name)));
             setIsLoading(false);
           } else {
             setModels([]);
@@ -214,6 +216,8 @@ const Models = () => {
                 isLoading={isLoading}
                 displayFields={displayFields}
                 idFieldName="id"
+                sortedAsc={true}
+                sortedCol="name"
               />
             </div>
           </div>
