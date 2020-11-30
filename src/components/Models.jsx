@@ -32,7 +32,9 @@ const Models = () => {
           setAlertMsg("An error occurred while retrieving namespaces. Please try again later.");
           return;
         }
-        const availableNsTmp = res.data.filter(ns => ns.permission > 1);
+        const availableNsTmp = res.data
+          .filter(ns => ns.permission > 1)
+          .sort((a, b) => ('' + a.name).localeCompare(b.name));
         if (availableNsTmp.length === 0) {
           setAlertMsg("You do not have permissions to see any namespaces.");
           return;
