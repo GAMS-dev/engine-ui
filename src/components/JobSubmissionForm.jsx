@@ -30,6 +30,7 @@ const JobSubmissionForm = props => {
     const [textEntries, setTextEntries] = useState("");
     const [streamEntries, setStreamEntries] = useState("");
     const [inexJSON, setInexJSON] = useState("");
+    const [jobDeps, setJobDeps] = useState("");
     const [validCpuReq, setValidCpuReq] = useState(true);
     const [validMemReq, setValidMemReq] = useState(true);
     const [cpuReq, setCpuReq] = useState(null);
@@ -93,6 +94,7 @@ const JobSubmissionForm = props => {
         if (!validCpuReq || !validMemReq) {
             return;
         }
+        setSubmissionErrorMsg("");
         setIsSubmitting(true);
         const jobSubmissionForm = new FormData();
         jobSubmissionForm.append("namespace", namespace);
@@ -142,7 +144,7 @@ const JobSubmissionForm = props => {
         }
         jobSubmissionForm.append("stdout_filename", logFileName ? logFileName : "log_stdout.txt");
 
-        let optionalArgs = [{ key: "arguments", value: clArgs }];
+        let optionalArgs = [{ key: "arguments", value: clArgs }, { key: "dep_tokens", value: jobDeps }];
 
         if (newHcJob) {
             if (!hcFile.name.toLowerCase().endsWith(".json")) {
@@ -383,6 +385,20 @@ const JobSubmissionForm = props => {
                                                 </div>
                                             </>
                                         }
+                                        <div className="form-group">
+                                            <label htmlFor="jobDeps" className="sr-only">
+                                                Job dependencies
+                                        </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="jobDeps"
+                                                placeholder="Job dependencies"
+                                                autoComplete="on"
+                                                value={jobDeps}
+                                                onChange={e => setJobDeps(e.target.value)}
+                                            />
+                                        </div>
                                         <InexJSONSelector onChangeHandler={e => setInexJSON(e)} />
                                         {process.env.REACT_APP_K8_BUILD === "true" &&
                                             <>
