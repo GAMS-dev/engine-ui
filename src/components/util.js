@@ -24,4 +24,5 @@ const zipAsync = filesToZip => {
             console.log(metadata.percent.toFixed(2) + " %");
         });
 }
-export { zipAsync }
+const isActiveJob = (status) => status < 10 && (status === -2 || status === -10 || status >= 0)
+export { zipAsync, isActiveJob }

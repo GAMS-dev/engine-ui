@@ -1,12 +1,11 @@
 import React, { useEffect, useContext, useState } from "react";
-import { RefreshCw, Send, Layers } from "react-feather";
+import { RefreshCw, Send, Layers, ArrowDown, ArrowUp } from "react-feather";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import TimeDisplay from "./TimeDisplay";
 import JobActionsButtonGroup from "./JobActionsButtonGroup";
-import { ArrowUp, ArrowDown } from "react-feather";
 import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
 

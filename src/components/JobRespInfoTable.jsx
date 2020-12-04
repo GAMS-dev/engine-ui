@@ -1,13 +1,14 @@
 import React, { useState, useContext } from "react";
 import { AlertContext } from "./Alert";
 import axios from "axios";
-import { FileText } from "react-feather";
+import { FileText, RefreshCw } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import DownloadLink from "./DownloadLink";
 import StreamEntryView from "./StreamEntryView";
 import SolveTraceEntryView from "./SolveTraceEntryView";
 import TerminateJobButton from "./TerminateJobButton";
+import { isActiveJob } from "./util";
 
 const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
@@ -64,6 +65,13 @@ const JobRespInfoTable = props => {
             <th>Status</th>
             <td>
               {job.status in statusCodes ? statusCodes[job.status] : job.status}
+              &nbsp;
+              {isActiveJob(job.status) &&
+                <button className="btn btn-sm btn-warning" onClick={() => setRefreshJob(refreshCnt => ({
+                  refresh: refreshCnt + 1
+                }))}>
+                  <RefreshCw size={18} />
+                </button>}
             </td>
           </tr>
           {isHcJob ?

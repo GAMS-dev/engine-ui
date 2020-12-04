@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import axios from "axios";
 import { AlertContext } from "./Alert";
+import { isActiveJob } from "./util";
 
 const TerminateJobButton = props => {
     const { token, status, server, setRefresh } = props;
@@ -25,10 +26,11 @@ const TerminateJobButton = props => {
 
     return (
         <>
-            {status >= 0 && status < 10 &&
-                <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob()}>Cancel</button>}
-            {status === -2 &&
-                <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob(true)}>Hard kill</button>}
+            {isActiveJob(status) &&
+                (status === -2 ?
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob(true)}>Hard kill</button> :
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob()}>Cancel</button>
+                )}
         </>
     );
 };
