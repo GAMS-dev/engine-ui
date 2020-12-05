@@ -144,3 +144,12 @@ body {
   width: 100%;
   z-index:10;
 }
+
+.no-resize {
+  resize: none;
+}
+
+.monospace {
+  font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+}
+

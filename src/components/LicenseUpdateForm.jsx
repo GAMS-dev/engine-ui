@@ -12,19 +12,12 @@ const LicenseUpdateForm = () => {
     const { username } = useParams();
 
     const [licenseErrorMsg, setlicenseErrorMsg] = useState("");
+    const [registeredLicense, setRegisteredLicense] = useState("");
     const [license, setLicense] = useState("");
     const [licenseAction, setLicenseAction] = useState("update");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [userEdited, setUserEdited] = useState(false);
-
-    const useDeleteLicenseAction = e => {
-        setLicenseAction("delete");
-    };
-
-    const updateLicense = e => {
-        setLicense(e.target.value);
-    }
 
     useEffect(() => {
         axios.get(`${server}/licenses/`, {
@@ -33,6 +26,7 @@ const LicenseUpdateForm = () => {
             .then(res => {
                 if (res.data[0].inherited_from === res.data[0].user) {
                     setLicense(res.data[0].license);
+                    setRegisteredLicense(res.data[0].license);
                 } else {
                     setlicenseErrorMsg(`User inherits the license from ${res.data[0].inherited_from}`);
                 }
@@ -68,6 +62,7 @@ const LicenseUpdateForm = () => {
                     return;
                 }
                 setLicense(licenseModified);
+                setRegisteredLicense(licenseModified);
             }
             catch (e) {
                 setlicenseErrorMsg(`An error occurred while updating user license. Error message: ${e.message}.`);
@@ -123,18 +118,23 @@ const LicenseUpdateForm = () => {
                     <fieldset disabled={isSubmitting}>
                         <label htmlFor="licenseBox">
                             GAMS license for the user
-                </label>
-                        <textarea id="licenseBox" rows="6" cols="50" className="form-control" value={license} onChange={updateLicense} >
-
+                        </label>
+                        <textarea
+                            id="licenseBox"
+                            rows="6"
+                            cols="50"
+                            className="form-control monospace no-resize"
+                            value={license}
+                            onChange={e => setLicense(e.target.value)} >
                         </textarea>
                     </fieldset>
                     <div className="mt-3">
                         <SubmitButton isSubmitting={isSubmitting}>
                             Update license
-                    </SubmitButton>
-                        {license &&
+                        </SubmitButton>
+                        {registeredLicense !== "" &&
                             <button type="submit" className={`btn btn-lg btn-danger btn-block`}
-                                disabled={isSubmitting} onClick={useDeleteLicenseAction}>
+                                disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
                                 {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
                             </button>}
                     </div>
