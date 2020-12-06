@@ -15,7 +15,7 @@ export const Alert = () => {
         setAlertType("danger");
       }
       const alertTimer = setTimeout(() => {
-        //setAlertMsg("");
+        setAlertMsg("");
       }, 4000);
       return () => clearTimeout(alertTimer);
     }
