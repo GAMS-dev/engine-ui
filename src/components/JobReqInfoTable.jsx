@@ -1,5 +1,6 @@
-import React, {useContext} from "react";
-import {AuthContext} from "../AuthContext";
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../AuthContext";
 import DownloadLink from "./DownloadLink";
 import TimeDisplay from "./TimeDisplay";
 
@@ -56,13 +57,13 @@ const JobReqInfoTable = props => {
                 </span>
               </span>
             ) : (
-              <DownloadLink 
-                url={`${server}/namespaces/${job.namespace}/${job.model}`} 
-                filename={`${job.model}.zip`}
-                className="badge badge-secondary">
-                {job.model}
-              </DownloadLink>
-            )}
+                <DownloadLink
+                  url={`${server}/namespaces/${job.namespace}/${job.model}`}
+                  filename={`${job.model}.zip`}
+                  className="badge badge-secondary">
+                  {job.model}
+                </DownloadLink>
+              )}
           </td>
         </tr>
         <tr>
@@ -80,8 +81,8 @@ const JobReqInfoTable = props => {
       <tbody>
         {!job.is_temporary_model && job.includes_model_args !== true && <tr>
           <td colSpan="2">
-            <div className="alert alert-info" role="alert" style={{fontSize: "10pt"}}>
-              The arguments provided with the model are not mentioned here. 
+            <div className="alert alert-info" role="alert" style={{ fontSize: "10pt" }}>
+              The arguments provided with the model are not mentioned here.
               Therefore the list of arguments shown here may not be complete!
             </div>
           </td>
@@ -101,7 +102,7 @@ const JobReqInfoTable = props => {
           <td colSpan="2">
             <code>
               gams {job.model}.gms {job.arguments.join(" ")} lo=3 input='{job.model}.gms'
-              {job.stdout_filename? ` > ${job.stdout_filename}`: ""}
+              {job.stdout_filename ? ` > ${job.stdout_filename}` : ""}
             </code>
           </td>
         </tr>
@@ -118,31 +119,45 @@ const JobReqInfoTable = props => {
           <th>Standard output filename</th>
           <td>{job.stdout_filename || "-"}</td>
         </tr>
-        {!isHcJob && 
-        <>
-          <tr>
-            <th>Text entries</th>
-            <td>
-              {job.text_entries.length > 0? job.text_entries.map(c => (
-                <span key={c.entry_name} className="badge badge-secondary m-1">
-                  {c.entry_name}
-                </span>
-              )): "-"}
-            </td>
-          </tr>
-          <tr>
-            <th>Stream entries</th>
-            <td>
-              {job.stream_entries.length > 0? job.stream_entries.map(c => (
-                <span key={c} className="badge badge-secondary m-1">
-                  {c}
-                </span>
-              )): "-"}
-            </td>
-          </tr>
-        </>}
+        {!isHcJob &&
+          <>
+            <tr>
+              <th>Text entries</th>
+              <td>
+                {job.text_entries.length > 0 ? job.text_entries.map(c => (
+                  <span key={c.entry_name} className="badge badge-secondary m-1">
+                    {c.entry_name}
+                  </span>
+                )) : "-"}
+              </td>
+            </tr>
+            <tr>
+              <th>Stream entries</th>
+              <td>
+                {job.stream_entries.length > 0 ? job.stream_entries.map(c => (
+                  <span key={c} className="badge badge-secondary m-1">
+                    {c}
+                  </span>
+                )) : "-"}
+              </td>
+            </tr>
+            <tr>
+              <th>Job dependencies</th>
+              <td>
+                {(!job.dep_tokens || job.dep_tokens.length === 0) ?
+                  "-" :
+                  job.dep_tokens.map(t => (
+                    <span key={t} title={t} className="badge badge-secondary m-1">
+                      <small>
+                        <Link to={"/jobs/" + t} style={{ color: "#fff" }}>{t.split('-')[0]}</Link>
+                      </small>
+                    </span>
+                  ))}
+              </td>
+            </tr>
+          </>}
       </tbody>
-    </table>
+    </table >
   );
 };
 
