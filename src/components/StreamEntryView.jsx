@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Activity } from "react-feather";
 import Modal from "react-bootstrap/Modal";
+import { getResponseError } from "./util";
 import Button from "react-bootstrap/Button";
 
 const StreamEntryView = props => {
@@ -34,7 +35,7 @@ const StreamEntryView = props => {
                     if (err.response.status === 308) {
                         setRefreshJob(refresh => refresh + 1);
                     } else {
-                        setErrorMsg(`A problem has occurred while retrieving the stream entry. Error message: ${err.message}`);
+                        setErrorMsg(`A problem has occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
                     }
                 });
         }

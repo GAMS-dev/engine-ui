@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
 import DownloadLink from "./DownloadLink";
+import { getResponseError } from "./util";
 import { AlertContext } from "./Alert";
 
 const ModelActionsButtonGroup = props => {
@@ -30,7 +31,7 @@ const ModelActionsButtonGroup = props => {
       .catch(err => {
         setIsSubmitting(false);
         setShowDeleteModelDialog(false);
-        setAlertMsg(`Problems deleting model. Error message: ${err.message}`);
+        setAlertMsg(`Problems deleting model. Error message: ${getResponseError(err)}`);
       });
   }
 

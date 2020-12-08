@@ -8,6 +8,7 @@ import TimeDisplay from "./TimeDisplay";
 import ModelActionsButtonGroup from "./ModelActionsButtonGroup";
 import AddNamespaceModal from "./AddNamespaceModal";
 import RemoveNamespaceModal from "./RemoveNamespaceModal";
+import { getResponseError } from "./util";
 import axios from "axios";
 
 const Models = () => {
@@ -43,7 +44,7 @@ const Models = () => {
         setNamespace(availableNsTmp[0]);
       })
       .catch(err => {
-        setAlertMsg(`Problems while retrieving namespaces. Error message: ${err.message}.`);
+        setAlertMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
       });
   }, [jwt, server, refresh, setAlertMsg]);
 
@@ -103,7 +104,7 @@ const Models = () => {
           setIsLoading(false);
         })
         .catch(err => {
-          setAlertMsg(`Problems while retrieving registered models. Error message: ${err.message}.`);
+          setAlertMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
           setIsLoading(false);
         });
     } else {

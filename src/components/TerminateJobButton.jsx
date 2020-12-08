@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import axios from "axios";
 import { AlertContext } from "./Alert";
-import { isActiveJob } from "./util";
+import { isActiveJob, getResponseError } from "./util";
 
 const TerminateJobButton = props => {
     const { token, status, server, setRefresh } = props;
@@ -20,7 +20,7 @@ const TerminateJobButton = props => {
                 }));
             })
             .catch(err => {
-                setAlertMsg(`Problems terminating job. Error message: ${err.message}`);
+                setAlertMsg(`Problems terminating job. Error message: ${getResponseError(err)}`);
             });
     }
 

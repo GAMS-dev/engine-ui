@@ -3,7 +3,7 @@ import { Redirect, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
-import { zipAsync } from "./util";
+import { zipAsync, getResponseError } from "./util";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 
@@ -40,7 +40,7 @@ const ModelSubmissionForm = () => {
                     return;
                 }));
             } catch (err) {
-                setSubmissionErrorMsg(err.message);
+                setSubmissionErrorMsg(getResponseError(err));
                 return;
             }
         } else {
@@ -81,12 +81,12 @@ const ModelSubmissionForm = () => {
                     setModelAdded(true);
                 })
                 .catch(err => {
-                    setSubmissionErrorMsg(`Problems while registering model. Error message: ${err.response.data.messa}.`);
+                    setSubmissionErrorMsg(`Problems while registering model. Error message: ${getResponseError(err)}.`);
                     setIsSubmitting(false);
                 });
         })
             .catch(err => {
-                setSubmissionErrorMsg(`Problems while registering model. Error message: ${err.message}.`);
+                setSubmissionErrorMsg(`Problems while registering model. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
             });
     }

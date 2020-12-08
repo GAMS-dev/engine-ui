@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { getResponseError } from "./util";
 import { Line } from 'react-chartjs-2';
 
 const SolveTraceEntryView = props => {
@@ -30,14 +31,14 @@ const SolveTraceEntryView = props => {
                             setRefresh(refresh + 1);
                         }
                     } catch (err) {
-                        setErrorMsg(`Problems parsing solvetrace file. Error message: ${err.message}`);
+                        setErrorMsg(`Problems parsing solvetrace file. Error message: ${getResponseError(err)}`);
                     };
                 })
                 .catch(err => {
                     if (err.response.status === 308) {
                         setRefreshJob(refresh => refresh + 1);
                     } else {
-                        setErrorMsg(`A problem has occurred while retrieving the stream entry. Error message: ${err.message}`);
+                        setErrorMsg(`A problem has occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
                     }
                 });
         }

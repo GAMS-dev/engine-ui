@@ -5,6 +5,7 @@ import { AlertContext } from "./Alert";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import TimeDisplay from "./TimeDisplay";
+import { getResponseError } from "./util";
 import JobActionsButtonGroup from "./JobActionsButtonGroup";
 import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
@@ -130,14 +131,14 @@ const Jobs = () => {
         }
       })
       .catch(err => {
-        setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
+        setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
         setIsLoading(false);
       });
 
     axios
       .get(server + `/hypercube/`, {
         params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
-        headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
+        headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, status, job_count" }
       })
       .then(resHc => {
         setHypercubePageInformation({
@@ -155,7 +156,7 @@ const Jobs = () => {
         }
       })
       .catch(err => {
-        setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
+        setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
         setIsLoading(false);
       });
   }, [jwt, server, roles, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
@@ -176,7 +177,7 @@ const Jobs = () => {
           setDisplayFields(newDisplayFields);
         })
         .catch(err => {
-          setAlertMsg(`Problems fetching status code map. Error message: ${err.message}`);
+          setAlertMsg(`Problems fetching status code map. Error message: ${getResponseError(err)}`);
         });
     }
   }, [server, displayFields, statusCodes, setAlertMsg]);
@@ -188,7 +189,6 @@ const Jobs = () => {
         if (!newHc.token.startsWith('hc:')) {
           newHc.token = `hc:${newHc.token}`;
         }
-        newHc.status = newHc.cancelled ? -3 : (newHc.finished === newHc.job_count ? 10 : (newHc.finished > 0 ? 1 : 0));
         return newHc;
       }
 
@@ -280,7 +280,7 @@ const Jobs = () => {
             setJobPageInformation(newJobInformation);
           })
           .catch(err => {
-            setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
+            setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
           });
       } else if (needMore === 'H') {
         axios
@@ -289,7 +289,7 @@ const Jobs = () => {
               everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
               order_by: sortedCol, order_asc: sortAsc, page: 1
             },
-            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, cancelled, job_count" }
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, status, job_count" }
           })
           .then(resHc => {
             const newHcInformation = {
@@ -303,7 +303,7 @@ const Jobs = () => {
             setHypercubePageInformation(newHcInformation);
           })
           .catch(err => {
-            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
+            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
           });
       }
     }

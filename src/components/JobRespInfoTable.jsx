@@ -8,7 +8,7 @@ import DownloadLink from "./DownloadLink";
 import StreamEntryView from "./StreamEntryView";
 import SolveTraceEntryView from "./SolveTraceEntryView";
 import TerminateJobButton from "./TerminateJobButton";
-import { isActiveJob } from "./util";
+import { isActiveJob, getResponseError } from "./util";
 
 const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
@@ -46,7 +46,7 @@ const JobRespInfoTable = props => {
       .catch(err => {
         setIsSubmitting(false);
         setShowRemoveConfirmDialog(false);
-        setAlertMsg(`Problems deleting dataset. Error message: ${err.message}`);
+        setAlertMsg(`Problems deleting dataset. Error message: ${getResponseError(err)}`);
       });
   }
 

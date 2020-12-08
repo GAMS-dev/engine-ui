@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { getResponseError } from "./util";
 import { AlertContext } from "./Alert";
 
 const TextEntryView = props => {
@@ -29,7 +30,7 @@ const TextEntryView = props => {
       }
       axios
         .get(
-            `${server}/jobs/${token}/text-entry/${textEntries[entryIndex].entry_name}`,
+          `${server}/jobs/${token}/text-entry/${textEntries[entryIndex].entry_name}`,
           {
             params: {
               length: viewCharLimit
@@ -42,7 +43,7 @@ const TextEntryView = props => {
           setTextEntries(newTextEntries);
         })
         .catch(err => {
-          setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${err.message}`);
+          setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`);
         });
     }
   }, [entryIndex, server, setTextEntries, setAlertMsg, textEntries, token]);

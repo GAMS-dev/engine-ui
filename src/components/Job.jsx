@@ -5,6 +5,7 @@ import { AlertContext } from "./Alert";
 import axios from "axios";
 import JobReqInfoTable from "./JobReqInfoTable";
 import JobRespInfoTable from "./JobRespInfoTable";
+import { getResponseError } from "./util";
 import TextEntryView from "./TextEntryView";
 
 const Job = () => {
@@ -27,6 +28,7 @@ const Job = () => {
       "status",
       "stdout_filename",
       "stream_entries",
+      "dep_tokens",
       "submitted_at",
       "result_exists",
       "text_entries{entry_name, entry_size, entry_value}",
@@ -46,14 +48,10 @@ const Job = () => {
             setAlertMsg("Problems fetching Hypercube job information. Please try again later.");
             return;
           }
-          const hcJobData = res.data.results[0];
-          hcJobData.status = hcJobData.cancelled ? -3 :
-            (hcJobData.finished === hcJobData.job_count ? 10 :
-              (hcJobData.finished > 0 ? 1 : 0));
-          return hcJobData;
+          return res.data.results[0];
         })
         .catch(err => {
-          setAlertMsg(`Problems fetching Hypercube job information. Error message: ${err.message}`);
+          setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
         });
     } else {
       setIsHcJob(false);
@@ -65,7 +63,7 @@ const Job = () => {
           return res.data;
         })
         .catch(err => {
-          setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
+          setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
         });
     }
     jobDataPromise
@@ -92,7 +90,7 @@ const Job = () => {
               })
               .catch(err => {
                 if (err.response.status !== 403) {
-                  setAlertMsg(`Problems fetching model information. Error message: ${err.message}`);
+                  setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`);
                 }
               });
           }
@@ -112,7 +110,7 @@ const Job = () => {
         setStatusCodes(newStatusCodes);
       })
       .catch(err => {
-        setAlertMsg(`Problems fetching job information. Error message: ${err.message}`);
+        setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
       });
   }, [server, setAlertMsg]);
 

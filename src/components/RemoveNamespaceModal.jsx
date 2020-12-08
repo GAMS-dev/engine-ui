@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { AuthContext } from "../AuthContext";
 import SubmitButton from "./SubmitButton";
+import { getResponseError } from "./util";
 import axios from "axios";
 
 const RemoveNamespaceModal = props => {
@@ -31,7 +32,7 @@ const RemoveNamespaceModal = props => {
         }
       })
       .catch(err => {
-        setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${err.message}.`);
+        setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${getResponseError(err)}.`);
         setIsSubmitting(false);
       });
   }

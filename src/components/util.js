@@ -1,5 +1,12 @@
 import JSZip from "jszip";
 
+const getResponseError = err => {
+    if (err.response && err.response.data && err.response.data.message) {
+        return err.response.data.message
+    }
+    return err.message
+}
+
 const zipAsync = filesToZip => {
     if (!JSZip.support.blob) {
         throw EvalError("Your browser does not support zipping files. Please zip the files first and try to upload the zip archive instead.");
@@ -25,4 +32,4 @@ const zipAsync = filesToZip => {
         });
 }
 const isActiveJob = (status) => status < 10 && (status === -2 || status === -10 || status >= 0)
-export { zipAsync, isActiveJob }
+export { zipAsync, isActiveJob, getResponseError }

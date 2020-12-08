@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { AuthContext } from "../AuthContext";
+import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import axios from "axios";
 
@@ -16,9 +17,6 @@ const AddNamespaceModal = props => {
     const handleCloseDialog = () => {
         setNamespaceName("");
         setShowDialog(false);
-    }
-    const updateNamespaceName = e => {
-        setNamespaceName(e.target.value);
     }
     const handleAddNamespace = () => {
         setIsSubmitting(true);
@@ -41,7 +39,7 @@ const AddNamespaceModal = props => {
                 }
             })
             .catch(err => {
-                setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${err.message}.`);
+                setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
             });
     }
@@ -73,7 +71,7 @@ const AddNamespaceModal = props => {
                                 id="namespaceName"
                                 placeholder="Namespace name"
                                 value={namespaceName}
-                                onChange={updateNamespaceName}
+                                onChange={(e) => setNamespaceName(e.target.value)}
                                 required
                             />
                         </div>

@@ -11,6 +11,8 @@ import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
 import UserActionsButtonGroup from "./UserActionsButtonGroup";
 import SubmitButton from "./SubmitButton";
+import { getResponseError } from "./util";
+import LicenseUpdateButton from "./LicenseUpdateButton";
 
 const Users = () => {
   const history = useHistory();
@@ -67,16 +69,10 @@ const Users = () => {
         isAdmin={roles.includes("admin")}
         setUserToDelete={setUserToDelete}
         setDeleteInvitation={setDeleteInvitation}
-        handleShowDeleteConfirmDialog={handleShowDeleteConfirmDialog} />
+        handleShowDeleteConfirmDialog={() => setShowDeleteConfirmDialog(true)} />
     }
   ]);
 
-  const handleShowDeleteConfirmDialog = () => {
-    setShowDeleteConfirmDialog(true);
-  }
-  const handleCloseDeleteConfirmDialog = () => {
-    setShowDeleteConfirmDialog(false);
-  }
   const deleteUser = () => {
     axios
       .delete(
@@ -102,7 +98,7 @@ const Users = () => {
         setShowDeleteConfirmDialog(false);
       })
       .catch(err => {
-        setAlertMsg(`Problems deleting user. Error message: ${err.message}`);
+        setAlertMsg(`Problems deleting user. Error message: ${getResponseError(err)}`);
         setIsSubmitting(false);
         setShowDeleteConfirmDialog(false);
       });
@@ -153,12 +149,12 @@ const Users = () => {
             setIsLoading(false);
           })
           .catch(err => {
-            setAlertMsg(`Problems fetching invitation information. Error message: ${err.message}`);
+            setAlertMsg(`Problems fetching invitation information. Error message: ${getResponseError(err)}`);
             setIsLoading(false);
           });
       })
       .catch(err => {
-        setAlertMsg(`Problems fetching user information. Error message: ${err.message}`);
+        setAlertMsg(`Problems fetching user information. Error message: ${getResponseError(err)}`);
         setIsLoading(false);
       });
   }, [jwt, server, roles, refresh, displayFields, setAlertMsg]);
@@ -170,6 +166,7 @@ const Users = () => {
         <h1 className="h2">Users</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group mr-2">
+            <LicenseUpdateButton />
             <Link to="/new-user">
               <button type="button" className="btn btn-sm btn-outline-primary">
                 Invite User
@@ -199,7 +196,7 @@ const Users = () => {
           isLoading={isLoading}
           sortedCol="created"
           idFieldName="id" />}
-      <Modal show={showDeleteConfirmDialog} onHide={handleCloseDeleteConfirmDialog}>
+      <Modal show={showDeleteConfirmDialog} onHide={() => setShowDeleteConfirmDialog(false)}>
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -221,7 +218,7 @@ const Users = () => {
             </fieldset>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseDeleteConfirmDialog}>
+            <Button variant="secondary" onClick={() => setShowDeleteConfirmDialog(false)}>
               Cancel
             </Button>
             <SubmitButton isSubmitting={isSubmitting} className="btn-primary">

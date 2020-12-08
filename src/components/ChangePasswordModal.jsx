@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { AuthContext } from "../AuthContext";
 import SubmitButton from "./SubmitButton";
+import { getResponseError } from "./util";
 import axios from "axios";
 
 const ChangePasswordModal = props => {
@@ -47,7 +48,7 @@ const ChangePasswordModal = props => {
                 }
             })
             .catch(err => {
-                setSubmissionErrorMsg(`Some error occurred while trying to change your password. Error message: ${err.response.data.messa}.`);
+                setSubmissionErrorMsg(`Some error occurred while trying to change your password. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
             });
     }

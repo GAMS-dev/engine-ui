@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
+import { getResponseError } from "./util";
 import { AlertContext } from "./Alert";
 
 export default function DownloadLink({ url, filename, children, className, jsonSubkey }) {
@@ -39,7 +40,7 @@ export default function DownloadLink({ url, filename, children, className, jsonS
       if (axios.isCancel(err)) {
         setCancelTokenSource(axios.CancelToken.source());
       } else {
-        setAlertMsg(`Problems fetching ${filename}. Error message: ${err.message}`);
+        setAlertMsg(`Problems fetching ${filename}. Error message: ${getResponseError(err)}`);
       }
       setLinkDisabled(false);
     });

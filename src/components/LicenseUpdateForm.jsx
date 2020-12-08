@@ -3,6 +3,7 @@ import { Redirect, useParams } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
+import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 
@@ -11,6 +12,7 @@ const LicenseUpdateForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
     const { username } = useParams();
 
+    const [isLoading, setIsLoading] = useState(true);
     const [licenseErrorMsg, setlicenseErrorMsg] = useState("");
     const [registeredLicense, setRegisteredLicense] = useState("");
     const [license, setLicense] = useState("");
@@ -27,16 +29,20 @@ const LicenseUpdateForm = () => {
                 if (res.data[0].inherited_from === res.data[0].user) {
                     setLicense(res.data[0].license);
                     setRegisteredLicense(res.data[0].license);
+                    setIsLoading(false);
                 } else {
                     setlicenseErrorMsg(`User inherits the license from ${res.data[0].inherited_from}`);
+                    setIsLoading(false);
                 }
             })
             .catch(err => {
                 if (err.response.status === 404) {
                     setlicenseErrorMsg('User does not have and does not inherit any license');
+                    setIsLoading(false);
                 }
                 else {
-                    setlicenseErrorMsg(`Problems while while retrieving user license. Error message: ${err.message}.`);
+                    setlicenseErrorMsg(`Problems while while retrieving user license. Error message: ${getResponseError(err)}.`);
+                    setIsLoading(false);
                 }
             });
     }, [server, jwt, username]);
@@ -64,8 +70,8 @@ const LicenseUpdateForm = () => {
                 setLicense(licenseModified);
                 setRegisteredLicense(licenseModified);
             }
-            catch (e) {
-                setlicenseErrorMsg(`An error occurred while updating user license. Error message: ${e.message}.`);
+            catch (err) {
+                setlicenseErrorMsg(`An error occurred while updating user license. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
                 return;
             }
@@ -80,13 +86,13 @@ const LicenseUpdateForm = () => {
                     return;
                 }
             }
-            catch (e) {
-                if (e.response.status === 404) {
+            catch (err) {
+                if (err.response.status === 404) {
                     setlicenseErrorMsg("User does not have a license");
                     setIsSubmitting(false);
                     return;
                 } else {
-                    setlicenseErrorMsg(`An error occurred while deleting user license. Error message: ${e.message}.`);
+                    setlicenseErrorMsg(`An error occurred while deleting user license. Error message: ${getResponseError(err)}.`);
                     setIsSubmitting(false);
                     return;
                 }
@@ -100,47 +106,48 @@ const LicenseUpdateForm = () => {
     return (
         <>
             {!roles.includes('admin') && <Redirect to="/users" />}
-            <div>
-                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 className="h2">Update license of user: {username}</h1>
-                </div>
-                <form
-                    className="m-auto"
-                    onSubmit={e => {
-                        e.preventDefault();
-                        handleUserUpdateLicense();
-                        return false;
-                    }}
-                >
-                    <div className="invalid-feedback text-center" style={{ display: licenseErrorMsg !== "" ? "block" : "none" }}>
-                        {licenseErrorMsg}
+            {isLoading ? <ClipLoader /> :
+                <div>
+                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 className="h2">Update license of user: {username}</h1>
                     </div>
-                    <fieldset disabled={isSubmitting}>
-                        <label htmlFor="licenseBox">
-                            GAMS license for the user
+                    <form
+                        className="m-auto"
+                        onSubmit={e => {
+                            e.preventDefault();
+                            handleUserUpdateLicense();
+                            return false;
+                        }}
+                    >
+                        <div className="invalid-feedback text-center" style={{ display: licenseErrorMsg !== "" ? "block" : "none" }}>
+                            {licenseErrorMsg}
+                        </div>
+                        <fieldset disabled={isSubmitting}>
+                            <label htmlFor="licenseBox">
+                                GAMS license for the user
                         </label>
-                        <textarea
-                            id="licenseBox"
-                            rows="6"
-                            cols="50"
-                            className="form-control monospace no-resize"
-                            value={license}
-                            onChange={e => setLicense(e.target.value)} >
-                        </textarea>
-                    </fieldset>
-                    <div className="mt-3">
-                        <SubmitButton isSubmitting={isSubmitting}>
-                            Update license
+                            <textarea
+                                id="licenseBox"
+                                rows="6"
+                                cols="50"
+                                className="form-control monospace no-resize"
+                                value={license}
+                                onChange={e => setLicense(e.target.value)} >
+                            </textarea>
+                        </fieldset>
+                        <div className="mt-3">
+                            <SubmitButton isSubmitting={isSubmitting}>
+                                Update license
                         </SubmitButton>
-                        {registeredLicense !== "" &&
-                            <button type="submit" className={`btn btn-lg btn-danger btn-block`}
-                                disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
-                                {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
-                            </button>}
-                    </div>
-                    {userEdited && <Redirect to="/users" />}
-                </form>
-            </div>
+                            {registeredLicense !== "" &&
+                                <button type="submit" className={`btn btn-lg btn-danger btn-block`}
+                                    disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
+                                    {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
+                                </button>}
+                        </div>
+                        {userEdited && <Redirect to="/users" />}
+                    </form>
+                </div>}
         </>
     );
 }

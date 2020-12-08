@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Table from "./Table";
+import { getResponseError } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 
 const Usage = () => {
@@ -174,7 +175,7 @@ const Usage = () => {
                 setIsLoading(false);
             })
             .catch(err => {
-                setAlertMsg(`Problems fetching usage information. Error message: ${err.message}`);
+                setAlertMsg(`Problems fetching usage information. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
     }, [jwt, server, roles, refresh, displayFields, setAlertMsg,

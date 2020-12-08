@@ -7,6 +7,7 @@ import { AlertContext } from "./Alert";
 import moment from "moment";
 import axios from "axios";
 import Table from "./Table";
+import { getResponseError } from "./util";
 import TimeDisplay from "./TimeDisplay";
 import SubmitButton from "./SubmitButton";
 import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
@@ -108,7 +109,7 @@ const Cleanup = () => {
                 setIsLoading(false);
             })
             .catch(err => {
-                setAlertMsg(`Problems fetching cleanup information. Error message: ${err.message}`);
+                setAlertMsg(`Problems fetching cleanup information. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
     }, [jwt, server, roles, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
@@ -170,7 +171,7 @@ const Cleanup = () => {
                 }
             })
             .catch(err => {
-                setSubmissionErrorMsg(`Problems deleting dataset. Error message: ${err.message}`);
+                setSubmissionErrorMsg(`Problems deleting dataset. Error message: ${getResponseError(err)}`);
                 setIsSubmitting(false);
             });
     }
