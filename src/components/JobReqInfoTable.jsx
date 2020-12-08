@@ -141,21 +141,21 @@ const JobReqInfoTable = props => {
                 )) : "-"}
               </td>
             </tr>
-            <tr>
-              <th>Job dependencies</th>
-              <td>
-                {(!job.dep_tokens || job.dep_tokens.length === 0) ?
-                  "-" :
-                  job.dep_tokens.map(t => (
-                    <span key={t} title={t} className="badge badge-secondary m-1">
-                      <small>
-                        <Link to={"/jobs/" + t} style={{ color: "#fff" }}>{t.split('-')[0]}</Link>
-                      </small>
-                    </span>
-                  ))}
-              </td>
-            </tr>
           </>}
+        <tr>
+          <th>Job dependencies</th>
+          <td>
+            {(!job.dep_tokens || job.dep_tokens.length === 0) ?
+              "-" :
+              job.dep_tokens.map(t => (
+                <span key={t} title={t} className="badge badge-secondary m-1">
+                  <small>
+                    <Link to={"/jobs/" + t} style={{ color: "#fff" }}>{t.split('-')[0]}</Link>
+                  </small>
+                </span>
+              ))}
+          </td>
+        </tr>
       </tbody>
     </table >
   );
