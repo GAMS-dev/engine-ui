@@ -66,7 +66,7 @@ body {
   padding-top: 77px;
 }
 
-.nav-link {
+.nav-block {
   padding: 2em 1rem;
 }
 
@@ -89,10 +89,10 @@ body {
     border-bottom: 1px solid #adb5bd !important;
     top:0;
   }
-  .nav-top .nav-link {
+  .nav-top .nav-block {
     display: inline-block;
   }
-  .nav-link {
+  .nav-block {
     padding: 0.5em 1rem;
     padding-bottom: 16px;
   }
@@ -151,5 +151,26 @@ body {
 
 .monospace {
   font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+}
+
+.username-sidebar {
+  font-size: 0.6em;
+  padding: 0 1em;
+  padding-top: 0.5rem;
+  text-align: center;
+}
+
+.cp-button {
+  font-size: 0.8em;
+}
+
+@media only screen and (min-width: 768px) {
+  .username-sidebar {
+    padding-top: 0;
+  }
+
+  .cp-button {
+    padding: 0 1em;
+  }
 }
 

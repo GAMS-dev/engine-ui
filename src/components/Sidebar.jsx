@@ -1,23 +1,25 @@
 import React, { useContext } from "react";
-import { Package, User, LogOut, Play, Archive } from "react-feather";
+import { Package, User, Users, LogOut, Play, Archive } from "react-feather";
 import { withRouter } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
 const SidebarRaw = props => {
-  const [{ roles }] = useContext(AuthContext);
+  const [{ roles, username }] = useContext(AuthContext);
   const pathname = props.location.pathname;
 
   const logOutMenu = <>
     <li className="nav-item">
-      <Link to="/logout" className="nav-link text-danger float-right float-md-none pb-md-3">
+      <div className="username-sidebar nav-block">
+        <User className="feather" size={12} /> {username}
+      </div>
+      <Link to="/logout" className="nav-link nav-block text-danger float-right float-md-none pb-md-3 pt-md-3">
         <LogOut className="feather" />
-        LogOut
+        Sign Out
       </Link>
       <button
         type="button"
-        className="btn nav-link btn-link btn-sm pt-md-0 pt-3"
-        style={{ fontSize: "0.8em", padding: "0 1em" }}
+        className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button"
         onClick={props.changePasswordHandler}>
         Change password
       </button>
@@ -35,27 +37,27 @@ const SidebarRaw = props => {
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">
           <li className="nav-item">
-            <Link to="/jobs" className={`nav-link${["/models", "/new-model", "/new-user", "/users", "/cleanup", "/licenses", "/usage"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+            <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-model", "/new-user", "/users", "/cleanup", "/licenses", "/usage"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/models" className={`nav-link${["/models", "/new-model"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
+            <Link to="/models" className={`nav-link nav-block${["/models", "/new-model"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
               <Package className="feather" />
               <span className="nav-link-text">Models</span>
             </Link>
           </li>
           {(roles && roles.length > 0) &&
             <li className="nav-item">
-              <Link to="/users" className={`nav-link${["/users", "/licenses", "/usage", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
-                <User className="feather" />
+              <Link to="/users" className={`nav-link nav-block${["/users", "/licenses", "/usage", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
+                <Users className="feather" />
                 <span className="nav-link-text">Users</span>
               </Link>
             </li>}
           {(roles && roles.find(role => role === "admin") !== undefined) &&
             <li className="nav-item">
-              <Link to="/cleanup" className={`nav-link${pathname === "/cleanup" ? " active" : ""}`}>
+              <Link to="/cleanup" className={`nav-link nav-block${pathname === "/cleanup" ? " active" : ""}`}>
                 <Archive className="feather" />
                 <span className="nav-link-text">Cleanup</span>
               </Link>
