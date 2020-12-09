@@ -8,9 +8,34 @@ import axios from "axios";
 import { getResponseError } from "./util";
 
 
-const EngineLicUpdateButton = props => {
+const LicUpdateButton = props => {
+    const { type } = props;
     const [{ server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
+    const settings = {}
+    let path;
+    let b64enc;
+    if (type === "engine") {
+        path = "engine";
+        settings.title = "Update Engine license";
+        settings.desc = "Engine license";
+        settings.id = "engineLicense";
+        settings.rows = 4;
+        settings.fontSize = "10pt";
+        settings.buttonLabel = "Update Engine license";
+        settings.successMsg = "Engine license successfully updated!";
+        b64enc = false;
+    } else {
+        path = "system-wide";
+        settings.title = "Update system-wide GAMS license";
+        settings.desc = "System-wide GAMS license";
+        settings.id = "systemLicense";
+        settings.rows = 6;
+        settings.fontSize = "8pt";
+        settings.buttonLabel = "Update GAMS license";
+        settings.successMsg = "GAMS license successfully updated!";
+        b64enc = true;
+    }
 
     const [showDialog, setShowDialog] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,61 +46,79 @@ const EngineLicUpdateButton = props => {
         if (showDialog) {
             setIsSubmitting(true);
             setSubmissionErrorMsg("");
-            axios.get(`${server}/licenses/engine`)
+            axios.get(`${server}/licenses/${path}`)
                 .then(res => {
                     if (res.status !== 200) {
                         setIsSubmitting(false);
-                        setSubmissionErrorMsg("An unexpected error occurred while fetching Engine license. Please try again later.");
+                        setSubmissionErrorMsg("An unexpected error occurred while fetching license. Please try again later.");
                         return;
                     }
-                    const liceMultiLine = [];
-                    while (liceMultiLine.length * 52 < res.data.license.length) {
-                        liceMultiLine.push(res.data.license.substring(liceMultiLine.length * 52,
-                            liceMultiLine.length * 52 + 52));
+                    let licFormatted = "";
+                    if (res.data.license) {
+                        if (b64enc) {
+                            licFormatted = res.data.license.trim();
+                        } else {
+                            const liceMultiLine = [];
+
+                            while (liceMultiLine.length * 52 < res.data.license.length) {
+                                liceMultiLine.push(res.data.license.substring(liceMultiLine.length * 52,
+                                    liceMultiLine.length * 52 + 52));
+                            }
+                            licFormatted = liceMultiLine.join('\n')
+                        }
                     }
                     setIsSubmitting(false);
-                    setEngineLicense(liceMultiLine.join('\n'));
+                    setEngineLicense(licFormatted);
                 })
                 .catch(err => {
                     setIsSubmitting(false);
-                    setSubmissionErrorMsg(`An error occurred while fetching Engine license. Error message: ${getResponseError(err)}.`);
+                    setSubmissionErrorMsg(`An error occurred while fetching license. Error message: ${getResponseError(err)}.`);
                 });
         }
-    }, [server, showDialog])
+    }, [server, path, b64enc, showDialog])
 
     const updateLicense = async () => {
         setIsSubmitting(true);
         setSubmissionErrorMsg("");
-        const licenseTrimmed = engineLicense.replace(/\s/g, '');
-        if (licenseTrimmed === "") {
-            setSubmissionErrorMsg("Cannot submit empty Engine license");
-            setIsSubmitting(false);
-            return;
-        }
         const licenseUpdateForm = new FormData();
-        licenseUpdateForm.append("license", licenseTrimmed);
+        if (b64enc) {
+            const licenseB64 = btoa(engineLicense.trim());
+            if (licenseB64 === "") {
+                setSubmissionErrorMsg("Cannot submit empty GAMS license");
+                setIsSubmitting(false);
+                return;
+            }
+            licenseUpdateForm.append("license", licenseB64);
+        } else {
+            const licenseTrimmed = engineLicense.replace(/\s/g, '');
+            if (licenseTrimmed === "") {
+                setSubmissionErrorMsg("Cannot submit empty Engine license");
+                setIsSubmitting(false);
+                return;
+            }
+            licenseUpdateForm.append("license", licenseTrimmed);
+        }
         try {
-            const res = await axios.put(`${server}/licenses/engine`, licenseUpdateForm);
+            const res = await axios.put(`${server}/licenses/${path}`, licenseUpdateForm);
             if (res.status !== 200) {
-                setSubmissionErrorMsg("An unexpected error occurred while updating Engine license. Please try again later.");
+                setSubmissionErrorMsg("An unexpected error occurred while updating license. Please try again later.");
                 setIsSubmitting(false);
                 return;
             }
         }
         catch (err) {
-            setSubmissionErrorMsg(`An error occurred while updating Engine license. Error message: ${getResponseError(err)}.`);
+            setSubmissionErrorMsg(`An error occurred while updating license. Error message: ${getResponseError(err)}.`);
             setIsSubmitting(false);
             return;
         }
         setIsSubmitting(false);
         setShowDialog(false);
-        setAlertMsg("success:Engine license successfully updated!");
+        setAlertMsg(`success:${settings.successMsg}`);
     }
-
     return (
         <>
             <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowDialog(true)}>
-                Update Engine license
+                {settings.buttonLabel}
             </button>
             <Modal show={showDialog} onHide={() => setShowDialog(false)}>
                 <form
@@ -86,7 +129,7 @@ const EngineLicUpdateButton = props => {
                     }}
                 >
                     <Modal.Header closeButton>
-                        <Modal.Title>Update Engine license</Modal.Title>
+                        <Modal.Title>{settings.title}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
@@ -94,15 +137,15 @@ const EngineLicUpdateButton = props => {
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
-                                <label htmlFor="engineLicense">
-                                    Engine license
+                                <label htmlFor={settings.id}>
+                                    {settings.desc}
                                 </label>
                                 <textarea
-                                    id="engineLicense"
-                                    rows="4"
-                                    cols="52"
-                                    className="form-control monospace no-resize"
-                                    style={{ fontSize: "10pt" }}
+                                    id={settings.id}
+                                    rows={settings.rows}
+                                    cols={52}
+                                    className="form-control monospace no-resize monospace"
+                                    style={{ fontSize: settings.fontSize }}
                                     value={engineLicense}
                                     onChange={e => setEngineLicense(e.target.value)} >
                                 </textarea>
@@ -123,4 +166,4 @@ const EngineLicUpdateButton = props => {
     );
 };
 
-export default EngineLicUpdateButton;
+export default LicUpdateButton;
