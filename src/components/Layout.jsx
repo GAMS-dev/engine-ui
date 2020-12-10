@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import axios from "axios";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { AuthContext } from "../AuthContext";
@@ -18,10 +19,12 @@ import { Switch, Route, useHistory } from "react-router-dom";
 import Cleanup from "./Cleanup";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import Usage from "./Usage";
+import { getResponseError } from "./util";
 
 const Layout = () => {
-  const [{ roles }] = useContext(AuthContext);
+  const [{ server, roles }] = useContext(AuthContext);
   const alertHook = useState("");
+  const [licenseExpiration, setLicenseExpiration] = useState(null);
   const history = useHistory();
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
 
@@ -31,11 +34,25 @@ const Layout = () => {
   const logOutUser = () => {
     history.push("/logout");
   }
+  useEffect(() => {
+    if (roles.includes("admin")) {
+      axios
+        .get(
+          `${server}/licenses/engine`,
+        )
+        .then(res => {
+          setLicenseExpiration(res.data.expiration_date);
+        })
+        .catch(err => {
+          console.error(getResponseError(err));
+        });
+    }
+  }, [server, roles])
 
   return (
     <React.Fragment>
       <AlertContext.Provider value={alertHook}>
-        <Header />
+        <Header isAdmin={roles.includes("admin")} licenseExpiration={licenseExpiration} />
         <div className="container-fluid">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
