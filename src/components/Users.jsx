@@ -14,7 +14,8 @@ import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
 import LicUpdateButton from "./LicenseUpdateButton";
 
-const Users = () => {
+const Users = props => {
+  const { setLicenseExpiration } = props;
   const history = useHistory();
 
   const [users, setUsers] = useState([]);
@@ -166,7 +167,7 @@ const Users = () => {
         <h1 className="h2">Users</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group mr-2">
-            <LicUpdateButton type="engine" />
+            <LicUpdateButton type="engine" setLicenseExpiration={setLicenseExpiration} />
             <LicUpdateButton type="system" />
             <Link to="/new-user">
               <button type="button" className="btn btn-sm btn-outline-primary">

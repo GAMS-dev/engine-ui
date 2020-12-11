@@ -9,7 +9,7 @@ import { getResponseError } from "./util";
 
 
 const LicUpdateButton = props => {
-    const { type } = props;
+    const { type, setLicenseExpiration } = props;
     const [{ server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
     const settings = {}
@@ -77,6 +77,21 @@ const LicUpdateButton = props => {
         }
     }, [server, path, b64enc, showDialog])
 
+    const refreshExpirationDate = async () => {
+        console.log('aaa')
+        if (type !== "engine") {
+            return;
+        }
+        try {
+            const res = await axios.get(`${server}/licenses/engine`);
+            console.log(res.data.expiration_date)
+            setLicenseExpiration(res.data.expiration_date);
+        }
+        catch (err) {
+            console.error(getResponseError(err));
+        }
+    }
+
     const updateLicense = async () => {
         setIsSubmitting(true);
         setSubmissionErrorMsg("");
@@ -104,6 +119,9 @@ const LicUpdateButton = props => {
                 setSubmissionErrorMsg("An unexpected error occurred while updating license. Please try again later.");
                 setIsSubmitting(false);
                 return;
+            }
+            if (type === "engine") {
+                refreshExpirationDate();
             }
         }
         catch (err) {

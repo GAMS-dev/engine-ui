@@ -58,12 +58,12 @@ const LoginForm = props => {
             }
           )
           .then(res => {
+            setIsSubmitting(false);
             if (res.status === 200 && res.data.length === 1) {
               setLogin({ jwt, server, roles: res.data[0].roles, username: username });
             } else {
               setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
             }
-            setIsSubmitting(false);
           })
           .catch(err => {
             setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");

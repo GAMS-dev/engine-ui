@@ -10,7 +10,7 @@ const Header = props => {
     if (isAdmin) {
       if (licenseExpiration) {
         setExpiresIn(Math.ceil((Date.parse(licenseExpiration) - new Date()) / (1000 * 60 * 60 * 24)));
-      } else if (typeof licenseExpiration === 'undefined') {
+      } else if (licenseExpiration === null) {
         setExpiresIn(null);
       }
     }

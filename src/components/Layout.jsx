@@ -81,7 +81,7 @@ const Layout = () => {
                 </Route>
                 {(roles && roles.length > 0) &&
                   <Route exact path="/users">
-                    <Users />
+                    <Users setLicenseExpiration={setLicenseExpiration} />
                   </Route>
                 }
                 {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
