@@ -13,3 +13,5 @@ FROM nginx:latest
 COPY --from=builder /app/build /usr/share/nginx/engine
 COPY boot.sh /docker-entrypoint.d/30-fix-ui-vars.sh
 RUN chmod +x /docker-entrypoint.d/30-fix-ui-vars.sh
+COPY engine.conf /etc/nginx/templates/default.conf.template
+COPY engine-ssl.conf /etc/nginx/templates/default.conf.template-secure
