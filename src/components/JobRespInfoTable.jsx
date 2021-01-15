@@ -85,7 +85,7 @@ const JobRespInfoTable = props => {
                   <th>Terminate job</th>
                   <td>
                     <TerminateJobButton
-                      token={job.token}
+                      token={isHcJob ? `hc:${job.token}` : job.token}
                       setRefresh={setRefreshJob}
                       server={server}
                       status={job.status} />
