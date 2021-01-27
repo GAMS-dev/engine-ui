@@ -20,7 +20,6 @@ const LicUpdateButton = props => {
         settings.title = "Update Engine license";
         settings.desc = "Engine license";
         settings.id = "engineLicense";
-        settings.rows = 4;
         settings.fontSize = "10pt";
         settings.buttonLabel = "Update Engine license";
         settings.successMsg = "Engine license successfully updated!";
@@ -30,7 +29,6 @@ const LicUpdateButton = props => {
         settings.title = "Update system-wide GAMS license";
         settings.desc = "System-wide GAMS license";
         settings.id = "systemLicense";
-        settings.rows = 6;
         settings.fontSize = "8pt";
         settings.buttonLabel = "Update GAMS license";
         settings.successMsg = "GAMS license successfully updated!";
@@ -78,7 +76,6 @@ const LicUpdateButton = props => {
     }, [server, path, b64enc, showDialog])
 
     const refreshExpirationDate = async () => {
-        console.log('aaa')
         if (type !== "engine") {
             return;
         }
@@ -105,7 +102,7 @@ const LicUpdateButton = props => {
             }
             licenseUpdateForm.append("license", licenseB64);
         } else {
-            const licenseTrimmed = engineLicense.replace(/\s/g, '');
+            const licenseTrimmed = engineLicense.replace(/\r?\n|\r/g, '');
             if (licenseTrimmed === "") {
                 setSubmissionErrorMsg("Cannot submit empty Engine license");
                 setIsSubmitting(false);
@@ -160,7 +157,7 @@ const LicUpdateButton = props => {
                                 </label>
                                 <textarea
                                     id={settings.id}
-                                    rows={settings.rows}
+                                    rows={6}
                                     cols={52}
                                     className="form-control monospace no-resize monospace"
                                     style={{ fontSize: settings.fontSize }}
