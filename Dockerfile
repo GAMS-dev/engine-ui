@@ -1,7 +1,8 @@
-FROM node:alpine AS builder
+FROM node:15.7.0-alpine AS builder
 WORKDIR /app
 RUN npm install react-scripts -g --silent
 COPY package*.json ./
+RUN apk add g++ make python
 RUN npm install
 COPY . .
 RUN npm run build-css
