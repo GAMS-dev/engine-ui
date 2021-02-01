@@ -123,7 +123,19 @@ const Cleanup = () => {
     const updateDeleteDataThreshold = e => {
         setDeleteDataThreshold(e.target.value);
     }
-    const deleteData = () => {
+    const getTokensToDelete = async (daysThresholdTmp, deletedUsersOnly) => {
+        let results_to_remove = await axios.get(`${server}/cleanup/results`, {
+            params: {
+                to_datetime: moment().subtract(daysThresholdTmp, 'days').toISOString()
+            }
+        });
+        results_to_remove = results_to_remove.data.results;
+        if (deletedUsersOnly) {
+            results_to_remove = results_to_remove.filter(el => (el.user.deleted === true));
+        }
+        return results_to_remove.map(el => ({ token: el.token, type: el.type }));
+    }
+    const deleteData = async () => {
         setIsSubmitting(true);
         let tokensToRemove;
         if (showHousekeepingDialog) {
@@ -132,10 +144,13 @@ const Cleanup = () => {
                 setSubmissionErrorMsg("The number of days you entered is not a valid integer!");
                 return;
             }
-            tokensToRemove = datasets
-                .filter(el => (el.user.deleted === deletedUsersOnly &&
-                    moment().diff(moment.utc(el.upload_date), 'days') >= daysThresholdTmp))
-                .map(el => ({ token: el.token, type: el.type }));
+            try {
+                tokensToRemove = await getTokensToDelete(daysThresholdTmp, deletedUsersOnly);
+            } catch (err) {
+                setSubmissionErrorMsg(`Problems deleting dataset. Error message: ${getResponseError(err)}`);
+                setIsSubmitting(false);
+                return;
+            }
         } else {
             tokensToRemove = dataToRemove;
 
@@ -276,6 +291,9 @@ const Cleanup = () => {
                     <Modal.Title>Please Confirm</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                        {submissionErrorMsg}
+                    </div>
                     Are you sure you want to delete this data? This cannot be undone!
             </Modal.Body>
                 <Modal.Footer>
