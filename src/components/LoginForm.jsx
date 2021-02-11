@@ -11,7 +11,9 @@ const LoginForm = props => {
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState(false);
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [server, setServer] = useState(SERVER_NAME);
   const [invitationCode, setInvitationCode] = useState("");
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
@@ -23,6 +25,7 @@ const LoginForm = props => {
   function clearRegisterErrors() {
     setUsernameError(false);
     setPasswordError(false);
+    setConfirmPasswordError(false);
   }
 
 
@@ -81,6 +84,10 @@ const LoginForm = props => {
   }
   function handleRegistration() {
     clearRegisterErrors();
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("The password does not match.");
+      return;
+    }
     setIsSubmitting(true);
     axios
       .post(
@@ -115,22 +122,6 @@ const LoginForm = props => {
           }
         }
       });
-  }
-
-  function updateUsername(e) {
-    setUsername(e.target.value);
-  }
-
-  function updatePassword(e) {
-    setPassword(e.target.value);
-  }
-
-  function updateServer(e) {
-    setServer(e.target.value);
-  }
-
-  function updateInvitationCode(e) {
-    setInvitationCode(e.target.value);
   }
 
   return (
@@ -169,14 +160,14 @@ const LoginForm = props => {
                 placeholder="Server"
                 autoComplete="on"
                 value={server}
-                onChange={updateServer}
+                onChange={e => setServer(e.target.value)}
                 required
               />
             </div>
           }
           {register && <div className="form-group">
             <label htmlFor="inputInvitationCode" className="sr-only">
-              Invitation code
+              Invitation Code
             </label>
             <input
               type="text"
@@ -184,7 +175,7 @@ const LoginForm = props => {
               id="inputInvitationCode"
               placeholder="Invitation code"
               value={invitationCode}
-              onChange={updateInvitationCode}
+              onChange={e => setInvitationCode(e.target.value)}
               required
             />
           </div>}
@@ -200,7 +191,7 @@ const LoginForm = props => {
               autoComplete="username"
               name="username"
               value={username}
-              onChange={updateUsername}
+              onChange={e => setUsername(e.target.value)}
               required
             />
             <div className="invalid-feedback"> {usernameError} </div>
@@ -217,11 +208,28 @@ const LoginForm = props => {
               autoComplete="current-password"
               name="password"
               value={password}
-              onChange={updatePassword}
+              onChange={e => setPassword(e.target.value)}
               required
             />
             <div className="invalid-feedback"> {passwordError} </div>
           </div>
+          {register && <div className="form-group">
+            <label htmlFor="confirmPassword" className="sr-only">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              className={"form-control" + (confirmPasswordError ? " is-invalid" : "")}
+              id="confirmPassword"
+              placeholder="Confirm Password"
+              autoComplete="current-password"
+              name="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              required
+            />
+            <div className="invalid-feedback"> {confirmPasswordError} </div>
+          </div>}
         </fieldset>
         <SubmitButton isSubmitting={isSubmitting}>
           {register ? "Register" : "Login"}
