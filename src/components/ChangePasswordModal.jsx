@@ -78,7 +78,7 @@ const ChangePasswordModal = props => {
                                 type="password"
                                 className="form-control"
                                 id="newPassword"
-                                placeholder="New password"
+                                placeholder="New Password"
                                 value={newPassword}
                                 onChange={updateNewPassword}
                                 required
