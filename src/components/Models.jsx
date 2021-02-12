@@ -16,6 +16,7 @@ const Models = () => {
   const [, setAlertMsg] = useContext(AlertContext);
 
   const [refresh, setRefresh] = useState(0);
+  const [refreshModels, setRefreshModels] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [models, setModels] = useState([]);
   const [namespace, setNamespace] = useState({ name: "", permission: 0 });
@@ -97,7 +98,7 @@ const Models = () => {
                 id={id}
                 namespace={namespace}
                 server={server}
-                setRefresh={setRefresh} />
+                setRefresh={setRefreshModels} />
             )
           }];
           setDisplayFields(newDisplayFields);
@@ -110,7 +111,7 @@ const Models = () => {
     } else {
       setIsLoading(false);
     }
-  }, [server, namespace, setAlertMsg]);
+  }, [server, namespace, refreshModels, setAlertMsg]);
 
   const updateNamespace = e => {
     if (e.target.dataset.ns) {
