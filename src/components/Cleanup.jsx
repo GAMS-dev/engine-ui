@@ -115,9 +115,11 @@ const Cleanup = () => {
     }, [jwt, server, roles, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
 
     const handleCloseDeleteConfirmDialog = () => {
+        setSubmissionErrorMsg("");
         setShowDeleteConfirmDialog(false);
     }
     const handleCloseHousekeepingDialog = () => {
+        setSubmissionErrorMsg("");
         setShowHousekeepingDialog(false);
     }
     const updateDeleteDataThreshold = e => {
@@ -137,6 +139,7 @@ const Cleanup = () => {
     }
     const deleteData = async () => {
         setIsSubmitting(true);
+        setSubmissionErrorMsg("");
         let tokensToRemove;
         if (showHousekeepingDialog) {
             const daysThresholdTmp = parseInt(deleteDataThreshold, 10);
@@ -176,7 +179,6 @@ const Cleanup = () => {
                 setRefresh(refreshCnt => ({
                     refresh: refreshCnt + 1
                 }));
-                setSubmissionErrorMsg("");
                 setIsSubmitting(false);
 
                 if (showDeleteConfirmDialog) {
