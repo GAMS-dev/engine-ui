@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from "react";
-import { RefreshCw, Send, Layers, ArrowDown, ArrowUp } from "react-feather";
+import { RefreshCw, Send, Layers, ArrowDown, ArrowUp, ToggleLeft, ToggleRight } from "react-feather";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { Link } from "react-router-dom";
@@ -17,6 +17,7 @@ const Jobs = () => {
   const [jobPageInformation, setJobPageInformation] = useState(null);
   const [hypercubePageInformation, setHypercubePageInformation] = useState(null);
   const [view, setView] = useState(null);
+  const [filterActive, setFilterActive] = useState(false);
   const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,7 +113,7 @@ const Jobs = () => {
     setIsLoading(true);
     axios
       .get(server + `/jobs/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
+        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc, show_only_active: filterActive },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
       })
       .then(res => {
@@ -137,7 +138,7 @@ const Jobs = () => {
 
     axios
       .get(server + `/hypercube/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
+        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc, show_only_active: filterActive },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, status, job_count" }
       })
       .then(resHc => {
@@ -159,7 +160,7 @@ const Jobs = () => {
         setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
         setIsLoading(false);
       });
-  }, [jwt, server, roles, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
+  }, [jwt, server, roles, filterActive, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
 
   //fetch status codes
   useEffect(() => {
@@ -264,7 +265,7 @@ const Jobs = () => {
           .get(server + `/jobs/`, {
             params: {
               everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
-              order_by: sortedCol, order_asc: sortAsc, page: 1
+              order_by: sortedCol, order_asc: sortAsc, page: 1, show_only_active: filterActive
             },
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
           })
@@ -287,7 +288,7 @@ const Jobs = () => {
           .get(server + `/hypercube/`, {
             params: {
               everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
-              order_by: sortedCol, order_asc: sortAsc, page: 1
+              order_by: sortedCol, order_asc: sortAsc, page: 1, show_only_active: filterActive
             },
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, status, job_count" }
           })
@@ -307,7 +308,7 @@ const Jobs = () => {
           });
       }
     }
-  }, [currentPage, view, hypercubePageInformation, jobPageInformation, needMore, displayFields, roles, server, setAlertMsg, sortAsc, sortedCol])
+  }, [currentPage, view, hypercubePageInformation, jobPageInformation, needMore, filterActive, displayFields, roles, server, setAlertMsg, sortAsc, sortedCol])
 
   return (
     <div>
@@ -327,6 +328,25 @@ const Jobs = () => {
                 <Layers width="12px" className="ml-2" />
               </button>
             </Link>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary"
+              onClick={() => {
+                setFilterActive(currFilterActive => !currFilterActive)
+              }}
+            >
+              {filterActive ?
+                <ToggleRight size={18} style={{ marginTop: "2px" }} />
+                :
+                <ToggleLeft size={18} style={{ marginTop: "2px" }} />
+              }
+              &nbsp;
+              <span className="flex-grow-1">
+                {filterActive
+                  ? "Show all"
+                  : "Show active"}
+              </span>
+            </button>
             <button
               type="button"
               className="btn btn-sm btn-outline-secondary"
