@@ -23,6 +23,9 @@ const Jobs = () => {
   const [sortAsc, setSortAsc] = useState(false);
   const [sortedCol, setSortedCol] = useState("submitted_at");
   const [needMore, setNeedMore] = useState(null);
+
+  const isInviter = roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined;
+
   const displayFieldsDefault = [
     {
       field: "model,token",
@@ -59,7 +62,7 @@ const Jobs = () => {
         setRefresh={setRefresh} />
     }
   ];
-  const [displayFields, setDisplayFields] = useState(roles.find(role => role === "admin") !== undefined ?
+  const [displayFields, setDisplayFields] = useState(isInviter ?
     [{
       field: "user",
       column: "Username",
@@ -112,7 +115,7 @@ const Jobs = () => {
     setIsLoading(true);
     axios
       .get(server + `/jobs/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
+        params: { everyone: isInviter, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
       })
       .then(res => {
@@ -137,7 +140,7 @@ const Jobs = () => {
 
     axios
       .get(server + `/hypercube/`, {
-        params: { everyone: roles.find(role => role === "admin") !== undefined, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
+        params: { everyone: isInviter, per_page: rowsPerPage * 10, order_by: sortedCol, order_asc: sortAsc },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, status, job_count" }
       })
       .then(resHc => {
@@ -159,7 +162,7 @@ const Jobs = () => {
         setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
         setIsLoading(false);
       });
-  }, [jwt, server, roles, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
+  }, [jwt, server, isInviter, refresh, displayFields, setAlertMsg, sortedCol, sortAsc]);
 
   //fetch status codes
   useEffect(() => {
@@ -263,7 +266,7 @@ const Jobs = () => {
         axios
           .get(server + `/jobs/`, {
             params: {
-              everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
+              everyone: isInviter, per_page: currentPage * rowsPerPage,
               order_by: sortedCol, order_asc: sortAsc, page: 1
             },
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
@@ -286,7 +289,7 @@ const Jobs = () => {
         axios
           .get(server + `/hypercube/`, {
             params: {
-              everyone: roles.find(role => role === "admin") !== undefined, per_page: currentPage * rowsPerPage,
+              everyone: isInviter, per_page: currentPage * rowsPerPage,
               order_by: sortedCol, order_asc: sortAsc, page: 1
             },
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", finished, status, job_count" }
@@ -307,7 +310,7 @@ const Jobs = () => {
           });
       }
     }
-  }, [currentPage, view, hypercubePageInformation, jobPageInformation, needMore, displayFields, roles, server, setAlertMsg, sortAsc, sortedCol])
+  }, [currentPage, view, hypercubePageInformation, jobPageInformation, needMore, displayFields, isInviter, server, setAlertMsg, sortAsc, sortedCol])
 
   return (
     <div>
