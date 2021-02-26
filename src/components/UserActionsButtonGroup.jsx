@@ -18,15 +18,14 @@ const UserActionsButtonGroup = props => {
 
   return (
     <div className="btn-group">
-      {isAdmin &&
+      {isAdmin && username !== "" &&
         <>
           <Link to={`/licenses/${username}`} className="btn btn-sm btn-outline-info">
             Update license
           </Link>
-          {username !== "" &&
-            <Link to={`/usage/${username}`} className="btn btn-sm btn-outline-info">
-              Show usage
-          </Link>}
+          <Link to={`/usage/${username}`} className="btn btn-sm btn-outline-info">
+            Show usage
+          </Link>
         </>
       }
       {username !== "admin" && (
