@@ -23,11 +23,11 @@ const Header = props => {
         {isAdmin && expiresIn !== 0 && <div className={`info-header ${expiresIn < 31 ? "text-error font-weight-bold" : "text-light"}`}>
           {expiresIn == null ? "No license" : (expiresIn < 0 ? "License expired" : `License expires in: ${expiresIn} days`)}
         </div>}
-        <Link to="/" className="navbar-brand m-auto d-none d-sm-block">
+        <Link to="/" className="navbar-brand m-auto d-none d-md-block">
           <img src={logo} className="navbar-logo" alt="GAMS Logo" />
         </Link>
       </header>
-      <ul className="nav flex-column nav-top d-block bg-light d-sm-none">
+      <ul className="nav flex-column nav-top d-block bg-light d-md-none">
         <LogOutMenu changePasswordHandler={props.changePasswordHandler} />
       </ul>
     </>
