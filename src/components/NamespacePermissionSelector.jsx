@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
 function generateDesc(name, perm) {
-    return `${name}${(perm && perm > 0)? ` (${perm & 4? 'r' : ''}${perm & 2? 'w' : ''}${perm & 1? 'x': ''})` : ''}`;
+    return `${name}${(perm && perm > 0) ? ` (${perm & 4 ? 'r' : ''}${perm & 2 ? 'w' : ''}${perm & 1 ? 'x' : ''})` : ''}`;
 }
 
 export const NamespacePermissionSelector = props => {
-    const {namespacePermissions, setNamespacePermissions} = props;
+    const { namespacePermissions, setNamespacePermissions } = props;
 
     const [nsId, setNsId] = useState(0);
     const [modifiedFlag, setModifiedFlag] = useState(false);
@@ -44,41 +44,41 @@ export const NamespacePermissionSelector = props => {
     }
     return (
         <>
-        {namespacePermissions.length > 0 &&
-            <>
-                <div className="form-group mt-3 mb-3">
-                    <label htmlFor="toggleIncludeExclude">
-                        {`Namespace${modifiedFlag? " (*)":""}`}
-                    </label>
-                    <select id="namespace" className="form-control" value={selectedNamespace} onChange={updateSelectedNamespace}>
-                        {namespacePermissions.map(ns => (
-                            <option key={ns.name} value={ns.name}>{generateDesc(ns.name, ns.perm)}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-check form-check-inline">
-                    <input className="form-check-input" type="checkbox" id="cbReadAccess" 
-                      checked={readAccess === undefined? (namespacePermissions[0].perm & 4) !== 0: readAccess} 
-                      onChange={updateReadAccess} 
-                      disabled={(namespacePermissions[nsId].maxPerm & 4) === 0}/>
-                    <label className="form-check-label" htmlFor="cbReadAccess">Read</label>
-                </div>
-                <div className="form-check form-check-inline">
-                    <input className="form-check-input" type="checkbox" id="cbWriteAccess" 
-                      checked={writeAccess === undefined? (namespacePermissions[0].perm & 2) !== 0: writeAccess} 
-                      onChange={updateWriteAccess} 
-                      disabled={(namespacePermissions[nsId].maxPerm & 2) === 0}/>
-                    <label className="form-check-label" htmlFor="cbWriteAccess">Write</label>
-                </div>
-                <div className="form-check form-check-inline">
-                    <input className="form-check-input" type="checkbox" id="cbExecuteAccess"
-                      checked={execAccess === undefined? (namespacePermissions[0].perm & 1) !== 0: execAccess} 
-                      onChange={updateExecAccess} 
-                      disabled={(namespacePermissions[nsId].maxPerm & 1) === 0}/>
-                    <label className="form-check-label" htmlFor="cbExecuteAccess">Execute</label>
-                </div>
-            </>
-        }
+            {namespacePermissions.length > 0 &&
+                <>
+                    <div className="form-group mt-3 mb-3">
+                        <label htmlFor="toggleIncludeExclude">
+                            {`Namespace${modifiedFlag ? " (*)" : ""}`}
+                        </label>
+                        <select id="namespace" className="form-control" value={selectedNamespace} onChange={updateSelectedNamespace}>
+                            {namespacePermissions.map(ns => (
+                                <option key={ns.name} value={ns.name}>{generateDesc(ns.name, ns.perm)}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="checkbox" id="cbReadAccess"
+                            checked={readAccess === undefined ? (namespacePermissions[0].perm & 4) !== 0 : readAccess}
+                            onChange={updateReadAccess}
+                            disabled={(namespacePermissions[nsId].maxPerm & 4) === 0} />
+                        <label className="form-check-label" htmlFor="cbReadAccess">Read</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="checkbox" id="cbWriteAccess"
+                            checked={writeAccess === undefined ? (namespacePermissions[0].perm & 2) !== 0 : writeAccess}
+                            onChange={updateWriteAccess}
+                            disabled={(namespacePermissions[nsId].maxPerm & 2) === 0} />
+                        <label className="form-check-label" htmlFor="cbWriteAccess">Write</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="checkbox" id="cbExecuteAccess"
+                            checked={execAccess === undefined ? (namespacePermissions[0].perm & 1) !== 0 : execAccess}
+                            onChange={updateExecAccess}
+                            disabled={(namespacePermissions[nsId].maxPerm & 1) === 0} />
+                        <label className="form-check-label" htmlFor="cbExecuteAccess">Execute</label>
+                    </div>
+                </>
+            }
         </>
     );
 };

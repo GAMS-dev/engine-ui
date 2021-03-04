@@ -341,13 +341,13 @@ const Jobs = () => {
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group mr-2">
             <Link to="/new-job">
-              <button type="button" className="btn btn-sm btn-outline-primary">
+              <button type="button" className="btn btn-sm btn-outline-primary h-100">
                 New Job
                 <Send width="12px" className="ml-2" />
               </button>
             </Link>
             <Link to="/new-hc-job">
-              <button type="button" className="btn btn-sm btn-outline-primary">
+              <button type="button" className="btn btn-sm btn-outline-primary h-100">
                 New Hypercube Job
                 <Layers width="12px" className="ml-2" />
               </button>

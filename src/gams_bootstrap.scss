@@ -85,7 +85,7 @@ body {
     width: 100%;
     position: fixed;
     z-index: 999;
-    padding: 77px 0 0;
+    padding: 17px 0 0;
     border-bottom: 1px solid #adb5bd !important;
     top:0;
   }
@@ -100,8 +100,7 @@ body {
     height: auto;
   }
   [role="main"] {
-    padding-top: 138px;
-    padding-bottom: 184px;
+    padding-bottom: 100px;
   }
   .sidebar {
     border-top: 1px solid #adb5bd !important;
@@ -184,4 +183,9 @@ body {
 
 .text-error {
   color: #f39619;
+}
+
+table {
+  font-size: 10pt;
+  white-space: nowrap;
 }

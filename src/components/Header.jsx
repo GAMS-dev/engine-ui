@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg";
+import LogOutMenu from "./LogOutMenu";
 
 const Header = props => {
   const { licenseExpiration, isAdmin } = props;
@@ -17,14 +18,19 @@ const Header = props => {
   }, [licenseExpiration, isAdmin])
 
   return (
-    <header className="navbar navbar-expand-lg navbar-dark bg-secondary border-bottom border-primary fixed-top shadow">
-      {isAdmin && expiresIn !== 0 && <div className={`info-header ${expiresIn < 31 ? "text-error font-weight-bold" : "text-light"}`}>
-        {expiresIn == null ? "No license" : (expiresIn < 0 ? "License expired" : `License expires in: ${expiresIn} days`)}
-      </div>}
-      <Link to="/" className="navbar-brand m-auto">
-        <img src={logo} className="navbar-logo" alt="GAMS Logo" />
-      </Link>
-    </header>
+    <>
+      <header className="navbar navbar-expand-lg navbar-dark bg-secondary border-bottom border-primary fixed-top shadow">
+        {isAdmin && expiresIn !== 0 && <div className={`info-header ${expiresIn < 31 ? "text-error font-weight-bold" : "text-light"}`}>
+          {expiresIn == null ? "No license" : (expiresIn < 0 ? "License expired" : `License expires in: ${expiresIn} days`)}
+        </div>}
+        <Link to="/" className="navbar-brand m-auto d-none d-sm-block">
+          <img src={logo} className="navbar-logo" alt="GAMS Logo" />
+        </Link>
+      </header>
+      <ul className="nav flex-column nav-top d-block bg-light d-sm-none">
+        <LogOutMenu changePasswordHandler={props.changePasswordHandler} />
+      </ul>
+    </>
   );
 };
 

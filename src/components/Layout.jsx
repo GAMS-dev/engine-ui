@@ -28,9 +28,6 @@ const Layout = () => {
   const history = useHistory();
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
 
-  const changePasswordHandler = () => {
-    setShowChangePasswordDialog(true);
-  }
   const logOutUser = () => {
     history.push("/logout");
   }
@@ -52,11 +49,18 @@ const Layout = () => {
   return (
     <React.Fragment>
       <AlertContext.Provider value={alertHook}>
-        <Header isAdmin={roles.includes("admin")} licenseExpiration={licenseExpiration} />
+        <Header
+          isAdmin={roles.includes("admin")}
+          licenseExpiration={licenseExpiration}
+          changePasswordHandler={() => {
+            setShowChangePasswordDialog(true);
+          }} />
         <div className="container-fluid">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
-              <Sidebar changePasswordHandler={changePasswordHandler} />
+              <Sidebar changePasswordHandler={() => {
+                setShowChangePasswordDialog(true);
+              }} />
             </div>
             <main className="col" role="main">
               <Alert />
