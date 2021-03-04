@@ -6,6 +6,7 @@ RUN apk add g++ make python
 RUN npm install
 COPY . .
 RUN npm run build-css
+ARG PUBLIC_URL=DDDDEEEEFFFF
 ARG REACT_APP_ENGINE_URL=AAAABBBBCCCC
 ARG REACT_APP_BASE_NAME=DDDDEEEEFFFF
 RUN npm run build
