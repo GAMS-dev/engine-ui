@@ -385,7 +385,7 @@ const Jobs = () => {
         </div>
       </div>
       <div className="table-responsive">
-        <table className="table">
+        <table className="table summary-table">
           <thead className="thead-dark">
             <tr>
               {displayFields.map(e => (
