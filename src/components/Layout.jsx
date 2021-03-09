@@ -77,7 +77,7 @@ const Layout = () => {
                 <Route exact path="/new-user">
                   <UserInvitationForm />
                 </Route>
-                <Route exact path="/new-model/:namespace">
+                <Route exact path="/new-model/:namespace/:updateModel?">
                   <ModelSubmissionForm />
                 </Route>
                 <Route exact path="/models">
