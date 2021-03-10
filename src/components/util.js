@@ -1,6 +1,9 @@
 import JSZip from "jszip";
 
 const getResponseError = err => {
+    if (!navigator.onLine) {
+        return "You are not connected to the internet."
+    }
     if (err.response && err.response.data && err.response.data.message) {
         return err.response.data.message
     }
