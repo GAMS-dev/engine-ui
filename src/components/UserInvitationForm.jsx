@@ -124,15 +124,15 @@ const UserInvitationForm = () => {
                     :
                     <>
                         <div className="mt-5">Your invitation code is: <code>{invitationCode}</code></div>
-                        <div>
+                        {window.isSecureContext && <div>
                             <button
                                 type="button"
                                 className="btn btn-link"
                                 onClick={() => { navigator.clipboard.writeText(invitationCode); setCopySuccessMsg("Copied!"); }}>
                                 Copy to clipboard
-                    </button>
+                            </button>
                             {copySuccessMsg}
-                        </div>
+                        </div>}
                     </>
                 )}
         </>
