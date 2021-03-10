@@ -89,14 +89,20 @@ const ModelSubmissionForm = () => {
             for (let i = 0; i < splitClArgs.length; i++) {
                 modelSubmissionForm.append("arguments", splitClArgs[i].trim());
             }
+        } else if (updateModel) {
+            modelSubmissionForm.append("delete_arguments", "true");
         }
 
         if (inexJSON !== "") {
             modelSubmissionForm.append("inex_file", new Blob([inexJSON],
                 { type: "application/json" }), "inex.json");
+        } else if (updateModel) {
+            modelSubmissionForm.append("delete_inex_file", "true");
         }
-        if (runName && runName !== `${modelName}.gms`) {
+        if (runName !== "" && runName !== `${modelName}.gms`) {
             modelSubmissionForm.append("run", runName);
+        } else if (updateModel) {
+            modelSubmissionForm.append("delete_run", "true");
         }
         Promise.all(promisesToAwait).then(() => {
             axios({
