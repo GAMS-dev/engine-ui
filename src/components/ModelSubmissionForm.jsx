@@ -214,7 +214,6 @@ const ModelSubmissionForm = () => {
                                     autoComplete="on"
                                     value={runName}
                                     onChange={e => setRunName(e.target.value)}
-                                    required
                                 />
                             </div>
                             <div className="form-group">
