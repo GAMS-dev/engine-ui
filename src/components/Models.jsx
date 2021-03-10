@@ -164,7 +164,7 @@ const Models = () => {
                 </>
               }
               {(namespace.permission && 2) === 2 &&
-                <Link to={`/new-model/${namespace.name}`}>
+                <Link to={`/models/${namespace.name}`}>
                   <button type="button" className="btn btn-sm btn-outline-primary">
                     Add Model
                     <Send width="12px" className="ml-2" />

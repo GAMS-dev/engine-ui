@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 
 export const InexJSONSelector = props => {
-    const {onChangeHandler, label} = props;
+    const { onChangeHandler, label, inexObject } = props;
 
-    const [filterResults, setFilterResults] = useState(false);
-    const [toggleIncludeExclude, setToggleIncludeExclude] = useState("include");
-    const [includeFiles, setIncludeFiles] = useState("");
-    const [excludeFiles, setExcludeFiles] = useState("");
+    const [filterResults, setFilterResults] = useState(inexObject ? true : false);
+    const [toggleIncludeExclude, setToggleIncludeExclude] = useState(inexObject ? inexObject.type : "include");
+    const [includeFiles, setIncludeFiles] = useState(inexObject && inexObject.type === "include" ? inexObject.files.join(",") : "");
+    const [excludeFiles, setExcludeFiles] = useState(inexObject && inexObject.type === "exclude" ? inexObject.files.join(",") : "");
 
     const updateFilterResults = e => {
         setFilterResults(e.target.checked);
@@ -20,7 +20,7 @@ export const InexJSONSelector = props => {
     const updateExcludeFiles = e => {
         setExcludeFiles(e.target.value);
     }
-    
+
     useEffect(() => {
         if (filterResults) {
             if (toggleIncludeExclude === "include") {
@@ -43,8 +43,8 @@ export const InexJSONSelector = props => {
         <React.Fragment>
             <div className="form-check">
                 <input type="checkbox" className="form-check-input" checked={filterResults} onChange={updateFilterResults}
-                id="filterResults"/>
-                <label className="form-check-label" htmlFor="filterResults">{label? label: "Filter results (e.g. to reduce the size of the results archive)?"}</label>
+                    id="filterResults" />
+                <label className="form-check-label" htmlFor="filterResults">{label ? label : "Filter results (e.g. to reduce the size of the results archive)?"}</label>
             </div>
             {filterResults && (
                 <React.Fragment>
@@ -57,7 +57,7 @@ export const InexJSONSelector = props => {
                             <option key="exclude" value="exclude">exclude</option>
                         </select>
                     </div>
-                    {toggleIncludeExclude === "include" ? 
+                    {toggleIncludeExclude === "include" ?
                         <div className="form-group">
                             <label htmlFor="includeFiles" className="sr-only">
                                 Files to include in results (optional, comma-separated)
@@ -74,7 +74,7 @@ export const InexJSONSelector = props => {
                         </div> :
                         <div className="form-group">
                             <label htmlFor="excludeFiles" className="sr-only">
-                            Files to exclude from results (optional, comma-separated)
+                                Files to exclude from results (optional, comma-separated)
                             </label>
                             <input
                                 type="text"

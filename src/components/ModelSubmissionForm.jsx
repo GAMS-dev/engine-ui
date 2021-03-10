@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Redirect, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
@@ -6,21 +6,52 @@ import axios from "axios";
 import { zipAsync, getResponseError } from "./util";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const ModelSubmissionForm = () => {
-    const { namespace } = useParams();
+    const { namespace, updateModel } = useParams();
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server }] = useContext(AuthContext);
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
+    const [errorMsg, setErrorMsg] = useState("")
     const [modelName, setModelName] = useState("");
     const [runName, setRunName] = useState("");
     const [modelFiles, setModelFiles] = useState();
     const [clArgs, setClArgs] = useState("");
+    const [inexObject, setInexObject] = useState("");
     const [inexJSON, setInexJSON] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const [modelAdded, setModelAdded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!updateModel) {
+            return;
+        }
+        setIsLoading(true);
+        setErrorMsg("");
+        axios.get(`${server}/namespaces/${namespace}`, {
+            params: { model: updateModel }
+        })
+            .then(res => {
+                if (res.data.length > 0) {
+                    setModelName(updateModel);
+                    setRunName(res.data[0].run ? res.data[0].run : `${updateModel}.gms`);
+                    setClArgs(res.data[0].arguments.join(","));
+                    setInexObject(res.data[0].inex);
+                    setIsLoading(false);
+                } else {
+                    setErrorMsg(`Model: ${updateModel} does not exist in namespace: ${namespace}`);
+                    setIsLoading(false);
+                }
+            })
+            .catch(err => {
+                setErrorMsg(`Problems while while retrieving model info. Error message: ${getResponseError(err)}.`);
+                setIsLoading(false);
+            });
+    }, [server, updateModel, namespace]);
 
     const handleModelSubmission = () => {
         if (modelName.toLowerCase().endsWith(".gms")) {
@@ -31,7 +62,13 @@ const ModelSubmissionForm = () => {
 
         setIsSubmitting(true);
         const modelSubmissionForm = new FormData();
-        if (modelFiles.length > 1 ||
+        if (!modelFiles || modelFiles.length === 0) {
+            if (!updateModel) {
+                setSubmissionErrorMsg("No model data provided!");
+                setIsSubmitting(false);
+                return;
+            }
+        } else if (modelFiles.length > 1 ||
             !modelFiles[0].name.toLowerCase().endsWith(".zip")) {
             // we need to zip uploaded files first
             try {
@@ -52,41 +89,53 @@ const ModelSubmissionForm = () => {
             for (let i = 0; i < splitClArgs.length; i++) {
                 modelSubmissionForm.append("arguments", splitClArgs[i].trim());
             }
+        } else if (updateModel) {
+            modelSubmissionForm.append("delete_arguments", "true");
         }
 
         if (inexJSON !== "") {
             modelSubmissionForm.append("inex_file", new Blob([inexJSON],
                 { type: "application/json" }), "inex.json");
+        } else if (updateModel) {
+            modelSubmissionForm.append("delete_inex_file", "true");
         }
-        if (runName && runName !== `${modelName}.gms`) {
+        if (runName !== "" && runName !== `${modelName}.gms`) {
             modelSubmissionForm.append("run", runName);
+        } else if (updateModel) {
+            modelSubmissionForm.append("delete_run", "true");
         }
         Promise.all(promisesToAwait).then(() => {
-            axios
-                .post(
-                    `${server}/namespaces/${namespace}/${modelName}`,
-                    modelSubmissionForm,
-                    {
-                        "Content-Type": "multipart/form-data"
-                    }
-                )
+            axios({
+                method: updateModel ? 'patch' : 'post',
+                url: `${server}/namespaces/${namespace}/${modelName}`,
+                data: modelSubmissionForm,
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            })
                 .then(res => {
-                    if (res.status !== 201) {
-                        setSubmissionErrorMsg("An error occurred while registering model. Please try again later.");
+                    let successCode;
+                    if (updateModel) {
+                        successCode = 200;
+                    } else {
+                        successCode = 201;
+                    }
+                    if (res.status !== successCode) {
+                        setSubmissionErrorMsg(`An error occurred while ${updateModel ? "updating" : "registering"} model. Please try again later.`);
                         setIsSubmitting(false);
                         return;
                     }
                     setIsSubmitting(false);
-                    setAlertMsg("success:Model successfully added!");
+                    setAlertMsg(`success:Model successfully ${updateModel ? "updated" : "added"}!`);
                     setModelAdded(true);
                 })
                 .catch(err => {
-                    setSubmissionErrorMsg(`Problems while registering model. Error message: ${getResponseError(err)}.`);
+                    setSubmissionErrorMsg(`Problems while ${updateModel ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
                     setIsSubmitting(false);
                 });
         })
             .catch(err => {
-                setSubmissionErrorMsg(`Problems while registering model. Error message: ${getResponseError(err)}.`);
+                setSubmissionErrorMsg(`Problems while ${updateModel ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
             });
     }
@@ -104,89 +153,96 @@ const ModelSubmissionForm = () => {
     return (
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">Add a model to namespace: {namespace}</h1>
+                <h1 className="h2">{updateModel ? `Update model: '${updateModel}' in namespace:` : "Add a model to namespace:"} {`'${namespace}'`}</h1>
             </div>
-            <form
-                className="m-auto"
-                onSubmit={e => {
-                    e.preventDefault();
-                    handleModelSubmission();
-                    return false;
-                }}
-            >
-                <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                    {submissionErrorMsg}
-                </div>
-                <fieldset disabled={isSubmitting}>
-                    <div className="form-group">
-                        <div className="custom-file">
-                            <input type="file" className="custom-file-input"
-                                id="modelFiles"
-                                multiple
-                                onChange={updateModelFiles}
-                                required
-                            />
-                            <label className="custom-file-label" htmlFor="modelFiles">
-                                {modelFiles ?
-                                    `${modelFiles[0].name}${modelFiles.length > 1 ? ", ..." : ""}`
-                                    : "Model files..."}
-                            </label>
+            {errorMsg ?
+                <div className="invalid-feedback text-center" style={{ display: "block" }}>
+                    {errorMsg}
+                </div> :
+                (isLoading ? <ClipLoader /> :
+                    <form
+                        className="m-auto"
+                        onSubmit={e => {
+                            e.preventDefault();
+                            handleModelSubmission();
+                            return false;
+                        }}
+                    >
+                        <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                            {submissionErrorMsg}
                         </div>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="modelName" className="sr-only">
-                            Model name
-                        </label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="modelName"
-                            placeholder="Identifier for the model"
-                            autoComplete="on"
-                            value={modelName}
-                            onChange={e => setModelName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="runName" className="sr-only">
-                            Name of the main file
-                        </label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="runName"
-                            placeholder="Name of the main file"
-                            autoComplete="on"
-                            value={runName}
-                            onChange={e => setRunName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="clArgs" className="sr-only">
-                            Command line arguments (comma-separated)
-                        </label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="clArgs"
-                            placeholder="Command line arguments (comma-separated, optional)"
-                            autoComplete="on"
-                            value={clArgs}
-                            onChange={e => setClArgs(e.target.value)}
-                        />
-                    </div>
-                    <InexJSONSelector label="Filter results (e.g. to reduce the size of the results archive or to restrict users from seeing certain files)?"
-                        onChangeHandler={e => setInexJSON(e)} />
-                </fieldset>
-                <div className="mt-3">
-                    <SubmitButton isSubmitting={isSubmitting}>
-                        Add model
-                </SubmitButton>
-                </div>
-                {modelAdded && <Redirect to="/models" />}
-            </form>
+                        <fieldset disabled={isSubmitting}>
+                            <div className="form-group">
+                                <div className="custom-file">
+                                    <input type="file" className="custom-file-input"
+                                        id="modelFiles"
+                                        multiple
+                                        onChange={updateModelFiles}
+                                        required={!updateModel}
+                                    />
+                                    <label className="custom-file-label" htmlFor="modelFiles">
+                                        {modelFiles ?
+                                            `${modelFiles[0].name}${modelFiles.length > 1 ? ", ..." : ""}`
+                                            : updateModel ? "Update model files..." : "Model files..."}
+                                    </label>
+                                </div>
+                            </div>
+                            {!updateModel && <div className="form-group">
+                                <label htmlFor="modelName" className="sr-only">
+                                    Model name
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="modelName"
+                                    placeholder="Identifier for the model"
+                                    autoComplete="on"
+                                    value={modelName}
+                                    onChange={e => setModelName(e.target.value)}
+                                    required
+                                />
+                            </div>}
+                            <div className="form-group">
+                                <label htmlFor="runName" className="sr-only">
+                                    Name of the main file
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="runName"
+                                    placeholder="Name of the main file"
+                                    autoComplete="on"
+                                    value={runName}
+                                    onChange={e => setRunName(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="clArgs" className="sr-only">
+                                    Command line arguments (comma-separated)
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="clArgs"
+                                    placeholder="Command line arguments (comma-separated, optional)"
+                                    autoComplete="on"
+                                    value={clArgs}
+                                    onChange={e => setClArgs(e.target.value)}
+                                />
+                            </div>
+                            <InexJSONSelector
+                                label="Filter results (e.g. to reduce the size of the results archive or to restrict users from seeing certain files)?"
+                                inexObject={inexObject}
+                                onChangeHandler={e => setInexJSON(e)} />
+                        </fieldset>
+                        <div className="mt-3">
+                            <SubmitButton isSubmitting={isSubmitting}>
+                                {updateModel ? "Update model" : "Add model"}
+                            </SubmitButton>
+                        </div>
+                        {modelAdded && <Redirect to="/models" />}
+                    </form>
+                )}
         </div>
     );
 }

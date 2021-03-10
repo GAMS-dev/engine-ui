@@ -11,7 +11,8 @@ then
     export BASE_URL=/
 fi
 
-ENGINE_URL_ESCAPED=$(echo ${ENGINE_URL} | sed -e 's/[&/\]/\\&/g')
-BASE_URL_ESCAPED=$(echo ${BASE_URL} | sed -e 's/[&/\]/\\&/g')
-grep -lr "AAAABBBBCCCC" /usr/share/nginx/engine | xargs sed -i "s/AAAABBBBCCCC/${ENGINE_URL_ESCAPED}/g"
-grep -lr "DDDDEEEEFFFF" /usr/share/nginx/engine | xargs sed -i "s/DDDDEEEEFFFF/${BASE_URL_ESCAPED}/g"
+BASE_URL_STRIPPED=$(echo ${BASE_URL} | sed -e 's@/$@@g')
+find /usr/share/nginx/engine -type f -name 'main*.chunk.js*' | xargs sed -i "s@AAAABBBBCCCC@${ENGINE_URL}@g"
+find /usr/share/nginx/engine -type f -name 'main*.chunk.js*' | xargs sed -i "s@DDDDEEEEFFFF@${BASE_URL}@g"
+grep -lr "GGGGHHHHIIIIJJJJ" /usr/share/nginx/engine | xargs -r sed -i "s@GGGGHHHHIIIIJJJJ@${BASE_URL_STRIPPED}@g"
+
