@@ -12,7 +12,7 @@ const SidebarRaw = props => {
     <nav className="sidebar bg-light">
       <div className="sidebar-sticky">
         <ul className="nav flex-column nav-top d-md-block bg-light d-none">
-          <LogOutMenu changePasswordHandler={props.changePasswordHandler} />
+          <LogOutMenu />
         </ul>
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">

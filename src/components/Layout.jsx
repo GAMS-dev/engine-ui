@@ -9,13 +9,13 @@ import JobSubmissionForm from "./JobSubmissionForm";
 import ModelSubmissionForm from "./ModelSubmissionForm";
 import UserInvitationForm from "./UserInvitationForm";
 import UserUpdateForm from "./UserUpdateForm";
-import ChangePasswordModal from "./ChangePasswordModal";
+import UserChangePassForm from "./UserChangePassForm";
 import Job from "./Job";
 import Models from "./Models";
 import Users from "./Users";
 import { AlertContext, Alert } from "./Alert";
 
-import { Switch, Route, useHistory } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import Cleanup from "./Cleanup";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import Usage from "./Usage";
@@ -25,12 +25,7 @@ const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
   const alertHook = useState("");
   const [licenseExpiration, setLicenseExpiration] = useState(null);
-  const history = useHistory();
-  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
 
-  const logOutUser = () => {
-    history.push("/logout");
-  }
   useEffect(() => {
     if (roles.includes("admin")) {
       axios
@@ -51,16 +46,11 @@ const Layout = () => {
       <AlertContext.Provider value={alertHook}>
         <Header
           isAdmin={roles.includes("admin")}
-          licenseExpiration={licenseExpiration}
-          changePasswordHandler={() => {
-            setShowChangePasswordDialog(true);
-          }} />
+          licenseExpiration={licenseExpiration} />
         <div className="container-fluid">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
-              <Sidebar changePasswordHandler={() => {
-                setShowChangePasswordDialog(true);
-              }} />
+              <Sidebar />
             </div>
             <main className="col" role="main">
               <Alert />
@@ -93,6 +83,9 @@ const Layout = () => {
                     <UserUpdateForm />
                   </Route>
                 }
+                <Route exact path="/users/:user/change-pass">
+                  <UserChangePassForm />
+                </Route>
                 {(roles && roles.includes('admin') !== undefined) &&
                   <Route exact path="/licenses/:username">
                     <LicenseUpdateForm />
@@ -112,10 +105,6 @@ const Layout = () => {
                   <Jobs />
                 </Route>
               </Switch>
-              <ChangePasswordModal
-                showDialog={showChangePasswordDialog}
-                setShowDialog={setShowChangePasswordDialog}
-                handleSuccess={logOutUser} />
             </main>
           </div>
         </div>

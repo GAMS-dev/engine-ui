@@ -20,6 +20,7 @@ const UserActionsButtonGroup = props => {
     <div className="btn-group">
       {isAdmin && username !== "" &&
         <>
+          <Link to={`/users/${username}/change-pass`} className="btn btn-sm btn-outline-info">Change password</Link>
           <Link to={`/licenses/${username}`} className="btn btn-sm btn-outline-info">
             Update license
           </Link>

@@ -28,7 +28,7 @@ const Header = props => {
         </Link>
       </header>
       <ul className="nav flex-column nav-top d-block bg-light d-md-none">
-        <LogOutMenu changePasswordHandler={props.changePasswordHandler} />
+        <LogOutMenu />
       </ul>
     </>
   );

@@ -16,12 +16,10 @@ export const LogOutMenu = props => {
                     <LogOut className="feather" />
                     Sign Out
                 </Link>
-                <button
-                    type="button"
-                    className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button"
-                    onClick={props.changePasswordHandler}>
+                <Link to={`/users/${username}/change-pass`}
+                    className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button">
                     Change password
-                </button>
+                </Link>
             </li>
         </>
     );
