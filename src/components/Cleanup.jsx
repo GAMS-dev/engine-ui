@@ -35,7 +35,6 @@ const Cleanup = () => {
         {
             field: "token,type",
             column: "Job token",
-            sorter: "alphabetical",
             displayer: (name, type) => <>
                 {name}{type === "hypercube_result" &&
                     <sup>
