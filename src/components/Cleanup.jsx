@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import { RefreshCw, Send } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -36,10 +37,11 @@ const Cleanup = () => {
             field: "token,type",
             column: "Job token",
             displayer: (name, type) => <>
-                {name}{type === "hypercube_result" &&
+                {type === "hypercube_result" ? <Link to={`/jobs/hc:${name}`}>{name}
                     <sup>
                         <span className="badge badge-pill badge-primary ml-1">HC</span>
-                    </sup>}
+                    </sup></Link> :
+                    <Link to={`/jobs/${name}`}>{name}</Link>}
             </>
         },
         {
