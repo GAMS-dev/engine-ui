@@ -20,7 +20,12 @@ const JobReqInfoTable = props => {
         <tr>
           <th>Token</th>
           <td>
-            <small>{job.token}</small>
+            <small>
+              {job.token}
+              {isHcJob && <sup>
+                <span className="badge badge-pill badge-primary ml-1">HC</span>
+              </sup>}
+            </small>
           </td>
         </tr>
         <tr>
@@ -57,13 +62,13 @@ const JobReqInfoTable = props => {
                 </span>
               </span>
             ) : (
-                <DownloadLink
-                  url={`${server}/namespaces/${job.namespace}/${job.model}`}
-                  filename={`${job.model}.zip`}
-                  className="badge badge-secondary">
-                  {job.model}
-                </DownloadLink>
-              )}
+              <DownloadLink
+                url={`${server}/namespaces/${job.namespace}/${job.model}`}
+                filename={`${job.model}.zip`}
+                className="badge badge-secondary">
+                {job.model}
+              </DownloadLink>
+            )}
           </td>
         </tr>
         <tr>
