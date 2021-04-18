@@ -420,7 +420,7 @@ const Jobs = () => {
           </tbody>
         </table>
         {noRows > rowsPerPage &&
-          <><small>{(jobPageInformation === null ? 0 : jobPageInformation.total) + (hypercubePageInformation === null ? 0 : hypercubePageInformation.total)} items</small>
+          <><small>{((jobPageInformation === null ? 0 : jobPageInformation.total) + (hypercubePageInformation === null ? 0 : hypercubePageInformation.total)).toLocaleString()} items</small>
             <Pagination>
               <Pagination.First disabled={currentPage === 1} onClick={gotoFirstPage} />
               <Pagination.Prev disabled={currentPage === 1} onClick={gotoPreviousPage} />

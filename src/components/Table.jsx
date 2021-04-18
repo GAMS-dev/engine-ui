@@ -141,7 +141,7 @@ const Table = props => {
         </tbody>
       </table>
       {noRows > rowsPerPage &&
-        <><small>{noRows} items</small>
+        <><small>{noRows.toLocaleString()} items</small>
           <Pagination>
             <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
             <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
