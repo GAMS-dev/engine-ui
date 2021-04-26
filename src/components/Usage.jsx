@@ -100,11 +100,12 @@ const Usage = () => {
                         }, 0);
                         let totalTime;
                         if (isFinished && c.finished == null) {
-                            totalTime = NaN;
+                            totalTime = NaN; //todo In the future, maybe use a flag or stg to inform
                         } else {
                             totalTime = ((isFinished ? new Date(c.finished) :
                                 new Date()) - new Date(c.submitted)) / 1000;
                         }
+                        // todo 0th job might not be the first one to start
                         const queuetime = ((c.jobs[0].times.length ?
                             new Date(c.jobs[0].times[0].start) : (isFinished ? NaN : new Date())) -
                             new Date(c.submitted)) / 1000;
@@ -133,11 +134,17 @@ const Usage = () => {
                     }
                     const isFinished = c.finished != null;
                     let solveTime;
-                    if (isFinished && (c.times.length === 0 || c.times[c.times.length - 1].finish == null)) {
-                        solveTime = NaN;
-                    } else {
+                    if (isFinished) {
+                        if (c.times.length === 0) {
+                            solveTime = 0;
+                        } else if (c.times[c.times.length - 1].finish == null) {
+                            solveTime = NaN;
+                        }
+                    } else if (c.times.length !== 0) {
                         solveTime = ((isFinished ? new Date(c.times[c.times.length - 1].finish) : new Date()) -
                             new Date(c.times[c.times.length - 1].start)) / 1000;
+                    } else { //canceling, queued
+                        solveTime = 0;
                     }
                     const queuetime = ((c.times.length ?
                         new Date(c.times[0].start) : (isFinished ? NaN : new Date())) -
@@ -176,6 +183,7 @@ const Usage = () => {
             })
             .catch(err => {
                 setAlertMsg(`Problems fetching usage information. Error message: ${getResponseError(err)}`);
+
                 setIsLoading(false);
             });
     }, [jwt, server, roles, refresh, displayFields, setAlertMsg,
