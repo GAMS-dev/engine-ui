@@ -134,27 +134,38 @@ const Usage = () => {
                     }
                     const isFinished = c.finished != null;
                     let solveTime;
+                    let queueTime;
                     if (isFinished) {
                         if (c.times.length === 0) {
                             solveTime = 0;
+                            queueTime = (new Date(c.finished) - new Date(c.submitted)) / 1000;
                         } else if (c.times[c.times.length - 1].finish == null) {
                             solveTime = NaN;
+                            queueTime = (new Date(c.times[0].start) - new Date(c.submitted)) / 1000;
+                        } else {
+                            solveTime = (
+                                new Date(c.times[c.times.length - 1].finish) -
+                                new Date(c.times[c.times.length - 1].start)
+                            ) / 1000;
+                            queueTime = (new Date(c.times[0].start) - new Date(c.submitted)) / 1000;
                         }
                     } else if (c.times.length !== 0) {
-                        solveTime = ((isFinished ? new Date(c.times[c.times.length - 1].finish) : new Date()) -
-                            new Date(c.times[c.times.length - 1].start)) / 1000;
+                        solveTime = (
+                            new Date() -
+                            new Date(c.times[c.times.length - 1].start)
+                        ) / 1000;
+                        queueTime = (new Date(c.times[0].start) - new Date(c.submitted)) / 1000;
                     } else { //canceling, queued
                         solveTime = 0;
+                        queueTime = (new Date() - new Date(c.submitted)) / 1000;
                     }
-                    const queuetime = ((c.times.length ?
-                        new Date(c.times[0].start) : (isFinished ? NaN : new Date())) -
-                        new Date(c.submitted)) / 1000;
+
                     if (a[c.username]) {
                         // User already exists
                         a[c.username].solvetime += solveTime;
                         a[c.username].totaltime += ((isFinished ? new Date(c.finished) : new Date()) -
                             new Date(c.submitted)) / 1000;
-                        a[c.username].queuetime += queuetime;
+                        a[c.username].queuetime += queueTime;
                         a[c.username].nocrash += Math.max(0, c.times.length - 1);
                         a[c.username].nojobs += 1;
                         return a;
@@ -163,7 +174,7 @@ const Usage = () => {
                         username: c.username,
                         nojobs: 1,
                         nocrash: Math.max(0, c.times.length - 1),
-                        queuetime: queuetime,
+                        queuetime: queueTime,
                         solvetime: solveTime,
                         totaltime: ((isFinished ? new Date(c.finished) : new Date()) - new Date(c.submitted)) / 1000
                     };
@@ -183,7 +194,6 @@ const Usage = () => {
             })
             .catch(err => {
                 setAlertMsg(`Problems fetching usage information. Error message: ${getResponseError(err)}`);
-
                 setIsLoading(false);
             });
     }, [jwt, server, roles, refresh, displayFields, setAlertMsg,
