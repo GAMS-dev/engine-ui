@@ -9,11 +9,13 @@ import { zipAsync, getResponseError } from "./util";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import { ServerInfoContext } from "../ServerInfoContext";
 
 const JobSubmissionForm = props => {
     const { newHcJob } = props;
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server }] = useContext(AuthContext);
+    const [{ jwt, server, roles, username }] = useContext(AuthContext);
+    const [serverInfo,] = useContext(ServerInfoContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -35,8 +37,13 @@ const JobSubmissionForm = props => {
     const [jobDeps, setJobDeps] = useState("");
     const [validCpuReq, setValidCpuReq] = useState(true);
     const [validMemReq, setValidMemReq] = useState(true);
-    const [cpuReq, setCpuReq] = useState(null);
-    const [memReq, setMemReq] = useState(null);
+    const [openLabelsWrapper, setOpenLabelsWrapper] = useState(false);
+    const [instancesLoaded, setInstancesLoaded] = useState(false);
+    const [availableInstances, setAvailableInstances] = useState([]);
+    const [useRawRequests, setUseRawRequests] = useState(false);
+    const [cpuReq, setCpuReq] = useState("");
+    const [memReq, setMemReq] = useState("");
+    const [instance, setInstance] = useState("");
     const [jobPosted, setJobPosted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -176,11 +183,17 @@ const JobSubmissionForm = props => {
             jobSubmissionForm.append("inex_file", new Blob([inexJSON],
                 { type: "application/json" }), "inex.json");
         }
-        if (cpuReq) {
-            jobSubmissionForm.append('label', `cpu=${cpuReq}`);
-        }
-        if (memReq) {
-            jobSubmissionForm.append('label', `memory=${memReq}`);
+        if (serverInfo && serverInfo.in_kubernetes === true) {
+            if (useRawRequests) {
+                if (cpuReq) {
+                    jobSubmissionForm.append('labels', `cpu_request=${cpuReq}`);
+                }
+                if (memReq) {
+                    jobSubmissionForm.append('labels', `memory_request=${memReq}`);
+                }
+            } else if (instance) {
+                jobSubmissionForm.append('labels', `instance=${instance}`);
+            }
         }
         Promise.all(promisesToAwait).then(() => {
             axios
@@ -201,12 +214,34 @@ const JobSubmissionForm = props => {
                     setJobPosted(true);
                 })
                 .catch(err => {
-                    setSubmissionErrorMsg(`Problems while posting job. Error message: ${getResponseError(err)}.`);
+                    setSubmissionErrorMsg(`Problems posting job. Error message: ${getResponseError(err)}.`);
                 });
         })
             .catch(err => {
-                setSubmissionErrorMsg(`Problems while posting job.`);
+                setSubmissionErrorMsg(`Problems posting job.`);
             });
+    }
+    const loadInstanceData = async () => {
+        if (openLabelsWrapper) {
+            setOpenLabelsWrapper(false);
+            return;
+        }
+        setOpenLabelsWrapper(true);
+        try {
+            const instanceData = await axios.get(`${server}/usage/instances/${username}`);
+            if (instanceData.data.instances_available) {
+                setAvailableInstances(instanceData.data.instances_available);
+                setInstance(instanceData.data.default_instance.label);
+                setUseRawRequests(false);
+            } else {
+                setUseRawRequests(true);
+            }
+            setInstancesLoaded(true);
+        }
+        catch (err) {
+            setSubmissionErrorMsg(`An error occurred fetching instances. Error message: ${getResponseError(err)}.`);
+            return;
+        }
     }
     const updateModelFiles = e => {
         if (modelName === "" || modelName === modelFiles[0].name.split(".")[0]) {
@@ -231,15 +266,12 @@ const JobSubmissionForm = props => {
                         }}
                     >
                         <div className="row">
-                            <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                                {submissionErrorMsg}
-                            </div>
                             <div className="col-md-6 col-12">
                                 <fieldset disabled={isSubmitting}>
                                     <div className="form-group">
                                         <label htmlFor="namespace">
                                             Select a namespace
-                                </label>
+                                        </label>
                                         <select id="namespace" className="form-control" value={namespace} onChange={e => setNamespace(e.target.value)}>
                                             {availableNamespaces.map(ns => <option key={ns.name} value={ns.name}>{ns.name}</option>)}
                                         </select>
@@ -326,11 +358,10 @@ const JobSubmissionForm = props => {
                                     <Button
                                         variant="link"
                                         onClick={() => setOpenAdvancedOptions(!openAdvancedOptions)}
-                                        aria-controls="example-collapse-text"
                                         aria-expanded={openAdvancedOptions}
                                     >
                                         Advanced options
-                            </Button>
+                                    </Button>
                                     <Collapse in={openAdvancedOptions}>
                                         <div>
                                             <div className="form-group">
@@ -408,68 +439,110 @@ const JobSubmissionForm = props => {
                                                 />
                                             </div>
                                             <InexJSONSelector onChangeHandler={e => setInexJSON(e)} />
-                                            {process.env.REACT_APP_K8_BUILD === "true" &&
+                                            {serverInfo && serverInfo.in_kubernetes === true &&
                                                 <>
-                                                    <div className="form-group">
-                                                        <label htmlFor="cpuReq">
-                                                            Required CPU units (vCPU/Core, Hyperthread)
-                                                    </label>
-                                                        <input
-                                                            type="number"
-                                                            className={`form-control${validCpuReq ? '' : ' is-invalid'}`}
-                                                            id="cpuReq"
-                                                            value={cpuReq}
-                                                            onChange={e => {
-                                                                if (!e.target.value) {
-                                                                    setValidCpuReq(true)
-                                                                    setCpuReq(null)
-                                                                    return;
-                                                                }
-                                                                const val = parseFloat(e.target.value);
-                                                                if (isNaN(val)) {
-                                                                    setValidCpuReq(false)
-                                                                    return;
-                                                                }
-                                                                setValidCpuReq(true)
-                                                                setCpuReq(val)
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group">
-                                                        <label htmlFor="memReq">
-                                                            Required memory units (bytes)
-                                                    </label>
-                                                        <input
-                                                            type="number"
-                                                            className={`form-control${validMemReq ? '' : ' is-invalid'}`}
-                                                            id="memReq"
-                                                            value={memReq}
-                                                            onChange={e => {
-                                                                if (!e.target.value) {
-                                                                    setValidMemReq(true)
-                                                                    setMemReq(null)
-                                                                    return;
-                                                                }
-                                                                const val = parseFloat(e.target.value);
-                                                                if (isNaN(val)) {
-                                                                    setValidMemReq(false)
-                                                                    return;
-                                                                }
-                                                                setValidMemReq(true)
-                                                                setMemReq(val)
-                                                            }}
-                                                        />
-                                                    </div>
+                                                    <Button
+                                                        variant="link"
+                                                        onClick={loadInstanceData}
+                                                        aria-expanded={openLabelsWrapper}
+                                                        aria-controls="labelsWrapperContent"
+                                                    >
+                                                        Resources
+                                                    </Button>
+                                                    <Collapse in={openLabelsWrapper}>
+                                                        <div id="labelsWrapperContent">
+                                                            <ClipLoader loading={!instancesLoaded} />
+                                                            {instancesLoaded && availableInstances.length > 0 &&
+                                                                roles && roles.find(role => role === "admin") !== undefined &&
+                                                                <div className="form-check mb-3">
+                                                                    <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
+                                                                        id="useRawRequests" />
+                                                                    <label className="form-check-label" htmlFor="useRawRequests">Use raw resource requests?</label>
+                                                                </div>}
+                                                            <div style={{
+                                                                display: !useRawRequests ? "block" : "none"
+                                                            }}>
+                                                                <div className="form-group">
+                                                                    <label htmlFor="instance">
+                                                                        Select instance
+                                                                    </label>
+                                                                    <select id="instance" className="form-control" value={instance} onChange={e => setInstance(e.target.value)}>
+                                                                        {availableInstances.map(instance =>
+                                                                            <option key={instance.label} value={instance.label}>
+                                                                                {`${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB)`}
+                                                                            </option>)}
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{
+                                                                display: useRawRequests ? "block" : "none"
+                                                            }}>
+                                                                <div className="form-group">
+                                                                    <label htmlFor="cpuReq">
+                                                                        Required CPU units (vCPU/Core, Hyperthread)
+                                                                    </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        className={`form-control${validCpuReq ? '' : ' is-invalid'}`}
+                                                                        id="cpuReq"
+                                                                        value={cpuReq}
+                                                                        onChange={e => {
+                                                                            if (!e.target.value) {
+                                                                                setValidCpuReq(true)
+                                                                                setCpuReq(null)
+                                                                                return;
+                                                                            }
+                                                                            const val = parseFloat(e.target.value);
+                                                                            if (isNaN(val)) {
+                                                                                setValidCpuReq(false)
+                                                                                return;
+                                                                            }
+                                                                            setValidCpuReq(true)
+                                                                            setCpuReq(val)
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <div className="form-group">
+                                                                    <label htmlFor="memReq">
+                                                                        Required memory units (MiB)
+                                                                </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        className={`form-control${validMemReq ? '' : ' is-invalid'}`}
+                                                                        id="memReq"
+                                                                        value={memReq}
+                                                                        onChange={e => {
+                                                                            if (!e.target.value) {
+                                                                                setValidMemReq(true)
+                                                                                setMemReq(null)
+                                                                                return;
+                                                                            }
+                                                                            const val = parseFloat(e.target.value);
+                                                                            if (isNaN(val)) {
+                                                                                setValidMemReq(false)
+                                                                                return;
+                                                                            }
+                                                                            setValidMemReq(true)
+                                                                            setMemReq(val)
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </Collapse>
                                                 </>}
                                         </div>
                                     </Collapse>
                                 </fieldset>
                             </div>
                         </div>
+                        <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                            {submissionErrorMsg}
+                        </div>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
                                 Submit job
-                    </SubmitButton>
+                            </SubmitButton>
                         </div>
                         {jobPosted && <Redirect to="/" />}
                     </form>
