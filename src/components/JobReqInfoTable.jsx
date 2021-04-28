@@ -6,7 +6,11 @@ import TimeDisplay from "./TimeDisplay";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
-  const { job, isHcJob } = props;
+  const { job, isHcJob, inKubernetes } = props;
+  let job_labels;
+  if (inKubernetes && job.labels) {
+    job_labels = Object.entries(job.labels).filter(el => el[1] != null);
+  }
   return (
     <table className="table table-sm">
       <thead className="thead-dark">
@@ -147,6 +151,22 @@ const JobReqInfoTable = props => {
               </td>
             </tr>
           </>}
+        {job_labels &&
+          <tr>
+            <th>Resources</th>
+            <td>{job_labels.map(el => {
+              if (el[0] === "cpu_request") {
+                return <span key="cpu_request" className="badge badge-secondary m-1">
+                  {`${el[1]} vCPU`}
+                </span>
+              } else if (el[0] === "memory_request") {
+                return <span key="memory_request" className="badge badge-secondary m-1">
+                  {`${el[1]} MiB`}
+                </span>
+              }
+              return ""
+            }) || "-"}</td>
+          </tr>}
         <tr>
           <th>Job dependencies</th>
           <td>

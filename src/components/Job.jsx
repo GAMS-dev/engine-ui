@@ -7,6 +7,7 @@ import JobReqInfoTable from "./JobReqInfoTable";
 import JobRespInfoTable from "./JobRespInfoTable";
 import { getResponseError } from "./util";
 import TextEntryView from "./TextEntryView";
+import { ServerInfoContext } from "../ServerInfoContext";
 
 const Job = () => {
   const [job, setJob] = useState(null);
@@ -16,6 +17,7 @@ const Job = () => {
   const { token } = useParams();
   const [{ jwt, server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
+  const [serverInfo,] = useContext(ServerInfoContext);
 
   useEffect(() => {
     const fields = [
@@ -34,6 +36,9 @@ const Job = () => {
       "text_entries{entry_name, entry_size, entry_value}",
       "token"
     ];
+    if (serverInfo.in_kubernetes === true) {
+      fields.push("labels");
+    }
     let jobDataPromise;
     if (token.startsWith("hc:")) {
       setIsHcJob(true);
@@ -96,7 +101,7 @@ const Job = () => {
           }
         }
       });
-  }, [jwt, server, token, setAlertMsg, refresh]);
+  }, [jwt, server, token, setAlertMsg, refresh, serverInfo]);
 
   useEffect(() => {
     axios
@@ -125,7 +130,7 @@ const Job = () => {
         <div className="mt-4">
           <div className="row">
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
-              <JobReqInfoTable job={job} isHcJob={isHcJob} />
+              <JobReqInfoTable job={job} isHcJob={isHcJob} inKubernetes={serverInfo.in_kubernetes === true} />
             </div>
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
               <JobRespInfoTable
