@@ -112,6 +112,8 @@ body {
   .sidebar-nav {
     justify-content: space-between !important;
     flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 }
 
