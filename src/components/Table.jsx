@@ -113,7 +113,7 @@ const Table = props => {
   }
   return (
     <div className="table-responsive">
-      <table className="table summary-table">
+      <table className="table summary-table table-striped">
         <thead className="thead-dark">
           <tr>
             {displayFields.map(e => (
