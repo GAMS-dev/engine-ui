@@ -135,7 +135,7 @@ const Table = props => {
             data.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage).map(createRow) :
             data.map(createRow)) :
             <tr>
-              <td colSpan="5">{isLoading === true ? <ClipLoader /> : noDataMsg}</td>
+              <td colSpan={displayFields.length}>{isLoading === true ? <ClipLoader /> : noDataMsg}</td>
             </tr>
           }
         </tbody>

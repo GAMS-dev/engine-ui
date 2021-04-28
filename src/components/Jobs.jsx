@@ -414,7 +414,7 @@ const Jobs = () => {
                 </tr>
               }) :
               <tr>
-                <td colSpan="5">{(!isLoading && view && view.length === 0) ? "No Job Found" : <ClipLoader />}</td>
+                <td colSpan={displayFields.length}>{(!isLoading && view && view.length === 0) ? "No Job Found" : <ClipLoader />}</td>
               </tr>
             }
           </tbody>
