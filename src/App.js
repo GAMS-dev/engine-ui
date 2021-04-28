@@ -4,6 +4,7 @@ import LogOut from "./components/LogOut";
 
 import Layout from "./components/Layout";
 import { AuthContext } from "./AuthContext";
+import { ServerInfoProvider } from "./ServerInfoContext";
 import {
   BrowserRouter as Router,
   Switch,
@@ -19,13 +20,15 @@ const App = () => {
   return (
     <React.Fragment>
       <Router basename={BASENAME}>
-        {!login && <Redirect to="/login" />}
-        <Switch>
-          <Route path="/login" exact render={() => <LoginForm />} />
-          <Route path="/register" exact render={() => <LoginForm register="true" />} />
-          <Route path="/logout" exact render={() => <LogOut />} />
-          {login && <Route path="/" render={() => <Layout />} />}
-        </Switch>
+        <ServerInfoProvider>
+          {!login && <Redirect to="/login" />}
+          <Switch>
+            <Route path="/login" exact render={() => <LoginForm />} />
+            <Route path="/register" exact render={() => <LoginForm register="true" />} />
+            <Route path="/logout" exact render={() => <LogOut />} />
+            {login && <Route path="/" render={() => <Layout />} />}
+          </Switch>
+        </ServerInfoProvider>
       </Router>
     </React.Fragment>
   );
