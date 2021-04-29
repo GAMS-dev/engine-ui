@@ -43,7 +43,7 @@ const UserUpdateForm = () => {
             responsesReceived += 1;
         }
         axios
-            .get(`${server}/namespaces/`)
+            .get(`${server}/namespaces/permissions/me`)
             .then(res => {
                 if (res.status !== 200) {
                     setSubmissionErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
@@ -52,7 +52,7 @@ const UserUpdateForm = () => {
                 }
                 const nsPerm = res.data.map(el => ({
                     name: el.name,
-                    perm: el.permissions.filter(perm => perm.username === username).map(el => el.permission)[0],
+                    perm: el.permission,
                     maxPerm: 7
                 }));
                 setNamespacePermissions(nsPerm);
