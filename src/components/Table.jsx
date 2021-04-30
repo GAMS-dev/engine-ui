@@ -112,7 +112,7 @@ const Table = props => {
     setSortedCol(field);
   }
   return (
-    <div className="table-responsive">
+    <>
       <table className="table summary-table table-striped">
         <thead className="thead-dark">
           <tr>
@@ -160,7 +160,7 @@ const Table = props => {
             <Pagination.Next disabled={currentPage === (noPages - 1)} onClick={gotoNextPage} />
             <Pagination.Last disabled={currentPage === (noPages - 1)} onClick={gotoLastPage} />
           </Pagination></>}
-    </div>
+    </>
   );
 };
 export default Table;
