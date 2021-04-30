@@ -134,7 +134,7 @@ const UserQuotaUpdateForm = () => {
                             <fieldset disabled={isSubmitting}>
                                 <div className="form-group">
                                     <label htmlFor="quotaParallel">
-                                        Parallel quotas
+                                        Parallel quota
                                 </label>
                                     <input
                                         type="number"
@@ -160,7 +160,7 @@ const UserQuotaUpdateForm = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="quotaVolume">
-                                        Volume quotas
+                                        Volume quota
                                 </label>
                                     <input
                                         type="number"
@@ -186,7 +186,7 @@ const UserQuotaUpdateForm = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="quotaDisk">
-                                        Disk space quotas (in MB)
+                                        Disk space quota (in MB)
                                 </label>
                                     <input
                                         type="number"
