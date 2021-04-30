@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg";
 import { ServerInfoContext } from "../ServerInfoContext";
@@ -30,6 +31,7 @@ const Header = props => {
         </div>}
         <Link to="/" className="navbar-brand m-auto d-none d-md-block">
           <img src={logo} className="navbar-logo" alt="GAMS Logo" />
+          {serverInfo.in_kubernetes === true && <Badge id="logoPostfix" pill variant="primary">PRO</Badge>}
         </Link>
       </header>
       <ul className="nav flex-column nav-top d-block bg-light d-md-none">
