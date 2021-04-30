@@ -8,10 +8,10 @@ import Jobs from "./Jobs";
 import JobSubmissionForm from "./JobSubmissionForm";
 import ModelSubmissionForm from "./ModelSubmissionForm";
 import UserInvitationForm from "./UserInvitationForm";
-import UserUpdateForm from "./UserUpdateForm";
 import UserChangePassForm from "./UserChangePassForm";
 import Job from "./Job";
 import Models from "./Models";
+import NamespaceQuotaUpdateForm from "./NamespaceQuotaUpdateForm";
 import Users from "./Users";
 import { AlertContext, Alert } from "./Alert";
 
@@ -80,6 +80,11 @@ const Layout = () => {
                 <Route exact path="/models">
                   <Models />
                 </Route>
+                {(roles && roles.includes('admin') !== undefined) &&
+                  <Route exact path="/quotas/:namespace">
+                    <NamespaceQuotaUpdateForm />
+                  </Route>
+                }
                 {(roles && roles.length > 0) &&
                   <Route exact path="/users">
                     <Users setLicenseExpiration={setLicenseExpiration} />
