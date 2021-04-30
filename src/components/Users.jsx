@@ -68,6 +68,7 @@ const Users = props => {
         username={name}
         me={username}
         isAdmin={roles.includes("admin")}
+        isInviter={roles.includes("inviter")}
         setUserToDelete={setUserToDelete}
         setDeleteInvitation={setDeleteInvitation}
         handleShowDeleteConfirmDialog={() => setShowDeleteConfirmDialog(true)} />

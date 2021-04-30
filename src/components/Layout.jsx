@@ -23,6 +23,9 @@ import { getResponseError } from "./util";
 import Instances from "./Instances";
 import InstanceSubmissionForm from "./InstanceSubmissionForm";
 import { ServerInfoContext } from "../ServerInfoContext";
+import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
+import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
+import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -83,20 +86,30 @@ const Layout = () => {
                   </Route>
                 }
                 {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
-                  <Route exact path="/users/:username">
-                    <UserUpdateForm />
+                  <Route exact path="/users/:username/permissions">
+                    <UserPermissionUpdateForm />
+                  </Route>
+                }
+                {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
+                  <Route exact path="/users/:username/quotas">
+                    <UserQuotaUpdateForm />
+                  </Route>
+                }
+                {(roles && roles.find(role => role === "admin") !== undefined && serverInfo.in_kubernetes === true) &&
+                  <Route exact path="/users/:userToEdit/instances">
+                    <UserInstanceUpdateForm />
                   </Route>
                 }
                 <Route exact path="/users/:user/change-pass">
                   <UserChangePassForm />
                 </Route>
                 {(roles && roles.includes('admin') !== undefined) &&
-                  <Route exact path="/licenses/:username">
+                  <Route exact path="/users/:username/licenses">
                     <LicenseUpdateForm />
                   </Route>
                 }
                 {(roles && roles.includes('admin') !== undefined) &&
-                  <Route exact path="/usage/:username">
+                  <Route exact path="/users/:username/usage">
                     <Usage />
                   </Route>
                 }
