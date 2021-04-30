@@ -6,7 +6,7 @@ import { AuthContext } from "../AuthContext";
 import LogOutMenu from "./LogOutMenu";
 
 const SidebarRaw = props => {
-  const [{ roles, inKubernetes }] = useContext(AuthContext);
+  const [{ roles }] = useContext(AuthContext);
   const pathname = props.location.pathname;
   return (
     <nav className="sidebar bg-light">
@@ -43,7 +43,7 @@ const SidebarRaw = props => {
                   <span className="nav-link-text">Cleanup</span>
                 </Link>
               </li>
-              {inKubernetes && <li className="nav-item">
+              {props.inKubernetes && <li className="nav-item">
                 <Link to="/instances" className={`nav-link nav-block${pathname.startsWith("/instances") ? " active" : ""}`}>
                   <Server className="feather" />
                   <span className="nav-link-text">Instances</span>
