@@ -130,7 +130,10 @@ const Job = () => {
         <div className="mt-4">
           <div className="row">
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
-              <JobReqInfoTable job={job} isHcJob={isHcJob} inKubernetes={serverInfo.in_kubernetes === true} />
+              <JobReqInfoTable
+                job={job}
+                isHcJob={isHcJob}
+                inKubernetes={serverInfo.in_kubernetes === true} />
             </div>
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
               <JobRespInfoTable

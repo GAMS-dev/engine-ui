@@ -488,17 +488,18 @@ const JobSubmissionForm = props => {
                                                                         value={cpuReq}
                                                                         onChange={e => {
                                                                             if (!e.target.value) {
-                                                                                setValidCpuReq(true)
-                                                                                setCpuReq(null)
+                                                                                setValidCpuReq(true);
+                                                                                setCpuReq(null);
                                                                                 return;
                                                                             }
                                                                             const val = parseFloat(e.target.value);
-                                                                            if (isNaN(val)) {
-                                                                                setValidCpuReq(false)
+                                                                            if (isNaN(val) || !isFinite(val)) {
+                                                                                setValidCpuReq(false);
+                                                                                setCpuReq(val);
                                                                                 return;
                                                                             }
-                                                                            setValidCpuReq(true)
-                                                                            setCpuReq(val)
+                                                                            setValidCpuReq(true);
+                                                                            setCpuReq(val);
                                                                         }}
                                                                     />
                                                                 </div>
@@ -513,17 +514,18 @@ const JobSubmissionForm = props => {
                                                                         value={memReq}
                                                                         onChange={e => {
                                                                             if (!e.target.value) {
-                                                                                setValidMemReq(true)
-                                                                                setMemReq(null)
+                                                                                setValidMemReq(true);
+                                                                                setMemReq(null);
                                                                                 return;
                                                                             }
                                                                             const val = parseFloat(e.target.value);
-                                                                            if (isNaN(val)) {
-                                                                                setValidMemReq(false)
+                                                                            if (isNaN(val) || !isFinite(val)) {
+                                                                                setValidMemReq(false);
+                                                                                setMemReq(val);
                                                                                 return;
                                                                             }
-                                                                            setValidMemReq(true)
-                                                                            setMemReq(val)
+                                                                            setValidMemReq(true);
+                                                                            setMemReq(val);
                                                                         }}
                                                                     />
                                                                 </div>
