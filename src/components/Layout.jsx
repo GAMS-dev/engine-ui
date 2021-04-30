@@ -20,9 +20,13 @@ import Cleanup from "./Cleanup";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import Usage from "./Usage";
 import { getResponseError } from "./util";
+import Instances from "./Instances";
+import InstanceSubmissionForm from "./InstanceSubmissionForm";
+import { ServerInfoContext } from "../ServerInfoContext";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
+  const [serverInfo] = useContext(ServerInfoContext);
   const alertHook = useState("");
   const [licenseExpiration, setLicenseExpiration] = useState(null);
 
@@ -50,7 +54,7 @@ const Layout = () => {
         <div className="container-fluid">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
-              <Sidebar />
+              <Sidebar inKubernetes={serverInfo.in_kubernetes === true} />
             </div>
             <main className="col" role="main">
               <Alert />
@@ -99,6 +103,16 @@ const Layout = () => {
                 {(roles && roles.find(role => role === "admin") !== undefined) &&
                   <Route exact path="/cleanup">
                     <Cleanup />
+                  </Route>
+                }
+                {(roles && roles.find(role => role === "admin") !== undefined && serverInfo.in_kubernetes === true) &&
+                  <Route exact path="/instances">
+                    <Instances />
+                  </Route>
+                }
+                {(roles && roles.find(role => role === "admin") !== undefined && serverInfo.in_kubernetes === true) &&
+                  <Route exact path="/instances/update/:label?">
+                    <InstanceSubmissionForm />
                   </Route>
                 }
                 <Route>

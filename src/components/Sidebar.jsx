@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
-import { Package, Users, Play, Archive } from "react-feather";
+import { Package, Users, Play, Archive, Server } from "react-feather";
 import { withRouter } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import LogOutMenu from "./LogOutMenu";
 
 const SidebarRaw = props => {
-  const [{ roles }] = useContext(AuthContext);
+  const [{ roles, inKubernetes }] = useContext(AuthContext);
   const pathname = props.location.pathname;
   return (
     <nav className="sidebar bg-light">
@@ -17,7 +17,7 @@ const SidebarRaw = props => {
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">
           <li className="nav-item">
-            <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users", "/cleanup", "/licenses", "/usage"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+            <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users", "/cleanup", "/licenses", "/usage", "/instances"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
@@ -36,12 +36,20 @@ const SidebarRaw = props => {
               </Link>
             </li>}
           {(roles && roles.find(role => role === "admin") !== undefined) &&
-            <li className="nav-item">
-              <Link to="/cleanup" className={`nav-link nav-block${pathname === "/cleanup" ? " active" : ""}`}>
-                <Archive className="feather" />
-                <span className="nav-link-text">Cleanup</span>
-              </Link>
-            </li>
+            <>
+              <li className="nav-item">
+                <Link to="/cleanup" className={`nav-link nav-block${pathname === "/cleanup" ? " active" : ""}`}>
+                  <Archive className="feather" />
+                  <span className="nav-link-text">Cleanup</span>
+                </Link>
+              </li>
+              {inKubernetes && <li className="nav-item">
+                <Link to="/instances" className={`nav-link nav-block${pathname.startsWith("/instances") ? " active" : ""}`}>
+                  <Server className="feather" />
+                  <span className="nav-link-text">Instances</span>
+                </Link>
+              </li>}
+            </>
           }
         </ul>
       </div>
