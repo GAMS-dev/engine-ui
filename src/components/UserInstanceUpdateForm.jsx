@@ -28,24 +28,44 @@ const UserInstanceUpdateForm = () => {
     useEffect(() => {
         const fetchRequiredData = async () => {
             try {
-                const resMe = await axios
-                    .get(`${server}/usage/instances/${username}`);
-                if (resMe.status !== 200) {
-                    setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
-                    return;
+                if (roles && roles.includes("admin")) {
+                    const resMe = await axios
+                        .get(`${server}/usage/instances`);
+                    if (resMe.status !== 200) {
+                        setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
+                        return;
+                    }
+                    if (!resMe.data ||
+                        resMe.data.length === 0) {
+                        setErrorMsg("No instances available.");
+                        setIsLoading(false);
+                        return;
+                    }
+                    setInstancesAllowed(resMe.data
+                        .map(instance => ({
+                            "value": instance.label,
+                            "label": instance.label
+                        })));
+                } else {
+                    const resMe = await axios
+                        .get(`${server}/usage/instances/${username}`);
+                    if (resMe.status !== 200) {
+                        setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
+                        return;
+                    }
+                    if (!resMe.data ||
+                        !resMe.data.instances_available ||
+                        resMe.data.instances_available.length === 0) {
+                        setErrorMsg("No instances available.");
+                        setIsLoading(false);
+                        return;
+                    }
+                    setInstancesAllowed(resMe.data.instances_available
+                        .map(instance => ({
+                            "value": instance.label,
+                            "label": instance.label
+                        })));
                 }
-                if (!resMe.data ||
-                    !resMe.data.instances_available ||
-                    resMe.data.instances_available.length === 0) {
-                    setErrorMsg("No instances available.");
-                    setIsLoading(false);
-                    return;
-                }
-                setInstancesAllowed(resMe.data.instances_available
-                    .map(instance => ({
-                        "value": instance.label,
-                        "label": instance.label
-                    })));
                 const resUser = await axios
                     .get(`${server}/usage/instances/${userToEdit}`);
                 if (resUser.status !== 200) {
@@ -83,7 +103,7 @@ const UserInstanceUpdateForm = () => {
             }
         };
         fetchRequiredData();
-    }, [server, jwt, userToEdit, username]);
+    }, [server, jwt, roles, userToEdit, username]);
 
     const handleUserUpdateInstancesSubmission = async () => {
         setIsSubmitting(true);
