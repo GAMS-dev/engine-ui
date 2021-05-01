@@ -21,7 +21,9 @@ const UserInstanceUpdateForm = () => {
     const [selectedInstancesAllowed, setSelectedInstancesAllowed] = useState(null);
     const [defaultInstance, setDefaultInstance] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
-    const [instancesSubmissionErrorMsg, setInstancesSubmissionErrorMsg] = useState("");
+    const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
+    const [instancesInfoMsg, setInstancesInfoMsg] = useState("");
+    const [defaultInstanceInfoMsg, setDefaultInstanceInfoMsg] = useState("");
 
     const [userEdited, setUserEdited] = useState(false);
 
@@ -73,10 +75,6 @@ const UserInstanceUpdateForm = () => {
                     return;
                 }
                 if (resUser.data) {
-                    if (resUser.data.inherited_from != null &&
-                        resUser.data.inherited_from !== userToEdit) {
-                        setInstancesSubmissionErrorMsg(`User inherits instances from ${resUser.data.inherited_from}`)
-                    }
                     if (resUser.data.instances_available) {
                         const selectedInstances = resUser.data.instances_available
                             .map(instance => ({
@@ -87,7 +85,16 @@ const UserInstanceUpdateForm = () => {
                             setUseRawRequests(true);
                             return;
                         }
+                        if (resUser.data.instances_inherited_from != null &&
+                            resUser.data.instances_inherited_from !== userToEdit) {
+                            setInstancesInfoMsg(`Inherited from ${resUser.data.instances_inherited_from}`);
+                            setInstancesAllowed(selectedInstances);
+                        }
                         setSelectedInstancesAllowed(selectedInstances);
+                    }
+                    if (resUser.data.default_inherited_from != null &&
+                        resUser.data.default_inherited_from !== userToEdit) {
+                        setDefaultInstanceInfoMsg(`Inherited from ${resUser.data.default_inherited_from}`);
                     }
                     if (resUser.data.default_instance) {
                         const defaultLabel = resUser.data.default_instance.label;
@@ -115,22 +122,17 @@ const UserInstanceUpdateForm = () => {
             }
             catch (err) {
                 setIsSubmitting(false);
-                setInstancesSubmissionErrorMsg(`An error occurred while updating user instances. Error message: ${getResponseError(err)}.`);
+                setSubmissionErrorMsg(`An error occurred while updating user instances. Error message: ${getResponseError(err)}.`);
             }
             return;
         }
         try {
             const selectedLabels = selectedInstancesAllowed.map(instance =>
                 instance.value);
-            if (!selectedLabels || selectedLabels.length === 0) {
-                setIsSubmitting(false);
-                setInstancesSubmissionErrorMsg(`No allowed instances selected.`);
-                return;
-            }
             const defaultLabel = defaultInstance.value;
             if (!defaultLabel) {
                 setIsSubmitting(false);
-                setInstancesSubmissionErrorMsg(`No default instance selected.`);
+                setSubmissionErrorMsg(`No default instance selected.`);
                 return;
             }
             await axios.put(`${server}/usage/instances/${userToEdit}`, {
@@ -142,7 +144,7 @@ const UserInstanceUpdateForm = () => {
         }
         catch (err) {
             setIsSubmitting(false);
-            setInstancesSubmissionErrorMsg(`An error occurred while updating user instances. Error message: ${getResponseError(err)}.`);
+            setSubmissionErrorMsg(`An error occurred while updating user instances. Error message: ${getResponseError(err)}.`);
         }
     }
 
@@ -166,8 +168,8 @@ const UserInstanceUpdateForm = () => {
                                 return false;
                             }}
                         >
-                            <div className="invalid-feedback text-center" style={{ display: instancesSubmissionErrorMsg !== "" ? "block" : "none" }}>
-                                {instancesSubmissionErrorMsg}
+                            <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                                {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
                                 {(useRawRequests || (roles && roles.includes("admin"))) &&
@@ -182,6 +184,9 @@ const UserInstanceUpdateForm = () => {
                                             <label htmlFor="instancesAllowed">
                                                 Instances user is allowed to use
                                             </label>
+                                            <div className="invalid-feedback text-center" style={{ display: instancesInfoMsg !== "" ? "block" : "none" }}>
+                                                {instancesInfoMsg}
+                                            </div>
                                             <Select
                                                 id="instancesAllowed"
                                                 value={selectedInstancesAllowed}
@@ -201,6 +206,9 @@ const UserInstanceUpdateForm = () => {
                                             <label htmlFor="instancesDefault">
                                                 Default Instance
                                             </label>
+                                            <div className="invalid-feedback text-center" style={{ display: defaultInstanceInfoMsg !== "" ? "block" : "none" }}>
+                                                {defaultInstanceInfoMsg}
+                                            </div>
                                             <Select
                                                 id="instancesDefault"
                                                 isClearable={false}
