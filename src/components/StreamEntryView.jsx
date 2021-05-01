@@ -35,7 +35,7 @@ const StreamEntryView = props => {
                     if (err.response.status === 308) {
                         setRefreshJob(refresh => refresh + 1);
                     } else {
-                        setErrorMsg(`A problem has occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
+                        setErrorMsg(`A problem occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
                     }
                 });
         }

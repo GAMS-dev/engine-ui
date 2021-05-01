@@ -82,7 +82,7 @@ const NamespaceQuotaUpdateForm = () => {
             <div>
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 className="h2">Edit Disk Space Quota of Namespace: {namespace}</h1>
-                    {diskUsed && <Alert variant="info">Disk space used: {Math.round(diskUsed * 100) / 100} MB</Alert>}
+                    {diskUsed && <Alert variant="info">Disk Space used: {Math.round(diskUsed * 100) / 100} MB</Alert>}
                 </div>
                 {isLoading ? <ClipLoader /> :
                     (errorMsg ?
@@ -104,7 +104,7 @@ const NamespaceQuotaUpdateForm = () => {
                             <fieldset disabled={isSubmitting}>
                                 <div className="form-group">
                                     <label htmlFor="quotaDisk">
-                                        Disk space quota (in MB)
+                                        Disk Space Quota (in MB)
                                     </label>
                                     <input
                                         type="number"
@@ -131,7 +131,7 @@ const NamespaceQuotaUpdateForm = () => {
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
-                                    Update quotas
+                                    Update Quota
                             </SubmitButton>
                             </div>
                             {quotaEdited && <Redirect to="/models" />}

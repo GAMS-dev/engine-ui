@@ -176,7 +176,7 @@ const UserUpdateForm = () => {
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
-                                    Update permissions
+                                    Update Permissions
                             </SubmitButton>
                             </div>
                             {userEdited && <Redirect to="/users" />}

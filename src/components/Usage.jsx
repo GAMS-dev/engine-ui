@@ -32,31 +32,31 @@ const Usage = () => {
         },
         {
             field: "nojobs",
-            column: "Number jobs",
+            column: "Number Jobs",
             sorter: "numerical",
             displayer: Number
         },
         {
             field: "nocrash",
-            column: "Number crashes",
+            column: "Number Crashes",
             sorter: "numerical",
             displayer: Number
         },
         {
             field: "queuetime",
-            column: "Time in queue",
+            column: "Time in Queue",
             sorter: "numerical",
             displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
         },
         {
             field: "solvetime",
-            column: "Solve time",
+            column: "Solve Time",
             sorter: "numerical",
             displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
         },
         {
             field: "totaltime",
-            column: "Total time",
+            column: "Total Time",
             sorter: "numerical",
             displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
         }
@@ -221,7 +221,7 @@ const Usage = () => {
             <div className="row">
                 <div className="col-lg-4 col-sm-12 mb-4">
                     <label>
-                        Show invitees?
+                        Show Invitees?
                         <input
                             name="showinvitees"
                             type="checkbox"
@@ -255,7 +255,7 @@ const Usage = () => {
                         <small>
                             <div className="row">
                                 <div className="col-4">
-                                    Total time:
+                                    Total Time:
                                 </div>
                                 <div className="col-8">
                                     <TimeDiffDisplay time={totalTime} classNames="badge badge-secondary" />
@@ -267,7 +267,7 @@ const Usage = () => {
                         <small>
                             <div className="row">
                                 <div className="col-4">
-                                    Total solve time:
+                                    Total Solve Time:
                                 </div>
                                 <div className="col-8">
                                     <TimeDiffDisplay time={totalSolveTime} classNames="badge badge-secondary" />

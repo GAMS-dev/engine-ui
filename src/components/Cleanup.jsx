@@ -219,7 +219,7 @@ const Cleanup = () => {
                     </div>
                 </div>
             </div>
-            <small>Total file size: {totalFileSize >= 1e6 ?
+            <small>Total File Size: {totalFileSize >= 1e6 ?
                 (totalFileSize >= 1e9 ? `${(totalFileSize / 1e9).toFixed(2)}GB` :
                     `${(totalFileSize / 1e6).toFixed(2)}MB`) :
                 `${(totalFileSize / 1e3).toFixed(2)}KB`}</small>
@@ -245,7 +245,7 @@ const Cleanup = () => {
                     }}
                 >
                     <Modal.Header closeButton>
-                        <Modal.Title>Run housekeeping</Modal.Title>
+                        <Modal.Title>Run Housekeeping</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>

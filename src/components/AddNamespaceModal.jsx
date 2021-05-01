@@ -63,7 +63,7 @@ const AddNamespaceModal = props => {
                     <fieldset disabled={isSubmitting}>
                         <div className="form-group">
                             <label htmlFor="namespaceName" className="sr-only">
-                                Namespace name
+                                Namespace Name
                         </label>
                             <input
                                 type="text"

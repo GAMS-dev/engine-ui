@@ -76,7 +76,7 @@ const JobReqInfoTable = props => {
           </td>
         </tr>
         <tr>
-          <th>Data provided</th>
+          <th>Data Provided</th>
           <td>{job.is_data_provided ? "Yes" : "No"}</td>
         </tr>
       </tbody>
@@ -131,7 +131,7 @@ const JobReqInfoTable = props => {
         {!isHcJob &&
           <>
             <tr>
-              <th>Text entries</th>
+              <th>Text Entries</th>
               <td>
                 {job.text_entries.length > 0 ? job.text_entries.map(c => (
                   <span key={c.entry_name} className="badge badge-secondary m-1">
@@ -141,7 +141,7 @@ const JobReqInfoTable = props => {
               </td>
             </tr>
             <tr>
-              <th>Stream entries</th>
+              <th>Stream Entries</th>
               <td>
                 {job.stream_entries.length > 0 ? job.stream_entries.map(c => (
                   <span key={c} className="badge badge-secondary m-1">
@@ -168,7 +168,7 @@ const JobReqInfoTable = props => {
             }) || "-"}</td>
           </tr>}
         <tr>
-          <th>Job dependencies</th>
+          <th>Job Dependencies</th>
           <td>
             {(!job.dep_tokens || job.dep_tokens.length === 0) ?
               "-" :

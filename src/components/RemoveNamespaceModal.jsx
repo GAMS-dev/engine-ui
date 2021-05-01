@@ -47,7 +47,7 @@ const RemoveNamespaceModal = props => {
         }}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Please confirm</Modal.Title>
+          <Modal.Title>Please Confirm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>

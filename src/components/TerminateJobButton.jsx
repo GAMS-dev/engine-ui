@@ -28,7 +28,7 @@ const TerminateJobButton = props => {
         <>
             {isActiveJob(status) &&
                 (status === -2 ?
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob(true)}>Hard kill</button> :
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob(true)}>Hard Kill</button> :
                     <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob()}>Cancel</button>
                 )}
         </>

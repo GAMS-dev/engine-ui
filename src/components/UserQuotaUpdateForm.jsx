@@ -160,7 +160,7 @@ const UserQuotaUpdateForm = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="quotaVolume">
-                                        Volume quota
+                                        Volume Quota
                                 </label>
                                     <input
                                         type="number"
@@ -186,7 +186,7 @@ const UserQuotaUpdateForm = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="quotaDisk">
-                                        Disk space quota (in MB)
+                                        Disk Space Quota (in MB)
                                 </label>
                                     <input
                                         type="number"
@@ -213,7 +213,7 @@ const UserQuotaUpdateForm = () => {
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
-                                    Update quotas
+                                    Update Quotas
                             </SubmitButton>
                             </div>
                             {userEdited && <Redirect to="/users" />}

@@ -82,7 +82,7 @@ const JobRespInfoTable = props => {
               </tr>
               {(job.status > 0 || job.status === -2) && job.status < 10 &&
                 <tr>
-                  <th>Terminate job</th>
+                  <th>Terminate Job</th>
                   <td>
                     <TerminateJobButton
                       token={isHcJob ? `hc:${job.token}` : job.token}
@@ -94,11 +94,11 @@ const JobRespInfoTable = props => {
             </> :
             <>
               <tr>
-                <th>Process status</th>
+                <th>Process Status</th>
                 <td>{job.process_status !== null ? job.process_status : "-"}</td>
               </tr>
               {job.status >= 10 && <tr>
-                <th>Text entries</th>
+                <th>Text Entries</th>
                 <td>
                   {job.text_entries && job.text_entries.length > 0 ?
                     <div className="form-group form-inline">
@@ -133,7 +133,7 @@ const JobRespInfoTable = props => {
               {(job.status > 0 || job.status === -2) && job.status < 10 &&
                 <>
                   <tr>
-                    <th>Stream entries</th>
+                    <th>Stream Entries</th>
                     <td>
                       <div className="form-group form-inline">
                         <select
@@ -158,7 +158,7 @@ const JobRespInfoTable = props => {
                     </td>
                   </tr>
                   <tr>
-                    <th>Terminate job</th>
+                    <th>Terminate Job</th>
                     <td>
                       <TerminateJobButton
                         token={job.token}
@@ -171,7 +171,7 @@ const JobRespInfoTable = props => {
               }
               {job.status > 0 && solveTraceEntries.length > 0 &&
                 <tr>
-                  <th>Solve trace</th>
+                  <th>Solve Trace</th>
                   <td>
                     <div className="form-group form-inline">
                       <select
@@ -198,14 +198,14 @@ const JobRespInfoTable = props => {
             </>
           }
           {job.result_exists && (job.status >= 10 || (isHcJob && job.status === -3)) ? <tr>
-            <th>Result zip</th>
+            <th>Result ZIP</th>
             <td>
               <DownloadLink url={isHcJob ? `${server}/hypercube/${job.token}/result` : `${server}/jobs/${job.token}/result`} filename="results.zip"
                 className="btn btn-sm btn-outline-info">
                 Download
               </DownloadLink>
               <button className="btn btn-sm btn-outline-danger" onClick={() => setShowRemoveConfirmDialog(true)}>
-                Delete results
+                Delete Results
               </button>
             </td>
           </tr> : <tr></tr>}

@@ -63,7 +63,7 @@ const UserChangePassForm = () => {
                 </div> :
                 <div>
                     <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 className="h2">{username === user ? 'Change password' : `Change password of user: ${username}`}</h1>
+                        <h1 className="h2">{username === user ? 'Change Password' : `Change Password of User: ${username}`}</h1>
                     </div>
                     <form
                         className="m-auto"
@@ -79,7 +79,7 @@ const UserChangePassForm = () => {
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
                                 <label htmlFor="modelName" className="sr-only">
-                                    New password
+                                    New Password
                             </label>
                                 <input
                                     type="password"
@@ -93,7 +93,7 @@ const UserChangePassForm = () => {
                             </div>
                             <div className="form-group">
                                 <label htmlFor="modelName" className="sr-only">
-                                    Confirm password
+                                    Confirm Password
                             </label>
                                 <input
                                     type="password"
@@ -108,7 +108,7 @@ const UserChangePassForm = () => {
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
-                                Change password
+                                Change Password
                             </SubmitButton>
                         </div>
                         {passwordUpdated && <Redirect to="/users" />}

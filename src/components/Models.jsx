@@ -164,7 +164,7 @@ const Models = () => {
                   {(namespace && namespace.name) &&
                     <Link to={`/quotas/${namespace.name}`}>
                       <button type="button" className="btn btn-sm btn-outline-primary">
-                        Edit quota
+                        Edit Quota
                     <Save width="12px" className="ml-2" />
                       </button>
                     </Link>}

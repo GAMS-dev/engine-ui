@@ -183,13 +183,13 @@ const ModelSubmissionForm = () => {
                                     <label className="custom-file-label" htmlFor="modelFiles">
                                         {modelFiles ?
                                             `${modelFiles[0].name}${modelFiles.length > 1 ? ", ..." : ""}`
-                                            : updateModel ? "Update model files..." : "Model files..."}
+                                            : updateModel ? "Update Model Files..." : "Model Files..."}
                                     </label>
                                 </div>
                             </div>
                             {!updateModel && <div className="form-group">
                                 <label htmlFor="modelName" className="sr-only">
-                                    Model name
+                                    Model Name
                                 </label>
                                 <input
                                     type="text"
@@ -204,7 +204,7 @@ const ModelSubmissionForm = () => {
                             </div>}
                             <div className="form-group">
                                 <label htmlFor="runName" className="sr-only">
-                                    Name of the main file
+                                    Name of the Main File
                                 </label>
                                 <input
                                     type="text"
@@ -218,7 +218,7 @@ const ModelSubmissionForm = () => {
                             </div>
                             <div className="form-group">
                                 <label htmlFor="clArgs" className="sr-only">
-                                    Command line arguments (comma-separated)
+                                    Command Line Arguments (comma-separated)
                                 </label>
                                 <input
                                     type="text"
@@ -237,7 +237,7 @@ const ModelSubmissionForm = () => {
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
-                                {updateModel ? "Update model" : "Add model"}
+                                {updateModel ? "Update Model" : "Add Model"}
                             </SubmitButton>
                         </div>
                         {modelAdded && <Redirect to="/models" />}

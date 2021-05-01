@@ -18,7 +18,7 @@ const Instances = () => {
     const [displayFields] = useState([
         {
             field: "label",
-            column: "Instance label",
+            column: "Instance Label",
             sorter: "alphabetical",
             displayer: String
         },
@@ -81,7 +81,7 @@ const Instances = () => {
                     <div className="btn-group mr-2">
                         <Link to="/instances/update">
                             <button type="button" className="btn btn-sm btn-outline-primary h-100">
-                                New instance
+                                New Instance
                             </button>
                         </Link>
                         <button

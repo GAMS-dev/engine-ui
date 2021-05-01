@@ -253,7 +253,7 @@ const JobSubmissionForm = props => {
     return (
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">Submit new {newHcJob && 'Hypercube '}job</h1>
+                <h1 className="h2">Submit new {newHcJob && 'Hypercube '}Job</h1>
             </div>
             {isLoading ? <ClipLoader /> :
                 (availableNamespaces.length > 0 ?
@@ -270,7 +270,7 @@ const JobSubmissionForm = props => {
                                 <fieldset disabled={isSubmitting}>
                                     <div className="form-group">
                                         <label htmlFor="namespace">
-                                            Select a namespace
+                                            Select a Namespace
                                         </label>
                                         <select id="namespace" className="form-control" value={namespace} onChange={e => setNamespace(e.target.value)}>
                                             {availableNamespaces.map(ns => <option key={ns.name} value={ns.name}>{ns.name}</option>)}
@@ -279,12 +279,12 @@ const JobSubmissionForm = props => {
                                     <div className="form-check mb-3">
                                         <input type="checkbox" className="form-check-input" checked={useRegisteredModel} onChange={e => setUseRegisteredModel(e.target.checked)}
                                             id="useRegisteredModel" disabled={registeredModels.length === 0} />
-                                        <label className="form-check-label" htmlFor="useRegisteredModel">Use a registered model?</label>
+                                        <label className="form-check-label" htmlFor="useRegisteredModel">Use a Registered Model?</label>
                                     </div>
                                     {useRegisteredModel && registeredModels.length !== 0 ?
                                         <div className="form-group">
                                             <label htmlFor="registeredModelName">
-                                                Select a model
+                                                Select a Model
                                     </label>
                                             <select id="registeredModelName" className="form-control" value={registeredModelName} onChange={e => setRegisteredModelName(e.target.value)}>
                                                 {registeredModels.map(model => <option key={model} value={model}>{model}</option>)}
@@ -308,7 +308,7 @@ const JobSubmissionForm = props => {
                                             </div>
                                             <div className="form-group">
                                                 <label htmlFor="modelName" className="sr-only">
-                                                    Name of the main file
+                                                    Name of the Main File
                                         </label>
                                                 <input
                                                     type="text"
@@ -360,13 +360,13 @@ const JobSubmissionForm = props => {
                                         onClick={() => setOpenAdvancedOptions(!openAdvancedOptions)}
                                         aria-expanded={openAdvancedOptions}
                                     >
-                                        Advanced options
+                                        Advanced Options
                                     </Button>
                                     <Collapse in={openAdvancedOptions}>
                                         <div>
                                             <div className="form-group">
                                                 <label htmlFor="clArgs" className="sr-only">
-                                                    Command line arguments (comma-separated)
+                                                    Command Line Arguments (comma-separated)
                                         </label>
                                                 <input
                                                     type="text"
@@ -380,7 +380,7 @@ const JobSubmissionForm = props => {
                                             </div>
                                             <div className="form-group">
                                                 <label htmlFor="logFileName" className="sr-only">
-                                                    Log filename
+                                                    Log Filename
                                         </label>
                                                 <input
                                                     type="text"
@@ -396,7 +396,7 @@ const JobSubmissionForm = props => {
                                                 <>
                                                     <div className="form-group">
                                                         <label htmlFor="textEntries" className="sr-only">
-                                                            Text entries (comma-separated)
+                                                            Text Entries (comma-separated)
                                                     </label>
                                                         <input
                                                             type="text"
@@ -410,7 +410,7 @@ const JobSubmissionForm = props => {
                                                     </div>
                                                     <div className="form-group">
                                                         <label htmlFor="streamEntries" className="sr-only">
-                                                            Stream entries (comma-separated)
+                                                            Stream Entries (comma-separated)
                                                     </label>
                                                         <input
                                                             type="text"
@@ -426,7 +426,7 @@ const JobSubmissionForm = props => {
                                             }
                                             <div className="form-group">
                                                 <label htmlFor="jobDeps" className="sr-only">
-                                                    Job dependencies
+                                                    Job Dependencies
                                         </label>
                                                 <input
                                                     type="text"
@@ -464,7 +464,7 @@ const JobSubmissionForm = props => {
                                                             }}>
                                                                 <div className="form-group">
                                                                     <label htmlFor="instance">
-                                                                        Select instance
+                                                                        Select Instance
                                                                     </label>
                                                                     <select id="instance" className="form-control" value={instance} onChange={e => setInstance(e.target.value)}>
                                                                         {availableInstances.map(instance =>
@@ -479,7 +479,7 @@ const JobSubmissionForm = props => {
                                                             }}>
                                                                 <div className="form-group">
                                                                     <label htmlFor="cpuReq">
-                                                                        Required CPU units (vCPU/Core, Hyperthread)
+                                                                        Required CPU Units (vCPU/Core, Hyperthread)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -505,7 +505,7 @@ const JobSubmissionForm = props => {
                                                                 </div>
                                                                 <div className="form-group">
                                                                     <label htmlFor="memReq">
-                                                                        Required memory units (MiB)
+                                                                        Required Memory Units (MiB)
                                                                 </label>
                                                                     <input
                                                                         type="number"
@@ -543,7 +543,7 @@ const JobSubmissionForm = props => {
                         </div>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
-                                Submit job
+                                Submit Job
                             </SubmitButton>
                         </div>
                         {jobPosted && <Redirect to="/" />}

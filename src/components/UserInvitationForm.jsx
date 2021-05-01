@@ -99,8 +99,8 @@ const UserInvitationForm = () => {
                                 {roles.length > 0 &&
                                     <div className="form-group mt-3 mb-3">
                                         <label htmlFor="roleSelector">
-                                            Select a role to assign to the invitee
-                                </label>
+                                            Select a role to be assigned to the invitee
+                                        </label>
                                         <select id="roleSelector" className="form-control" value={role} onChange={updateRole}>
                                             <option key="user" value="user">User</option>
                                             <option key="inviter" value="inviter">Inviter</option>
@@ -116,7 +116,7 @@ const UserInvitationForm = () => {
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
-                                    Create invitation
+                                    Create Invitation
                         </SubmitButton>
                             </div>
                         </form>

@@ -79,7 +79,7 @@ const InstanceSubmissionForm = () => {
     return (
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">{label ? `Update instance: '${label}'` : "Add new instance"}</h1>
+                <h1 className="h2">{label ? `Update Instance: '${label}'` : "Add new Instance"}</h1>
             </div>
             {errorMsg ?
                 <div className="invalid-feedback text-center" style={{ display: "block" }}>
@@ -100,7 +100,7 @@ const InstanceSubmissionForm = () => {
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
                                 <label htmlFor="instanceLabel">
-                                    Instance label
+                                    Instance Label
                                 </label>
                                 <input
                                     type="text"

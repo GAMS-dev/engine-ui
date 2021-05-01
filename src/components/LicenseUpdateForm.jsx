@@ -109,7 +109,7 @@ const LicenseUpdateForm = () => {
             {isLoading ? <ClipLoader /> :
                 <div>
                     <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 className="h2">Update license of user: {username}</h1>
+                        <h1 className="h2">Update License of User: {username}</h1>
                     </div>
                     <form
                         className="m-auto"
@@ -124,7 +124,7 @@ const LicenseUpdateForm = () => {
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <label htmlFor="licenseBox">
-                                GAMS license for the user
+                                GAMS License for User
                         </label>
                             <textarea
                                 id="licenseBox"
@@ -137,7 +137,7 @@ const LicenseUpdateForm = () => {
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
-                                Update license
+                                Update License
                         </SubmitButton>
                             {registeredLicense !== "" &&
                                 <button type="submit" className={`btn btn-lg btn-danger btn-block`}

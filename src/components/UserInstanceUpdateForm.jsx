@@ -199,7 +199,7 @@ const UserInstanceUpdateForm = () => {
                                         </div>
                                         <div className="form-group">
                                             <label htmlFor="instancesDefault">
-                                                Default instance
+                                                Default Instance
                                             </label>
                                             <Select
                                                 id="instancesDefault"
@@ -215,8 +215,8 @@ const UserInstanceUpdateForm = () => {
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
-                                    Update instances
-                                        </SubmitButton>
+                                    Update Instances
+                                </SubmitButton>
                             </div>
                         </form>)}
                 {userEdited && <Redirect to="/users" />}
