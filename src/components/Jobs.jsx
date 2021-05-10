@@ -367,8 +367,8 @@ const Jobs = () => {
               &nbsp;
               <span className="flex-grow-1">
                 {filterActive
-                  ? "Show all"
-                  : "Show active"}
+                  ? "Show All"
+                  : "Show Active"}
               </span>
             </button>
             <button

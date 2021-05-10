@@ -69,7 +69,7 @@ const AddNamespaceModal = props => {
                                 type="text"
                                 className="form-control"
                                 id="namespaceName"
-                                placeholder="Namespace name"
+                                placeholder="Namespace Name"
                                 value={namespaceName}
                                 onChange={(e) => setNamespaceName(e.target.value)}
                                 required
