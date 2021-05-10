@@ -17,13 +17,14 @@ const SidebarRaw = props => {
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">
           <li className="nav-item">
-            <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users", "/cleanup", "/licenses", "/usage", "/instances", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+            <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users",
+              "/groups", "/cleanup", "/licenses", "/usage", "/instances", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/models" className={`nav-link nav-block${["/models"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
+            <Link to="/models" className={`nav-link nav-block${["/models", "/groups"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
               <Package className="feather" />
               <span className="nav-link-text">Models</span>
             </Link>

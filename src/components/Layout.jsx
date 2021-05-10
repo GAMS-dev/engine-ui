@@ -26,6 +26,7 @@ import { ServerInfoContext } from "../ServerInfoContext";
 import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
 import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
+import GroupMembers from "./GroupMembers";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -77,7 +78,10 @@ const Layout = () => {
                 <Route exact path="/models/:namespace/:updateModel?">
                   <ModelSubmissionForm />
                 </Route>
-                <Route exact path="/models">
+                <Route exact path="/groups/:namespace/:label">
+                  <GroupMembers />
+                </Route>
+                <Route exact path={["/models", "/groups"]}>
                   <Models />
                 </Route>
                 {(roles && roles.includes('admin') !== undefined) &&

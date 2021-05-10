@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
-import { Send, Folder, RefreshCw, Trash2, Save } from "react-feather";
-import { Link } from "react-router-dom";
+import { Send, Folder, RefreshCw, Trash2, Save, Users } from "react-feather";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import Table from "./Table";
@@ -10,21 +10,27 @@ import AddNamespaceModal from "./AddNamespaceModal";
 import RemoveNamespaceModal from "./RemoveNamespaceModal";
 import { getResponseError } from "./util";
 import axios from "axios";
+import AddUserGroupModal from "./AddUserGroupModal";
+import GroupActionsButtonGroup from "./GroupActionsButtonGroup";
+import { Tab, Tabs } from "react-bootstrap";
 
 const Models = () => {
+  const location = useLocation();
+  const history = useHistory();
   const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
   const [refresh, setRefresh] = useState(0);
   const [refreshModels, setRefreshModels] = useState(0);
+  const [tabSelected, setTabSelected] = useState(location.pathname === "/models" ? "models" : "groups");
   const [isLoading, setIsLoading] = useState(true);
   const [models, setModels] = useState([]);
+  const [userGroups, setUserGroups] = useState([]);
   const [namespace, setNamespace] = useState({ name: "", permission: 0 });
   const [availableNamespaces, setAvailableNamespaces] = useState([]);
+  const [showGroupModal, setShowGroupModal] = useState(false);
   const [showNsModal, setShowNsModal] = useState(false);
   const [showRemoveNsModal, setShowRemoveNsModal] = useState(false);
-
-  const [displayFields, setDisplayFields] = useState([]);
 
   useEffect(() => {
     axios
@@ -50,8 +56,36 @@ const Models = () => {
   }, [jwt, server, refresh, setAlertMsg]);
 
   useEffect(() => {
+    if (!namespace || namespace.name === "") {
+      return;
+    }
     setIsLoading(true);
-    if (namespace.name !== "") {
+    if (tabSelected === "groups") {
+      axios
+        .get(`${server}/namespaces/${namespace.name}/user/groups`)
+        .then(res => {
+          if (res.status !== 200) {
+            setAlertMsg("An error occurred while retrieving user groups. Please try again later.");
+            setIsLoading(false);
+            return;
+          }
+          const groupsTmp = res.data
+            .map(group => ({
+              id: group.label,
+              label: group.label,
+              created_at: group.created_at,
+              created_by: group.created_by.username,
+              no_members: group.members.length
+            }))
+            .sort((a, b) => ('' + a.label).localeCompare(b.label));
+          setUserGroups(groupsTmp);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          setAlertMsg(`Problems while retrieving user groups. Error message: ${getResponseError(err)}.`);
+          setIsLoading(false);
+        });
+    } else {
       axios
         .get(`${server}/namespaces/${namespace.name}`)
         .then(res => {
@@ -72,46 +106,14 @@ const Models = () => {
           } else {
             setModels([]);
           }
-          const newDisplayFields = [{
-            field: "name",
-            column: "Model",
-            sorter: "alphabetical",
-            displayer: String
-          },
-          {
-            field: "upload_date",
-            column: "Upload date",
-            sorter: "datetime",
-            displayer: e => <TimeDisplay time={e} />
-          },
-          {
-            field: "arguments",
-            column: "Arguments",
-            sorter: "alphabetical-array",
-            displayer: args => args.join(",")
-          },
-          {
-            field: "id",
-            column: "Actions",
-            displayer: id => (
-              <ModelActionsButtonGroup
-                id={id}
-                namespace={namespace}
-                server={server}
-                setRefresh={setRefreshModels} />
-            )
-          }];
-          setDisplayFields(newDisplayFields);
           setIsLoading(false);
         })
         .catch(err => {
           setAlertMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
           setIsLoading(false);
         });
-    } else {
-      setIsLoading(false);
     }
-  }, [server, namespace, refreshModels, setAlertMsg]);
+  }, [server, namespace, refreshModels, setAlertMsg, tabSelected]);
 
   const updateNamespace = e => {
     if (e.target.dataset.ns) {
@@ -120,12 +122,6 @@ const Models = () => {
         permission: parseInt(e.target.dataset.permission, 10)
       })
     }
-  }
-  const openAddNsModal = () => {
-    setShowNsModal(true);
-  }
-  const openRemoveNsModal = () => {
-    setShowRemoveNsModal(true);
   }
   const handleAddNamespace = () => {
     setAlertMsg("success:Namespace successfully added!");
@@ -156,7 +152,9 @@ const Models = () => {
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-primary"
-                    onClick={openAddNsModal}
+                    onClick={() => {
+                      setShowNsModal(true);
+                    }}
                   >
                     Add Namespace
                     <Folder width="12px" className="ml-2" />
@@ -171,12 +169,24 @@ const Models = () => {
                 </>
               }
               {(namespace.permission && 2) === 2 &&
-                <Link to={`/models/${namespace.name}`}>
-                  <button type="button" className="btn btn-sm btn-outline-primary">
-                    Add Model
-                    <Send width="12px" className="ml-2" />
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => {
+                      setShowGroupModal(true);
+                    }}
+                  >
+                    Add Group
+                    <Users width="12px" className="ml-2" />
                   </button>
-                </Link>
+                  <Link to={`/models/${namespace.name}`}>
+                    <button type="button" className="btn btn-sm btn-outline-primary">
+                      Add Model
+                    <Send width="12px" className="ml-2" />
+                    </button>
+                  </Link>
+                </>
               }
               <button
                 type="button"
@@ -206,7 +216,9 @@ const Models = () => {
                     <button
                       type="button"
                       className="btn btn-sm btn-danger"
-                      onClick={openRemoveNsModal}
+                      onClick={() => {
+                        setShowRemoveNsModal(true);
+                      }}
                     >
                       <Trash2 width="14px" />
                     </button>
@@ -217,19 +229,100 @@ const Models = () => {
           </ul>
         </div>
         <div className="col-md-8 col-12 order-4 mt-1">
-          <div className="tab-content">
-            <div className="tab-pane active">
+          <Tabs
+            activeKey={tabSelected}
+            onSelect={(k) => {
+              history.push("/" + k);
+              setTabSelected(k)
+            }}>
+            <Tab eventKey="models" title="Models">
               <Table
                 data={models}
                 noDataMsg="No Model Found"
                 isLoading={isLoading}
-                displayFields={displayFields}
+                displayFields={[{
+                  field: "name",
+                  column: "Model",
+                  sorter: "alphabetical",
+                  displayer: String
+                },
+                {
+                  field: "upload_date",
+                  column: "Upload date",
+                  sorter: "datetime",
+                  displayer: e => <TimeDisplay time={e} />
+                },
+                {
+                  field: "arguments",
+                  column: "Arguments",
+                  sorter: "alphabetical-array",
+                  displayer: args => args ? args.join(",") : ""
+                },
+                {
+                  field: "id",
+                  column: "Actions",
+                  displayer: id => (
+                    <ModelActionsButtonGroup
+                      id={id}
+                      namespace={namespace}
+                      server={server}
+                      setRefresh={setRefreshModels} />
+                  )
+                }]}
                 idFieldName="id"
                 sortedAsc={true}
                 sortedCol="name"
               />
-            </div>
-          </div>
+            </Tab>
+            <Tab eventKey="groups" title="Groups">
+              <Table
+                data={userGroups}
+                noDataMsg="No Group Found"
+                isLoading={isLoading}
+                displayFields={[{
+                  field: "label",
+                  column: "Label",
+                  sorter: "alphabetical",
+                  displayer: String
+                },
+                {
+                  field: "created_at",
+                  column: "Created",
+                  sorter: "datetime",
+                  displayer: e => <TimeDisplay time={e} />
+                },
+                {
+                  field: "created_by",
+                  column: "Created By",
+                  sorter: "alphabetical",
+                  displayer: String
+
+                },
+                {
+                  field: "no_members",
+                  column: "Members",
+                  sorter: "numerical",
+                  displayer: Number
+
+                },
+                {
+                  field: "id",
+                  column: "Actions",
+                  displayer: id => (
+                    <GroupActionsButtonGroup
+                      id={id}
+                      namespace={namespace}
+                      server={server}
+                      roles={roles}
+                      setRefresh={setRefreshModels} />
+                  )
+                }]}
+                idFieldName="id"
+                sortedAsc={true}
+                sortedCol="label"
+              />
+            </Tab>
+          </Tabs>
         </div>
       </div>
       <AddNamespaceModal
@@ -242,6 +335,12 @@ const Models = () => {
         showDialog={showRemoveNsModal}
         setShowDialog={setShowRemoveNsModal}
         handleSuccess={handleRemoveNamespace}
+        namespace={namespace.name}
+      />
+      <AddUserGroupModal
+        showDialog={showGroupModal}
+        setShowDialog={setShowGroupModal}
+        handleSuccess={() => setRefresh(cnt => cnt + 1)}
         namespace={namespace.name}
       />
     </>
