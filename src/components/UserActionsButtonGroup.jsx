@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { ServerInfoContext } from "../ServerInfoContext";
 
 const UserActionsButtonGroup = props => {
-  const { id, username, me, isAdmin, isInviter, setUserToDelete, setDeleteInvitation, handleShowDeleteConfirmDialog } = props;
+  const { id, username, me, isAdmin, isInviter,
+    setUserToDelete, setDeleteInvitation,
+    handleShowDeleteConfirmDialog } = props;
+  const [serverInfo] = useContext(ServerInfoContext);
 
   const showConfirmDialog = e => {
     let user = e.target.dataset.user;
@@ -39,9 +43,10 @@ const UserActionsButtonGroup = props => {
               <Dropdown.Item as={Link} to={`/users/${username}/quotas`}>
                 Edit Quotas
               </Dropdown.Item>
-              <Dropdown.Item as={Link} to={`/users/${username}/instances`}>
-                Edit Instances
-              </Dropdown.Item>
+              {serverInfo.in_kubernetes === true &&
+                <Dropdown.Item as={Link} to={`/users/${username}/instances`}>
+                  Edit Instances
+                </Dropdown.Item>}
             </>}
         </DropdownButton>}
       {username !== "admin" && (
