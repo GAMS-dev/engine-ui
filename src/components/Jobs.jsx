@@ -428,11 +428,11 @@ const Jobs = () => {
                 const pageDistance = (i === 0 || i === noPages - 1) ? 0 :
                   Math.abs(currentPage - i);
                 if (pageDistance === 2) {
-                  return <Pagination.Ellipsis key={i} disabled={true} />
+                  return <Pagination.Ellipsis key={'p' + i} disabled={true} />
                 } else if (pageDistance > 1) {
                   return undefined
                 }
-                return <Pagination.Item key={i} active={currentPage === i + 1} onClick={updateCurrentPage}>
+                return <Pagination.Item key={'p' + i} active={currentPage === i + 1} onClick={updateCurrentPage}>
                   {++i}
                 </Pagination.Item>
               })}
