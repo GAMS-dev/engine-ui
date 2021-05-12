@@ -16,7 +16,7 @@ const InstanceSubmissionForm = () => {
     const [errorMsg, setErrorMsg] = useState("")
     const [instanceLabel, setInstanceLabel] = useState("");
     const [cpuReq, setCpuReq] = useState("");
-    const [memReq, setMemReq] = useState();
+    const [memReq, setMemReq] = useState("");
     const [multiplier, setMultiplier] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
