@@ -229,7 +229,21 @@ const JobSubmissionForm = props => {
         setOpenLabelsWrapper(true);
         try {
             const instanceData = await axios.get(`${server}/usage/instances/${username}`);
-            if (instanceData.data.instances_available) {
+            if (roles && roles.includes("admin")) {
+                // admins can see/use all instances
+                const availableInstancesTmp = await axios.get(`${server}/usage/instances`);
+                if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
+                    setAvailableInstances(availableInstancesTmp.data);
+                    if (instanceData.data.default_instance.label != null) {
+                        setInstance(instanceData.data.default_instance.label);
+                    } else {
+                        setInstance(availableInstancesTmp.data[0].label);
+                    }
+                    setUseRawRequests(false);
+                } else {
+                    setUseRawRequests(true);
+                }
+            } else if (instanceData.data && instanceData.data.instances_available.length > 0) {
                 setAvailableInstances(instanceData.data.instances_available);
                 setInstance(instanceData.data.default_instance.label);
                 setUseRawRequests(false);
@@ -453,7 +467,7 @@ const JobSubmissionForm = props => {
                                                         <div id="labelsWrapperContent">
                                                             <ClipLoader loading={!instancesLoaded} />
                                                             {instancesLoaded && availableInstances.length > 0 &&
-                                                                roles && roles.find(role => role === "admin") !== undefined &&
+                                                                roles && roles.includes("admin") &&
                                                                 <div className="form-check mb-3">
                                                                     <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
                                                                         id="useRawRequests" />
