@@ -26,9 +26,11 @@ const UserInstanceUpdateForm = () => {
     const [defaultInstanceInfoMsg, setDefaultInstanceInfoMsg] = useState("");
 
     const [userEdited, setUserEdited] = useState(false);
+    const [userToEditIsAdmin, setUserToEditIsAdmin] = useState(false);
 
     useEffect(() => {
         const fetchRequiredData = async () => {
+            let userToEditIsAdminTmp = false;
             try {
                 if (roles && roles.includes("admin")) {
                     const resMe = await axios
@@ -43,11 +45,36 @@ const UserInstanceUpdateForm = () => {
                         setIsLoading(false);
                         return;
                     }
-                    setInstancesAllowed(resMe.data
+                    const instancesAllowedTmp = resMe.data
                         .map(instance => ({
                             "value": instance.label,
                             "label": instance.label
-                        })));
+                        }));
+                    setInstancesAllowed(instancesAllowedTmp);
+                    const resUserInfo = await axios
+                        .get(`${server}/users/`, {
+                            params: {
+                                username: userToEdit
+                            },
+                            headers: {
+                                "X-Fields": "roles"
+                            }
+                        });
+                    if (resUserInfo.status !== 200) {
+                        setErrorMsg("An error occurred while retrieving user information. Please try again later.");
+                        return;
+                    }
+                    if (!resUserInfo.data || resUserInfo.data.length === 0) {
+                        setErrorMsg("User not found.");
+                        setIsLoading(false);
+                        return;
+                    }
+                    userToEditIsAdminTmp = resUserInfo.data[0].roles &&
+                        resUserInfo.data[0].roles.includes("admin");
+                    setUserToEditIsAdmin(userToEditIsAdminTmp);
+                    if (userToEditIsAdminTmp) {
+                        setSelectedInstancesAllowed(instancesAllowedTmp);
+                    }
                 } else {
                     const resMe = await axios
                         .get(`${server}/usage/instances/${username}`);
@@ -81,24 +108,24 @@ const UserInstanceUpdateForm = () => {
                                 "value": instance.label,
                                 "label": instance.label
                             }));
-                        if (selectedInstances.length === 0) {
-                            setUseRawRequests(true);
-                            return;
-                        }
                         if (resUser.data.instances_inherited_from != null &&
                             resUser.data.instances_inherited_from !== userToEdit) {
                             setInstancesInfoMsg(`Inherited from ${resUser.data.instances_inherited_from}`);
                             setInstancesAllowed(selectedInstances);
                         }
-                        setSelectedInstancesAllowed(selectedInstances);
+                        if (!userToEditIsAdminTmp) {
+                            setSelectedInstancesAllowed(selectedInstances);
+                        }
                     }
                     if (resUser.data.default_inherited_from != null &&
                         resUser.data.default_inherited_from !== userToEdit) {
                         setDefaultInstanceInfoMsg(`Inherited from ${resUser.data.default_inherited_from}`);
                     }
-                    if (resUser.data.default_instance) {
+                    if (resUser.data.default_instance && resUser.data.default_instance.label) {
                         const defaultLabel = resUser.data.default_instance.label;
                         setDefaultInstance({ "value": defaultLabel, "label": defaultLabel });
+                    } else {
+                        setUseRawRequests(true);
                     }
                 }
             }
@@ -127,18 +154,20 @@ const UserInstanceUpdateForm = () => {
             return;
         }
         try {
-            const selectedLabels = selectedInstancesAllowed.map(instance =>
-                instance.value);
             const defaultLabel = defaultInstance.value;
             if (!defaultLabel) {
                 setIsSubmitting(false);
                 setSubmissionErrorMsg(`No default instance selected.`);
                 return;
             }
-            await axios.put(`${server}/usage/instances/${userToEdit}`, {
-                labels: selectedLabels,
+            const requestData = {
                 default_label: defaultLabel
-            });
+            };
+            if (!userToEditIsAdmin) {
+                requestData['labels'] = selectedInstancesAllowed
+                    .map(instance => instance.value);
+            }
+            await axios.put(`${server}/usage/instances/${userToEdit}`, requestData);
             setAlertMsg(`success:Instances of user: ${userToEdit} updated successfully`);
             setUserEdited(true);
         }
@@ -180,28 +209,28 @@ const UserInstanceUpdateForm = () => {
                                     </div>}
                                 {!useRawRequests &&
                                     <>
-                                        <div className="form-group">
-                                            <label htmlFor="instancesAllowed">
-                                                Instances user is allowed to use
+                                        {!userToEditIsAdmin &&
+                                            <div className="form-group">
+                                                <label htmlFor="instancesAllowed">
+                                                    Instances user is allowed to use
                                             </label>
-                                            <div className="invalid-feedback text-center" style={{ display: instancesInfoMsg !== "" ? "block" : "none" }}>
-                                                {instancesInfoMsg}
-                                            </div>
-                                            <Select
-                                                id="instancesAllowed"
-                                                value={selectedInstancesAllowed}
-                                                isMulti={true}
-                                                isSearchable={true}
-                                                onChange={selected => {
-                                                    setSelectedInstancesAllowed(selected);
-                                                    if (!defaultInstance) {
-                                                        setDefaultInstance(selected[0]);
-                                                    }
-                                                }}
-                                                options={instancesAllowed}
-                                            />
-
-                                        </div>
+                                                <div className="invalid-feedback text-center" style={{ display: instancesInfoMsg !== "" ? "block" : "none" }}>
+                                                    {instancesInfoMsg}
+                                                </div>
+                                                <Select
+                                                    id="instancesAllowed"
+                                                    value={selectedInstancesAllowed}
+                                                    isMulti={true}
+                                                    isSearchable={true}
+                                                    onChange={selected => {
+                                                        setSelectedInstancesAllowed(selected);
+                                                        if (!defaultInstance) {
+                                                            setDefaultInstance(selected[0]);
+                                                        }
+                                                    }}
+                                                    options={instancesAllowed}
+                                                />
+                                            </div>}
                                         <div className="form-group">
                                             <label htmlFor="instancesDefault">
                                                 Default Instance
