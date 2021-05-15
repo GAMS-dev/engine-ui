@@ -168,7 +168,7 @@ const Models = () => {
                     </Link>}
                 </>
               }
-              {(namespace.permission && 2) === 2 &&
+              {(namespace.permission & 2) === 2 &&
                 <>
                   <button
                     type="button"
