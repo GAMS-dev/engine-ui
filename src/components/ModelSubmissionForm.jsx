@@ -9,13 +9,13 @@ import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 
 const ModelSubmissionForm = () => {
-    const { namespace, updateModel } = useParams();
+    const { namespace, modelname } = useParams();
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server }] = useContext(AuthContext);
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [errorMsg, setErrorMsg] = useState("")
-    const [modelName, setModelName] = useState("");
+    const [newModelName, setNewModelName] = useState("");
     const [runName, setRunName] = useState("");
     const [modelFiles, setModelFiles] = useState();
     const [clArgs, setClArgs] = useState("");
@@ -27,23 +27,23 @@ const ModelSubmissionForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (!updateModel) {
+        if (!modelname) {
             return;
         }
         setIsLoading(true);
         setErrorMsg("");
         axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`, {
-            params: { model: updateModel }
+            params: { model: modelname }
         })
             .then(res => {
                 if (res.data.length > 0) {
-                    setModelName(updateModel);
-                    setRunName(res.data[0].run ? res.data[0].run : `${updateModel}.gms`);
+                    setNewModelName(modelname);
+                    setRunName(res.data[0].run ? res.data[0].run : `${modelname}.gms`);
                     setClArgs(res.data[0].arguments.join(","));
                     setInexObject(res.data[0].inex);
                     setIsLoading(false);
                 } else {
-                    setErrorMsg(`Model: ${updateModel} does not exist in namespace: ${namespace}`);
+                    setErrorMsg(`Model: ${modelname} does not exist in namespace: ${namespace}`);
                     setIsLoading(false);
                 }
             })
@@ -51,10 +51,10 @@ const ModelSubmissionForm = () => {
                 setErrorMsg(`Problems while while retrieving model info. Error message: ${getResponseError(err)}.`);
                 setIsLoading(false);
             });
-    }, [server, updateModel, namespace]);
+    }, [server, modelname, namespace]);
 
     const handleModelSubmission = () => {
-        if (modelName.toLowerCase().endsWith(".gms")) {
+        if (newModelName.toLowerCase().endsWith(".gms")) {
             setSubmissionErrorMsg("Model name must not end with '.gms'!");
             return;
         }
@@ -63,7 +63,7 @@ const ModelSubmissionForm = () => {
         setIsSubmitting(true);
         const modelSubmissionForm = new FormData();
         if (!modelFiles || modelFiles.length === 0) {
-            if (!updateModel) {
+            if (!modelname) {
                 setSubmissionErrorMsg("No model data provided!");
                 setIsSubmitting(false);
                 return;
@@ -89,25 +89,25 @@ const ModelSubmissionForm = () => {
             for (let i = 0; i < splitClArgs.length; i++) {
                 modelSubmissionForm.append("arguments", splitClArgs[i].trim());
             }
-        } else if (updateModel) {
+        } else if (modelname) {
             modelSubmissionForm.append("delete_arguments", "true");
         }
 
         if (inexJSON !== "") {
             modelSubmissionForm.append("inex_file", new Blob([inexJSON],
                 { type: "application/json" }), "inex.json");
-        } else if (updateModel) {
+        } else if (modelname) {
             modelSubmissionForm.append("delete_inex_file", "true");
         }
-        if (runName !== "" && runName !== `${modelName}.gms`) {
+        if (runName !== "" && runName !== `${newModelName}.gms`) {
             modelSubmissionForm.append("run", runName);
-        } else if (updateModel) {
+        } else if (modelname) {
             modelSubmissionForm.append("delete_run", "true");
         }
         Promise.all(promisesToAwait).then(() => {
             axios({
-                method: updateModel ? 'patch' : 'post',
-                url: `${server}/namespaces/${encodeURIComponent(namespace)}/${encodeURIComponent(modelName)}`,
+                method: modelname ? 'patch' : 'post',
+                url: `${server}/namespaces/${encodeURIComponent(namespace)}/${encodeURIComponent(newModelName)}`,
                 data: modelSubmissionForm,
                 headers: {
                     "Content-Type": "multipart/form-data"
@@ -115,35 +115,35 @@ const ModelSubmissionForm = () => {
             })
                 .then(res => {
                     let successCode;
-                    if (updateModel) {
+                    if (modelname) {
                         successCode = 200;
                     } else {
                         successCode = 201;
                     }
                     if (res.status !== successCode) {
-                        setSubmissionErrorMsg(`An error occurred while ${updateModel ? "updating" : "registering"} model. Please try again later.`);
+                        setSubmissionErrorMsg(`An error occurred while ${modelname ? "updating" : "registering"} model. Please try again later.`);
                         setIsSubmitting(false);
                         return;
                     }
                     setIsSubmitting(false);
-                    setAlertMsg(`success:Model successfully ${updateModel ? "updated" : "added"}!`);
+                    setAlertMsg(`success:Model successfully ${modelname ? "updated" : "added"}!`);
                     setModelAdded(true);
                 })
                 .catch(err => {
-                    setSubmissionErrorMsg(`Problems while ${updateModel ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
+                    setSubmissionErrorMsg(`Problems while ${modelname ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
                     setIsSubmitting(false);
                 });
         })
             .catch(err => {
-                setSubmissionErrorMsg(`Problems while ${updateModel ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
+                setSubmissionErrorMsg(`Problems while ${modelname ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
             });
     }
     const updateModelFiles = e => {
         setModelFiles([...e.target.files]);
         const modelNameTmp = e.target.files[0].name.split(".")[0];
-        if (modelName === "") {
-            setModelName(modelNameTmp)
+        if (newModelName === "") {
+            setNewModelName(modelNameTmp)
         }
         if (runName === "") {
             setRunName(`${modelNameTmp}.gms`)
@@ -153,7 +153,7 @@ const ModelSubmissionForm = () => {
     return (
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">{updateModel ? `Update model: '${updateModel}' in namespace:` : "Add a model to namespace:"} {`'${namespace}'`}</h1>
+                <h1 className="h2">{modelname ? `Update model: '${modelname}' in namespace:` : "Add a model to namespace:"} {`'${namespace}'`}</h1>
             </div>
             {errorMsg ?
                 <div className="invalid-feedback text-center" style={{ display: "block" }}>
@@ -178,27 +178,27 @@ const ModelSubmissionForm = () => {
                                         id="modelFiles"
                                         multiple
                                         onChange={updateModelFiles}
-                                        required={!updateModel}
+                                        required={!modelname}
                                     />
                                     <label className="custom-file-label" htmlFor="modelFiles">
                                         {modelFiles ?
                                             `${modelFiles[0].name}${modelFiles.length > 1 ? ", ..." : ""}`
-                                            : updateModel ? "Update Model Files..." : "Model Files..."}
+                                            : modelname ? "Update Model Files..." : "Model Files..."}
                                     </label>
                                 </div>
                             </div>
-                            {!updateModel && <div className="form-group">
-                                <label htmlFor="modelName" className="sr-only">
+                            {!modelname && <div className="form-group">
+                                <label htmlFor="newModelName" className="sr-only">
                                     Model Name
                                 </label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="modelName"
+                                    id="newModelName"
                                     placeholder="Identifier for the model"
                                     autoComplete="on"
-                                    value={modelName}
-                                    onChange={e => setModelName(e.target.value)}
+                                    value={newModelName}
+                                    onChange={e => setNewModelName(e.target.value)}
                                     required
                                 />
                             </div>}
@@ -237,10 +237,10 @@ const ModelSubmissionForm = () => {
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
-                                {updateModel ? "Update Model" : "Add Model"}
+                                {modelname ? "Update Model" : "Add Model"}
                             </SubmitButton>
                         </div>
-                        {modelAdded && <Redirect to="/models" />}
+                        {modelAdded && <Redirect to={`/models/${encodeURIComponent(namespace)}`} />}
                     </form>
                 )}
         </div>

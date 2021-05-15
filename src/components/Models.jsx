@@ -1,6 +1,6 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useContext, useState, useRef } from "react";
 import { Send, Folder, RefreshCw, Trash2, Save, Users } from "react-feather";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { Link, useHistory, useLocation, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import Table from "./Table";
@@ -17,12 +17,14 @@ import { Tab, Tabs } from "react-bootstrap";
 const Models = () => {
   const location = useLocation();
   const history = useHistory();
+  const { selectedNs } = useParams();
+  const refSelectedNs = useRef(selectedNs);
   const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
   const [refresh, setRefresh] = useState(0);
   const [refreshModels, setRefreshModels] = useState(0);
-  const [tabSelected, setTabSelected] = useState(location.pathname === "/models" ? "models" : "groups");
+  const [tabSelected, setTabSelected] = useState(location.pathname.startsWith("/models") ? "models" : "groups");
   const [isLoading, setIsLoading] = useState(true);
   const [models, setModels] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
@@ -48,7 +50,16 @@ const Models = () => {
           return;
         }
         setAvailableNamespaces(availableNsTmp);
-        setNamespace(availableNsTmp[0]);
+        if (refSelectedNs.current) {
+          const nsIdx = availableNsTmp.findIndex(el => el.name === refSelectedNs.current);
+          if (nsIdx === -1) {
+            setNamespace(availableNsTmp[0]);
+          } else {
+            setNamespace(availableNsTmp[nsIdx]);
+          }
+        } else {
+          setNamespace(availableNsTmp[0]);
+        }
       })
       .catch(err => {
         setAlertMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
@@ -61,6 +72,7 @@ const Models = () => {
     }
     setIsLoading(true);
     if (tabSelected === "groups") {
+      history.push("/groups/" + encodeURIComponent(namespace.name));
       axios
         .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user/groups`)
         .then(res => {
@@ -86,6 +98,7 @@ const Models = () => {
           setIsLoading(false);
         });
     } else {
+      history.push("/models/" + encodeURIComponent(namespace.name));
       axios
         .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}`)
         .then(res => {
@@ -113,7 +126,7 @@ const Models = () => {
           setIsLoading(false);
         });
     }
-  }, [server, namespace, refreshModels, setAlertMsg, tabSelected]);
+  }, [server, namespace, history, refreshModels, setAlertMsg, tabSelected]);
 
   const updateNamespace = e => {
     if (e.target.dataset.ns) {
@@ -180,7 +193,7 @@ const Models = () => {
                     Add Group
                     <Users width="12px" className="ml-2" />
                   </button>
-                  <Link to={`/models/${namespace.name}`}>
+                  <Link to={`/models/${encodeURIComponent(namespace.name)}/new`}>
                     <button type="button" className="btn btn-sm btn-outline-primary">
                       Add Model
                     <Send width="12px" className="ml-2" />
@@ -232,7 +245,7 @@ const Models = () => {
           <Tabs
             activeKey={tabSelected}
             onSelect={(k) => {
-              history.push("/" + k);
+              history.push(`/${k}/${encodeURIComponent(namespace.name)}`);
               setTabSelected(k)
             }}>
             <Tab eventKey="models" title="Models">

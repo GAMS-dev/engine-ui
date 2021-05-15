@@ -134,7 +134,7 @@ const NamespaceQuotaUpdateForm = () => {
                                     Update Quota
                             </SubmitButton>
                             </div>
-                            {quotaEdited && <Redirect to="/models" />}
+                            {quotaEdited && <Redirect to={`/models/${encodeURIComponent(namespace)}`} />}
                         </form>)}
             </div>
         </>

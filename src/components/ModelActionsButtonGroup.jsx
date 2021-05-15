@@ -49,7 +49,7 @@ const ModelActionsButtonGroup = props => {
                 </DownloadLink>}
           {(namespace.permission & 2) === 2 &&
             <>
-              <Link to={`/models/${namespace.name}/${id}`} className="btn btn-sm btn-outline-info">
+              <Link to={`/models/${encodeURIComponent(namespace.name)}/${encodeURIComponent(id)}`} className="btn btn-sm btn-outline-info">
                 Update
               </Link>
               <button className="btn btn-sm btn-outline-danger" onClick={() => setShowDeleteModelDialog(true)}>Delete</button>

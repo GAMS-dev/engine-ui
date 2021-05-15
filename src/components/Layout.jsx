@@ -75,13 +75,13 @@ const Layout = () => {
                 <Route exact path="/new-user">
                   <UserInvitationForm />
                 </Route>
-                <Route exact path="/models/:namespace/:updateModel?">
+                <Route exact path={["/models/:namespace/new", "/models/:namespace/:modelname"]}>
                   <ModelSubmissionForm />
                 </Route>
                 <Route exact path="/groups/:namespace/:label">
                   <GroupMembers />
                 </Route>
-                <Route exact path={["/models", "/groups"]}>
+                <Route exact path={["/models/:selectedNs?", "/groups/:selectedNs?"]}>
                   <Models />
                 </Route>
                 {(roles && roles.includes('admin') !== undefined) &&
