@@ -23,12 +23,21 @@ const QuotaWidget = () => {
                 );
                 if (result.data && result.data.length) {
                     const volumeLeft = Math.min(...result.data
-                        .map(el => el.volume_quota - el.volume_used));
+                        .map(el => (el.volume_quota == null ? Infinity : el.volume_quota) - el.volume_used));
                     const diskLeft = Math.min(...result.data
-                        .map(el => Math.round((el.disk_quota - el.disk_used) / 1e4) / 100));
-                    setData([`Volume: ${volumeLeft}`, `Disk: ${diskLeft} MB`]);
+                        .map(el => Math.round(((el.disk_quota == null ? Infinity : el.disk_quota) - el.disk_used) / 1e4) / 100));
+                    setData([{
+                        key: 'volume',
+                        text: `Volume: ${volumeLeft === Infinity ? 'unlimited' : volumeLeft}\n`,
+                        val: volumeLeft < 10000 ? 'text-danger' : ''
+                    },
+                    {
+                        key: 'disk',
+                        text: `Disk: ${diskLeft === Infinity ? 'unlimited' : diskLeft + 'MB'}`,
+                        className: diskLeft < 100 ? 'text-danger' : ''
+                    }]);
                 } else {
-                    setData(['Volume: unlimited', 'Disk: unlimited']);
+                    setData(['Volume: unlimited\n', 'Disk: unlimited']);
                 }
             }
             catch (err) {
@@ -49,7 +58,15 @@ const QuotaWidget = () => {
                 delay={{ hide: 600 }}
                 overlay={
                     <Tooltip id="quota-tooltip">
-                        {data ? <span className="pre-line">{data.join('\n')}</span> : <ClipLoader size={12} />}
+                        {data ?
+                            <span className="pre-line">
+                                {data.map(quotaEl =>
+                                    <span key={quotaEl.key}
+                                        className={quotaEl.className}>
+                                        {quotaEl.text}
+                                    </span>)}
+                            </span> :
+                            <ClipLoader size={12} />}
                     </Tooltip>
                 }
             >
