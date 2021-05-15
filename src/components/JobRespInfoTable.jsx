@@ -36,7 +36,7 @@ const JobRespInfoTable = props => {
     setIsSubmitting(true);
     axios
       .delete(
-        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/result`
+        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${encodeURIComponent(job.token)}/result`
       )
       .then(() => {
         setIsSubmitting(false);
@@ -118,7 +118,7 @@ const JobRespInfoTable = props => {
                 &nbsp;
                 {textEntry &&
                         <DownloadLink
-                          url={`${server}/jobs/${job.token}/text-entry/${textEntry}`}
+                          url={`${server}/jobs/${encodeURIComponent(job.token)}/text-entry/${encodeURIComponent(textEntry)}`}
                           filename={textEntry}
                           jsonSubkey="entry_value">
                           <FileText size={18} />
@@ -200,7 +200,8 @@ const JobRespInfoTable = props => {
           {job.result_exists && (job.status >= 10 || (isHcJob && job.status === -3)) ? <tr>
             <th>Result ZIP</th>
             <td>
-              <DownloadLink url={isHcJob ? `${server}/hypercube/${job.token}/result` : `${server}/jobs/${job.token}/result`} filename="results.zip"
+              <DownloadLink url={isHcJob ? `${server}/hypercube/${encodeURIComponent(job.token)}/result` :
+                `${server}/jobs/${encodeURIComponent(job.token)}/result`} filename="results.zip"
                 className="btn btn-sm btn-outline-info">
                 Download
               </DownloadLink>

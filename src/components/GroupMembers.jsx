@@ -61,7 +61,7 @@ const GroupMembers = () => {
         }
         setIsLoading(true);
         axios
-            .get(`${server}/namespaces/${namespace}/user/groups`)
+            .get(`${server}/namespaces/${encodeURIComponent(namespace)}/user/groups`)
             .then(res => {
                 if (res.status !== 200) {
                     setAlertMsg("An error occurred while retrieving group members. Please try again later.");
@@ -121,7 +121,7 @@ const GroupMembers = () => {
         setSubmissionErrorMsg("");
         setIsSubmitting(true);
         axios
-            .post(`${server}/namespaces/${namespace}/user/groups/${label}`, null, {
+            .post(`${server}/namespaces/${encodeURIComponent(namespace)}/user/groups/${encodeURIComponent(label)}`, null, {
                 params: {
                     username: userToAdd.value
                 }

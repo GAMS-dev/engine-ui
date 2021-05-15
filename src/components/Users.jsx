@@ -76,15 +76,20 @@ const Users = props => {
   ]);
 
   const deleteUser = () => {
+    const deleteRequestParams = {};
+    if (deleteInvitation) {
+      deleteRequestParams['token'] = userToDelete;
+    } else {
+      deleteRequestParams['username'] = userToDelete;
+      deleteRequestParams['delete_results'] = deleteResults;
+    }
     axios
       .delete(
         deleteInvitation ?
-          `${server}/users/invitation?token=${userToDelete}` :
-          `${server}/users/?username=${userToDelete}`,
-        deleteInvitation ? {} : {
-          params: {
-            delete_results: deleteResults
-          }
+          `${server}/users/invitation` :
+          `${server}/users/`,
+        {
+          params: deleteRequestParams
         }
       )
       .then(() => {

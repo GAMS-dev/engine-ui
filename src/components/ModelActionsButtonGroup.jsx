@@ -19,7 +19,7 @@ const ModelActionsButtonGroup = props => {
     setIsSubmitting(true);
     axios
       .delete(
-        `${server}/namespaces/${namespace.name}/${id}`,
+        `${server}/namespaces/${encodeURIComponent(namespace.name)}/${encodeURIComponent(id)}`,
         {}
       )
       .then(res => {
@@ -41,7 +41,9 @@ const ModelActionsButtonGroup = props => {
       {namespace &&
         <div className="btn-group">
           {(namespace.permission & 4) === 4 &&
-            <DownloadLink url={`${server}/namespaces/${namespace.name}/${id}`} filename={`${id}.zip`}
+            <DownloadLink
+              url={`${server}/namespaces/${encodeURIComponent(namespace.name)}/${encodeURIComponent(id)}`}
+              filename={`${id}.zip`}
               className="btn btn-sm btn-outline-info">
               Download
                 </DownloadLink>}

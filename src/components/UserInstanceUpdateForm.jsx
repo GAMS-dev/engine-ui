@@ -77,7 +77,7 @@ const UserInstanceUpdateForm = () => {
                     }
                 } else {
                     const resMe = await axios
-                        .get(`${server}/usage/instances/${username}`);
+                        .get(`${server}/usage/instances/${encodeURIComponent(username)}`);
                     if (resMe.status !== 200) {
                         setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
                         return;
@@ -96,7 +96,7 @@ const UserInstanceUpdateForm = () => {
                         })));
                 }
                 const resUser = await axios
-                    .get(`${server}/usage/instances/${userToEdit}`);
+                    .get(`${server}/usage/instances/${encodeURIComponent(userToEdit)}`);
                 if (resUser.status !== 200) {
                     setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
                     return;
@@ -143,7 +143,7 @@ const UserInstanceUpdateForm = () => {
         setIsSubmitting(true);
         if (useRawRequests) {
             try {
-                await axios.delete(`${server}/usage/instances/${userToEdit}`);
+                await axios.delete(`${server}/usage/instances/${encodeURIComponent(userToEdit)}`);
                 setAlertMsg(`success:Instances of user: ${userToEdit} updated successfully`);
                 setUserEdited(true);
             }
@@ -167,7 +167,7 @@ const UserInstanceUpdateForm = () => {
                 requestData['labels'] = selectedInstancesAllowed
                     .map(instance => instance.value);
             }
-            await axios.put(`${server}/usage/instances/${userToEdit}`, requestData);
+            await axios.put(`${server}/usage/instances/${encodeURIComponent(userToEdit)}`, requestData);
             setAlertMsg(`success:Instances of user: ${userToEdit} updated successfully`);
             setUserEdited(true);
         }

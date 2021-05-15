@@ -44,7 +44,7 @@ const LicUpdateButton = props => {
         if (showDialog) {
             setIsSubmitting(true);
             setSubmissionErrorMsg("");
-            axios.get(`${server}/licenses/${path}`)
+            axios.get(`${server}/licenses/${encodeURIComponent(path)}`)
                 .then(res => {
                     if (res.status !== 200) {
                         setIsSubmitting(false);
@@ -111,7 +111,7 @@ const LicUpdateButton = props => {
             licenseUpdateForm.append("license", licenseTrimmed);
         }
         try {
-            const res = await axios.put(`${server}/licenses/${path}`, licenseUpdateForm);
+            const res = await axios.put(`${server}/licenses/${encodeURIComponent(path)}`, licenseUpdateForm);
             if (res.status !== 200) {
                 setSubmissionErrorMsg("An unexpected error occurred while updating license. Please try again later.");
                 setIsSubmitting(false);

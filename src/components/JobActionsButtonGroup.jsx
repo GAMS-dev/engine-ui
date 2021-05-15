@@ -13,7 +13,8 @@ const JobActionsButtonGroup = props => {
       </Link>
       {status > 9 &&
         <DownloadLink
-          url={token.startsWith("hc:") ? `${server}/hypercube/${token.substring(3)}/result` : `${server}/jobs/${token}/result`}
+          url={token.startsWith("hc:") ? `${server}/hypercube/${encodeURIComponent(token.substring(3))}/result` :
+            `${server}/jobs/${encodeURIComponent(token)}/result`}
           filename="results.zip"
           className="btn btn-sm btn-outline-info">
           Download

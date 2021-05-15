@@ -59,8 +59,12 @@ const Jobs = () => {
     {
       field: "token,status",
       column: "Actions",
-      displayer: (e, status) => <JobActionsButtonGroup token={e} status={status} server={server}
-        setRefresh={setRefresh} />
+      displayer: (e, status) =>
+        <JobActionsButtonGroup
+          token={e}
+          status={status}
+          server={server}
+          setRefresh={setRefresh} />
     }
   ];
   const [displayFields, setDisplayFields] = useState(isInviter ?

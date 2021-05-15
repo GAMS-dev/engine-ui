@@ -62,7 +62,7 @@ const Models = () => {
     setIsLoading(true);
     if (tabSelected === "groups") {
       axios
-        .get(`${server}/namespaces/${namespace.name}/user/groups`)
+        .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user/groups`)
         .then(res => {
           if (res.status !== 200) {
             setAlertMsg("An error occurred while retrieving user groups. Please try again later.");
@@ -87,7 +87,7 @@ const Models = () => {
         });
     } else {
       axios
-        .get(`${server}/namespaces/${namespace.name}`)
+        .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}`)
         .then(res => {
           if (res.status !== 200) {
             setAlertMsg("An error occurred while retrieving registered models. Please try again later.");
@@ -147,7 +147,7 @@ const Models = () => {
         <div className="col-md-8 col-12 mt-1 order-2 order-md-1">
           <div className="btn-toolbar mb-2 mb-md-0 float-right">
             <div className="btn-group mr-2">
-              {(roles.find(role => role === "admin") !== undefined) &&
+              {roles && roles.includes("admin") &&
                 <>
                   <button
                     type="button"

@@ -15,7 +15,7 @@ const SolveTraceEntryView = props => {
         const fetchStreamEntry = () => {
             axios
             [jobFinished ? 'get' : 'delete'](
-                `${server}/jobs/${token}/${jobFinished ? 'text-entry' : 'stream-entry'}/${solveTraceEntry}`
+                `${server}/jobs/${encodeURIComponent(token)}/${jobFinished ? 'text-entry' : 'stream-entry'}/${encodeURIComponent(solveTraceEntry)}`
             )
                 .then(res => {
                     try {

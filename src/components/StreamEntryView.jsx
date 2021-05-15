@@ -24,8 +24,8 @@ const StreamEntryView = props => {
         const fetchStreamEntry = () => {
             axios
                 .delete(
-                    isStdOut ? `${server}/jobs/${token}/unread-logs` :
-                        `${server}/jobs/${token}/stream-entry/${streamEntry}`
+                    isStdOut ? `${server}/jobs/${encodeURIComponent(token)}/unread-logs` :
+                        `${server}/jobs/${encodeURIComponent(token)}/stream-entry/${encodeURIComponent(streamEntry)}`
                 )
                 .then(res => {
                     setEntryValue(el => el + res.data[isStdOut ? "message" : "entry_value"]);

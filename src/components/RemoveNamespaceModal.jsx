@@ -20,7 +20,7 @@ const RemoveNamespaceModal = props => {
     setIsSubmitting(true);
     axios
       .delete(
-        `${server}/namespaces/${namespace}`
+        `${server}/namespaces/${encodeURIComponent(namespace)}`
       )
       .then(res => {
         setIsSubmitting(false);

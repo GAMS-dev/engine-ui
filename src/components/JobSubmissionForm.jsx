@@ -73,7 +73,7 @@ const JobSubmissionForm = props => {
     useEffect(() => {
         if (namespace !== "") {
             axios
-                .get(`${server}/namespaces/${namespace}`)
+                .get(`${server}/namespaces/${encodeURIComponent(namespace)}`)
                 .then(res => {
                     if (res.status !== 200) {
                         setSubmissionErrorMsg("An error occurred while retrieving registered models. Please try again later.");
@@ -228,7 +228,7 @@ const JobSubmissionForm = props => {
         }
         setOpenLabelsWrapper(true);
         try {
-            const instanceData = await axios.get(`${server}/usage/instances/${username}`);
+            const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
             if (roles && roles.includes("admin")) {
                 // admins can see/use all instances
                 const availableInstancesTmp = await axios.get(`${server}/usage/instances`);

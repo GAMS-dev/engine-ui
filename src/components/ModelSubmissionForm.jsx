@@ -32,7 +32,7 @@ const ModelSubmissionForm = () => {
         }
         setIsLoading(true);
         setErrorMsg("");
-        axios.get(`${server}/namespaces/${namespace}`, {
+        axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`, {
             params: { model: updateModel }
         })
             .then(res => {
@@ -107,7 +107,7 @@ const ModelSubmissionForm = () => {
         Promise.all(promisesToAwait).then(() => {
             axios({
                 method: updateModel ? 'patch' : 'post',
-                url: `${server}/namespaces/${namespace}/${modelName}`,
+                url: `${server}/namespaces/${encodeURIComponent(namespace)}/${encodeURIComponent(modelName)}`,
                 data: modelSubmissionForm,
                 headers: {
                     "Content-Type": "multipart/form-data"

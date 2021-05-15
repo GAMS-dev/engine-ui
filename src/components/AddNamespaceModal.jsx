@@ -27,7 +27,7 @@ const AddNamespaceModal = props => {
         }
         axios
             .post(
-                `${server}/namespaces/${namespaceName}`
+                `${server}/namespaces/${encodeURIComponent(namespaceName)}`
             )
             .then(res => {
                 setIsSubmitting(false);

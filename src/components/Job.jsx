@@ -61,7 +61,7 @@ const Job = () => {
     } else {
       setIsHcJob(false);
       jobDataPromise = axios
-        .get(`${server}/jobs/${token}`, {
+        .get(`${server}/jobs/${encodeURIComponent(token)}`, {
           headers: { "X-Fields": fields.join(", ") }
         })
         .then(res => {
@@ -77,7 +77,7 @@ const Job = () => {
           if (jobData.is_temporary_model) {
             setJob(jobData);
           } else {
-            axios.get(`${server}/namespaces/${jobData.namespace}`, {
+            axios.get(`${server}/namespaces/${encodeURIComponent(jobData.namespace)}`, {
               params: {
                 model: jobData.model
               },

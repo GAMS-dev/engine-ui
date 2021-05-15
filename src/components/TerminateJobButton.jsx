@@ -11,7 +11,8 @@ const TerminateJobButton = props => {
     function terminateJob(hardKill = false) {
         axios
             .delete(
-                token.startsWith("hc:") ? `${server}/hypercube/${token.substring(3)}?hard_kill=${hardKill}` : `${server}/jobs/${token}?hard_kill=${hardKill}`,
+                token.startsWith("hc:") ? `${server}/hypercube/${encodeURIComponent(token.substring(3))}?hard_kill=${hardKill}` :
+                    `${server}/jobs/${encodeURIComponent(token)}?hard_kill=${hardKill}`,
                 {}
             )
             .then(() => {

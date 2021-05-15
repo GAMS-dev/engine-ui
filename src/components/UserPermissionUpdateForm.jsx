@@ -116,7 +116,7 @@ const UserUpdateForm = () => {
             userUpdateForm.append("username", username);
             userUpdateForm.append("permissions", nsPerm.perm);
             try {
-                const res = await axios.put(`${server}/namespaces/${nsPerm.name}/permissions`,
+                const res = await axios.put(`${server}/namespaces/${encodeURIComponent(nsPerm.name)}/permissions`,
                     userUpdateForm);
                 if (res.status !== 200) {
                     setSubmissionErrorMsg("An unexpected error occurred while updating user permissions. Please try again later.");
