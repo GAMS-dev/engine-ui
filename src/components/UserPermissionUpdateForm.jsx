@@ -38,7 +38,7 @@ const UserUpdateForm = () => {
         const fetchRequiredData = async () => {
             const requests = [
                 axios
-                    .get(`${server}/namespaces/permissions/me`)
+                    .get(`${server}/namespaces/`)
                     .then(res => {
                         if (res.status !== 200) {
                             setErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
@@ -46,7 +46,7 @@ const UserUpdateForm = () => {
                         }
                         const nsPerm = res.data.map(el => ({
                             name: el.name,
-                            perm: el.permission,
+                            perm: el.permissions.filter(perm => perm.username === username).map(el => el.permission)[0],
                             maxPerm: 7
                         }));
                         setNamespacePermissions(nsPerm);
@@ -65,7 +65,8 @@ const UserUpdateForm = () => {
                             setErrorMsg("An error occurred while retrieving user roles. Please try again later.");
                             return;
                         }
-                        setCurrentRole(res.data[0].roles[0]);
+                        const currentRoleTmp = res.data[0].roles[0];
+                        setCurrentRole(currentRoleTmp == null ? "user" : currentRoleTmp);
                     })
                     .catch(err => {
                         setErrorMsg(`Problems while while retrieving user roles. Error message: ${getResponseError(err)}.`);
