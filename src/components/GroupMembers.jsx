@@ -24,7 +24,7 @@ const GroupMembers = () => {
     const [refresh, setRefresh] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [addMemberIsLoading, setAddMemberIsLoading] = useState(true);
-    const [hasWritePerm, setHasWritePerm] = useState(false);
+    const [invitees, setInvitees] = useState([]);
     const [groupMembers, setGroupMembers] = useState([]);
     const [usersToAdd, setUsersToAdd] = useState([]);
     const [userToAdd, setUserToAdd] = useState("");
@@ -33,27 +33,26 @@ const GroupMembers = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
+        if (!isInviter) {
+            return;
+        }
         setIsLoading(true);
         axios
-            .get(`${server}/namespaces/${namespace}/permissions/me`)
+            .get(`${server}/users/`,
+                { headers: { "X-Fields": "username" } })
             .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("An error occurred while retrieving namespace permissions. Please try again later.");
-                    setIsLoading(false);
-                    return;
-                }
-                if (res.data && res.data.permission && (res.data.permission & 2) === 2) {
-                    setHasWritePerm(true);
-                } else {
-                    setHasWritePerm(false);
+                if (res.data && res.data.length > 0) {
+                    const usersTmp = res.data
+                        .map(user => user.username);
+                    setInvitees(usersTmp);
                 }
                 setIsLoading(false);
             })
             .catch(err => {
-                setAlertMsg(`Problems while retrieving namespace permissions. Error message: ${getResponseError(err)}.`);
+                setAlertMsg(`Problems while loading users. Error message: ${getResponseError(err)}.`);
                 setIsLoading(false);
             });
-    }, [jwt, server, namespace, setAlertMsg]);
+    }, [jwt, server, namespace, setAlertMsg, isInviter]);
 
     useEffect(() => {
         if (!namespace || !label) {
@@ -74,7 +73,7 @@ const GroupMembers = () => {
                         id: member.username,
                         username: member.username,
                         added_at: member.added_at,
-                        added_by: member.added_by.username
+                        added_by: member.added_by
                     }))).flat()
                     .sort((a, b) => ('' + a.username).localeCompare(b.username));
                 setGroupMembers(groupMembersTmp);
@@ -143,7 +142,7 @@ const GroupMembers = () => {
                 <h1 className="h2">{`User Group: ${label}`}</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
                     <div className="btn-group mr-2">
-                        {isInviter && hasWritePerm &&
+                        {isInviter &&
                             <button type="button" className="btn btn-sm btn-outline-primary"
                                 onClick={() => setShowAddMemberDialog(true)}>
                                 Add Member
@@ -182,18 +181,20 @@ const GroupMembers = () => {
                     field: "added_by",
                     column: "Added By",
                     sorter: "alphabetical",
-                    displayer: String
+                    displayer: user => user.deleted ?
+                        <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
 
                 },
                 {
                     field: "id",
                     column: "Actions",
                     displayer: id => {
-                        if (isInviter && hasWritePerm) {
+                        if (isInviter && id !== "admin" && invitees.includes(id)) {
                             return <GroupMemberActionsButtonGroup
                                 id={id}
                                 namespace={namespace}
                                 server={server}
+                                me={username}
                                 username={id}
                                 label={label}
                                 setRefresh={setRefresh} />

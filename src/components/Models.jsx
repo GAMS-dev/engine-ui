@@ -87,7 +87,7 @@ const Models = () => {
               id: group.label,
               label: group.label,
               created_at: group.created_at,
-              created_by: group.created_by.username,
+              created_by: group.created_by,
               no_members: group.members.length
             }))
             .sort((a, b) => ('' + a.label).localeCompare(b.label));
@@ -309,7 +309,8 @@ const Models = () => {
                   field: "created_by",
                   column: "Created By",
                   sorter: "alphabetical",
-                  displayer: String
+                  displayer: user => user.deleted ?
+                    <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
 
                 },
                 {

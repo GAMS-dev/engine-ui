@@ -6,7 +6,7 @@ import { getResponseError } from "./util";
 import { AlertContext } from "./Alert";
 
 const GroupMemberActionsButtonGroup = props => {
-    const { id, namespace, server, username, label, setRefresh } = props;
+    const { id, namespace, server, username, me, label, setRefresh } = props;
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -46,7 +46,9 @@ const GroupMemberActionsButtonGroup = props => {
                     <Modal.Title>Please Confirm</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Are you sure you want to remove: '{username}' from the group: '{label}'?
+                    {username === me ?
+                        `Are you sure you want to remove yourself from the group: '${label}'? This cannot be undone!` :
+                        `Are you sure you want to remove: '${username}' from the group: '${label}'?`}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowDeleteDialog(false)}>
