@@ -71,6 +71,7 @@ const Models = () => {
       return;
     }
     setIsLoading(true);
+    refSelectedNs.current = namespace.name;
     if (tabSelected === "groups") {
       history.push("/groups/" + encodeURIComponent(namespace.name));
       axios
