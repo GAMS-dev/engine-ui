@@ -140,6 +140,7 @@ const UserQuotaUpdateForm = () => {
                                         type="number"
                                         className={`form-control${validQuotaParallel ? '' : ' is-invalid'}`}
                                         id="quotaParallel"
+                                        step="any"
                                         value={quotaParallel}
                                         onChange={e => {
                                             if (!e.target.value) {
@@ -166,6 +167,7 @@ const UserQuotaUpdateForm = () => {
                                         type="number"
                                         className={`form-control${validQuotaVolume ? '' : ' is-invalid'}`}
                                         id="quotaVolume"
+                                        step="any"
                                         value={quotaVolume}
                                         onChange={e => {
                                             if (!e.target.value) {

@@ -119,6 +119,7 @@ const InstanceSubmissionForm = () => {
                                 <input
                                     type="number"
                                     className="form-control"
+                                    step="any"
                                     id="cpuReq"
                                     value={cpuReq}
                                     required
@@ -146,6 +147,7 @@ const InstanceSubmissionForm = () => {
                                     type="number"
                                     className="form-control"
                                     id="multiplier"
+                                    step="any"
                                     value={multiplier}
                                     required
                                     onChange={e => setMultiplier(e.target.value)}

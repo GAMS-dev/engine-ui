@@ -499,6 +499,7 @@ const JobSubmissionForm = props => {
                                                                         type="number"
                                                                         className={`form-control${validCpuReq ? '' : ' is-invalid'}`}
                                                                         id="cpuReq"
+                                                                        step="any"
                                                                         value={cpuReq}
                                                                         onChange={e => {
                                                                             if (!e.target.value) {
