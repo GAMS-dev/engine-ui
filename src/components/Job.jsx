@@ -8,6 +8,7 @@ import JobRespInfoTable from "./JobRespInfoTable";
 import { getResponseError } from "./util";
 import TextEntryView from "./TextEntryView";
 import { ServerInfoContext } from "../ServerInfoContext";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const Job = () => {
   const [job, setJob] = useState(null);
@@ -125,7 +126,7 @@ const Job = () => {
     setJob(newJob);
   };
   return (
-    <React.Fragment>
+    <>
       {job ? (
         <div className="mt-4">
           <div className="row">
@@ -154,8 +155,8 @@ const Job = () => {
               </div>}
           </div>
         </div>
-      ) : null}
-    </React.Fragment>
+      ) : <ClipLoader />}
+    </>
   );
 };
 
