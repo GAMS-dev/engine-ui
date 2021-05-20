@@ -107,14 +107,6 @@ const JobReqInfoTable = props => {
             {job.arguments.length === 0 && "-"}
           </td>
         </tr>
-        <tr>
-          <td colSpan="2">
-            <code>
-              gams {job.model}.gms {job.arguments.join(" ")} lo=3 input='{job.model}.gms'
-              {job.stdout_filename ? ` > ${job.stdout_filename}` : ""}
-            </code>
-          </td>
-        </tr>
       </tbody>
       <thead className="thead-light">
         <tr>
