@@ -7,7 +7,9 @@ import { AlertContext } from "./Alert";
 const TextEntryView = props => {
   const [, setAlertMsg] = useContext(AlertContext);
 
-  const { setTextEntries, textEntries, server } = props;
+  const { textEntries, server } = props;
+  const [cache, setCache] = useState([]);
+  const [teContent, setTeContent] = useState("")
   const { token } = useParams();
   const [truncationFlag, setTruncationFlag] = useState(false);
   const viewCharLimit = 1000000;
@@ -19,34 +21,42 @@ const TextEntryView = props => {
       entry_value: "You will see here",
       entry_size: 17
     }*/
-    if (!textEntries[entryIndex].entry_size) {
-      return;
-    }
-    if (!textEntries[entryIndex].entry_value) {
-      if (textEntries[entryIndex].entry_size > viewCharLimit) {
+    if (cache[entryIndex] && cache[entryIndex].entry_value) {
+      if (cache[entryIndex].entry_size > viewCharLimit) {
         setTruncationFlag(true);
       } else {
         setTruncationFlag(false);
       }
+      setTeContent(cache[entryIndex].entry_value);
+    } else {
       axios
         .get(
           `${server}/jobs/${encodeURIComponent(token)}/text-entry/${encodeURIComponent(textEntries[entryIndex].entry_name)}`,
           {
             params: {
-              length: viewCharLimit
+              length: viewCharLimit + 1
             }
           }
         )
         .then(res => {
-          const newTextEntries = textEntries.map(e => ({ ...e }));
-          newTextEntries[entryIndex].entry_value = res.data.entry_value;
-          setTextEntries(newTextEntries);
+          const cacheTmp = cache;
+          cacheTmp[entryIndex] = {
+            entry_size: res.data.entry_value.length,
+            entry_value: res.data.entry_value
+          };
+          setCache(cacheTmp);
+          if (cache[entryIndex].entry_size > viewCharLimit) {
+            setTruncationFlag(true);
+          } else {
+            setTruncationFlag(false);
+          }
+          setTeContent(res.data.entry_value);
         })
         .catch(err => {
           setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`);
         });
     }
-  }, [entryIndex, server, setTextEntries, setAlertMsg, textEntries, token]);
+  }, [entryIndex, server, cache, setCache, setTeContent, setAlertMsg, textEntries, token]);
 
   return (
     <form action="">
@@ -86,7 +96,7 @@ const TextEntryView = props => {
           className="form-control text-monospace"
           id="exampleFormControlTextarea1"
           rows="15"
-          value={textEntries[entryIndex].entry_value}
+          value={teContent}
           readOnly
         ></textarea>
       </div>

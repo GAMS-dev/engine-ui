@@ -34,7 +34,7 @@ const Job = () => {
       "dep_tokens",
       "submitted_at",
       "result_exists",
-      "text_entries{entry_name, entry_size}",
+      "text_entries{entry_name}",
       "token"
     ];
     if (serverInfo.in_kubernetes === true) {
@@ -95,7 +95,7 @@ const Job = () => {
                 }
               })
               .catch(err => {
-                if (err.response.status !== 403) {
+                if (err.response && err.response.status !== 403) {
                   setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`);
                 }
               });
@@ -120,11 +120,6 @@ const Job = () => {
       });
   }, [server, setAlertMsg]);
 
-  const setTextEntries = textEntries => {
-    const newJob = { ...job };
-    newJob.text_entries = textEntries;
-    setJob(newJob);
-  };
   return (
     <>
       {job ? (
@@ -148,8 +143,8 @@ const Job = () => {
             {job.text_entries && job.text_entries.length > 0 && job.status >= 10 &&
               <div className="col-md-12 col-xl-4">
                 <TextEntryView
-                  textEntries={job.text_entries}
-                  setTextEntries={setTextEntries}
+                  textEntries={job.text_entries && job.text_entries.length > 0 ?
+                    job.text_entries.sort((a, b) => a.entry_name.localeCompare(b.username)) : null}
                   server={server}
                 />
               </div>}
