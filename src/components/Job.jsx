@@ -33,7 +33,7 @@ const Job = () => {
       "dep_tokens",
       "submitted_at",
       "result_exists",
-      "text_entries{entry_name, entry_size, entry_value}",
+      "text_entries{entry_name, entry_size}",
       "token"
     ];
     if (serverInfo.in_kubernetes === true) {
