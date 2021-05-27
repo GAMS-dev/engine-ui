@@ -37,7 +37,16 @@ const QuotaWidget = () => {
                         className: diskLeft < 100 ? 'text-danger' : ''
                     }]);
                 } else {
-                    setData(['Volume: unlimited\n', 'Disk: unlimited']);
+                    setData([{
+                        key: 'volume',
+                        text: 'Volume: unlimited\n',
+                        val: ''
+                    },
+                    {
+                        key: 'disk',
+                        text: 'Disk: unlimited',
+                        className: ''
+                    }]);
                 }
             }
             catch (err) {
