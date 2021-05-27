@@ -243,101 +243,102 @@ const Models = () => {
           </ul>
         </div>
         <div className="col-md-8 col-12 order-4 mt-1">
-          <Tabs
-            activeKey={tabSelected}
-            onSelect={(k) => {
-              history.push(`/${k}/${encodeURIComponent(namespace.name)}`);
-              setTabSelected(k)
-            }}>
-            <Tab eventKey="models" title="Models">
-              <Table
-                data={models}
-                noDataMsg="No Model Found"
-                isLoading={isLoading}
-                displayFields={[{
-                  field: "name",
-                  column: "Model",
-                  sorter: "alphabetical",
-                  displayer: String
-                },
-                {
-                  field: "upload_date",
-                  column: "Upload date",
-                  sorter: "datetime",
-                  displayer: e => <TimeDisplay time={e} />
-                },
-                {
-                  field: "arguments",
-                  column: "Arguments",
-                  sorter: "alphabetical-array",
-                  displayer: args => args ? args.join(",") : ""
-                },
-                {
-                  field: "id",
-                  column: "Actions",
-                  displayer: id => (
-                    <ModelActionsButtonGroup
-                      id={id}
-                      namespace={namespace}
-                      server={server}
-                      setRefresh={setRefreshModels} />
-                  )
-                }]}
-                idFieldName="id"
-                sortedAsc={true}
-                sortedCol="name"
-              />
-            </Tab>
-            <Tab eventKey="groups" title="Groups">
-              <Table
-                data={userGroups}
-                noDataMsg="No Group Found"
-                isLoading={isLoading}
-                displayFields={[{
-                  field: "label",
-                  column: "Label",
-                  sorter: "alphabetical",
-                  displayer: String
-                },
-                {
-                  field: "created_at",
-                  column: "Created",
-                  sorter: "datetime",
-                  displayer: e => <TimeDisplay time={e} />
-                },
-                {
-                  field: "created_by",
-                  column: "Created By",
-                  sorter: "alphabetical",
-                  displayer: user => user.deleted ?
-                    <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
+          {availableNamespaces.length ?
+            <Tabs
+              activeKey={tabSelected}
+              onSelect={(k) => {
+                history.push(`/${k}/${encodeURIComponent(namespace.name)}`);
+                setTabSelected(k)
+              }}>
+              <Tab eventKey="models" title="Models">
+                <Table
+                  data={models}
+                  noDataMsg="No Model Found"
+                  isLoading={isLoading}
+                  displayFields={[{
+                    field: "name",
+                    column: "Model",
+                    sorter: "alphabetical",
+                    displayer: String
+                  },
+                  {
+                    field: "upload_date",
+                    column: "Upload date",
+                    sorter: "datetime",
+                    displayer: e => <TimeDisplay time={e} />
+                  },
+                  {
+                    field: "arguments",
+                    column: "Arguments",
+                    sorter: "alphabetical-array",
+                    displayer: args => args ? args.join(",") : ""
+                  },
+                  {
+                    field: "id",
+                    column: "Actions",
+                    displayer: id => (
+                      <ModelActionsButtonGroup
+                        id={id}
+                        namespace={namespace}
+                        server={server}
+                        setRefresh={setRefreshModels} />
+                    )
+                  }]}
+                  idFieldName="id"
+                  sortedAsc={true}
+                  sortedCol="name"
+                />
+              </Tab>
+              <Tab eventKey="groups" title="Groups">
+                <Table
+                  data={userGroups}
+                  noDataMsg="No Group Found"
+                  isLoading={isLoading}
+                  displayFields={[{
+                    field: "label",
+                    column: "Label",
+                    sorter: "alphabetical",
+                    displayer: String
+                  },
+                  {
+                    field: "created_at",
+                    column: "Created",
+                    sorter: "datetime",
+                    displayer: e => <TimeDisplay time={e} />
+                  },
+                  {
+                    field: "created_by",
+                    column: "Created By",
+                    sorter: "alphabetical",
+                    displayer: user => user.deleted ?
+                      <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
 
-                },
-                {
-                  field: "no_members",
-                  column: "Members",
-                  sorter: "numerical",
-                  displayer: Number
+                  },
+                  {
+                    field: "no_members",
+                    column: "Members",
+                    sorter: "numerical",
+                    displayer: Number
 
-                },
-                {
-                  field: "id",
-                  column: "Actions",
-                  displayer: id => (
-                    <GroupActionsButtonGroup
-                      id={id}
-                      namespace={namespace}
-                      server={server}
-                      roles={roles}
-                      setRefresh={setRefreshModels} />
-                  )
-                }]}
-                idFieldName="id"
-                sortedAsc={true}
-                sortedCol="label"
-              />
-            </Tab>
-          </Tabs>
+                  },
+                  {
+                    field: "id",
+                    column: "Actions",
+                    displayer: id => (
+                      <GroupActionsButtonGroup
+                        id={id}
+                        namespace={namespace}
+                        server={server}
+                        roles={roles}
+                        setRefresh={setRefreshModels} />
+                    )
+                  }]}
+                  idFieldName="id"
+                  sortedAsc={true}
+                  sortedCol="label"
+                />
+              </Tab>
+            </Tabs> : "No Namespace Found"}
         </div>
       </div>
       <AddNamespaceModal
