@@ -92,11 +92,12 @@ const GroupMembers = () => {
         setAddMemberIsLoading(true);
         axios
             .get(`${server}/users/`,
-                { headers: { "X-Fields": "username" } })
+                { headers: { "X-Fields": "username,deleted" } })
             .then(res => {
                 if (res.data && res.data.length > 0) {
                     const existingUsers = groupMembers.map(member => member.username);
                     const usersTmp = res.data
+                        .filter(user => user.deleted === false)
                         .map(user => ({
                             value: user.username,
                             label: user.username
