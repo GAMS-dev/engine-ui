@@ -430,7 +430,7 @@ const Jobs = () => {
               <Pagination.Prev disabled={currentPage === 1} onClick={gotoPreviousPage} />
               {[...Array(noPages).keys()].map(i => {
                 const pageDistance = (i === 0 || i === noPages - 1) ? 0 :
-                  Math.abs(currentPage - i);
+                  Math.abs(currentPage - 1 - i);
                 if (pageDistance === 2) {
                   return <Pagination.Ellipsis key={'pe_' + i} disabled={true} />
                 } else if (pageDistance > 1) {
