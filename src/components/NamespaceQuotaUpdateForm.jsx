@@ -28,7 +28,7 @@ const NamespaceQuotaUpdateForm = () => {
         const fetchRequiredData = async () => {
             try {
                 const res = await axios
-                    .get(`${server}/namespaces/${encodeURIComponent(namespace)}/disk/quota`);
+                    .get(`${server}/namespaces/${encodeURIComponent(namespace)}/disk-quota`);
                 if (res.status !== 200) {
                     setErrorMsg("An error occurred while retrieving namespace quota. Please try again later.");
                     return;
@@ -60,13 +60,13 @@ const NamespaceQuotaUpdateForm = () => {
 
         try {
             if (quota) {
-                await axios.put(`${server}/namespaces/${encodeURIComponent(namespace)}/disk/quota`, null, {
+                await axios.put(`${server}/namespaces/${encodeURIComponent(namespace)}/disk-quota`, null, {
                     params: {
                         disk_quota: quota * 1e6
                     }
                 });
             } else {
-                await axios.delete(`${server}/namespaces/${encodeURIComponent(namespace)}/disk/quota`);
+                await axios.delete(`${server}/namespaces/${encodeURIComponent(namespace)}/disk-quota`);
             }
             setAlertMsg("success:Namespace quota successfully updated!");
             setQuotaEdited(true);

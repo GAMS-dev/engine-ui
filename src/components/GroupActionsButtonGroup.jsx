@@ -18,7 +18,7 @@ const GroupActionsButtonGroup = props => {
         setIsSubmitting(true);
         axios
             .delete(
-                `${server}/namespaces/${encodeURIComponent(namespace.name)}/user/groups`,
+                `${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`,
                 {
                     params: {
                         label: id

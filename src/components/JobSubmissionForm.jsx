@@ -49,26 +49,31 @@ const JobSubmissionForm = props => {
 
     useEffect(() => {
         axios
-            .get(`${server}/namespaces/permissions/me`)
+            .get(`${server}/namespaces/`, {
+                headers: { "X-Fields": "name,permissions" }
+            })
             .then(res => {
                 if (res.status !== 200) {
                     setSubmissionErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
                     return;
                 }
-                const availableNsTmp = res.data.filter(ns => (ns.permission & 1) === 1);
+                const availableNsTmp = res.data
+                    .filter(ns => roles && roles.includes("admin") ? true : ns.permissions
+                        .filter(perm => (perm.username === username && (perm.permission & 1) === 1)).length > 0)
+                    .map(ns => ns.name);
                 if (availableNsTmp.length === 0) {
                     setSubmissionErrorMsg("You do not have permissions to execute models.");
                     setIsLoading(false);
                     return;
                 }
                 setAvailableNamespaces(availableNsTmp);
-                setNamespace(availableNsTmp[0].name);
+                setNamespace(availableNsTmp[0]);
             })
             .catch(err => {
                 setSubmissionErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
                 setIsLoading(false);
             });
-    }, [server, jwt]);
+    }, [server, jwt, roles, username]);
 
     useEffect(() => {
         if (namespace !== "") {
@@ -287,7 +292,7 @@ const JobSubmissionForm = props => {
                                             Select a Namespace
                                         </label>
                                         <select id="namespace" className="form-control" value={namespace} onChange={e => setNamespace(e.target.value)}>
-                                            {availableNamespaces.map(ns => <option key={ns.name} value={ns.name}>{ns.name}</option>)}
+                                            {availableNamespaces.map(ns => <option key={ns} value={ns}>{ns}</option>)}
                                         </select>
                                     </div>
                                     <div className="form-check mb-3">
@@ -565,7 +570,7 @@ const JobSubmissionForm = props => {
                     </form>
                     :
                     <div className="alert alert-danger">
-                        <p><strong>You have no write access to any namespace.</strong></p>
+                        <p><strong>You have no execute access to any namespace.</strong></p>
                         <p>Ask an administrator to grant you permission to submit jobs and try again.</p>
                     </div>)
             }

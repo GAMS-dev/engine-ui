@@ -107,7 +107,7 @@ const ModelSubmissionForm = () => {
         Promise.all(promisesToAwait).then(() => {
             axios({
                 method: modelname ? 'patch' : 'post',
-                url: `${server}/namespaces/${encodeURIComponent(namespace)}/${encodeURIComponent(newModelName)}`,
+                url: `${server}/namespaces/${encodeURIComponent(namespace)}/models/${encodeURIComponent(newModelName)}`,
                 data: modelSubmissionForm,
                 headers: {
                     "Content-Type": "multipart/form-data"

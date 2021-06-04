@@ -25,7 +25,7 @@ const AddUserGroupModal = props => {
         setIsSubmitting(true);
         axios
             .post(
-                `${server}/namespaces/${encodeURIComponent(namespace)}/user/groups`, null,
+                `${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`, null,
                 {
                     params: {
                         label: groupLabel

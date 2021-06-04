@@ -7,7 +7,7 @@ import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 
 const UserInvitationForm = () => {
-    const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [{ jwt, server, roles, username }] = useContext(AuthContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -20,21 +20,27 @@ const UserInvitationForm = () => {
 
     useEffect(() => {
         axios
-            .get(`${server}/namespaces/permissions/me`)
+            .get(`${server}/namespaces/`, {
+                headers: { "X-Fields": "name,permissions" }
+            })
             .then(res => {
                 if (res.status !== 200) {
                     setSubmissionErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
                     setIsLoading(false);
                     return;
                 }
-                setNamespacePermissions(res.data.map(el => ({ name: el.name, maxPerm: el.permission })));
+                setNamespacePermissions(res.data.map(el =>
+                ({
+                    name: el.name, maxPerm: roles && roles.includes("admin") ? 7 : el.permissions
+                        .reduce((acc, curr) => (curr.username === username ? curr.permission : acc), 0)
+                })));
                 setIsLoading(false);
             })
             .catch(err => {
                 setSubmissionErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
                 setIsLoading(false);
             });
-    }, [server, jwt]);
+    }, [server, jwt, roles, username]);
 
     const handleInvitationSubmission = () => {
         setIsSubmitting(true);

@@ -19,7 +19,7 @@ const Models = () => {
   const history = useHistory();
   const { selectedNs } = useParams();
   const refSelectedNs = useRef(selectedNs);
-  const [{ jwt, server, roles }] = useContext(AuthContext);
+  const [{ jwt, server, roles, username }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
   const [refresh, setRefresh] = useState(0);
@@ -36,14 +36,22 @@ const Models = () => {
 
   useEffect(() => {
     axios
-      .get(`${server}/namespaces/permissions/me`)
+      .get(`${server}/namespaces/`, {
+        headers: { "X-Fields": "name,permissions" }
+      })
       .then(res => {
         if (res.status !== 200) {
           setAlertMsg("An error occurred while retrieving namespaces. Please try again later.");
           return;
         }
         const availableNsTmp = res.data
-          .filter(ns => ns.permission > 1)
+          .map(ns => ({
+            name: ns.name,
+            permission: roles && roles.includes("admin") ? [7] : ns.permissions
+              .filter(perm => perm.username === username && perm.permission > 1)
+              .map(perm => perm.permission)
+          }))
+          .filter(ns => ns.permission.length > 0)
           .sort((a, b) => ('' + a.name).localeCompare(b.name));
         if (availableNsTmp.length === 0) {
           setAlertMsg("You do not have permissions to see any namespaces.");
@@ -64,7 +72,7 @@ const Models = () => {
       .catch(err => {
         setAlertMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
       });
-  }, [jwt, server, refresh, setAlertMsg]);
+  }, [jwt, server, roles, username, refresh, setAlertMsg]);
 
   useEffect(() => {
     if (!namespace || namespace.name === "") {
@@ -75,7 +83,7 @@ const Models = () => {
     if (tabSelected === "groups") {
       history.push("/groups/" + encodeURIComponent(namespace.name));
       axios
-        .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user/groups`)
+        .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`)
         .then(res => {
           if (res.status !== 200) {
             setAlertMsg("An error occurred while retrieving user groups. Please try again later.");

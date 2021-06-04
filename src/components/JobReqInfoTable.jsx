@@ -67,7 +67,7 @@ const JobReqInfoTable = props => {
               </span>
             ) : (
               <DownloadLink
-                url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/${encodeURIComponent(job.model)}`}
+                url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/models/${encodeURIComponent(job.model)}`}
                 filename={`${job.model}.zip`}
                 className="badge badge-secondary">
                 {job.model}
