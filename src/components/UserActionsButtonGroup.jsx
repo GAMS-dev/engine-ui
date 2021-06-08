@@ -2,12 +2,14 @@ import React, { useContext } from "react";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { ServerInfoContext } from "../ServerInfoContext";
+import { AlertContext } from "./Alert";
 
 const UserActionsButtonGroup = props => {
   const { id, username, me, isAdmin, isInviter,
     setUserToDelete, setDeleteInvitation,
     handleShowDeleteConfirmDialog } = props;
   const [serverInfo] = useContext(ServerInfoContext);
+  const [, setAlertMsg] = useContext(AlertContext);
 
   const showConfirmDialog = e => {
     let user = e.target.dataset.user;
@@ -51,12 +53,22 @@ const UserActionsButtonGroup = props => {
         </DropdownButton>}
       {username !== "admin" && (
         username === "" ?
-          <button
-            className="btn btn-sm btn-outline-danger"
-            data-token={id}
-            onClick={showConfirmDialog}>
-            Delete
+          <>
+            {window.isSecureContext && <div>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-info"
+                onClick={() => { navigator.clipboard.writeText(id); setAlertMsg("success:Token copied to clipboard!") }}>
+                Copy token
+              </button>
+            </div>}
+            <button
+              className="btn btn-sm btn-outline-danger"
+              data-token={id}
+              onClick={showConfirmDialog}>
+              Delete
             </button>
+          </>
           :
           <button
             className="btn btn-sm btn-outline-danger"

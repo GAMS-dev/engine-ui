@@ -30,17 +30,17 @@ const Users = props => {
   const [{ jwt, server, roles, username }] = useContext(AuthContext);
   const [displayFields] = useState([
     {
-      field: "username",
+      field: "username,id",
       column: "User",
       sorter: "alphabetical",
-      displayer: e => e === "" ? <span className="badge badge-pill badge-info">unregistered</span> :
-        (e === username ?
+      displayer: (user, id) => user === "" ? <span className="badge badge-pill badge-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
+        (user === username ?
           <>
-            {e}
+            {user}
             <sup>
               <span className="badge badge-pill badge-primary ml-1">me</span>
             </sup>
-          </> : e)
+          </> : user)
     },
     {
       field: "roles",
