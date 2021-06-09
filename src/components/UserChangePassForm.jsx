@@ -50,7 +50,12 @@ const UserChangePassForm = () => {
                 }
             })
             .catch(err => {
-                setSubmissionErrorMsg(`Some error occurred while trying to change your password. Error message: ${getResponseError(err)}.`);
+                if (err.response == null || err.response.status !== 400 ||
+                    !err.response.data.errors.hasOwnProperty('password')) {
+                    setSubmissionErrorMsg(`Some error occurred while trying to change your password. Error message: ${getResponseError(err)}.`);
+                } else {
+                    setSubmissionErrorMsg(err.response.data.errors.password);
+                }
                 setIsSubmitting(false);
             });
     }
