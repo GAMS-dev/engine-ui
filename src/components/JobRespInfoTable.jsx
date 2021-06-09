@@ -197,19 +197,25 @@ const JobRespInfoTable = props => {
               }
             </>
           }
-          {job.result_exists && (job.status >= 10 || (isHcJob && job.status === -3)) ? <tr>
+          <tr>
             <th>Result ZIP</th>
             <td>
-              <DownloadLink url={isHcJob ? `${server}/hypercube/${encodeURIComponent(job.token)}/result` :
-                `${server}/jobs/${encodeURIComponent(job.token)}/result`} filename="results.zip"
-                className="btn btn-sm btn-outline-info">
-                Download
-              </DownloadLink>
-              <button className="btn btn-sm btn-outline-danger" onClick={() => setShowRemoveConfirmDialog(true)}>
-                Delete Results
-              </button>
+              {job.result_exists && (job.status >= 10 || (isHcJob && job.status === -3)) ?
+                <>
+                  <DownloadLink url={isHcJob ? `${server}/hypercube/${encodeURIComponent(job.token)}/result` :
+                    `${server}/jobs/${encodeURIComponent(job.token)}/result`} filename="results.zip"
+                    className="btn btn-sm btn-outline-info">
+                    Download
+                  </DownloadLink>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => setShowRemoveConfirmDialog(true)}>
+                    Delete Results
+                  </button>
+                </> :
+                <span className="badge badge-danger">
+                  Job results were deleted.
+                </span>}
             </td>
-          </tr> : <tr></tr>}
+          </tr>
         </tbody>
       </table>
       <Modal show={showRemoveConfirmDialog} onHide={() => setShowRemoveConfirmDialog(false)}>
