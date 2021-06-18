@@ -40,7 +40,7 @@ export const AuthProvider = props => {
           function (error) {
             if (!axios.isCancel(error) &&
               (login.server.startsWith('/') || error.request.responseURL.startsWith(login.server)) &&
-              error.response.status === 401
+              error.response != null && error.response.status === 401
             ) {
               setLogin(false);
             }
