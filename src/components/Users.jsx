@@ -71,7 +71,10 @@ const Users = props => {
         isInviter={roles.includes("inviter")}
         setUserToDelete={setUserToDelete}
         setDeleteInvitation={setDeleteInvitation}
-        handleShowDeleteConfirmDialog={() => setShowDeleteConfirmDialog(true)} />
+        handleShowDeleteConfirmDialog={() => {
+          setDeleteResults(false);
+          setShowDeleteConfirmDialog(true);
+        }} />
     }
   ]);
 
@@ -221,7 +224,7 @@ const Users = props => {
           <Modal.Body>
             <fieldset disabled={isSubmitting}>
               Are you sure you want to delete this {deleteInvitation ? 'invitation' : 'user'}? This cannot be undone!
-                {!deleteInvitation && <div className="form-check mt-3">
+              {!deleteInvitation && <div className="form-check mt-3">
                 <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
                   id="deleteData" />
                 <label className="form-check-label" htmlFor="deleteData">Delete all data associated with this user?</label>
