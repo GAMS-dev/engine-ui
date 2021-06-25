@@ -213,7 +213,7 @@ const UserInstanceUpdateForm = () => {
                                             <div className="form-group">
                                                 <label htmlFor="instancesAllowed">
                                                     Instances user is allowed to use
-                                            </label>
+                                                </label>
                                                 <div className="invalid-feedback text-center" style={{ display: instancesInfoMsg !== "" ? "block" : "none" }}>
                                                     {instancesInfoMsg}
                                                 </div>
@@ -224,7 +224,8 @@ const UserInstanceUpdateForm = () => {
                                                     isSearchable={true}
                                                     onChange={selected => {
                                                         setSelectedInstancesAllowed(selected);
-                                                        if (!defaultInstance) {
+                                                        if (defaultInstance == null ||
+                                                            !selected.map(el => el.value).includes(selected.value)) {
                                                             setDefaultInstance(selected[0]);
                                                         }
                                                     }}
