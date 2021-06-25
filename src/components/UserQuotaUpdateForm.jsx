@@ -6,6 +6,7 @@ import axios from "axios";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import UserQuotaSelector from "./UserQuotaSelector";
 
 const UserQuotaUpdateForm = () => {
     const [{ jwt, server }] = useContext(AuthContext);
@@ -17,12 +18,7 @@ const UserQuotaUpdateForm = () => {
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [quotaParallel, setQuotaParallel] = useState('');
-    const [validQuotaParallel, setValidQuotaParallel] = useState(true);
-    const [quotaVolume, setQuotaVolume] = useState('');
-    const [validQuotaVolume, setValidQuotaVolume] = useState(true);
-    const [quotaDisk, setQuotaDisk] = useState('');
-    const [validQuotaDisk, setValidQuotaDisk] = useState(true);
+    const [quotas, setQuotas] = useState({});
 
     const [userEdited, setUserEdited] = useState(false);
 
@@ -39,9 +35,11 @@ const UserQuotaUpdateForm = () => {
                 }
                 const quotasUser = res.data.filter(el => el.username === username)[0];
                 if (quotasUser) {
-                    setQuotaParallel(quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota);
-                    setQuotaDisk(quotasUser.disk_quota == null ? '' : quotasUser.disk_quota / 1e6);
-                    setQuotaVolume(quotasUser.volume_quota == null ? '' : quotasUser.volume_quota);
+                    setQuotas({
+                        parallel: quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota,
+                        disk: quotasUser.disk_quota == null ? '' : quotasUser.disk_quota,
+                        volume: quotasUser.volume_quota == null ? '' : quotasUser.volume_quota
+                    })
                 } else if (res.data.length > 0) {
                     setSubmissionErrorMsg(`User inherits quotas from ${res.data[res.data.length - 1]["username"]}`);
                 }
@@ -57,7 +55,7 @@ const UserQuotaUpdateForm = () => {
     }, [server, jwt, username]);
 
     const handleUserUpdateQuotaSubmission = async () => {
-        if (!(validQuotaParallel && validQuotaVolume && validQuotaDisk)) {
+        if (quotas == null) {
             return;
         }
         setIsSubmitting(true);
@@ -65,18 +63,18 @@ const UserQuotaUpdateForm = () => {
         let needUpdate = true;
         const quotasToDelete = [];
 
-        if (quotaParallel) {
-            quotaUpdateParams["parallel_quota"] = quotaParallel;
+        if (quotas.parallel != null) {
+            quotaUpdateParams["parallel_quota"] = quotas.parallel;
         } else {
             quotasToDelete.push("parallel_quota");
         }
-        if (quotaVolume) {
-            quotaUpdateParams["volume_quota"] = quotaVolume;
+        if (quotas.volume != null) {
+            quotaUpdateParams["volume_quota"] = quotas.volume;
         } else {
             quotasToDelete.push("volume_quota");
         }
-        if (quotaDisk) {
-            quotaUpdateParams["disk_quota"] = quotaDisk * 1e6;
+        if (quotas.disk != null) {
+            quotaUpdateParams["disk_quota"] = quotas.disk;
         } else {
             quotasToDelete.push("disk_quota");
         }
@@ -132,91 +130,12 @@ const UserQuotaUpdateForm = () => {
                                 {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
-                                <div className="form-group">
-                                    <label htmlFor="quotaParallel">
-                                        Parallel quota
-                                </label>
-                                    <input
-                                        type="number"
-                                        className={`form-control${validQuotaParallel ? '' : ' is-invalid'}`}
-                                        id="quotaParallel"
-                                        step="any"
-                                        value={quotaParallel}
-                                        onChange={e => {
-                                            if (!e.target.value) {
-                                                setValidQuotaParallel(true);
-                                                setQuotaParallel('');
-                                                return;
-                                            }
-                                            const val = parseFloat(e.target.value);
-                                            if (isNaN(val) || !isFinite(val)) {
-                                                setValidQuotaParallel(false);
-                                                setQuotaParallel(val);
-                                                return;
-                                            }
-                                            setValidQuotaParallel(true);
-                                            setQuotaParallel(val);
-                                        }}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="quotaVolume">
-                                        Volume Quota
-                                </label>
-                                    <input
-                                        type="number"
-                                        className={`form-control${validQuotaVolume ? '' : ' is-invalid'}`}
-                                        id="quotaVolume"
-                                        step="any"
-                                        value={quotaVolume}
-                                        onChange={e => {
-                                            if (!e.target.value) {
-                                                setValidQuotaVolume(true);
-                                                setQuotaVolume('');
-                                                return;
-                                            }
-                                            const val = parseFloat(e.target.value);
-                                            if (isNaN(val) || !isFinite(val)) {
-                                                setValidQuotaVolume(false);
-                                                setQuotaVolume(val);
-                                                return;
-                                            }
-                                            setValidQuotaVolume(true);
-                                            setQuotaVolume(val);
-                                        }}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="quotaDisk">
-                                        Disk Space Quota (in MB)
-                                </label>
-                                    <input
-                                        type="number"
-                                        className={`form-control${validQuotaDisk ? '' : ' is-invalid'}`}
-                                        id="quotaDisk"
-                                        value={quotaDisk}
-                                        onChange={e => {
-                                            if (!e.target.value) {
-                                                setValidQuotaDisk(true);
-                                                setQuotaDisk('');
-                                                return;
-                                            }
-                                            const val = parseInt(e.target.value);
-                                            if (isNaN(val) || !isFinite(val)) {
-                                                setValidQuotaDisk(false);
-                                                setQuotaDisk(val);
-                                                return;
-                                            }
-                                            setValidQuotaDisk(true);
-                                            setQuotaDisk(val);
-                                        }}
-                                    />
-                                </div>
+                                <UserQuotaSelector quotas={quotas} setQuotas={setQuotas} />
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
                                     Update Quotas
-                            </SubmitButton>
+                                </SubmitButton>
                             </div>
                             {userEdited && <Redirect to="/users" />}
                         </form>)}
