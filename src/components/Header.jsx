@@ -13,7 +13,7 @@ const Header = props => {
   useEffect(() => {
     if (isAdmin) {
       if (licenseExpiration) {
-        setExpiresIn(Math.ceil((Date.parse(licenseExpiration) - new Date()) / (1000 * 60 * 60 * 24)));
+        setExpiresIn(Math.ceil((Date.parse(licenseExpiration + 'Z') - new Date()) / (1000 * 60 * 60 * 24)));
       } else if (licenseExpiration === null) {
         setExpiresIn(null);
       }
