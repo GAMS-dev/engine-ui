@@ -40,17 +40,24 @@ const TextEntryView = props => {
         )
         .then(res => {
           const cacheTmp = cache;
-          cacheTmp[entryIndex] = {
-            entry_size: res.data.entry_value.length,
-            entry_value: res.data.entry_value
-          };
+          if (res.data.entry_value == null) {
+            cacheTmp[entryIndex] = {
+              entry_size: 0,
+              entry_value: ""
+            };
+          } else {
+            cacheTmp[entryIndex] = {
+              entry_size: res.data.entry_value.length,
+              entry_value: res.data.entry_value
+            };
+          }
           setCache(cacheTmp);
           if (cache[entryIndex].entry_size > viewCharLimit) {
             setTruncationFlag(true);
           } else {
             setTruncationFlag(false);
           }
-          setTeContent(res.data.entry_value);
+          setTeContent(cache[entryIndex].entry_value);
         })
         .catch(err => {
           setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`);
