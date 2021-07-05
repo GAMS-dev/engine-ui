@@ -33,7 +33,14 @@ const JobReqInfoTable = props => {
           </td>
         </tr>
         <tr>
-          <th>Submitted</th>
+          <th>Submitted by</th>
+          <td>
+            {job.user.deleted ? <span className="badge badge-pill badge-secondary ml-1">deleted</span>
+              : job.user.username}
+          </td>
+        </tr>
+        <tr>
+          <th>Submitted at</th>
           <td>
             <TimeDisplay time={job.submitted_at} />
           </td>
