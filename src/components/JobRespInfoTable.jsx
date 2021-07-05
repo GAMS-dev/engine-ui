@@ -9,6 +9,7 @@ import StreamEntryView from "./StreamEntryView";
 import SolveTraceEntryView from "./SolveTraceEntryView";
 import TerminateJobButton from "./TerminateJobButton";
 import { isActiveJob, getResponseError } from "./util";
+import JobTimingInfoBar from "./JobTimingInfoBar";
 
 const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
@@ -57,7 +58,7 @@ const JobRespInfoTable = props => {
           <tr>
             <th colSpan="2" className="text-center">
               Result
-          </th>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -94,6 +95,19 @@ const JobRespInfoTable = props => {
             </> :
             <>
               <tr>
+                <th>Timing</th>
+                <td>
+                  {job.user.deleted ?
+                    <span className="badge badge-danger">
+                      Timing information not available.
+                    </span> :
+                    <JobTimingInfoBar
+                      token={job.token}
+                      jobOwner={job.user.username}
+                      setRefreshJob={setRefreshJob} />}
+                </td>
+              </tr>
+              <tr>
                 <th>Process Status</th>
                 <td>{job.process_status !== null ? job.process_status : "-"}</td>
               </tr>
@@ -115,8 +129,8 @@ const JobRespInfoTable = props => {
                           </option>
                         ))}
                       </select>
-                &nbsp;
-                {textEntry &&
+                      &nbsp;
+                      {textEntry &&
                         <DownloadLink
                           url={`${server}/jobs/${encodeURIComponent(job.token)}/text-entry/${encodeURIComponent(textEntry)}`}
                           filename={textEntry}
@@ -147,8 +161,8 @@ const JobRespInfoTable = props => {
                             <option key={e} value={e}>{e}</option>
                           ))}
                         </select>
-                &nbsp;
-                <StreamEntryView
+                        &nbsp;
+                        <StreamEntryView
                           server={server}
                           streamEntry={streamEntry}
                           setRefreshJob={setRefreshJob}
@@ -207,14 +221,14 @@ const JobRespInfoTable = props => {
                       `${server}/jobs/${encodeURIComponent(job.token)}/result`} filename="results.zip"
                       className="btn btn-sm btn-outline-info">
                       Download
-                  </DownloadLink>
+                    </DownloadLink>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => setShowRemoveConfirmDialog(true)}>
                       Delete Results
-                  </button>
+                    </button>
                   </> :
                   <span className="badge badge-danger">
                     Job results were deleted.
-                </span>) :
+                  </span>) :
                 <></>}
             </td>
           </tr>
@@ -230,10 +244,10 @@ const JobRespInfoTable = props => {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowRemoveConfirmDialog(false)}>
             Cancel
-            </Button>
+          </Button>
           <Button variant="primary" onClick={deleteData} disabled={isSubmitting}>
             Delete
-            </Button>
+          </Button>
         </Modal.Footer>
       </Modal>
     </>

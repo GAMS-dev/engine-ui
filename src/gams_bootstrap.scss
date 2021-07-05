@@ -1,6 +1,7 @@
 $theme-colors: (
   "primary": #f39619,
-  "secondary": #494d55
+  "secondary": #494d55,
+  "info": #17a2b8
 );
 
 $border-color: #adb5bd;
@@ -65,7 +66,7 @@ body {
 }
 
 .sidebar .nav-link.active {
-  color: #f39619;
+  color: theme-color("primary");
 }
 
 .sidebar .nav-link .feather {
@@ -199,7 +200,7 @@ body {
 }
 
 .text-error {
-  color: #f39619;
+  color: theme-color("primary");
 }
 
 .summary-table {
@@ -217,4 +218,33 @@ body {
 
 .pre-line {
   white-space: pre-line
+}
+
+.job-timings-info-bar {
+  width: 100%;
+  height: 20px;
+}
+
+.job-timings-info-bar div{
+  display: inline-block;
+  font-size: 10pt;
+  text-align: center;
+  height: 20px;
+  vertical-align: middle;
+  outline: 1px solid white;
+}
+
+.job-timings-info-queued {
+  background-color: theme-color("primary");
+}
+
+.job-timings-info-running {
+  background-color: theme-color("secondary");
+  color: white;
+  border-right: 1px solid white;
+}
+
+.job-timings-info-finalizing {
+  background-color: theme-color("info");
+  color: white;
 }

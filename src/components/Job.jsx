@@ -63,7 +63,7 @@ const Job = () => {
       setIsHcJob(false);
       jobDataPromise = axios
         .get(`${server}/jobs/${encodeURIComponent(token)}`, {
-          headers: { "X-Fields": fields.join(", ") }
+          headers: { "X-Fields": fields.join(", ") + ',user' }
         })
         .then(res => {
           return res.data;
