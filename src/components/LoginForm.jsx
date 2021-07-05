@@ -191,7 +191,7 @@ const LoginForm = props => {
               autoComplete="username"
               name="username"
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={e => setUsername(e.target.value.trim())}
               required
             />
             <div className="invalid-feedback"> {usernameError} </div>
