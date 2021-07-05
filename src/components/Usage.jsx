@@ -61,17 +61,14 @@ const Usage = () => {
             displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
         }
     ]);
+    const isInviter = roles && (roles.includes('admin') || roles.includes('inviter'));
 
     useEffect(() => {
-        if (!roles.includes('admin')) {
-            setIsLoading(false);
-            return;
-        }
         setIsLoading(true);
         axios
             .get(`${server}/usage/`, {
                 params: {
-                    recursive: recursive,
+                    recursive: isInviter ? recursive : false,
                     username: username,
                     from_datetime: startDate,
                     to_datetime: endDate
@@ -196,8 +193,8 @@ const Usage = () => {
                 setAlertMsg(`Problems fetching usage information. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
-    }, [jwt, server, roles, refresh, displayFields, setAlertMsg,
-        username, recursive, startDate, endDate]);
+    }, [jwt, server, refresh, displayFields, setAlertMsg,
+        username, recursive, startDate, endDate, isInviter]);
 
     return (
         <div>
@@ -213,25 +210,26 @@ const Usage = () => {
                             }}
                         >
                             Refresh
-                        <RefreshCw width="12px" className="ml-2" />
+                            <RefreshCw width="12px" className="ml-2" />
                         </button>
                     </div>
                 </div>
             </div>
             <div className="row">
-                <div className="col-lg-4 col-sm-12 mb-4">
-                    <label>
-                        Show Invitees?
-                        <input
-                            name="showinvitees"
-                            type="checkbox"
-                            className="ml-2"
-                            checked={recursive}
-                            onChange={e => {
-                                setRecursive(e.target.checked)
-                            }} />
-                    </label>
-                </div>
+                {isInviter &&
+                    <div className="col-lg-4 col-sm-12 mb-4">
+                        <label>
+                            Show Invitees?
+                            <input
+                                name="showinvitees"
+                                type="checkbox"
+                                className="ml-2"
+                                checked={recursive}
+                                onChange={e => {
+                                    setRecursive(e.target.checked)
+                                }} />
+                        </label>
+                    </div>}
                 <div className="col-lg-4 col-sm-6 col-12 mb-4">
                     <div className="row">
                         <div className="col-4">From:</div>

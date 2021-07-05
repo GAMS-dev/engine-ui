@@ -114,18 +114,28 @@ const Users = props => {
       });
   }
   useEffect(() => {
-    if (!roles.length) {
-      setIsLoading(false);
-      return;
-    }
     setIsLoading(true);
     axios
       .get(`${server}/users/`, {
+        params: roles.length ? null : { username: username },
         headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted" }
       })
       .then(res => {
         if (res.status !== 200) {
           setAlertMsg("Problems fetching user information.");
+          setIsLoading(false);
+          return;
+        }
+        if (!roles.length) {
+          setUsers(res.data
+            .filter(user => user.deleted === false)
+            .map(user => {
+              const newUserInfo = user;
+              newUserInfo.id = newUserInfo.username;
+              newUserInfo.created = newUserInfo.invitation_time;
+              return newUserInfo;
+            })
+            .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
           setIsLoading(false);
           return;
         }
@@ -167,7 +177,7 @@ const Users = props => {
         setAlertMsg(`Problems fetching user information. Error message: ${getResponseError(err)}`);
         setIsLoading(false);
       });
-  }, [jwt, server, roles, refresh, displayFields, setAlertMsg]);
+  }, [jwt, server, username, roles, refresh, displayFields, setAlertMsg]);
 
 
   return (
@@ -181,35 +191,33 @@ const Users = props => {
                 <LicUpdateButton type="engine" setLicenseExpiration={setLicenseExpiration} />
                 <LicUpdateButton type="system" />
               </>}
-            <Link to="/new-user">
-              <button type="button" className="btn btn-sm btn-outline-primary">
-                Invite User
-                <Send width="12px" className="ml-2" />
-              </button>
-            </Link>
-            {roles.length &&
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => {
-                  setRefresh(refresh + 1);
-                }}
-              >
-                Refresh
-                <RefreshCw width="12px" className="ml-2" />
-              </button>
-            }
+            {roles.length ?
+              <Link to="/new-user">
+                <button type="button" className="btn btn-sm btn-outline-primary">
+                  Invite User
+                  <Send width="12px" className="ml-2" />
+                </button>
+              </Link> : <></>}
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary"
+              onClick={() => {
+                setRefresh(refresh + 1);
+              }}
+            >
+              Refresh
+              <RefreshCw width="12px" className="ml-2" />
+            </button>
           </div>
         </div>
       </div>
-      {roles.length &&
-        <Table data={users}
-          noDataMsg="No User Found"
-          displayFields={displayFields}
-          sortedAsc={false}
-          isLoading={isLoading}
-          sortedCol="created"
-          idFieldName="id" />}
+      <Table data={users}
+        noDataMsg="No User Found"
+        displayFields={displayFields}
+        sortedAsc={false}
+        isLoading={isLoading}
+        sortedCol="created"
+        idFieldName="id" />
       <Modal show={showDeleteConfirmDialog} onHide={() => setShowDeleteConfirmDialog(false)}>
         <form
           onSubmit={e => {

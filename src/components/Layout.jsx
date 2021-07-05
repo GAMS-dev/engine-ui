@@ -89,11 +89,9 @@ const Layout = () => {
                     <NamespaceQuotaUpdateForm />
                   </Route>
                 }
-                {(roles && roles.length > 0) &&
-                  <Route exact path="/users">
-                    <Users setLicenseExpiration={setLicenseExpiration} />
-                  </Route>
-                }
+                <Route exact path="/users">
+                  <Users setLicenseExpiration={setLicenseExpiration} />
+                </Route>
                 {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
                   <Route exact path="/users/:username/permissions">
                     <UserPermissionUpdateForm />
@@ -117,11 +115,9 @@ const Layout = () => {
                     <LicenseUpdateForm />
                   </Route>
                 }
-                {(roles && roles.includes('admin') !== undefined) &&
-                  <Route exact path="/users/:username/usage">
-                    <Usage />
-                  </Route>
-                }
+                <Route exact path="/users/:username/usage">
+                  <Usage />
+                </Route>
                 {(roles && roles.find(role => role === "admin") !== undefined) &&
                   <Route exact path="/cleanup">
                     <Cleanup />

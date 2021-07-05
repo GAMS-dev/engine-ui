@@ -35,23 +35,24 @@ const UserActionsButtonGroup = props => {
             <>
               <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>Change Password</Dropdown.Item>
               <Dropdown.Item as={Link} to={`/users/${username}/licenses`}>Update License</Dropdown.Item>
-              <Dropdown.Item as={Link} to={`/users/${username}/usage`}>Usage</Dropdown.Item>
             </>}
-          {(isAdmin || (isInviter && username !== me)) &&
-            <>
-              <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
-                Edit Permissions
-              </Dropdown.Item>
-              <Dropdown.Item as={Link} to={`/users/${username}/quotas`}>
-                Edit Quotas
-              </Dropdown.Item>
-              {serverInfo.in_kubernetes === true &&
-                <Dropdown.Item as={Link} to={`/users/${username}/instances`}>
-                  Edit Instances
-                </Dropdown.Item>}
-            </>}
+          <Dropdown.Item as={Link} to={`/users/${username}/usage`}>Usage</Dropdown.Item>
+          <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
+            Edit Permissions
+          </Dropdown.Item>
+          <Dropdown.Item as={Link} to={`/users/${username}/quotas`}>
+            Edit Quotas
+          </Dropdown.Item>
+          {serverInfo.in_kubernetes === true &&
+            <Dropdown.Item as={Link} to={`/users/${username}/instances`}>
+              Edit Instances
+            </Dropdown.Item>}
         </DropdownButton>}
-      {username !== "admin" && (
+      {!isAdmin && username === me &&
+        <Link
+          to={`/users/${username}/usage`}
+          className="btn btn-sm btn-outline-info">Usage</Link>}
+      {(isAdmin || (isInviter && username !== me)) && username !== "admin" && (
         username === "" ?
           <>
             {window.isSecureContext && <div>
@@ -75,7 +76,7 @@ const UserActionsButtonGroup = props => {
             data-user={username}
             onClick={showConfirmDialog}>
             Delete
-            </button>
+          </button>
       )}
     </div>
   );

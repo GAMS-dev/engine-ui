@@ -29,13 +29,12 @@ const SidebarRaw = props => {
               <span className="nav-link-text">Models</span>
             </Link>
           </li>
-          {(roles && roles.length > 0) &&
-            <li className="nav-item">
-              <Link to="/users" className={`nav-link nav-block${["/users", "/licenses", "/usage", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
-                <Users className="feather" />
-                <span className="nav-link-text">Users</span>
-              </Link>
-            </li>}
+          <li className="nav-item">
+            <Link to="/users" className={`nav-link nav-block${["/users", "/licenses", "/usage", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
+              <Users className="feather" />
+              <span className="nav-link-text">Users</span>
+            </Link>
+          </li>
           {(roles && roles.find(role => role === "admin") !== undefined) &&
             <>
               <li className="nav-item">
