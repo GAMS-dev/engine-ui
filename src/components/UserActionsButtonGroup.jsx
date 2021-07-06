@@ -5,7 +5,7 @@ import { ServerInfoContext } from "../ServerInfoContext";
 import { AlertContext } from "./Alert";
 
 const UserActionsButtonGroup = props => {
-  const { id, username, me, isAdmin, isInviter,
+  const { id, username, userroles, me, isAdmin, isInviter,
     setUserToDelete, setDeleteInvitation,
     handleShowDeleteConfirmDialog } = props;
   const [serverInfo] = useContext(ServerInfoContext);
@@ -40,9 +40,10 @@ const UserActionsButtonGroup = props => {
           <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
             Edit Permissions
           </Dropdown.Item>
-          <Dropdown.Item as={Link} to={`/users/${username}/quotas`}>
-            Edit Quotas
-          </Dropdown.Item>
+          {userroles && !userroles.includes("admin") ?
+            <Dropdown.Item as={Link} to={`/users/${username}/quotas`}>
+              Edit Quotas
+            </Dropdown.Item> : <></>}
           {serverInfo.in_kubernetes === true &&
             <Dropdown.Item as={Link} to={`/users/${username}/instances`}>
               Edit Instances

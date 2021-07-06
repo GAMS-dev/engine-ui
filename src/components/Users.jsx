@@ -61,11 +61,12 @@ const Users = props => {
       displayer: e => <TimeDisplay time={e} />
     },
     {
-      field: "id,username",
+      field: "id,username,roles",
       column: "Actions",
-      displayer: (id, name) => <UserActionsButtonGroup
+      displayer: (id, name, roles) => <UserActionsButtonGroup
         id={id}
         username={name}
+        userroles={roles}
         me={username}
         isAdmin={roles.includes("admin")}
         isInviter={roles.includes("inviter")}
