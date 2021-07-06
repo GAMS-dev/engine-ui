@@ -239,7 +239,8 @@ const JobSubmissionForm = props => {
                 const availableInstancesTmp = await axios.get(`${server}/usage/instances`);
                 if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
                     setAvailableInstances(availableInstancesTmp.data);
-                    if (instanceData.data.default_instance.label != null) {
+                    if (instanceData.data.default_instance != null &&
+                        instanceData.data.default_instance.label != null) {
                         setInstance(instanceData.data.default_instance.label);
                     } else {
                         setInstance(availableInstancesTmp.data[0].label);
@@ -304,7 +305,7 @@ const JobSubmissionForm = props => {
                                         <div className="form-group">
                                             <label htmlFor="registeredModelName">
                                                 Select a Model
-                                    </label>
+                                            </label>
                                             <select id="registeredModelName" className="form-control" value={registeredModelName} onChange={e => setRegisteredModelName(e.target.value)}>
                                                 {registeredModels.map(model => <option key={model} value={model}>{model}</option>)}
                                             </select>
@@ -328,7 +329,7 @@ const JobSubmissionForm = props => {
                                             <div className="form-group">
                                                 <label htmlFor="modelName" className="sr-only">
                                                     Name of the Main File
-                                        </label>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -386,7 +387,7 @@ const JobSubmissionForm = props => {
                                             <div className="form-group">
                                                 <label htmlFor="clArgs" className="sr-only">
                                                     Command Line Arguments (comma-separated)
-                                        </label>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -400,7 +401,7 @@ const JobSubmissionForm = props => {
                                             <div className="form-group">
                                                 <label htmlFor="logFileName" className="sr-only">
                                                     Log Filename
-                                        </label>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -416,7 +417,7 @@ const JobSubmissionForm = props => {
                                                     <div className="form-group">
                                                         <label htmlFor="textEntries" className="sr-only">
                                                             Text Entries (comma-separated)
-                                                    </label>
+                                                        </label>
                                                         <input
                                                             type="text"
                                                             className="form-control"
@@ -430,7 +431,7 @@ const JobSubmissionForm = props => {
                                                     <div className="form-group">
                                                         <label htmlFor="streamEntries" className="sr-only">
                                                             Stream Entries (comma-separated)
-                                                    </label>
+                                                        </label>
                                                         <input
                                                             type="text"
                                                             className="form-control"
@@ -446,7 +447,7 @@ const JobSubmissionForm = props => {
                                             <div className="form-group">
                                                 <label htmlFor="jobDeps" className="sr-only">
                                                     Job Dependencies
-                                        </label>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -526,7 +527,7 @@ const JobSubmissionForm = props => {
                                                                 <div className="form-group">
                                                                     <label htmlFor="memReq">
                                                                         Required Memory Units (MiB)
-                                                                </label>
+                                                                    </label>
                                                                     <input
                                                                         type="number"
                                                                         className={`form-control${validMemReq ? '' : ' is-invalid'}`}
