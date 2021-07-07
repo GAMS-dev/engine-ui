@@ -28,6 +28,8 @@ const Users = props => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setAlertMsg] = useContext(AlertContext);
   const [{ jwt, server, roles, username }] = useContext(AuthContext);
+  const isAdmin = roles && roles.includes("admin");
+  const isInviter = roles && roles.includes("inviter");
   const [displayFields] = useState([
     {
       field: "username,id",
@@ -68,8 +70,8 @@ const Users = props => {
         username={name}
         userroles={roles}
         me={username}
-        isAdmin={roles.includes("admin")}
-        isInviter={roles.includes("inviter")}
+        isAdmin={isAdmin}
+        isInviter={isInviter}
         setUserToDelete={setUserToDelete}
         setDeleteInvitation={setDeleteInvitation}
         handleShowDeleteConfirmDialog={() => {
