@@ -144,7 +144,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                         }
                     >
                         <div
-                            className={timingObj.className} style={{ width: `${timingObj.width}%` }}>
+                            className={timingObj.className} style={{ width: `${Math.floor(timingObj.width * 100) / 100}%` }}>
                             {timingObj.width > 10 ? `${Math.round(timingObj.duration)}s` : ''}
                         </div>
                     </OverlayTrigger>
