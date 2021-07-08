@@ -63,6 +63,9 @@ const Layout = () => {
             <main className="col" role="main">
               <Alert />
               <Switch>
+                <Route exact path="/hc">
+                  <Jobs key="hc" />
+                </Route>
                 <Route exact path="/jobs/:token">
                   <Job />
                 </Route>
@@ -134,7 +137,7 @@ const Layout = () => {
                   </Route>
                 }
                 <Route>
-                  <Jobs />
+                  <Jobs key="jobs" />
                 </Route>
               </Switch>
             </main>
