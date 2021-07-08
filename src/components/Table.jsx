@@ -58,6 +58,12 @@ const Table = props => {
       ))}
     </tr>
   }
+  const changeToPage = () => {
+    if (invalidPageNumber || goToPage == null) {
+      return;
+    }
+    setCurrentPage(goToPage - 1);
+  }
   const sortCol = e => {
     if (!e.target.dataset.field) {
       return;
@@ -169,6 +175,11 @@ const Table = props => {
                   aria-label="Page"
                   aria-describedby="basic-addon2"
                   isInvalid={invalidPageNumber}
+                  onKeyPress={(e) => {
+                    if (e.code === "Enter") {
+                      changeToPage();
+                    }
+                  }}
                   onChange={(e) => {
                     const page = parseInt(e.target.value);
                     if (isNaN(page) || page < 1 || page > noPages) {
@@ -180,12 +191,7 @@ const Table = props => {
                   }}
                 />
                 <InputGroup.Append>
-                  <Button variant="outline-secondary" onClick={() => {
-                    if (invalidPageNumber || goToPage == null) {
-                      return;
-                    }
-                    setCurrentPage(goToPage - 1);
-                  }}>Go</Button>
+                  <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
                 </InputGroup.Append>
               </InputGroup>}
           </Pagination></>}
