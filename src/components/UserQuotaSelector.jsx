@@ -40,7 +40,7 @@ const UserQuotaSelector = ({ quotas, setQuotas }) => {
                         return;
                     }
                     const val = parseFloat(e.target.value);
-                    if (isNaN(val) || !isFinite(val)) {
+                    if (isNaN(val) || !isFinite(val) || val < 0) {
                         setValidQuotaParallel(false);
                         setQuotaParallel(val);
                         return;
@@ -67,7 +67,7 @@ const UserQuotaSelector = ({ quotas, setQuotas }) => {
                         return;
                     }
                     const val = parseFloat(e.target.value);
-                    if (isNaN(val) || !isFinite(val)) {
+                    if (isNaN(val) || !isFinite(val) || val < 0) {
                         setValidQuotaVolume(false);
                         setQuotaVolume(val);
                         return;
@@ -93,7 +93,7 @@ const UserQuotaSelector = ({ quotas, setQuotas }) => {
                         return;
                     }
                     const val = parseInt(e.target.value);
-                    if (isNaN(val) || !isFinite(val)) {
+                    if (isNaN(val) || !isFinite(val) || val < 0) {
                         setValidQuotaDisk(false);
                         setQuotaDisk(val * 1e6);
                         return;
