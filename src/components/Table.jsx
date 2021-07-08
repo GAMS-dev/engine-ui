@@ -3,11 +3,14 @@ import moment from "moment";
 import { ArrowUp, ArrowDown } from "react-feather";
 import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
+import { FormControl, Button, InputGroup } from "react-bootstrap";
 
 const Table = props => {
   const { displayFields, noDataMsg, idFieldName, isLoading, onChange, total } = props;
 
   const [currentPage, setCurrentPage] = useState(0);
+  const [invalidPageNumber, setInvalidPageNumber] = useState(false);
+  const [goToPage, setGoToPage] = useState(null);
   const [data, setData] = useState([...props.data]);
   const [sortAsc, setSortAsc] = useState(props.sortedAsc === true);
   const [sortedCol, setSortedCol] = useState(props.sortedCol);
@@ -159,6 +162,32 @@ const Table = props => {
             })}
             <Pagination.Next disabled={currentPage === (noPages - 1)} onClick={gotoNextPage} />
             <Pagination.Last disabled={currentPage === (noPages - 1)} onClick={gotoLastPage} />
+            {noRows > rowsPerPage * 4 &&
+              <InputGroup className="ml-3" style={{ width: '150px' }}>
+                <FormControl
+                  placeholder="Page"
+                  aria-label="Page"
+                  aria-describedby="basic-addon2"
+                  isInvalid={invalidPageNumber}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value);
+                    if (isNaN(page) || page < 1 || page > noPages) {
+                      setInvalidPageNumber(true);
+                      return;
+                    }
+                    setGoToPage(page);
+                    setInvalidPageNumber(false);
+                  }}
+                />
+                <InputGroup.Append>
+                  <Button variant="outline-secondary" onClick={() => {
+                    if (invalidPageNumber || goToPage == null) {
+                      return;
+                    }
+                    setCurrentPage(goToPage - 1);
+                  }}>Go</Button>
+                </InputGroup.Append>
+              </InputGroup>}
           </Pagination></>}
     </>
   );
