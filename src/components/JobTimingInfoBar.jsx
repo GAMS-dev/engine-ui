@@ -102,7 +102,9 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                     setTimingData(timingsTmp);
                     if (isFinishedTmp) {
                         setIsFinished(true);
-                        setRefreshJob(refresh => refresh + 1);
+                        if (refresh > 0) {
+                            setRefreshJob(refresh => refresh + 1);
+                        }
                     } else {
                         setRefresh(refresh + 1);
                     }
