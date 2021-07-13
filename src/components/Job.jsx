@@ -13,6 +13,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 const Job = () => {
   const [job, setJob] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isHcJob, setIsHcJob] = useState(false);
   const [statusCodes, setStatusCodes] = useState([]);
   const { token } = useParams();
@@ -21,6 +22,7 @@ const Job = () => {
   const [serverInfo,] = useContext(ServerInfoContext);
 
   useEffect(() => {
+    setIsLoading(true);
     const fields = [
       "arguments",
       "is_data_provided",
@@ -77,6 +79,7 @@ const Job = () => {
         if (jobData) {
           if (jobData.is_temporary_model) {
             setJob(jobData);
+            setIsLoading(false);
           } else {
             axios.get(`${server}/namespaces/${encodeURIComponent(jobData.namespace)}`, {
               params: {
@@ -93,11 +96,13 @@ const Job = () => {
                 } else {
                   setJob(jobData);
                 }
+                setIsLoading(false);
               })
               .catch(err => {
                 if (err.response && err.response.status !== 403) {
                   setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`);
                 }
+                setIsLoading(false);
               });
           }
         }
@@ -122,7 +127,7 @@ const Job = () => {
 
   return (
     <>
-      {job ? (
+      {isLoading ? <ClipLoader /> :
         <div className="mt-4">
           <div className="row">
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
@@ -149,8 +154,7 @@ const Job = () => {
                 />
               </div>}
           </div>
-        </div>
-      ) : <ClipLoader />}
+        </div>}
     </>
   );
 };
