@@ -7,9 +7,11 @@ import NamespacePermissionSelector from "./NamespacePermissionSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import UserQuotaSelector from "./UserQuotaSelector";
+import { ServerInfoContext } from "../ServerInfoContext";
 
 const UserInvitationForm = () => {
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
+    const [serverInfo,] = useContext(ServerInfoContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -206,7 +208,7 @@ const UserInvitationForm = () => {
                                             <UserQuotaSelector
                                                 setQuotas={setQuotas} />
                                         }
-                                        {availableInstances.length > 0 &&
+                                        {serverInfo.in_kubernetes === true && availableInstances.length > 0 &&
                                             <>
                                                 <div className="form-group form-check mt-3 mb-3">
                                                     <input type="checkbox" className="form-check-input"
