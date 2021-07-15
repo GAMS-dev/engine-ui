@@ -7,6 +7,8 @@ import { zipAsync, getResponseError } from "./util";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import FileDropZone from "./FileDropZone";
+import { useCallback } from "react";
 
 const ModelSubmissionForm = () => {
     const { namespace, modelname } = useParams();
@@ -139,16 +141,16 @@ const ModelSubmissionForm = () => {
                 setIsSubmitting(false);
             });
     }
-    const updateModelFiles = e => {
-        setModelFiles([...e.target.files]);
-        const modelNameTmp = e.target.files[0].name.split(".")[0];
+    const updateModelFiles = useCallback(acceptedFiles => {
+        setModelFiles([...acceptedFiles]);
+        const modelNameTmp = acceptedFiles[0].name.split(".")[0];
         if (newModelName === "") {
             setNewModelName(modelNameTmp)
         }
         if (runName === "") {
             setRunName(`${modelNameTmp}.gms`)
         }
-    }
+    }, [runName, newModelName]);
 
     return (
         <div>
@@ -173,19 +175,9 @@ const ModelSubmissionForm = () => {
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
-                                <div className="custom-file">
-                                    <input type="file" className="custom-file-input"
-                                        id="modelFiles"
-                                        multiple
-                                        onChange={updateModelFiles}
-                                        required={!modelname}
-                                    />
-                                    <label className="custom-file-label" htmlFor="modelFiles">
-                                        {modelFiles ?
-                                            `${modelFiles[0].name}${modelFiles.length > 1 ? ", ..." : ""}`
-                                            : modelname ? "Update Model Files..." : "Model Files..."}
-                                    </label>
-                                </div>
+                                <FileDropZone
+                                    label={modelname ? "Drop updated model files here" : "Drop model files here"}
+                                    onDrop={updateModelFiles} />
                             </div>
                             {!modelname && <div className="form-group">
                                 <label htmlFor="newModelName" className="sr-only">

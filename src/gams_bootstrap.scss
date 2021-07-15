@@ -248,3 +248,9 @@ body {
   background-color: theme-color("info");
   color: white;
 }
+.dropzone-file-info {
+  font-size: 10pt;
+  max-height: 100px;
+  overflow: auto;
+  white-space: nowrap;
+}

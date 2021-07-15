@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { Redirect } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
@@ -10,6 +10,7 @@ import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import { ServerInfoContext } from "../ServerInfoContext";
+import FileDropZone from "./FileDropZone";
 
 const JobSubmissionForm = props => {
     const { newHcJob } = props;
@@ -111,6 +112,10 @@ const JobSubmissionForm = props => {
 
     const handleJobSubmission = () => {
         if (!validCpuReq || !validMemReq) {
+            return;
+        }
+        if (!useRegisteredModel && modelFiles == null) {
+            setSubmissionErrorMsg("Please provide model files.");
             return;
         }
         setSubmissionErrorMsg("");
@@ -263,12 +268,16 @@ const JobSubmissionForm = props => {
             return;
         }
     }
-    const updateModelFiles = e => {
-        if (modelName === "" || modelName === modelFiles[0].name.split(".")[0]) {
-            setModelName(`${e.target.files[0].name.split(".")[0]}.gms`);
+    const updateModelFiles = useCallback(acceptedFiles => {
+        if (modelName === "") {
+            setModelName(`${acceptedFiles[0].name.split(".")[0]}.gms`);
         }
-        setModelFiles([...e.target.files]);
-    }
+        setModelFiles([...acceptedFiles]);
+    }, [modelName]);
+
+    const updatDataFiles = useCallback(acceptedFiles => {
+        setModelData([...acceptedFiles])
+    }, []);
 
     return (
         <div>
@@ -312,19 +321,9 @@ const JobSubmissionForm = props => {
                                         </div> :
                                         <React.Fragment>
                                             <div className="form-group">
-                                                <div className="custom-file">
-                                                    <input type="file" className="custom-file-input"
-                                                        id="modelFiles"
-                                                        multiple
-                                                        onChange={updateModelFiles}
-                                                        required
-                                                    />
-                                                    <label className="custom-file-label" htmlFor="modelFiles">
-                                                        {modelFiles ?
-                                                            `${modelFiles[0].name}${modelFiles.length > 1 ? ", ..." : ""}`
-                                                            : "Model files..."}
-                                                    </label>
-                                                </div>
+                                                <FileDropZone
+                                                    label="Drop static model files here"
+                                                    onDrop={updateModelFiles} />
                                             </div>
                                             <div className="form-group">
                                                 <label htmlFor="modelName" className="sr-only">
@@ -344,18 +343,9 @@ const JobSubmissionForm = props => {
                                         </React.Fragment>
                                     }
                                     <div className="form-group">
-                                        <div className="custom-file">
-                                            <input type="file" className="custom-file-input"
-                                                id="modelData"
-                                                multiple
-                                                onChange={e => setModelData([...e.target.files])} />
-                                            <label className="custom-file-label" htmlFor="modelData">
-                                                {modelData ?
-                                                    `${modelData[0].name}${modelData.length > 1 ? ", ..." : ""}`
-                                                    : `Data files${useRegisteredModel &&
-                                                        registeredModels.length !== 0 ? "" : "(optional)"}...`}
-                                            </label>
-                                        </div>
+                                        <FileDropZone
+                                            label="Drop data files here (optional)"
+                                            onDrop={updatDataFiles} />
                                     </div>
                                     {newHcJob &&
                                         <div className="form-group">
