@@ -38,12 +38,16 @@ const JobSubmissionForm = props => {
     const [jobDeps, setJobDeps] = useState("");
     const [validCpuReq, setValidCpuReq] = useState(true);
     const [validMemReq, setValidMemReq] = useState(true);
+    const [validWsReq, setValidWsReq] = useState(true);
     const [openLabelsWrapper, setOpenLabelsWrapper] = useState(false);
     const [instancesLoaded, setInstancesLoaded] = useState(false);
     const [availableInstances, setAvailableInstances] = useState([]);
     const [useRawRequests, setUseRawRequests] = useState(false);
     const [cpuReq, setCpuReq] = useState("");
+    const [wsReq, setWsReq] = useState("");
     const [memReq, setMemReq] = useState("");
+    const [tolerations, setTolerations] = useState("");
+    const [nodeSelectors, setNodeSelectors] = useState("");
     const [instance, setInstance] = useState("");
     const [jobPosted, setJobPosted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,7 +115,7 @@ const JobSubmissionForm = props => {
     }, [submissionErrorMsg])
 
     const handleJobSubmission = () => {
-        if (!validCpuReq || !validMemReq) {
+        if (!validCpuReq || !validMemReq || !validWsReq) {
             return;
         }
         if (!useRegisteredModel && modelFiles == null) {
@@ -200,6 +204,25 @@ const JobSubmissionForm = props => {
                 }
                 if (memReq) {
                     jobSubmissionForm.append('labels', `memory_request=${memReq}`);
+                }
+                if (wsReq) {
+                    jobSubmissionForm.append('labels', `workspace_request=${wsReq}`);
+                }
+                if (tolerations) {
+                    const tolerationsTmp = tolerations.split(',');
+                    if (tolerationsTmp.length) {
+                        tolerationsTmp.forEach(toleration => {
+                            jobSubmissionForm.append('labels', `tolerations=${toleration}`);
+                        });
+                    }
+                }
+                if (nodeSelectors) {
+                    const nodeSelectorsTmp = nodeSelectors.split(',');
+                    if (nodeSelectorsTmp.length) {
+                        nodeSelectorsTmp.forEach(nodeSelector => {
+                            jobSubmissionForm.append('labels', `node_selectors=${nodeSelector}`);
+                        });
+                    }
                 }
             } else if (instance) {
                 jobSubmissionForm.append('labels', `instance=${instance}`);
@@ -479,7 +502,7 @@ const JobSubmissionForm = props => {
                                                                     <select id="instance" className="form-control" value={instance} onChange={e => setInstance(e.target.value)}>
                                                                         {availableInstances.map(instance =>
                                                                             <option key={instance.label} value={instance.label}>
-                                                                                {`${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB)`}
+                                                                                {`${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB RAM)`}
                                                                             </option>)}
                                                                     </select>
                                                                 </div>
@@ -538,6 +561,58 @@ const JobSubmissionForm = props => {
                                                                             setValidMemReq(true);
                                                                             setMemReq(val);
                                                                         }}
+                                                                    />
+                                                                </div>
+                                                                <div className="form-group">
+                                                                    <label htmlFor="wsReq">
+                                                                        Required Workspace Size (MiB)
+                                                                    </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        className={`form-control${validWsReq ? '' : ' is-invalid'}`}
+                                                                        id="wsReq"
+                                                                        value={wsReq}
+                                                                        onChange={e => {
+                                                                            if (!e.target.value) {
+                                                                                setValidWsReq(true);
+                                                                                setWsReq(null);
+                                                                                return;
+                                                                            }
+                                                                            const val = parseFloat(e.target.value);
+                                                                            if (isNaN(val) || !isFinite(val)) {
+                                                                                setValidWsReq(false);
+                                                                                setWsReq(val);
+                                                                                return;
+                                                                            }
+                                                                            setValidWsReq(true);
+                                                                            setWsReq(val);
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <div className="form-group">
+                                                                    <label htmlFor="tolerations">
+                                                                        Tolerations (comma-separated)
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        id="tolerations"
+                                                                        autoComplete="on"
+                                                                        value={tolerations}
+                                                                        onChange={e => setTolerations(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div className="form-group">
+                                                                    <label htmlFor="nodeSelectors">
+                                                                        Node Selectors (comma-separated)
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        id="nodeSelectors"
+                                                                        autoComplete="on"
+                                                                        value={nodeSelectors}
+                                                                        onChange={e => setNodeSelectors(e.target.value)}
                                                                     />
                                                                 </div>
                                                             </div>
