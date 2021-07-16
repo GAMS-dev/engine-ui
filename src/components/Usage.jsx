@@ -97,15 +97,15 @@ const Usage = () => {
                         }, 0);
                         let totalTime;
                         if (isFinished && c.finished == null) {
-                            totalTime = NaN; //todo In the future, maybe use a flag or stg to inform
+                            totalTime = NaN; //TODO: In the future, maybe use a flag or sth to inform
                         } else {
                             totalTime = ((isFinished ? new Date(c.finished + 'Z') :
                                 new Date()) - new Date(c.submitted + 'Z')) / 1000;
                         }
-                        // todo 0th job might not be the first one to start
-                        const queuetime = ((c.jobs[0].times.length ?
+                        // TODO: 0th job might not be the first one to start
+                        const queuetime = c.jobs.length ? ((c.jobs[0].times.length ?
                             new Date(c.jobs[0].times[0].start + 'Z') : (isFinished ? NaN : new Date())) -
-                            new Date(c.submitted + 'Z')) / 1000;
+                            new Date(c.submitted + 'Z')) / 1000 : 0;
                         if (a[c.username]) {
                             // User already exists
                             a[c.username].solvetime += solveTime;
