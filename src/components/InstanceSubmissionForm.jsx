@@ -71,13 +71,17 @@ const InstanceSubmissionForm = () => {
             if (label) {
                 payload['old_label'] = label;
             }
-            const tolerationsTmp = tolerations.split(',');
-            if (tolerationsTmp.length) {
-                payload['tolerations'] = tolerationsTmp;
+            if (tolerations) {
+                const tolerationsTmp = tolerations.split(',');
+                if (tolerationsTmp.length) {
+                    payload['tolerations'] = tolerationsTmp;
+                }
             }
-            const nodeSelectorsTmp = nodeSelectors.split(',');
-            if (nodeSelectorsTmp.length) {
-                payload['node_selectors'] = nodeSelectorsTmp;
+            if (nodeSelectors) {
+                const nodeSelectorsTmp = nodeSelectors.split(',');
+                if (nodeSelectorsTmp.length) {
+                    payload['node_selectors'] = nodeSelectorsTmp;
+                }
             }
             await axios({
                 url: `${server}/usage/instances`,
