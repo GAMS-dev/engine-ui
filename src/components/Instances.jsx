@@ -35,6 +35,12 @@ const Instances = () => {
             displayer: Number
         },
         {
+            field: "workspace_request",
+            column: "Workspace (MiB)",
+            sorter: "numerical",
+            displayer: Number
+        },
+        {
             field: "multiplier",
             column: "Multiplier",
             sorter: "numerical",
