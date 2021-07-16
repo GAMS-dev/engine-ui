@@ -376,7 +376,7 @@ const JobSubmissionForm = props => {
                                         <div>
                                             <div className="form-group">
                                                 <label htmlFor="clArgs" className="sr-only">
-                                                    Command Line Arguments (comma-separated)
+                                                    Command Line Arguments (comma-separated, optional)
                                                 </label>
                                                 <input
                                                     type="text"
