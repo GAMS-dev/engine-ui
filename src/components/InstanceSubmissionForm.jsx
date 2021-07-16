@@ -19,8 +19,8 @@ const InstanceSubmissionForm = () => {
     const [cpuReq, setCpuReq] = useState("");
     const [memReq, setMemReq] = useState("");
     const [wsReq, setWsReq] = useState("");
-    const [tolerations, setTolerations] = useState([]);
-    const [nodeSelectors, setNodeSelectors] = useState([]);
+    const [tolerations, setTolerations] = useState("");
+    const [nodeSelectors, setNodeSelectors] = useState("");
     const [multiplier, setMultiplier] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
