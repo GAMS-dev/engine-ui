@@ -160,10 +160,24 @@ const JobReqInfoTable = props => {
                 </span>
               } else if (el[0] === "memory_request") {
                 return <span key="memory_request" className="badge badge-secondary m-1">
-                  {`${el[1]} MiB`}
+                  {`${el[1]} MiB RAM`}
                 </span>
+              } else if (el[0] === "workspace_request") {
+                return <span key="workspace_request" className="badge badge-secondary m-1">
+                  {`${el[1]} MiB Disk`}
+                </span>
+              } else if (Array.isArray(el[1])) {
+                return el[1].map((arrayEl, arrayIdx) => {
+                  return <span key={el[0] + arrayIdx}
+                    className={`badge badge-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
+                    title={el[0] === 'tolerations' ? "Toleration" : "Node Selector"}>
+                    {`${arrayEl.key}=${arrayEl.value}`}
+                  </span>
+                });
               }
-              return ""
+              return <span key={el[0]} className="badge badge-secondary m-1">
+                {el[1]}
+              </span>
             }) || "-"}</td>
           </tr>}
         <tr>
