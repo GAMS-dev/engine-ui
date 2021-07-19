@@ -56,9 +56,14 @@ body {
   overflow-y: auto;
 }
 
+.sidebar .nav-item {
+  white-space: nowrap;
+}
+
 .sidebar .nav-link {
   font-weight: 500;
   color: #6c757d;
+  white-space: nowrap;
 }
 
 .sidebar .nav-link:hover {
