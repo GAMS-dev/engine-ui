@@ -222,6 +222,7 @@ const UserInstanceUpdateForm = () => {
                                                     value={selectedInstancesAllowed}
                                                     isMulti={true}
                                                     isSearchable={true}
+                                                    closeMenuOnSelect={false}
                                                     onChange={selected => {
                                                         setSelectedInstancesAllowed(selected);
                                                         if (defaultInstance == null ||

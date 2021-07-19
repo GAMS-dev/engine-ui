@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
+import Select from 'react-select';
 import { Redirect } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
@@ -224,8 +225,8 @@ const JobSubmissionForm = props => {
                         });
                     }
                 }
-            } else if (instance) {
-                jobSubmissionForm.append('labels', `instance=${instance}`);
+            } else if (instance && instance.value) {
+                jobSubmissionForm.append('labels', `instance=${instance.value}`);
             }
         }
         Promise.all(promisesToAwait).then(() => {
@@ -264,22 +265,26 @@ const JobSubmissionForm = props => {
             const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
             if (roles && roles.includes("admin")) {
                 // admins can see/use all instances
-                const availableInstancesTmp = await axios.get(`${server}/usage/instances`);
+                let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
                 if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
-                    setAvailableInstances(availableInstancesTmp.data);
+                    availableInstancesTmp = availableInstancesTmp.data
+                        .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB RAM)` }));
+                    setAvailableInstances(availableInstancesTmp);
                     if (instanceData.data.default_instance != null &&
                         instanceData.data.default_instance.label != null) {
-                        setInstance(instanceData.data.default_instance.label);
+                        setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
                     } else {
-                        setInstance(availableInstancesTmp.data[0].label);
+                        setInstance(availableInstancesTmp[0]);
                     }
                     setUseRawRequests(false);
                 } else {
                     setUseRawRequests(true);
                 }
             } else if (instanceData.data && instanceData.data.instances_available.length > 0) {
-                setAvailableInstances(instanceData.data.instances_available);
-                setInstance(instanceData.data.default_instance.label);
+                const availableInstancesTmp = instanceData.data.instances_available
+                    .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB RAM)` }));
+                setAvailableInstances(availableInstancesTmp);
+                setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
                 setUseRawRequests(false);
             } else {
                 setUseRawRequests(true);
@@ -324,9 +329,15 @@ const JobSubmissionForm = props => {
                                         <label htmlFor="namespace">
                                             Select a Namespace
                                         </label>
-                                        <select id="namespace" className="form-control" value={namespace} onChange={e => setNamespace(e.target.value)}>
-                                            {availableNamespaces.map(ns => <option key={ns} value={ns}>{ns}</option>)}
-                                        </select>
+                                        <Select
+                                            id="namespace"
+                                            isClearable={false}
+                                            value={{ value: namespace, label: namespace }}
+                                            isSearchable={true}
+                                            onChange={selected => setNamespace(selected.value)}
+                                            options={availableNamespaces
+                                                .map(ns => ({ value: ns, label: ns }))}
+                                        />
                                     </div>
                                     <div className="form-check mb-3">
                                         <input type="checkbox" className="form-check-input" checked={useRegisteredModel} onChange={e => setUseRegisteredModel(e.target.checked)}
@@ -338,9 +349,14 @@ const JobSubmissionForm = props => {
                                             <label htmlFor="registeredModelName">
                                                 Select a Model
                                             </label>
-                                            <select id="registeredModelName" className="form-control" value={registeredModelName} onChange={e => setRegisteredModelName(e.target.value)}>
-                                                {registeredModels.map(model => <option key={model} value={model}>{model}</option>)}
-                                            </select>
+                                            <Select
+                                                id="registeredModelName"
+                                                isClearable={false}
+                                                value={{ value: registeredModelName, label: registeredModelName }}
+                                                isSearchable={true}
+                                                onChange={selected => setRegisteredModelName(selected.value)}
+                                                options={registeredModels.map(model => ({ value: model, label: model }))}
+                                            />
                                         </div> :
                                         <React.Fragment>
                                             <div className="form-group">
@@ -499,12 +515,14 @@ const JobSubmissionForm = props => {
                                                                     <label htmlFor="instance">
                                                                         Select Instance
                                                                     </label>
-                                                                    <select id="instance" className="form-control" value={instance} onChange={e => setInstance(e.target.value)}>
-                                                                        {availableInstances.map(instance =>
-                                                                            <option key={instance.label} value={instance.label}>
-                                                                                {`${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB RAM)`}
-                                                                            </option>)}
-                                                                    </select>
+                                                                    <Select
+                                                                        id="instance"
+                                                                        isClearable={false}
+                                                                        value={instance}
+                                                                        isSearchable={true}
+                                                                        onChange={selected => setInstance(selected)}
+                                                                        options={availableInstances}
+                                                                    />
                                                                 </div>
                                                             </div>
                                                             <div style={{

@@ -1,29 +1,19 @@
 import React, { useState, useEffect } from "react";
+import Select from 'react-select';
 
 export const InexJSONSelector = props => {
     const { onChangeHandler, label, inexObject } = props;
 
     const [filterResults, setFilterResults] = useState(inexObject ? true : false);
-    const [toggleIncludeExclude, setToggleIncludeExclude] = useState(inexObject ? inexObject.type : "include");
+    const [toggleIncludeExclude, setToggleIncludeExclude] = useState(inexObject && inexObject.type === "exclude" ?
+        { value: "exclude", label: "exclude" } :
+        { value: "include", label: "include" });
     const [includeFiles, setIncludeFiles] = useState(inexObject && inexObject.type === "include" ? inexObject.files.join(",") : "");
     const [excludeFiles, setExcludeFiles] = useState(inexObject && inexObject.type === "exclude" ? inexObject.files.join(",") : "");
 
-    const updateFilterResults = e => {
-        setFilterResults(e.target.checked);
-    }
-    const updateToggleIncludeExclude = e => {
-        setToggleIncludeExclude(e.target.value);
-    }
-    const updateIncludeFiles = e => {
-        setIncludeFiles(e.target.value);
-    }
-    const updateExcludeFiles = e => {
-        setExcludeFiles(e.target.value);
-    }
-
     useEffect(() => {
         if (filterResults) {
-            if (toggleIncludeExclude === "include") {
+            if (toggleIncludeExclude.value === "include") {
                 onChangeHandler(JSON.stringify({
                     type: "include",
                     files: includeFiles.split(",").map(el => el.trim())
@@ -42,7 +32,10 @@ export const InexJSONSelector = props => {
     return (
         <React.Fragment>
             <div className="form-check">
-                <input type="checkbox" className="form-check-input" checked={filterResults} onChange={updateFilterResults}
+                <input type="checkbox"
+                    className="form-check-input"
+                    checked={filterResults}
+                    onChange={e => setFilterResults(e.target.checked)}
                     id="filterResults" />
                 <label className="form-check-label" htmlFor="filterResults">{label ? label : "Filter results (e.g. to reduce the size of the results archive)?"}</label>
             </div>
@@ -52,12 +45,22 @@ export const InexJSONSelector = props => {
                         <label htmlFor="toggleIncludeExclude">
                             Include or exclude files from results archive?
                         </label>
-                        <select id="toggleIncludeExclude" className="form-control" value={toggleIncludeExclude} onChange={updateToggleIncludeExclude}>
-                            <option key="include" value="include">include</option>
-                            <option key="exclude" value="exclude">exclude</option>
-                        </select>
+                        <Select
+                            id="toggleIncludeExclude"
+                            isClearable={false}
+                            value={toggleIncludeExclude}
+                            isSearchable={true}
+                            onChange={selected => setToggleIncludeExclude(selected)}
+                            options={[{
+                                value: "include",
+                                label: "include"
+                            }, {
+                                value: "exclude",
+                                label: "exclude"
+                            }]}
+                        />
                     </div>
-                    {toggleIncludeExclude === "include" ?
+                    {toggleIncludeExclude.value === "include" ?
                         <div className="form-group">
                             <label htmlFor="includeFiles" className="sr-only">
                                 Files to include in results (optional, comma-separated)
@@ -69,7 +72,7 @@ export const InexJSONSelector = props => {
                                 placeholder="Files to include in results (comma-separated, optional)"
                                 autoComplete="on"
                                 value={includeFiles}
-                                onChange={updateIncludeFiles}
+                                onChange={e => setIncludeFiles(e.target.value)}
                             />
                         </div> :
                         <div className="form-group">
@@ -83,7 +86,7 @@ export const InexJSONSelector = props => {
                                 placeholder="Files to exclude from results (comma-separated, optional)"
                                 autoComplete="on"
                                 value={excludeFiles}
-                                onChange={updateExcludeFiles}
+                                onChange={e => setExcludeFiles(e.target.value)}
                             />
                         </div>
                     }
