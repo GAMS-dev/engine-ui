@@ -19,6 +19,8 @@ const UserInvitationForm = () => {
     const [role, setRole] = useState("user");
     const [namespacePermissions, setNamespacePermissions] = useState([]);
     const [assignInstances, setAssignInstances] = useState(false);
+    const [assignLicense, setAssignLicense] = useState(false);
+    const [license, setLicense] = useState("");
     const [availableInstances, setAvailableInstances] = useState([]);
     const [selectedInstancesAllowed, setSelectedInstancesAllowed] = useState(null);
     const [defaultInstance, setDefaultInstance] = useState(null);
@@ -129,6 +131,10 @@ const UserInvitationForm = () => {
                     invitationSubmissionForm.append("labels", instance.label);
                 });
                 invitationSubmissionForm.append("default_label", defaultInstance.value);
+            }
+            if (assignLicense && license !== "") {
+                const license_b64 = btoa(license);
+                invitationSubmissionForm.append("gams_license", license_b64);
             }
         }
         axios
@@ -253,6 +259,26 @@ const UserInvitationForm = () => {
                                                         </div>
                                                     </> : <></>}
                                             </>}
+
+                                        {roles && roles.includes('admin') && <div className="form-group form-check mt-3 mb-3">
+                                            <input type="checkbox" className="form-check-input"
+                                                checked={assignLicense !== false} onChange={e => setAssignLicense(e.target.checked)}
+                                                id="assignLicense" />
+                                            <label className="form-check-label" htmlFor="assignLicense">Assign License?</label>
+                                            {assignLicense && <div>
+                                                <label htmlFor="licenseBox">
+                                                    GAMS License for User
+                                                </label>
+                                                <textarea
+                                                    id="licenseBox"
+                                                    rows="6"
+                                                    cols="50"
+                                                    className="form-control monospace no-resize"
+                                                    value={license}
+                                                    onChange={e => setLicense(e.target.value)} >
+                                                </textarea> </div>
+                                            }
+                                        </div>}
                                     </>}
                             </fieldset>
                             <div className="mt-3">
