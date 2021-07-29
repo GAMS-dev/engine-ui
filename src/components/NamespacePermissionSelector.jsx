@@ -31,7 +31,6 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
         if (includeGroups !== true || selectedNamespace.length < 1) {
             return;
         }
-        console.log('asd')
         const fetchGroups = async () => {
             setIsLoading(true);
             try {

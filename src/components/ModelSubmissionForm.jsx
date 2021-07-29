@@ -3,6 +3,7 @@ import { Redirect, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
+import Select from 'react-select';
 import { zipAsync, getResponseError } from "./util";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
@@ -19,6 +20,8 @@ const ModelSubmissionForm = () => {
     const [errorMsg, setErrorMsg] = useState("")
     const [newModelName, setNewModelName] = useState("");
     const [runName, setRunName] = useState("");
+    const [userGroups, setUserGroups] = useState([]);
+    const [availableUserGroups, setAvailableUserGroups] = useState([]);
     const [modelFiles, setModelFiles] = useState();
     const [clArgs, setClArgs] = useState("");
     const [inexObject, setInexObject] = useState("");
@@ -32,27 +35,45 @@ const ModelSubmissionForm = () => {
         if (!modelname) {
             return;
         }
-        setIsLoading(true);
-        setErrorMsg("");
-        axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`, {
-            params: { model: modelname }
-        })
-            .then(res => {
-                if (res.data.length > 0) {
+        const fetchModelData = async () => {
+            setIsLoading(true);
+            setErrorMsg("");
+            try {
+                const modelDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`);
+                const groupDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`);
+                const resModelData = await modelDataPromise;
+                if (resModelData.data.length > 0) {
+                    const selectedGroups = resModelData.data[0].user_groups ?
+                        resModelData.data[0].user_groups.map(group => ({
+                            value: group,
+                            label: group
+                        })) : [];
+                    const resGroupData = await groupDataPromise;
+                    let availableGroupsTmp = resGroupData.data
+                        .map(group => group.label);
+                    availableGroupsTmp = availableGroupsTmp
+                        .concat(resModelData.data[0].user_groups ?
+                            resModelData.data[0].user_groups.filter(group =>
+                                !availableGroupsTmp.includes(group)) : []);
+                    setAvailableUserGroups(availableGroupsTmp.map(group => ({
+                        value: group,
+                        label: group
+                    })));
+                    setUserGroups(selectedGroups);
                     setNewModelName(modelname);
-                    setRunName(res.data[0].run ? res.data[0].run : `${modelname}.gms`);
-                    setClArgs(res.data[0].arguments.join(","));
-                    setInexObject(res.data[0].inex);
-                    setIsLoading(false);
+                    setRunName(resModelData.data[0].run ? resModelData.data[0].run : `${modelname}.gms`);
+                    setClArgs(resModelData.data[0].arguments.join(","));
+                    setInexObject(resModelData.data[0].inex);
                 } else {
                     setErrorMsg(`Model: ${modelname} does not exist in namespace: ${namespace}`);
-                    setIsLoading(false);
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 setErrorMsg(`Problems while while retrieving model info. Error message: ${getResponseError(err)}.`);
+            } finally {
                 setIsLoading(false);
-            });
+            }
+        }
+        fetchModelData();
     }, [server, modelname, namespace]);
 
     const handleModelSubmission = () => {
@@ -105,6 +126,13 @@ const ModelSubmissionForm = () => {
             modelSubmissionForm.append("run", runName);
         } else if (modelname) {
             modelSubmissionForm.append("delete_run", "true");
+        }
+        if (userGroups.length > 0) {
+            for (let i = 0; i < userGroups.length; i++) {
+                modelSubmissionForm.append("user_groups", userGroups[i].value);
+            }
+        } else {
+            modelSubmissionForm.append("delete_user_groups", "true");
         }
         Promise.all(promisesToAwait).then(() => {
             axios({
@@ -226,6 +254,23 @@ const ModelSubmissionForm = () => {
                                 label="Filter results (e.g. to reduce the size of the results archive or to restrict users from seeing certain files)?"
                                 inexObject={inexObject}
                                 onChangeHandler={e => setInexJSON(e)} />
+                            {availableUserGroups.length > 0 &&
+                                <div className="form-group mt-3">
+                                    <label htmlFor="userGroups" className="sr-only">
+                                        User Groups
+                                    </label>
+                                    <Select
+                                        id="userGroups"
+                                        value={userGroups}
+                                        isMulti={true}
+                                        isSearchable={true}
+                                        placeholder={'User Groups'}
+                                        isDisabled={isSubmitting}
+                                        closeMenuOnSelect={false}
+                                        onChange={setUserGroups}
+                                        options={availableUserGroups}
+                                    />
+                                </div>}
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
