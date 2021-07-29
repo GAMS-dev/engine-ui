@@ -32,9 +32,6 @@ const ModelSubmissionForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (!modelname) {
-            return;
-        }
         const fetchModelData = async () => {
             setIsLoading(true);
             setErrorMsg("");
@@ -73,7 +70,27 @@ const ModelSubmissionForm = () => {
                 setIsLoading(false);
             }
         }
-        fetchModelData();
+        const fetchGroupData = async () => {
+            setIsLoading(true);
+            setErrorMsg("");
+            try {
+                const groupDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`);
+                const resGroupData = await groupDataPromise;
+                setAvailableUserGroups(resGroupData.data.map(group => ({
+                    value: group.label,
+                    label: group.label
+                })));
+            } catch (err) {
+                setErrorMsg(`Problems while while user group info. Error message: ${getResponseError(err)}.`);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        if (modelname) {
+            fetchModelData();
+        } else {
+            fetchGroupData();
+        }
     }, [server, modelname, namespace]);
 
     const handleModelSubmission = () => {
