@@ -64,11 +64,11 @@ const UserChangePassForm = () => {
         <>
             {username !== user && !roles.includes('admin') ?
                 <div className="alert alert-danger">
-                    <p><strong>You have no permission to change password of user: {username}.</strong></p>
+                    <p><strong>You have no permission to change password of user: {user}.</strong></p>
                 </div> :
                 <div>
                     <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 className="h2">{username === user ? 'Change Password' : `Change Password of User: ${username}`}</h1>
+                        <h1 className="h2">{username === user ? 'Change Password' : `Change Password of User: ${user}`}</h1>
                     </div>
                     <form
                         className="m-auto"
