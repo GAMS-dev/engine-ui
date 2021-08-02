@@ -148,7 +148,7 @@ const ModelSubmissionForm = () => {
             for (let i = 0; i < userGroups.length; i++) {
                 modelSubmissionForm.append("user_groups", userGroups[i].value);
             }
-        } else {
+        } else if (modelname) {
             modelSubmissionForm.append("delete_user_groups", "true");
         }
         Promise.all(promisesToAwait).then(() => {
