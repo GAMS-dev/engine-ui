@@ -9,6 +9,7 @@ import JobSubmissionForm from "./JobSubmissionForm";
 import ModelSubmissionForm from "./ModelSubmissionForm";
 import UserInvitationForm from "./UserInvitationForm";
 import UserChangePassForm from "./UserChangePassForm";
+import UserChangeNameForm from "./UserChangeNameForm";
 import Job from "./Job";
 import Models from "./Models";
 import NamespaceQuotaUpdateForm from "./NamespaceQuotaUpdateForm";
@@ -112,6 +113,9 @@ const Layout = () => {
                 }
                 <Route exact path="/users/:user/change-pass">
                   <UserChangePassForm />
+                </Route>
+                <Route exact path="/users/:user/change-username">
+                  <UserChangeNameForm />
                 </Route>
                 {(roles && roles.includes('admin') !== undefined) &&
                   <Route exact path="/users/:username/licenses">
