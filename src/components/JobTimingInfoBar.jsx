@@ -49,7 +49,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                     if (isFinishedTmp) {
                         totalDuration = (new Date(data.finished) - new Date(data.submitted)) / 1000;
                     } else {
-                        totalDuration = (new Date() - new Date(data.submitted + 'Z')) / 1000;
+                        totalDuration = (new Date() - new Date(data.submitted)) / 1000;
                     }
                     let timingsTmp;
                     if (data.times.length > 0) {
@@ -70,7 +70,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                                     intervalDuration = (new Date(data.finished) - new Date(interval.start)) / 1000;
                                 } else {
                                     // job is still running
-                                    intervalDuration = (new Date() - new Date(interval.start + 'Z')) / 1000;
+                                    intervalDuration = (new Date() - new Date(interval.start)) / 1000;
                                 }
                             } else {
                                 intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;
