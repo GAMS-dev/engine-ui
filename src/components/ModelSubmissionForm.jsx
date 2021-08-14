@@ -36,7 +36,9 @@ const ModelSubmissionForm = () => {
             setIsLoading(true);
             setErrorMsg("");
             try {
-                const modelDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`);
+                const modelDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`, {
+                    params: { model: modelname }
+                });
                 const groupDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`);
                 const resModelData = await modelDataPromise;
                 if (resModelData.data.length > 0) {
