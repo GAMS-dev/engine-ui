@@ -81,7 +81,7 @@ const JobRespInfoTable = props => {
                 <th>Progress</th>
                 <td>{`${job.finished}/${job.job_count} (${job.successfully_finished} successful)`}</td>
               </tr>
-              {(job.status > 0 || job.status === -2) && job.status < 10 &&
+              {isActiveJob(job.status) &&
                 <tr>
                   <th>Terminate Job</th>
                   <td>
@@ -144,7 +144,7 @@ const JobRespInfoTable = props => {
                     </span>}
                 </td>
               </tr>}
-              {(job.status > 0 || job.status === -2) && job.status < 10 &&
+              {isActiveJob(job.status) &&
                 <>
                   <tr>
                     <th>Stream Entries</th>
