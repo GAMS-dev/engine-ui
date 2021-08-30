@@ -36,7 +36,8 @@ const LoginForm = props => {
         `${server}/auth/login`,
         {
           username: username,
-          password: password
+          password: password,
+          expires_in: 604800
         }
       )
       .then(res => {
