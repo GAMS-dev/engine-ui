@@ -149,7 +149,7 @@ const Job = () => {
               <div className="col-md-12 col-xl-4">
                 <TextEntryView
                   textEntries={job.text_entries && job.text_entries.length > 0 ?
-                    job.text_entries.sort((a, b) => a.entry_name.localeCompare(b.username)) : null}
+                    job.text_entries.sort((a, b) => a.entry_name.localeCompare(b.entry_name)) : null}
                   server={server}
                 />
               </div>}
