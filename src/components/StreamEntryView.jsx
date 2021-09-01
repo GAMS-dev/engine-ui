@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Activity } from "react-feather";
@@ -6,14 +6,23 @@ import Modal from "react-bootstrap/Modal";
 import { getResponseError } from "./util";
 import Button from "react-bootstrap/Button";
 
+function entryCacheReducer(state, action) {
+    if (state[action.key] == null) {
+        state[action.key] = action.value;
+    } else {
+        state[action.key] += action.value;
+    }
+    return state;
+}
+
 const StreamEntryView = props => {
     const [showStreamEntry, setShowStreamEntry] = useState(false);
 
     const contentTextarea = useRef(null);
     const { streamEntry, isStdOut, server, setRefreshJob } = props;
     const [errorMsg, setErrorMsg] = useState("");
-    const [entryValue, setEntryValue] = useState("");
     const [refresh, setRefresh] = useState(0);
+    const [entryCache, setEntryCache] = useReducer(entryCacheReducer, {});
     const [scrollToBottom, setScrollToBottom] = useState(true);
     const { token } = useParams();
 
@@ -28,8 +37,11 @@ const StreamEntryView = props => {
                         `${server}/jobs/${encodeURIComponent(token)}/stream-entry/${encodeURIComponent(streamEntry)}`
                 )
                 .then(res => {
-                    setEntryValue(el => el + res.data[isStdOut ? "message" : "entry_value"]);
-                    setRefresh(refresh + 1);
+                    const entryValTmp = res.data[isStdOut ? "message" : "entry_value"];
+                    if (entryValTmp !== '') {
+                        setEntryCache({ key: streamEntry, value: entryValTmp });
+                        setRefresh(curr => curr + 1);
+                    }
                 })
                 .catch(err => {
                     if (err.response.status === 308) {
@@ -39,23 +51,20 @@ const StreamEntryView = props => {
                     }
                 });
         }
-        if (refresh === 0) {
+        fetchStreamEntry();
+        const streamEntryTimer = setInterval(() => {
             fetchStreamEntry();
-        } else {
-            const streamEntryTimer = setTimeout(() => {
-                fetchStreamEntry();
-            }, 1500);
-            return () => {
-                clearTimeout(streamEntryTimer)
-            }
+        }, 1500);
+        return () => {
+            clearInterval(streamEntryTimer);
         }
-    }, [server, token, isStdOut, streamEntry, showStreamEntry, refresh, setRefreshJob]);
+    }, [server, token, isStdOut, streamEntry, showStreamEntry, setRefreshJob]);
 
     useEffect(() => {
         if (showStreamEntry && scrollToBottom) {
             contentTextarea.current.scrollTop = contentTextarea.current.scrollHeight;
         }
-    }, [showStreamEntry, entryValue, scrollToBottom])
+    }, [showStreamEntry, refresh, scrollToBottom])
     return (
         <>
             <button className="btn btn-sm btn-warning" onClick={() => setShowStreamEntry(true)}>
@@ -73,7 +82,7 @@ const StreamEntryView = props => {
                         className="form-control text-monospace"
                         style={{ fontSize: "9pt" }}
                         rows="15"
-                        value={entryValue}
+                        value={entryCache[streamEntry]}
                         ref={contentTextarea}
                         readOnly
                     ></textarea>
@@ -89,7 +98,7 @@ const StreamEntryView = props => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowStreamEntry(false)}>
                         Cancel
-            </Button>
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </>
