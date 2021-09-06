@@ -100,7 +100,7 @@ const TextEntryView = props => {
           </div>
         }
         <textarea
-          className="form-control text-monospace"
+          className="form-control text-monospace nowrap"
           id="exampleFormControlTextarea1"
           rows="15"
           value={teContent}

@@ -170,6 +170,10 @@ body {
   font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
 }
 
+.nowrap {
+  white-space: pre;
+}
+
 .username-sidebar {
   font-size: 0.6em;
   padding: 0 1em;
