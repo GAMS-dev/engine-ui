@@ -11,8 +11,19 @@ then
     export BASE_URL=/
 fi
 
+if [ -z ${ENGINE_HTTP_PORT+x} ]
+then
+    echo "ENGINE_HTTP_PORT is unset, using default 80"
+    export ENGINE_HTTP_PORT=80
+fi
+
+if [ -n ${mount_url+x} ] && [ "$mount_url" != "" ] && [ "$mount_url" != "/" ] && [ "$mount_url" != "/engine" ]
+then
+   ln -s /usr/share/nginx/engine /usr/share/nginx${mount_url}
+fi
+
 BASE_URL_STRIPPED=$(echo ${BASE_URL} | sed -e 's@/$@@g')
 find /usr/share/nginx/engine -type f -name 'main*.chunk.js*' | xargs sed -i "s@AAAABBBBCCCC@${ENGINE_URL}@g"
 find /usr/share/nginx/engine -type f -name 'main*.chunk.js*' | xargs sed -i "s@DDDDEEEEFFFF@${BASE_URL}@g"
 grep -lr "GGGGHHHHIIIIJJJJ" /usr/share/nginx/engine | xargs -r sed -i "s@GGGGHHHHIIIIJJJJ@${BASE_URL_STRIPPED}@g"
-
+sed -i -E "s/listen [0-9]+;/listen ${ENGINE_HTTP_PORT};/" /etc/nginx/conf.d/default.conf
