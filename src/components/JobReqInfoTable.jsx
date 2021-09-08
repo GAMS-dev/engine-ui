@@ -12,7 +12,7 @@ const JobReqInfoTable = props => {
     job_labels = Object.entries(job.labels).filter(el => el[1] != null);
   }
   return (
-    <table className="table table-sm">
+    <table className="table table-sm table-fixed">
       <thead className="thead-dark">
         <tr>
           <th colSpan="2" className="text-center">

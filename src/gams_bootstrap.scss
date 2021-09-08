@@ -217,6 +217,14 @@ body {
   white-space: nowrap;
 }
 
+.table-fixed {
+  table-layout: fixed;
+}
+
+.table-fixed td {
+  overflow: auto;
+}
+
 #quota-icon {
   margin-left: 5px;
 }

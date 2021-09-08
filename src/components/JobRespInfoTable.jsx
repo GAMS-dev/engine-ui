@@ -53,7 +53,7 @@ const JobRespInfoTable = props => {
 
   return (
     <>
-      <table className="table table-sm">
+      <table className="table table-sm table-fixed">
         <thead className="thead-dark">
           <tr>
             <th colSpan="2" className="text-center">
