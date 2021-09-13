@@ -20,6 +20,8 @@ const ModelSubmissionForm = () => {
     const [errorMsg, setErrorMsg] = useState("")
     const [newModelName, setNewModelName] = useState("");
     const [runName, setRunName] = useState("");
+    const [textEntries, setTextEntries] = useState("");
+    const [streamEntries, setStreamEntries] = useState("");
     const [userGroups, setUserGroups] = useState([]);
     const [availableUserGroups, setAvailableUserGroups] = useState([]);
     const [modelFiles, setModelFiles] = useState();
@@ -62,6 +64,8 @@ const ModelSubmissionForm = () => {
                     setNewModelName(modelname);
                     setRunName(resModelData.data[0].run ? resModelData.data[0].run : `${modelname}.gms`);
                     setClArgs(resModelData.data[0].arguments.join(","));
+                    setTextEntries(resModelData.data[0].text_entries.join(","));
+                    setStreamEntries(resModelData.data[0].stream_entries.join(","));
                     setInexObject(resModelData.data[0].inex);
                 } else {
                     setErrorMsg(`Model: ${modelname} does not exist in namespace: ${namespace}`);
@@ -133,6 +137,24 @@ const ModelSubmissionForm = () => {
             }
         } else if (modelname) {
             modelSubmissionForm.append("delete_arguments", "true");
+        }
+
+        if (textEntries.trim() !== "") {
+            const splitTextEntries = textEntries.trim().split(",");
+            for (let i = 0; i < splitTextEntries.length; i++) {
+                modelSubmissionForm.append("text_entries", splitTextEntries[i].trim());
+            }
+        } else if (modelname) {
+            modelSubmissionForm.append("delete_text_entries", "true");
+        }
+
+        if (streamEntries.trim() !== "") {
+            const splitStreamEntries = streamEntries.trim().split(",");
+            for (let i = 0; i < splitStreamEntries.length; i++) {
+                modelSubmissionForm.append("stream_entries", splitStreamEntries[i].trim());
+            }
+        } else if (modelname) {
+            modelSubmissionForm.append("delete_stream_entries", "true");
         }
 
         if (inexJSON !== "") {
@@ -267,6 +289,34 @@ const ModelSubmissionForm = () => {
                                     autoComplete="on"
                                     value={clArgs}
                                     onChange={e => setClArgs(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="textEntries" className="sr-only">
+                                    Text Entries (comma-separated)
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="textEntries"
+                                    placeholder="Text entries (comma-separated, optional)"
+                                    autoComplete="on"
+                                    value={textEntries}
+                                    onChange={e => setTextEntries(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="streamEntries" className="sr-only">
+                                    Stream Entries (comma-separated)
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="streamEntries"
+                                    placeholder="Stream entries (comma-separated, optional)"
+                                    autoComplete="on"
+                                    value={streamEntries}
+                                    onChange={e => setStreamEntries(e.target.value)}
                                 />
                             </div>
                             <InexJSONSelector
