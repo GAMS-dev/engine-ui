@@ -158,8 +158,7 @@ const ModelSubmissionForm = () => {
         }
 
         if (inexJSON !== "") {
-            modelSubmissionForm.append("inex_file", new Blob([inexJSON],
-                { type: "application/json" }), "inex.json");
+            modelSubmissionForm.append("inex_string", inexJSON);
         } else if (modelname) {
             modelSubmissionForm.append("delete_inex_file", "true");
         }

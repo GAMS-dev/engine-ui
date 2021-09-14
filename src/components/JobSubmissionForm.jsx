@@ -195,8 +195,7 @@ const JobSubmissionForm = props => {
             }
         });
         if (inexJSON !== "") {
-            jobSubmissionForm.append("inex_file", new Blob([inexJSON],
-                { type: "application/json" }), "inex.json");
+            jobSubmissionForm.append("inex_string", inexJSON);
         }
         if (serverInfo && serverInfo.in_kubernetes === true) {
             if (useRawRequests) {
