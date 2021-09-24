@@ -649,7 +649,7 @@ const JobSubmissionForm = props => {
                                 Submit Job
                             </SubmitButton>
                         </div>
-                        {jobPosted && <Redirect to="/" />}
+                        {jobPosted && <Redirect to={ newHcJob ? "/hc" : "/jobs" } />}
                     </form>
                     :
                     <div className="alert alert-danger">
