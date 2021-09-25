@@ -166,6 +166,12 @@ const JobReqInfoTable = props => {
                 return <span key="workspace_request" className="badge badge-secondary m-1">
                   {`${el[1]} MiB Disk`}
                 </span>
+              } else if (el[0] === "resource_warning"){
+                if (el[1] === "none"){
+                    return <span key="resource_warning"></span>
+                }else{
+                    return <span key="resource_warning" className="badge badge-danger m-1">{`Out of ${el[1]}`}</span>
+                }
               } else if (Array.isArray(el[1])) {
                 return el[1].map((arrayEl, arrayIdx) => {
                   return <span key={el[0] + arrayIdx}
