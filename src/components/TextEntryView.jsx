@@ -31,10 +31,11 @@ const TextEntryView = props => {
     } else {
       axios
         .get(
-          `${server}/jobs/${encodeURIComponent(token)}/text-entry/${encodeURIComponent(textEntries[entryIndex].entry_name)}`,
+          `${server}/jobs/${encodeURIComponent(token)}/text-entry`,
           {
             params: {
-              length: viewCharLimit + 1
+              length: viewCharLimit + 1,
+              entry_name: textEntries[entryIndex].entry_name
             }
           }
         )
