@@ -132,7 +132,7 @@ const JobRespInfoTable = props => {
                       &nbsp;
                       {textEntry &&
                         <DownloadLink
-                          url={`${server}/jobs/${encodeURIComponent(job.token)}/text-entry/${encodeURIComponent(textEntry)}`}
+                          url={`${server}/jobs/${encodeURIComponent(job.token)}/text-entry?entry_name=${encodeURIComponent(textEntry)}`}
                           filename={textEntry}
                           jsonSubkey="entry_value">
                           <FileText size={18} />
