@@ -47,6 +47,7 @@ const Job = () => {
       setIsHcJob(true);
       jobDataPromise = axios
         .get(`${server}/hypercube/`, {
+          headers: { "X-Fields": "*, labels{*}" },
           params: {
             hypercube_token: token.substring(3)
           }
