@@ -40,7 +40,7 @@ const Job = () => {
       "token"
     ];
     if (serverInfo.in_kubernetes === true) {
-      fields.push("labels");
+      fields.push("labels{*}");
     }
     let jobDataPromise;
     if (token.startsWith("hc:")) {
