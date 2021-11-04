@@ -135,22 +135,25 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                 </span> :
                 <ClipLoader />) :
             <div className="job-timings-info-bar">
-                {timingData.map((timingObj, idx) => (
-                    <OverlayTrigger
+                {timingData.map((timingObj, idx) => {
+                    const durationSeconds = `${Math.round(timingObj.duration)}s`;
+                    const durationDisplayed = timingObj.duration > 3600 ?
+                        `${Math.round(timingObj.duration / 360) / 10}h` : durationSeconds;
+                    return <OverlayTrigger
                         key={`jobTimings${idx}`}
                         placement="top"
                         overlay={(props) =>
                             <Tooltip id={`jobTimingsTT${idx}`} {...props}>
-                                {`${timingObj.desc}: ${Math.round(timingObj.duration)}s (${Math.round(timingObj.width)}%)`}
+                                {`${timingObj.desc}: ${durationDisplayed} (${Math.round(timingObj.width)}%)`}
                             </Tooltip>
                         }
                     >
                         <div
                             className={timingObj.className} style={{ width: `${Math.floor(timingObj.width * 100) / 100}%` }}>
-                            {timingObj.width > 10 ? `${Math.round(timingObj.duration)}s` : ''}
+                            {timingObj.width > 10 ? durationSeconds : ''}
                         </div>
                     </OverlayTrigger>
-                ))}
+                })}
             </div>
     );
 };
