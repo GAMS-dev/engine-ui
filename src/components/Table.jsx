@@ -4,6 +4,7 @@ import { ArrowUp, ArrowDown } from "react-feather";
 import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
 import { FormControl, Button, InputGroup } from "react-bootstrap";
+import OverlayFilter from "./OverlayFilter";
 
 const Table = props => {
   const { displayFields, noDataMsg, idFieldName, isLoading, onChange, total } = props;
@@ -11,9 +12,13 @@ const Table = props => {
   const [currentPage, setCurrentPage] = useState(0);
   const [invalidPageNumber, setInvalidPageNumber] = useState(false);
   const [goToPage, setGoToPage] = useState(null);
+  const [dataRaw, setDataRaw] = useState([...props.data]);
   const [data, setData] = useState([...props.data]);
   const [sortAsc, setSortAsc] = useState(props.sortedAsc === true);
   const [sortedCol, setSortedCol] = useState(props.sortedCol);
+  const [refreshCount, setRefreshCount] = useState(0);
+
+  const [currentFilters, setCurrentFilters] = useState({});
 
   const noRows = onChange == null ? data.length : total;
   const rowsPerPage = 10;
@@ -21,8 +26,11 @@ const Table = props => {
 
   useEffect(() => {
     setData([...props.data]);
+    setDataRaw([...props.data]);
     setSortAsc(props.sortedAsc === true);
-    setSortedCol(props.sortedCol)
+    setSortedCol(props.sortedCol);
+    setCurrentFilters({});
+    setRefreshCount(prev => prev + 1);
   }, [props.data, props.sortedAsc, props.sortedCol])
 
   useEffect(() => {
@@ -120,23 +128,55 @@ const Table = props => {
     setSortAsc(asc === -1);
     setSortedCol(field);
   }
+  const filterCol = (colName, filterText) => {
+    const currentFiltersTmp = {
+      ...currentFilters
+    }
+    if (currentFiltersTmp[colName] == null || currentFiltersTmp[colName].length < filterText.length) {
+      setData(data
+        .filter(dataTmp => dataTmp[colName] && dataTmp[colName].includes(filterText)));
+      currentFiltersTmp[colName] = filterText;
+    } else {
+      if (filterText.length > 0) {
+        currentFiltersTmp[colName] = filterText;
+      } else {
+        delete currentFiltersTmp[colName];
+      }
+      if (Object.keys(currentFiltersTmp).length === 0) {
+        setData(dataRaw);
+      } else {
+        setData(dataRaw
+          .filter(dataTmp =>
+            Object.keys(currentFiltersTmp).every(colNameTmp => dataTmp[colNameTmp] && dataTmp[colNameTmp].includes(currentFiltersTmp[colNameTmp]))
+          ));
+      }
+    }
+    setCurrentFilters(currentFiltersTmp);
+  }
   return (
     <>
       <table className="table summary-table table-striped">
         <thead className="thead-dark">
           <tr>
-            {displayFields.map(e => (
-              <th scope="col" key={e.field}
+            {displayFields.map(e => {
+              const colKey = e.field.split(",")[0];
+              return <th scope="col" key={e.field}
                 data-field={e.field}
                 data-sorter={e.sorter}
                 style={e.sorter == null ? {} : { cursor: "pointer" }}
                 onClick={e.sorter == null ? undefined : sortCol}>
                 {e.column}
-                {(e.field.split(",")[0] === sortedCol) && (sortAsc ?
+                {(colKey === sortedCol) && (sortAsc ?
                   <ArrowUp width="12px" /> :
                   <ArrowDown width="12px" />)}
-              </th>
-            ))}
+                {onChange == null && e.sorter != null && ["alphabetical"].includes(e.sorter) &&
+                  <OverlayFilter
+                    width="12px"
+                    filterKey={colKey}
+                    resetFilter={refreshCount}
+                    onChange={filterCol} />}
+              </th>;
+            })}
           </tr>
         </thead>
         <tbody>

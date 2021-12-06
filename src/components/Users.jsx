@@ -19,8 +19,6 @@ const Users = props => {
   const history = useHistory();
 
   const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [filteredUsername, setFilteredUsername] = useState("");
   const [userToDelete, setUserToDelete] = useState("");
   const [deleteInvitation, setDeleteInvitation] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
@@ -184,15 +182,6 @@ const Users = props => {
       });
   }, [jwt, server, username, roles, refresh, displayFields, setAlertMsg]);
 
-  useEffect(() => {
-    if (filteredUsername === "") {
-      setFilteredUsers(users);
-    } else {
-      setFilteredUsers(users
-        .filter(user => user.username.includes(filteredUsername)));
-    }
-  }, [setFilteredUsers, users, filteredUsername]);
-
 
   return (
     <div>
@@ -225,21 +214,7 @@ const Users = props => {
           </div>
         </div>
       </div>
-      <div className="form-group">
-        <label htmlFor="searchUser" className="sr-only">
-          Search User
-        </label>
-        <input
-          type="text"
-          className="form-control"
-          id="searchUser"
-          placeholder="Search User"
-          value={filteredUsername}
-          onChange={e => setFilteredUsername(e.target.value.trim())}
-          required
-        />
-      </div>
-      <Table data={filteredUsers}
+      <Table data={users}
         noDataMsg="No User Found"
         displayFields={displayFields}
         sortedAsc={false}
