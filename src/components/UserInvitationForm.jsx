@@ -70,6 +70,7 @@ const UserInvitationForm = () => {
                 }
                 if (availableInstancesTmp && availableInstancesTmp.length > 0) {
                     setAvailableInstances(availableInstancesTmp);
+                    setSelectedInstancesAllowed([availableInstancesTmp[0]]);
                     setDefaultInstance(availableInstancesTmp[0]);
                 }
             } catch (err) {
@@ -91,6 +92,10 @@ const UserInvitationForm = () => {
     }, [server, jwt, roles, username]);
 
     const handleInvitationSubmission = () => {
+        if (assignInstances && (selectedInstancesAllowed == null || selectedInstancesAllowed.length === 0)) {
+            setSubmissionErrorMsg("Please assign at least one instance that user is allowed to use.");
+            return;
+        }
         setIsSubmitting(true);
         const invitationSubmissionForm = new FormData();
 
@@ -220,7 +225,10 @@ const UserInvitationForm = () => {
                                                     <input type="checkbox" className="form-check-input"
                                                         checked={assignInstances !== true} onChange={e => setAssignInstances(!e.target.checked)}
                                                         id="assignInstances" />
-                                                    <label className="form-check-label" htmlFor="assignInstances">User is allowed to use raw resource requests?</label>
+                                                    <label className="form-check-label" htmlFor="assignInstances">
+                                                        {(availableInstances.length === 0 || (roles && roles.includes("admin"))) ?
+                                                            "Allowed to use raw resource requests" :
+                                                            "Inherit instances from you"}</label>
                                                 </div>
                                                 {assignInstances ?
                                                     <>

@@ -88,7 +88,7 @@ const Layout = () => {
                 <Route exact path={["/models/:selectedNs?", "/groups/:selectedNs?"]}>
                   <Models />
                 </Route>
-                {(roles && roles.includes('admin') !== undefined) &&
+                {(roles && roles.includes('admin')) &&
                   <Route exact path="/quotas/:namespace">
                     <NamespaceQuotaUpdateForm />
                   </Route>
@@ -96,17 +96,17 @@ const Layout = () => {
                 <Route exact path="/users">
                   <Users setLicenseExpiration={setLicenseExpiration} />
                 </Route>
-                {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
+                {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
                   <Route exact path="/users/:username/permissions">
                     <UserPermissionUpdateForm />
                   </Route>
                 }
-                {(roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined) &&
+                {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
                   <Route exact path="/users/:username/quotas">
                     <UserQuotaUpdateForm />
                   </Route>
                 }
-                {(roles && roles.find(role => role === "admin") !== undefined && serverInfo.in_kubernetes === true) &&
+                {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1 && serverInfo.in_kubernetes === true) &&
                   <Route exact path="/users/:userToEdit/instances">
                     <UserInstanceUpdateForm />
                   </Route>
@@ -117,7 +117,7 @@ const Layout = () => {
                 <Route exact path="/users/:user/change-username">
                   <UserChangeNameForm />
                 </Route>
-                {(roles && roles.includes('admin') !== undefined) &&
+                {(roles && roles.includes('admin')) &&
                   <Route exact path="/users/:username/licenses">
                     <LicenseUpdateForm />
                   </Route>
@@ -125,17 +125,17 @@ const Layout = () => {
                 <Route exact path="/users/:username/usage">
                   <Usage />
                 </Route>
-                {(roles && roles.find(role => role === "admin") !== undefined) &&
+                {(roles && roles.includes('admin')) &&
                   <Route exact path="/cleanup">
                     <Cleanup />
                   </Route>
                 }
-                {(roles && roles.find(role => role === "admin") !== undefined && serverInfo.in_kubernetes === true) &&
+                {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
                   <Route exact path="/instances">
                     <Instances />
                   </Route>
                 }
-                {(roles && roles.find(role => role === "admin") !== undefined && serverInfo.in_kubernetes === true) &&
+                {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
                   <Route exact path="/instances/update/:label?">
                     <InstanceSubmissionForm />
                   </Route>

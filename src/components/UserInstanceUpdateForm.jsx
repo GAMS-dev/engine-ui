@@ -24,14 +24,36 @@ const UserInstanceUpdateForm = () => {
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [instancesInfoMsg, setInstancesInfoMsg] = useState("");
     const [defaultInstanceInfoMsg, setDefaultInstanceInfoMsg] = useState("");
+    const [inviterHasInstancesAssigned, setInviterHasInstancesAssigned] = useState(false);
 
     const [userEdited, setUserEdited] = useState(false);
     const [userToEditIsAdmin, setUserToEditIsAdmin] = useState(false);
+    const [inviterName, setInviterName] = useState("");
 
     useEffect(() => {
         const fetchRequiredData = async () => {
             let userToEditIsAdminTmp = false;
             try {
+                const resUserInfo = await axios
+                    .get(`${server}/users/`, {
+                        params: {
+                            username: userToEdit
+                        },
+                        headers: {
+                            "X-Fields": "roles,inviter_name"
+                        }
+                    });
+                if (resUserInfo.status !== 200) {
+                    setErrorMsg("An error occurred while retrieving user information. Please try again later.");
+                    setIsLoading(false);
+                    return;
+                }
+                if (!resUserInfo.data || resUserInfo.data.length === 0) {
+                    setErrorMsg("User not found.");
+                    setIsLoading(false);
+                    return;
+                }
+                setInviterName(resUserInfo.data[0].inviter_name);
                 if (roles && roles.includes("admin")) {
                     const resMe = await axios
                         .get(`${server}/usage/instances`);
@@ -51,21 +73,10 @@ const UserInstanceUpdateForm = () => {
                             "label": instance.label
                         }));
                     setInstancesAllowed(instancesAllowedTmp);
-                    const resUserInfo = await axios
-                        .get(`${server}/users/`, {
-                            params: {
-                                username: userToEdit
-                            },
-                            headers: {
-                                "X-Fields": "roles"
-                            }
-                        });
-                    if (resUserInfo.status !== 200) {
-                        setErrorMsg("An error occurred while retrieving user information. Please try again later.");
-                        return;
-                    }
-                    if (!resUserInfo.data || resUserInfo.data.length === 0) {
-                        setErrorMsg("User not found.");
+
+                    const inviterName = resUserInfo.data[0].inviter_name;
+                    if (!inviterName) {
+                        setErrorMsg("Invalid inviter name. This should never happen. Please contact GAMS support!");
                         setIsLoading(false);
                         return;
                     }
@@ -75,6 +86,13 @@ const UserInstanceUpdateForm = () => {
                     if (userToEditIsAdminTmp) {
                         setSelectedInstancesAllowed(instancesAllowedTmp);
                     }
+                    const resInviter = await axios
+                        .get(`${server}/usage/instances/${encodeURIComponent(inviterName)}`);
+                    if (resInviter.status !== 200) {
+                        setErrorMsg("An error occurred while retrieving inviter instances. Please try again later.");
+                        return;
+                    }
+                    setInviterHasInstancesAssigned(resInviter.data && resInviter.data.instances_available && resInviter.data.instances_available.length > 0);
                 } else {
                     const resMe = await axios
                         .get(`${server}/usage/instances/${encodeURIComponent(username)}`);
@@ -86,9 +104,11 @@ const UserInstanceUpdateForm = () => {
                         !resMe.data.instances_available ||
                         resMe.data.instances_available.length === 0) {
                         setErrorMsg("No instances available.");
+                        setInviterHasInstancesAssigned(false);
                         setIsLoading(false);
                         return;
                     }
+                    setInviterHasInstancesAssigned(true);
                     setInstancesAllowed(resMe.data.instances_available
                         .map(instance => ({
                             "value": instance.label,
@@ -111,8 +131,9 @@ const UserInstanceUpdateForm = () => {
                         if (resUser.data.instances_inherited_from != null &&
                             resUser.data.instances_inherited_from !== userToEdit) {
                             setInstancesInfoMsg(`Inherited from ${resUser.data.instances_inherited_from}`);
-                            setInstancesAllowed(selectedInstances);
+                            setUseRawRequests(true);
                         }
+                        setInstancesAllowed(selectedInstances);
                         if (!userToEditIsAdminTmp) {
                             setSelectedInstancesAllowed(selectedInstances);
                         }
@@ -164,6 +185,11 @@ const UserInstanceUpdateForm = () => {
                 default_label: defaultLabel
             };
             if (!userToEditIsAdmin) {
+                if (selectedInstancesAllowed == null || !selectedInstancesAllowed.findIndex(instance => instance.value === defaultLabel) === -1) {
+                    setIsSubmitting(false);
+                    setSubmissionErrorMsg(`The default instance: ${defaultLabel} must be part of the allowed instances.`);
+                    return;
+                }
                 requestData['labels'] = selectedInstancesAllowed
                     .map(instance => instance.value);
             }
@@ -201,12 +227,12 @@ const UserInstanceUpdateForm = () => {
                                 {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
-                                {(useRawRequests || (roles && roles.includes("admin"))) &&
-                                    <div className="form-check mb-3">
-                                        <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
-                                            id="useRawRequests" />
-                                        <label className="form-check-label" htmlFor="useRawRequests">User is allowed to use raw resource requests</label>
-                                    </div>}
+                                <div className="form-check mb-3">
+                                    <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
+                                        id="useRawRequests" />
+                                    <label className="form-check-label" htmlFor="useRawRequests">{inviterHasInstancesAssigned ?
+                                        `Inherit instances from ${inviterName === username ? "you" : inviterName}` : "Allowed to use raw resource requests"}</label>
+                                </div>
                                 {!useRawRequests &&
                                     <>
                                         {!userToEditIsAdmin &&
