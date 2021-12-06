@@ -25,7 +25,7 @@ const UserQuotaSelector = ({ quotas, setQuotas }) => {
     return <>
         <div className="form-group">
             <label htmlFor="quotaParallel">
-                Parallel Quota
+                Parallel Quota (weighted parallel jobs)
             </label>
             <input
                 type="number"
@@ -52,7 +52,7 @@ const UserQuotaSelector = ({ quotas, setQuotas }) => {
         </div>
         <div className="form-group">
             <label htmlFor="quotaVolume">
-                Volume Quota
+                Volume Quota (weighted job seconds)
             </label>
             <input
                 type="number"
