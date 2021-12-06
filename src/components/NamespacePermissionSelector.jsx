@@ -43,7 +43,6 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                     if (namespacePermissions[nsIdTmp].groups == null) {
                         return [];
                     }
-                    console.log(namespacePermissions[nsIdTmp].groups)
                     return namespacePermissions[nsIdTmp].groups
                         .filter((group) => availableGroupLabels.includes(group))
                         .map(group => ({ value: group, label: group }));

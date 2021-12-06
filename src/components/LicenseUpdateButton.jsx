@@ -81,7 +81,6 @@ const LicUpdateButton = props => {
         }
         try {
             const res = await axios.get(`${server}/licenses/engine`);
-            console.log(res.data.expiration_date)
             setLicenseExpiration(res.data.expiration_date);
         }
         catch (err) {
