@@ -35,4 +35,13 @@ const zipAsync = filesToZip => {
         });
 }
 const isActiveJob = (status) => status < 10 && (status === -2 || status === -10 || status >= 0)
-export { zipAsync, isActiveJob, getResponseError }
+
+const calcRemainingQuotaInternal = (quotaObj, quotaKey, usedKey, noQuotaVal = Infinity) =>
+    Math.min(...quotaObj
+        .map(el => (el[quotaKey] == null ? noQuotaVal : el[quotaKey]) - el[usedKey]))
+
+const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
+    volume: calcRemainingQuotaInternal(data, "volume_quota", "volume_used", noQuotaVal),
+    disk: calcRemainingQuotaInternal(data, "disk_quota", "disk_used", noQuotaVal)
+})
+export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota }
