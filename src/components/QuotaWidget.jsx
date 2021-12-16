@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { calcRemainingQuota, getResponseError } from "./util";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Server } from "react-feather";
@@ -15,26 +15,29 @@ const QuotaWidget = () => {
     const target = useRef(null);
 
     useEffect(() => {
+        const cancelTokenSource = axios.CancelToken.source();
         const updateData = async () => {
             try {
-                const result = await axios.get(
-                    `${server}/usage/quota`,
-                    { params: { username: username } }
-                );
+                const result = await axios({
+                    url: `${server}/usage/quota`,
+                    method: "GET",
+                    params: { username: username },
+                    cancelToken: cancelTokenSource.token
+                });
+                if (!showTT) {
+                    return;
+                }
                 if (result.data && result.data.length) {
-                    const volumeLeft = Math.min(...result.data
-                        .map(el => (el.volume_quota == null ? Infinity : el.volume_quota) - el.volume_used));
-                    const diskLeft = Math.min(...result.data
-                        .map(el => Math.round(((el.disk_quota == null ? Infinity : el.disk_quota) - el.disk_used) / 1e4) / 100));
+                    const quotaRemaining = calcRemainingQuota(result.data);
                     setData([{
                         key: 'volume',
-                        text: `Volume: ${volumeLeft === Infinity ? 'unlimited' : volumeLeft}\n`,
-                        val: volumeLeft < 10000 ? 'text-danger' : ''
+                        text: `Volume: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume / 3600) + 'h'}\n`,
+                        val: quotaRemaining.volume < 10000 ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
-                        text: `Disk: ${diskLeft === Infinity ? 'unlimited' : diskLeft + 'MB'}`,
-                        className: diskLeft < 100 ? 'text-danger' : ''
+                        text: `Disk: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.disk / 1e6) + 'MB'}`,
+                        className: quotaRemaining.disk < 100 ? 'text-danger' : ''
                     }]);
                 } else {
                     setData([{
@@ -50,11 +53,16 @@ const QuotaWidget = () => {
                 }
             }
             catch (err) {
-                setData([`Problems fetching quota data. Error message: ${getResponseError(err)}`]);
+                if (!!!axios.isCancel(err)) {
+                    setData([`Problems fetching quota data. Error message: ${getResponseError(err)}`]);
+                }
             }
         }
         if (showTT) {
             updateData();
+        }
+        return () => {
+            cancelTokenSource.cancel()
         }
     }, [server, username, showTT])
 
@@ -63,7 +71,7 @@ const QuotaWidget = () => {
             <OverlayTrigger
                 placement="right"
                 show={showTT}
-                onToggle={() => setShowTT(!showTT)}
+                onToggle={show => setShowTT(show)}
                 delay={{ hide: 600 }}
                 overlay={
                     <Tooltip id="quota-tooltip">
