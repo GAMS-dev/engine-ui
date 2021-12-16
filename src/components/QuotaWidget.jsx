@@ -29,14 +29,22 @@ const QuotaWidget = () => {
                 }
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
+                    const quotaFormatted = {
+                        volume: quotaRemaining.volume, disk: quotaRemaining.disk / 1e6,
+                        unitVolume: 's', unitDisk: 'MB'
+                    }
+                    if (quotaFormatted.volume >= 1e4) {
+                        quotaFormatted.volume /= 3600;
+                        quotaFormatted.unitVolume = 'h';
+                    }
                     setData([{
                         key: 'volume',
-                        text: `Volume: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume / 3600) + 'h'}\n`,
-                        val: quotaRemaining.volume < 10000 ? 'text-danger' : ''
+                        text: `Volume: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume) + quotaFormatted.unitVolume}\n`,
+                        className: quotaRemaining.volume < 10000 ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
-                        text: `Disk: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.disk / 1e6) + 'MB'}`,
+                        text: `Disk: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.disk) + quotaFormatted.unitDisk}`,
                         className: quotaRemaining.disk < 100 ? 'text-danger' : ''
                     }]);
                 } else {
