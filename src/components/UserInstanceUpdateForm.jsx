@@ -133,7 +133,9 @@ const UserInstanceUpdateForm = () => {
                             setInstancesInfoMsg(`Inherited from ${resUser.data.instances_inherited_from}`);
                             setUseRawRequests(true);
                         }
-                        setInstancesAllowed(selectedInstances);
+                        if (!roles || !roles.includes("admin")) {
+                            setInstancesAllowed(selectedInstances);
+                        }
                         if (!userToEditIsAdminTmp) {
                             setSelectedInstancesAllowed(selectedInstances);
                         }
