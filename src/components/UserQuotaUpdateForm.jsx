@@ -3,7 +3,7 @@ import { Redirect, useParams } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
-import { calcRemainingQuota, getResponseError } from "./util";
+import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import UserQuotaSelector from "./UserQuotaSelector";
@@ -19,8 +19,7 @@ const UserQuotaUpdateForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [quotas, setQuotas] = useState({});
-    const [quotaRemaining, setQuotaRemaining] = useState({});
-    const [quotaCurrent, setQuotaCurrent] = useState({});
+    const [quotaData, setQuotaData] = useState({});
 
     const [userEdited, setUserEdited] = useState(false);
 
@@ -36,19 +35,13 @@ const UserQuotaUpdateForm = () => {
                     return;
                 }
                 const quotasUser = res.data.filter(el => el.username === username)[0];
+                setQuotaData(res.data);
                 if (quotasUser) {
                     setQuotas({
                         parallel: quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota,
                         disk: quotasUser.disk_quota == null ? '' : quotasUser.disk_quota,
                         volume: quotasUser.volume_quota == null ? '' : quotasUser.volume_quota
                     });
-                    setQuotaCurrent({
-                        disk: quotasUser.disk_quota == null ? Infinity : quotasUser.disk_quota,
-                        volume: quotasUser.volume_quota == null ? Infinity : quotasUser.volume_quota
-                    });
-                    setQuotaRemaining(calcRemainingQuota(res.data, 0));
-                } else if (res.data.length > 0) {
-                    setSubmissionErrorMsg(`User inherits quotas from ${res.data[res.data.length - 1]["username"]}`);
                 }
             }
             catch (err) {
@@ -139,8 +132,8 @@ const UserQuotaUpdateForm = () => {
                             <fieldset disabled={isSubmitting}>
                                 <UserQuotaSelector
                                     quotas={quotas}
-                                    quotaRemaining={quotaRemaining}
-                                    quotaCurrent={quotaCurrent}
+                                    quotaData={quotaData}
+                                    userToEdit={username}
                                     setQuotas={setQuotas} />
                             </fieldset>
                             <div className="mt-3">

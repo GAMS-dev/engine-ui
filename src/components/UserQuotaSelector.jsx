@@ -7,7 +7,7 @@ import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { calcRemainingQuota, getResponseError } from "./util";
 
-const UserQuotaSelector = ({ quotas, quotaRemaining, quotaCurrent, setQuotas }) => {
+const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [{ server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
     const [quotaParallel, setQuotaParallel] = useState(quotas && quotas.parallel ? quotas.parallel : '');
@@ -17,10 +17,33 @@ const UserQuotaSelector = ({ quotas, quotaRemaining, quotaCurrent, setQuotas }) 
     const [quotaDisk, setQuotaDisk] = useState(quotas && quotas.disk ? quotas.disk : '');
     const [maxQuotas, setMaxQuotas] = useState({ parallel: 0, volume: 0, disk: 0 });
     const [maxQuotasInitialized, setMaxQuotasInitialized] = useState(false);
+    const [quotaDataInternal, setQuotaDataInternal] = useState(quotaData);
     const [remainingLive, setRemainingLive] = useState(null);
     const [validQuotaDisk, setValidQuotaDisk] = useState(true);
 
+    const getBindingQuotas = (quotaArray) => {
+        const maxQuotasTmp = { parallel_quota: Infinity, volume_quota: Infinity, disk_quota: Infinity };
+        quotaArray.forEach(quotaObj => {
+            ['parallel_quota', 'volume_quota', 'disk_quota'].forEach(quotaKey => {
+                if (quotaObj[quotaKey] != null && maxQuotasTmp[quotaKey] > quotaObj[quotaKey]) {
+                    maxQuotasTmp[quotaKey] = quotaObj[quotaKey];
+                }
+            });
+        });
+        return maxQuotasTmp;
+    }
+
     useEffect(() => {
+        if (userToEdit != null) {
+            const maxQuotasTmp = getBindingQuotas(quotaData.filter(quotaObj => quotaObj.username !== userToEdit));
+            setMaxQuotas({
+                parallel: maxQuotasTmp.parallel_quota,
+                volume: maxQuotasTmp.volume_quota / 3600,
+                disk: maxQuotasTmp.disk_quota / 1e6
+            });
+            setMaxQuotasInitialized(true);
+            return;
+        }
         const fetchQuotas = async () => {
             try {
                 const resQuotas = await axios.get(`${server}/usage/quota`, {
@@ -30,13 +53,13 @@ const UserQuotaSelector = ({ quotas, quotaRemaining, quotaCurrent, setQuotas }) 
                     setAlertMsg("Problems while retrieving user quotas. Please try again later.");
                     return;
                 }
-                const myQuotas = resQuotas.data.filter(quotaObj => quotaObj.username === username);
-                if (myQuotas.length > 0) {
-                    const myRemainingQuotas = calcRemainingQuota(myQuotas);
+                setQuotaDataInternal(resQuotas.data);
+                if (resQuotas.data.length > 0) {
+                    const maxQuotasTmp = getBindingQuotas(resQuotas.data);
                     setMaxQuotas({
-                        parallel: myQuotas[0].parallel_quota == null ? Infinity : myQuotas[0].parallel_quota,
-                        volume: myRemainingQuotas.volume / 3600,
-                        disk: myRemainingQuotas.disk / 1e6
+                        parallel: maxQuotasTmp.parallel_quota,
+                        volume: maxQuotasTmp.volume_quota / 3600,
+                        disk: maxQuotasTmp.disk_quota / 1e6
                     });
                     setMaxQuotasInitialized(true);
                 } else {
@@ -53,13 +76,16 @@ const UserQuotaSelector = ({ quotas, quotaRemaining, quotaCurrent, setQuotas }) 
         } else {
             fetchQuotas();
         }
-    }, [server, username, roles, setAlertMsg]);
+    }, [server, username, quotaData, userToEdit, roles, setAlertMsg]);
 
     useEffect(() => {
         if (quotas == null || maxQuotasInitialized !== true) {
             return;
         }
         const isValidQuota = (quota, maxQuota) => {
+            if (quota == null || quota === '') {
+                return true;
+            }
             const quotaFloat = parseFloat(quota);
             return !isNaN(quotaFloat) && isFinite(quotaFloat) && quotaFloat >= 0 && quotaFloat <= maxQuota;
         }
@@ -82,18 +108,25 @@ const UserQuotaSelector = ({ quotas, quotaRemaining, quotaCurrent, setQuotas }) 
         quotaParallel, quotaDisk, quotaVolume, setQuotas])
 
     useEffect(() => {
-        if (quotaRemaining == null) {
+        if (quotaDataInternal == null) {
             return;
         }
         const newDiskQuota = quotas == null || quotas.disk == null ? Infinity : quotas.disk;
         const newVolumeQuota = quotas == null || quotas.volume == null ? Infinity : quotas.volume;
-        const currentDiskQuota = isFinite(quotaCurrent.disk) ? quotaCurrent.disk : 0;
-        const currentVolumeQuota = isFinite(quotaCurrent.volume) ? quotaCurrent.volume : 0;
+        let quotaDataNew = JSON.parse(JSON.stringify(quotaDataInternal));
+        if (quotaDataNew.filter(quotaObj => quotaObj.username === userToEdit).length === 0) {
+            quotaDataNew = [{ disk_quota: null, disk_used: 0, volume_quota: null, volume_used: 0 }].concat(quotaDataNew);
+        }
+        if (quotaDataNew != null && quotaDataNew.length > 0) {
+            quotaDataNew[0].disk_quota = newDiskQuota;
+            quotaDataNew[0].volume_quota = newVolumeQuota;
+        }
+        const quotaRemaining = calcRemainingQuota(quotaDataNew);
         setRemainingLive({
-            disk: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.disk, (quotaRemaining.disk + newDiskQuota - currentDiskQuota) / 1e6)),
-            volume: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.volume, (quotaRemaining.volume + newVolumeQuota - currentVolumeQuota) / 3600))
+            disk: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.disk, quotaRemaining.disk / 1e6)),
+            volume: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.volume, quotaRemaining.volume / 3600))
         })
-    }, [quotaRemaining, quotaCurrent, quotas, maxQuotas])
+    }, [quotaDataInternal, userToEdit, quotas, maxQuotas])
 
     return <>
         <div className="form-group">
