@@ -267,7 +267,7 @@ const JobSubmissionForm = props => {
                 let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
                 if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
                     availableInstancesTmp = availableInstancesTmp.data
-                        .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB RAM)` }));
+                        .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
                     setAvailableInstances(availableInstancesTmp);
                     if (instanceData.data.default_instance != null &&
                         instanceData.data.default_instance.label != null) {
@@ -281,7 +281,7 @@ const JobSubmissionForm = props => {
                 }
             } else if (instanceData.data && instanceData.data.instances_available.length > 0) {
                 const availableInstancesTmp = instanceData.data.instances_available
-                    .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${instance.memory_request} MiB RAM)` }));
+                    .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
                 setAvailableInstances(availableInstancesTmp);
                 setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
                 setUseRawRequests(false);
@@ -536,17 +536,18 @@ const JobSubmissionForm = props => {
                                                                         className={`form-control${validCpuReq ? '' : ' is-invalid'}`}
                                                                         id="cpuReq"
                                                                         step="any"
+                                                                        min="0"
                                                                         value={cpuReq}
                                                                         onChange={e => {
                                                                             if (!e.target.value) {
                                                                                 setValidCpuReq(true);
-                                                                                setCpuReq(null);
+                                                                                setCpuReq("");
                                                                                 return;
                                                                             }
                                                                             const val = parseFloat(e.target.value);
                                                                             if (isNaN(val) || !isFinite(val)) {
                                                                                 setValidCpuReq(false);
-                                                                                setCpuReq(val);
+                                                                                setCpuReq(e.target.value);
                                                                                 return;
                                                                             }
                                                                             setValidCpuReq(true);
@@ -562,17 +563,18 @@ const JobSubmissionForm = props => {
                                                                         type="number"
                                                                         className={`form-control${validMemReq ? '' : ' is-invalid'}`}
                                                                         id="memReq"
+                                                                        min="0"
                                                                         value={memReq}
                                                                         onChange={e => {
                                                                             if (!e.target.value) {
                                                                                 setValidMemReq(true);
-                                                                                setMemReq(null);
+                                                                                setMemReq("");
                                                                                 return;
                                                                             }
                                                                             const val = parseFloat(e.target.value);
                                                                             if (isNaN(val) || !isFinite(val)) {
                                                                                 setValidMemReq(false);
-                                                                                setMemReq(val);
+                                                                                setMemReq(e.target.value);
                                                                                 return;
                                                                             }
                                                                             setValidMemReq(true);
@@ -588,17 +590,18 @@ const JobSubmissionForm = props => {
                                                                         type="number"
                                                                         className={`form-control${validWsReq ? '' : ' is-invalid'}`}
                                                                         id="wsReq"
+                                                                        min="0"
                                                                         value={wsReq}
                                                                         onChange={e => {
                                                                             if (!e.target.value) {
                                                                                 setValidWsReq(true);
-                                                                                setWsReq(null);
+                                                                                setWsReq("");
                                                                                 return;
                                                                             }
                                                                             const val = parseFloat(e.target.value);
                                                                             if (isNaN(val) || !isFinite(val)) {
                                                                                 setValidWsReq(false);
-                                                                                setWsReq(val);
+                                                                                setWsReq(e.target.value);
                                                                                 return;
                                                                             }
                                                                             setValidWsReq(true);
@@ -649,7 +652,7 @@ const JobSubmissionForm = props => {
                                 Submit Job
                             </SubmitButton>
                         </div>
-                        {jobPosted && <Redirect to={ newHcJob ? "/hc" : "/jobs" } />}
+                        {jobPosted && <Redirect to={newHcJob ? "/hc" : "/jobs"} />}
                     </form>
                     :
                     <div className="alert alert-danger">

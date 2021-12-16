@@ -160,17 +160,17 @@ const JobReqInfoTable = props => {
                 </span>
               } else if (el[0] === "memory_request") {
                 return <span key="memory_request" className="badge badge-secondary m-1">
-                  {`${el[1]} MiB RAM`}
+                  {`${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(el[1])} MiB RAM`}
                 </span>
               } else if (el[0] === "workspace_request") {
                 return <span key="workspace_request" className="badge badge-secondary m-1">
-                  {`${el[1]} MiB Disk`}
+                  {`${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(el[1])} MiB Disk`}
                 </span>
-              } else if (el[0] === "resource_warning"){
-                if (el[1] === "none"){
-                    return <span key="resource_warning"></span>
-                }else{
-                    return <span key="resource_warning" className="badge badge-danger m-1">{`Out of ${el[1]}`}</span>
+              } else if (el[0] === "resource_warning") {
+                if (el[1] === "none") {
+                  return <span key="resource_warning"></span>
+                } else {
+                  return <span key="resource_warning" className="badge badge-danger m-1">{`Out of ${el[1]}`}</span>
                 }
               } else if (Array.isArray(el[1])) {
                 return el[1].map((arrayEl, arrayIdx) => {
