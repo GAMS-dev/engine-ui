@@ -10,11 +10,11 @@ import { calcRemainingQuota, getResponseError } from "./util";
 const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [{ server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const [quotaParallel, setQuotaParallel] = useState(quotas && quotas.parallel ? quotas.parallel : '');
+    const [quotaParallel, setQuotaParallel] = useState(quotas != null && quotas.parallel != null ? quotas.parallel : '');
     const [validQuotaParallel, setValidQuotaParallel] = useState(true);
-    const [quotaVolume, setQuotaVolume] = useState(quotas && quotas.volume ? quotas.volume : '');
+    const [quotaVolume, setQuotaVolume] = useState(quotas != null && quotas.volume != null ? quotas.volume : '');
     const [validQuotaVolume, setValidQuotaVolume] = useState(true);
-    const [quotaDisk, setQuotaDisk] = useState(quotas && quotas.disk ? quotas.disk : '');
+    const [quotaDisk, setQuotaDisk] = useState(quotas != null && quotas.disk != null ? quotas.disk : '');
     const [maxQuotas, setMaxQuotas] = useState({ parallel: 0, volume: 0, disk: 0 });
     const [maxQuotasInitialized, setMaxQuotasInitialized] = useState(false);
     const [quotaDataInternal, setQuotaDataInternal] = useState(quotaData);
