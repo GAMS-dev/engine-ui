@@ -124,6 +124,7 @@ const ModelSubmissionForm = () => {
                 }));
             } catch (err) {
                 setSubmissionErrorMsg(getResponseError(err));
+                setIsSubmitting(false);
                 return;
             }
         } else {
