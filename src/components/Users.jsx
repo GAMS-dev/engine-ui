@@ -152,21 +152,21 @@ const Users = props => {
               setIsLoading(false);
               return;
             }
-            setUsers(res.data
-              .filter(user => user.deleted === false)
-              .map(user => {
-                const newUserInfo = user;
-                newUserInfo.id = newUserInfo.username;
-                newUserInfo.created = newUserInfo.invitation_time;
-                return newUserInfo;
+            setUsers(resInv.data
+              .filter(invitation => invitation.used === false)
+              .map(invitation => {
+                const newInvitation = invitation;
+                newInvitation.id = newInvitation.token;
+                newInvitation.username = "";
+                return newInvitation;
               })
-              .concat(resInv.data
-                .filter(invitation => invitation.used === false)
-                .map(invitation => {
-                  const newInvitation = invitation;
-                  newInvitation.id = newInvitation.token;
-                  newInvitation.username = "";
-                  return newInvitation;
+              .concat(res.data
+                .filter(user => user.deleted === false)
+                .map(user => {
+                  const newUserInfo = user;
+                  newUserInfo.id = newUserInfo.username;
+                  newUserInfo.created = newUserInfo.invitation_time;
+                  return newUserInfo;
                 }))
               .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
             setIsLoading(false);
