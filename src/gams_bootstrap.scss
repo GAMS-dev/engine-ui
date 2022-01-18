@@ -155,6 +155,10 @@ body {
     max-height: 60vh;
   }
 }
+.namespace-list .list-group-item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .alert-absolute {
   position:absolute; 
