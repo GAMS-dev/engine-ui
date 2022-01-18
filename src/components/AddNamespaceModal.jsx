@@ -15,10 +15,12 @@ const AddNamespaceModal = props => {
     const [namespaceName, setNamespaceName] = useState("");
 
     const handleCloseDialog = () => {
+        setSubmissionErrorMsg("");
         setNamespaceName("");
         setShowDialog(false);
     }
     const handleAddNamespace = () => {
+        setSubmissionErrorMsg("");
         setIsSubmitting(true);
         if (existingNamespaces && existingNamespaces.find(ns => ns === namespaceName)) {
             setSubmissionErrorMsg("The namespace you entered already exists. Please choose another name.");
@@ -64,7 +66,7 @@ const AddNamespaceModal = props => {
                         <div className="form-group">
                             <label htmlFor="namespaceName" className="sr-only">
                                 Namespace Name
-                        </label>
+                            </label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -80,10 +82,10 @@ const AddNamespaceModal = props => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseDialog}>
                         Cancel
-                </Button>
+                    </Button>
                     <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
                         Add Namespace
-                </SubmitButton>
+                    </SubmitButton>
                 </Modal.Footer>
             </form>
         </Modal>
