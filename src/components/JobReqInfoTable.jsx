@@ -7,9 +7,44 @@ import TimeDisplay from "./TimeDisplay";
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
   const { job, isHcJob, inKubernetes } = props;
+
+  const formatLabel = (label) => {
+    if (label == null || label.length < 2 || label[1] === "") {
+      return "";
+    }
+    if (label[0] === "memory_request") {
+      return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])} MiB RAM`;
+    } else if (label[0] === "cpu_request") {
+      return `${label[1]} vCPU`;
+    } else if (label[0] === "workspace_request") {
+      return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])} MiB Disk`;
+    } else if (label[0] === "multiplier") {
+      return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])}x`;
+    }
+    return "";
+  }
+
   let job_labels;
   if (inKubernetes && job.labels) {
     job_labels = Object.entries(job.labels).filter(el => el[1] != null);
+    if (job_labels.findIndex(label => label[0] === "instance") !== -1) {
+      const memoryRequest = job_labels.find(label => label[0] === "memory_request");
+      const cpuRequest = job_labels.find(label => label[0] === "cpu_request");
+      const multiplier = job_labels.find(label => label[0] === "multiplier");
+      const workspaceRequest = job_labels.find(label => label[0] === "workspace_request");
+      job_labels = job_labels
+        .filter(el => !["memory_request", "cpu_request",
+          "multiplier", "workspace_request", "tolerations", "node_selectors"].includes(el[0]))
+        .map(el => {
+          if (el[0] !== "instance") {
+            return el;
+          }
+          const elTmp = el;
+          elTmp[1] = `${elTmp[1]} (${formatLabel(cpuRequest)}, ${formatLabel(memoryRequest)}, ${formatLabel(multiplier)})`;
+          elTmp[2] = formatLabel(workspaceRequest);
+          return elTmp;
+        });
+    }
   }
   return (
     <table className="table table-sm table-fixed">
@@ -153,38 +188,49 @@ const JobReqInfoTable = props => {
         {job_labels &&
           <tr>
             <th>Resources</th>
-            <td>{job_labels.map(el => {
-              if (el[0] === "cpu_request") {
-                return <span key="cpu_request" className="badge badge-secondary m-1">
-                  {`${el[1]} vCPU`}
-                </span>
-              } else if (el[0] === "memory_request") {
-                return <span key="memory_request" className="badge badge-secondary m-1">
-                  {`${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(el[1])} MiB RAM`}
-                </span>
-              } else if (el[0] === "workspace_request") {
-                return <span key="workspace_request" className="badge badge-secondary m-1">
-                  {`${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(el[1])} MiB Disk`}
-                </span>
-              } else if (el[0] === "resource_warning") {
-                if (el[1] === "none") {
-                  return <span key="resource_warning"></span>
-                } else {
-                  return <span key="resource_warning" className="badge badge-danger m-1">{`Out of ${el[1]}`}</span>
-                }
-              } else if (Array.isArray(el[1])) {
-                return el[1].map((arrayEl, arrayIdx) => {
-                  return <span key={el[0] + arrayIdx}
-                    className={`badge badge-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
-                    title={el[0] === 'tolerations' ? "Toleration" : "Node Selector"}>
-                    {`${arrayEl.key}=${arrayEl.value}`}
+            <td>{
+              job_labels.map(el => {
+                if (el[0] === "cpu_request") {
+                  return <span key="cpu_request" className="badge badge-secondary m-1" title="CPU Request">
+                    {formatLabel(el)}
                   </span>
-                });
-              }
-              return <span key={el[0]} className="badge badge-secondary m-1">
-                {el[1]}
-              </span>
-            }) || "-"}</td>
+                } else if (el[0] === "memory_request") {
+                  return <span key="memory_request" className="badge badge-secondary m-1" title="Memory Request">
+                    {formatLabel(el)}
+                  </span>
+                } else if (el[0] === "workspace_request") {
+                  return <span key="workspace_request" className="badge badge-secondary m-1" title="Workspace Request">
+                    {formatLabel(el)}
+                  </span>
+                } else if (el[0] === "resource_warning") {
+                  if (el[1] === "none") {
+                    return <span key="resource_warning"></span>
+                  } else {
+                    return <span key="resource_warning" className="badge badge-danger m-1" title="Resource Warning">
+                      {`Out of ${el[1]}`}
+                    </span>
+                  }
+                } else if (el[0] === "instance") {
+                  return <span key="instance" className="badge badge-info m-1" title={el[2]}>
+                    {el[1]}
+                  </span>
+                } else if (el[0] === "multiplier") {
+                  return <span key="multiplier" className="badge badge-secondary m-1" title="Multiplier">
+                    {`${el[1]}x`}
+                  </span>
+                } else if (Array.isArray(el[1])) {
+                  return el[1].map((arrayEl, arrayIdx) => {
+                    return <span key={el[0] + arrayIdx}
+                      className={`badge badge-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
+                      title={el[0] === 'tolerations' ? "Toleration" : "Node Selector"}>
+                      {`${arrayEl.key}=${arrayEl.value}`}
+                    </span>
+                  });
+                }
+                return <span key={el[0]} className="badge badge-secondary m-1">
+                  {el[1]}
+                </span>
+              }) || "-"}</td>
           </tr>}
         <tr>
           <th>Job Dependencies</th>
