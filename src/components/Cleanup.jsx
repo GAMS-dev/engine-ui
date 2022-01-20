@@ -146,6 +146,7 @@ const Cleanup = () => {
             const daysThresholdTmp = parseInt(deleteDataThreshold, 10);
             if (isNaN(daysThresholdTmp)) {
                 setSubmissionErrorMsg("The number of days you entered is not a valid integer!");
+                setIsSubmitting(false);
                 return;
             }
             try {
@@ -202,7 +203,7 @@ const Cleanup = () => {
                     <div className="btn-group mr-2">
                         <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowHousekeepingDialog(true)}>
                             Run Housekeeping
-                <Send width="12px" className="ml-2" />
+                            <Send width="12px" className="ml-2" />
                         </button>
                         {roles.length &&
                             <button
@@ -213,7 +214,7 @@ const Cleanup = () => {
                                 }}
                             >
                                 Refresh
-                    <RefreshCw width="12px" className="ml-2" />
+                                <RefreshCw width="12px" className="ml-2" />
                             </button>
                         }
                     </div>
@@ -255,7 +256,7 @@ const Cleanup = () => {
                             <div className="form-group">
                                 <label htmlFor="deleteDataThreshold">
                                     Delete all data older than ... days
-                            </label>
+                                </label>
                                 <input
                                     type="number"
                                     className="form-control"
@@ -282,10 +283,10 @@ const Cleanup = () => {
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleCloseHousekeepingDialog}>
                             Cancel
-                </Button>
+                        </Button>
                         <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
                             Submit
-                </SubmitButton>
+                        </SubmitButton>
                     </Modal.Footer>
                 </form>
             </Modal>
@@ -298,14 +299,14 @@ const Cleanup = () => {
                         {submissionErrorMsg}
                     </div>
                     Are you sure you want to delete this data? This cannot be undone!
-            </Modal.Body>
+                </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseDeleteConfirmDialog}>
                         Cancel
-            </Button>
-                    <Button variant="primary" onClick={deleteData}>
+                    </Button>
+                    <SubmitButton isSubmitting={isSubmitting} onClick={deleteData} className="btn-primary">
                         Delete
-            </Button>
+                    </SubmitButton>
                 </Modal.Footer>
             </Modal>
         </div>
