@@ -50,7 +50,7 @@ const UserUpdateForm = () => {
                             maxPerm: 7
                         }));
                         setNamespacePermissions(nsPerm);
-                        setCurrNamespacePermissions(nsPerm.map(el => el.perm));
+                        setCurrNamespacePermissions(nsPerm);
                     })
                     .catch(err => {
                         setErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
@@ -108,7 +108,7 @@ const UserUpdateForm = () => {
         }
         for (let i = 0; i < namespacePermissions.length; i++) {
             const nsPerm = namespacePermissions[i];
-            if (nsPerm.perm == null || currNamespacePermissions[i] === nsPerm.perm) {
+            if (nsPerm.perm == null || currNamespacePermissions.findIndex(el => el.name === nsPerm.name && el.perm === nsPerm.perm) !== -1) {
                 continue;
             }
 
@@ -178,7 +178,7 @@ const UserUpdateForm = () => {
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
                                     Update Permissions
-                            </SubmitButton>
+                                </SubmitButton>
                             </div>
                             {userEdited && <Redirect to="/users" />}
                         </form>)}
