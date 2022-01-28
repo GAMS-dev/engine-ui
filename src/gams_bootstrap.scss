@@ -156,8 +156,9 @@ body {
   }
 }
 .namespace-list .list-group-item {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap;
 }
 
 .alert-absolute {

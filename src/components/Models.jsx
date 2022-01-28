@@ -165,7 +165,7 @@ const Models = () => {
       <div className="row">
         <div className="col-md-4 col-12 mt-1 font-weight-bold">
           Namespace
-      </div>
+        </div>
         <div className="col-md-8 col-12 mt-1 order-2 order-md-1">
           <div className="btn-toolbar mb-2 mb-md-0 float-right">
             <div className="btn-group mr-2">
@@ -185,7 +185,7 @@ const Models = () => {
                     <Link to={`/quotas/${namespace.name}`}>
                       <button type="button" className="btn btn-sm btn-outline-primary">
                         Edit Quota
-                    <Save width="12px" className="ml-2" />
+                        <Save width="12px" className="ml-2" />
                       </button>
                     </Link>}
                 </>
@@ -205,7 +205,7 @@ const Models = () => {
                   <Link to={`/models/${encodeURIComponent(namespace.name)}/new`}>
                     <button type="button" className="btn btn-sm btn-outline-primary">
                       Add Model
-                    <Send width="12px" className="ml-2" />
+                      <Send width="12px" className="ml-2" />
                     </button>
                   </Link>
                 </>
@@ -223,8 +223,8 @@ const Models = () => {
             </div>
           </div>
         </div>
-        <div className="col-md-4 col-12 order-1 order-md-2 mt-1">
-          <ul className="list-group namespace-list" id="list-tab" role="tablist" onClick={updateNamespace}>
+        <div className="namespace-list col-md-4 col-12 order-1 order-md-2 mt-1">
+          <ul className="list-group" id="list-tab" role="tablist" onClick={updateNamespace}>
             {availableNamespaces.length ? availableNamespaces.map(ns => (
               <li
                 key={ns.name}
