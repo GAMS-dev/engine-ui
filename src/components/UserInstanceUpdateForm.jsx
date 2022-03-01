@@ -74,17 +74,20 @@ const UserInstanceUpdateForm = () => {
                         }));
                     setInstancesAllowed(instancesAllowedTmp);
 
-                    const inviterName = resUserInfo.data[0].inviter_name;
-                    if (!inviterName) {
-                        setErrorMsg("Invalid inviter name. This should never happen. Please contact GAMS support!");
-                        setIsLoading(false);
-                        return;
-                    }
                     userToEditIsAdminTmp = resUserInfo.data[0].roles &&
                         resUserInfo.data[0].roles.includes("admin");
                     setUserToEditIsAdmin(userToEditIsAdminTmp);
                     if (userToEditIsAdminTmp) {
                         setSelectedInstancesAllowed(instancesAllowedTmp);
+                        setIsLoading(false);
+                        return;
+                    }
+                    const inviterName = resUserInfo.data[0].inviter_name;
+                    if (inviterName == null) {
+                        setErrorMsg("Invalid inviter name. This should never happen. Please contact GAMS support!");
+                        setInviterHasInstancesAssigned(false);
+                        setIsLoading(false);
+                        return;
                     }
                     const resInviter = await axios
                         .get(`${server}/usage/instances/${encodeURIComponent(inviterName)}`);
