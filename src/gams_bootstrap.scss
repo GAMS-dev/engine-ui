@@ -230,6 +230,25 @@ body {
   overflow: auto;
 }
 
+.table-cell-overflow {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-form-control {
+  font-size: 80%;
+  font-weight: 400;
+  width: 100%;
+  outline: none;
+  border: 1px solid transparent;
+}
+
+.table-form-control:hover, .table-form-control:active, .table-form-control:focus {
+  border: 1px solid #ced4da;
+  border-radius: 0;
+}
+
 #quota-icon {
   margin-left: 5px;
 }

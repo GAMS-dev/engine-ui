@@ -46,6 +46,11 @@ const Jobs = () => {
       displayer: String
     },
     {
+      field: "tag",
+      column: "Tag",
+      displayer: e => <div className="table-cell-overflow">{e}</div>
+    },
+    {
       field: "submitted_at",
       column: "Submitted",
       sorter: "datetime",

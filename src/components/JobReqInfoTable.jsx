@@ -1,12 +1,21 @@
-import React, { useContext } from "react";
+import axios from "axios";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
+import { AlertContext } from "./Alert";
 import DownloadLink from "./DownloadLink";
 import TimeDisplay from "./TimeDisplay";
+import { getResponseError } from "./util";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
+  const [, setAlertMsg] = useContext(AlertContext);
   const { job, isHcJob, inKubernetes } = props;
+  const [jobTag, setJobTag] = useState(job.tag == null ? "" : job.tag);
+  const [tmpJobTag, setTmpJobTag] = useState(job.tag == null ? "" : job.tag);
+  const [jobTagUpdating, setJobTagUpdating] = useState(false);
+
+  let preventUpdateTag = false;
 
   const formatLabel = (label) => {
     if (label == null || label.length < 2 || label[1] === "") {
@@ -22,6 +31,34 @@ const JobReqInfoTable = props => {
       return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])}x`;
     }
     return "";
+  }
+
+  const updateJobTag = async (e) => {
+    if (e.key !== 'Enter') {
+      if (e.key === 'Escape') {
+        setTmpJobTag(jobTag);
+        preventUpdateTag = true;
+        e.target.blur();
+      }
+      return;
+    }
+    try {
+      setJobTagUpdating(true);
+      await axios.put(`${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/tag`, {
+        tag: tmpJobTag
+      });
+      setJobTag(tmpJobTag);
+      if (e.target != null) {
+        preventUpdateTag = true;
+        e.target.blur();
+      }
+    }
+    catch (err) {
+      setAlertMsg(`Problems updating job tag. Error message: ${getResponseError(err)}`);
+    }
+    finally {
+      setJobTagUpdating(false);
+    }
   }
 
   let job_labels;
@@ -65,6 +102,26 @@ const JobReqInfoTable = props => {
                 <span className="badge badge-pill badge-primary ml-1">HC</span>
               </sup>}
             </small>
+          </td>
+        </tr>
+        <tr>
+          <th>Tag</th>
+          <td>
+            <input
+              type="text"
+              className="table-form-control"
+              value={tmpJobTag}
+              disabled={jobTagUpdating}
+              onBlur={() => {
+                if (preventUpdateTag) {
+                  preventUpdateTag = false;
+                } else {
+                  updateJobTag({ key: 'Enter' });
+                }
+              }}
+              onChange={e => setTmpJobTag(e.target.value)}
+              onKeyDown={updateJobTag}
+            />
           </td>
         </tr>
         <tr>

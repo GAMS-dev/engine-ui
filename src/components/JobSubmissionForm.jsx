@@ -37,6 +37,7 @@ const JobSubmissionForm = props => {
     const [streamEntries, setStreamEntries] = useState("");
     const [inexJSON, setInexJSON] = useState("");
     const [jobDeps, setJobDeps] = useState("");
+    const [jobTag, setJobTag] = useState("");
     const [validCpuReq, setValidCpuReq] = useState(true);
     const [validMemReq, setValidMemReq] = useState(true);
     const [validWsReq, setValidWsReq] = useState(true);
@@ -170,6 +171,9 @@ const JobSubmissionForm = props => {
             } else {
                 jobSubmissionForm.append("data", modelData[0], "data.zip");
             }
+        }
+        if (jobTag) {
+            jobSubmissionForm.append('tag', jobTag);
         }
         jobSubmissionForm.append("stdout_filename", logFileName ? logFileName : "log_stdout.txt");
 
@@ -424,6 +428,20 @@ const JobSubmissionForm = props => {
                                                     autoComplete="on"
                                                     value={clArgs}
                                                     onChange={e => setClArgs(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label htmlFor="jobTag" className="sr-only">
+                                                    Job tag (human-readable identifier, optional)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="jobTag"
+                                                    placeholder="Job tag (human-readable identifier, optional)"
+                                                    autoComplete="on"
+                                                    value={jobTag}
+                                                    onChange={e => setJobTag(e.target.value)}
                                                 />
                                             </div>
                                             <div className="form-group">
