@@ -137,6 +137,7 @@ const Table = props => {
     const currentFiltersTmp = {
       ...currentFilters
     }
+    gotoFirstPage();
     if (currentFiltersTmp[colName] == null || currentFiltersTmp[colName].length < filterText.length) {
       setData(data
         .filter(dataTmp => dataTmp[colName] && dataTmp[colName].includes(filterText)));
