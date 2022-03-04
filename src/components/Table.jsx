@@ -139,8 +139,9 @@ const Table = props => {
     }
     gotoFirstPage();
     if (currentFiltersTmp[colName] == null || currentFiltersTmp[colName].length < filterText.length) {
+      const filterTextLower = filterText.toLowerCase();
       setData(data
-        .filter(dataTmp => dataTmp[colName] && dataTmp[colName].includes(filterText)));
+        .filter(dataTmp => dataTmp[colName] && dataTmp[colName].toLowerCase().includes(filterTextLower)));
       currentFiltersTmp[colName] = filterText;
     } else {
       if (filterText.length > 0) {
