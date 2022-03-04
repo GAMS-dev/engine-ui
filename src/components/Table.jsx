@@ -7,9 +7,11 @@ import { FormControl, Button, InputGroup } from "react-bootstrap";
 import OverlayFilter from "./OverlayFilter";
 
 const Table = props => {
-  const { displayFields, noDataMsg, idFieldName, isLoading, onChange, total } = props;
+  const { noDataMsg, isLoading, onChange, total } = props;
 
   const [currentPage, setCurrentPage] = useState(0);
+  const [idFieldName, setIdFieldName] = useState(props.idFieldName);
+  const [displayFields, setDisplayFields] = useState(props.displayFields);
   const [invalidPageNumber, setInvalidPageNumber] = useState(false);
   const [goToPage, setGoToPage] = useState(null);
   const [dataRaw, setDataRaw] = useState([...props.data]);
@@ -30,8 +32,11 @@ const Table = props => {
     setSortAsc(props.sortedAsc === true);
     setSortedCol(props.sortedCol);
     setCurrentFilters({});
+    setIdFieldName(props.idFieldName);
+    setDisplayFields(props.displayFields);
     setRefreshCount(prev => prev + 1);
-  }, [props.data, props.sortedAsc, props.sortedCol])
+  }, [props.data, props.sortedAsc, props.sortedCol, props.idFieldName,
+  props.displayFields])
 
   useEffect(() => {
     if (onChange != null) {
