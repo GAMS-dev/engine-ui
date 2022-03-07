@@ -3,6 +3,16 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { getResponseError } from "./util";
 import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, LinearScale, CategoryScale, PointElement, LineElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(
+    LinearScale,
+    CategoryScale,
+    PointElement,
+    LineElement,
+    Tooltip,
+    Legend
+);
 
 const SolveTraceEntryView = props => {
     const { solveTraceEntry, server, setRefreshJob, jobFinished } = props;
@@ -89,20 +99,18 @@ const SolveTraceEntryView = props => {
                             }
                         },
                         scales: {
-                            xAxes: [{
-                                display: true,
-                                scaleLabel: {
+                            x: {
+                                title: {
                                     display: true,
-                                    labelString: 'seconds'
+                                    text: 'seconds'
                                 }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                scaleLabel: {
+                            },
+                            y: {
+                                title: {
                                     display: true,
-                                    labelString: 'Value'
+                                    text: 'Value'
                                 }
-                            }]
+                            }
                         }
                     }} />
             </div>
