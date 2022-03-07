@@ -161,19 +161,19 @@ const LicUpdateButton = props => {
                         <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                             {submissionErrorMsg}
                         </div>
-                        {settings.id === "engineLicense" && usi != null? <small>
-                        Unique System Identifier (USI): <b>{usi}</b>
-                                    <Button className="p-0" variant="link" ref={copyUsiButton} onClick={() => { navigator.clipboard.writeText(usi); setShowCopyUsiToolTip(true); }} title="Copy to clipboard">
-                                        <Clipboard size="20"/>
-                                    </Button>
-                                    <Overlay target={copyUsiButton.current} show={showCopyUsiToolTip} placement="top">
-                                        {(props) => (
-                                        <Tooltip id="overlay-example" {...props}>
-                                            Copied!
-                                        </Tooltip>
-                                        )}
-                                    </Overlay>
-                        </small>: <></>}
+                        {settings.id === "engineLicense" && usi != null ? <small>
+                            Unique System Identifier (USI): <b>{usi}</b>
+                            <Button className="p-0" variant="link" ref={copyUsiButton} onClick={() => { navigator.clipboard.writeText(usi); setShowCopyUsiToolTip(true); }} title="Copy to clipboard">
+                                <Clipboard size="20" />
+                            </Button>
+                            <Overlay target={copyUsiButton.current} show={showCopyUsiToolTip} placement="top">
+                                {(props) => (
+                                    <Tooltip id="overlay-example" {...props}>
+                                        Copied!
+                                    </Tooltip>
+                                )}
+                            </Overlay>
+                        </small> : <></>}
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
                                 <label htmlFor={settings.id}>
