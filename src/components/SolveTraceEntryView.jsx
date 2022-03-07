@@ -36,8 +36,10 @@ const SolveTraceEntryView = props => {
                             .map(l => l.split(",").slice(3,).map(el => parseFloat(el)));
                         if (jobFinished) {
                             setData(dataRaw);
-                        } else {
+                        } else if (res.data.entry_value.trim() !== '') {
                             setData(el => el.concat(dataRaw));
+                            setRefresh(refresh + 1);
+                        } else {
                             setRefresh(refresh + 1);
                         }
                     } catch (err) {
