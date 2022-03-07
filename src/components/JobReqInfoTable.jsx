@@ -1,4 +1,5 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import DownloadLink from "./DownloadLink";
@@ -7,6 +8,7 @@ import TimeDisplay from "./TimeDisplay";
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
   const { job, isHcJob, inKubernetes } = props;
+  const [jobLabels, setJobLabels] = useState(null);
 
   const formatLabel = (label) => {
     if (label == null || label.length < 2 || label[1] === "") {
@@ -24,15 +26,18 @@ const JobReqInfoTable = props => {
     return "";
   }
 
-  let job_labels;
-  if (inKubernetes && job.labels) {
-    job_labels = Object.entries(job.labels).filter(el => el[1] != null);
-    if (job_labels.findIndex(label => label[0] === "instance") !== -1) {
-      const memoryRequest = job_labels.find(label => label[0] === "memory_request");
-      const cpuRequest = job_labels.find(label => label[0] === "cpu_request");
-      const multiplier = job_labels.find(label => label[0] === "multiplier");
-      const workspaceRequest = job_labels.find(label => label[0] === "workspace_request");
-      job_labels = job_labels
+  useEffect(() => {
+    if (!inKubernetes || !job.labels) {
+      setJobLabels(null);
+      return;
+    }
+    let jobLabelsTmp = Object.entries(job.labels).filter(el => el[1] != null);
+    if (jobLabelsTmp.findIndex(label => label[0] === "instance") !== -1) {
+      const memoryRequest = jobLabelsTmp.find(label => label[0] === "memory_request");
+      const cpuRequest = jobLabelsTmp.find(label => label[0] === "cpu_request");
+      const multiplier = jobLabelsTmp.find(label => label[0] === "multiplier");
+      const workspaceRequest = jobLabelsTmp.find(label => label[0] === "workspace_request");
+      setJobLabels(jobLabelsTmp
         .filter(el => !["memory_request", "cpu_request",
           "multiplier", "workspace_request", "tolerations", "node_selectors"].includes(el[0]))
         .map(el => {
@@ -43,9 +48,13 @@ const JobReqInfoTable = props => {
           elTmp[1] = `${elTmp[1]} (${formatLabel(cpuRequest)}, ${formatLabel(memoryRequest)}, ${formatLabel(multiplier)})`;
           elTmp[2] = formatLabel(workspaceRequest);
           return elTmp;
-        });
+        })
+      )
+    } else {
+      setJobLabels(jobLabelsTmp);
     }
-  }
+  }, [job, inKubernetes, setJobLabels]);
+
   return (
     <table className="table table-sm table-fixed">
       <thead className="thead-dark">
@@ -185,11 +194,11 @@ const JobReqInfoTable = props => {
               </td>
             </tr>
           </>}
-        {job_labels &&
+        {jobLabels &&
           <tr>
             <th>Resources</th>
             <td>{
-              job_labels.map(el => {
+              jobLabels.map(el => {
                 if (el[0] === "cpu_request") {
                   return <span key="cpu_request" className="badge badge-secondary m-1" title="CPU Request">
                     {formatLabel(el)}
