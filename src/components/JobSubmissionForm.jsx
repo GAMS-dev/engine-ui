@@ -354,7 +354,8 @@ const JobSubmissionForm = props => {
                                                 value={{ value: registeredModelName, label: registeredModelName }}
                                                 isSearchable={true}
                                                 onChange={selected => setRegisteredModelName(selected.value)}
-                                                options={registeredModels.map(model => ({ value: model, label: model }))}
+                                                options={registeredModels.map(model => ({ value: model, label: model }))
+                                                    .sort((a, b) => ('' + a.label).localeCompare(b.label))}
                                             />
                                         </div> :
                                         <React.Fragment>
