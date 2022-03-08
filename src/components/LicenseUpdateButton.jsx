@@ -140,7 +140,25 @@ const LicUpdateButton = props => {
     }
     useEffect(() => {
         setShowCopyUsiToolTip(false);
-    }, [showDialog])
+    }, [showDialog]);
+
+    useEffect(() => {
+        if (showCopyUsiToolTip !== true) {
+            return;
+        }
+        const requestTimer = setTimeout(() => {
+            setShowCopyUsiToolTip(false);
+        }, 3000);
+        return () => {
+            clearTimeout(requestTimer)
+        }
+    }, [showCopyUsiToolTip])
+
+    const copyUSIToClipboard = () => {
+        navigator.clipboard.writeText(usi);
+        setShowCopyUsiToolTip(true);
+    }
+
     return (
         <>
             <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowDialog(true)}>
@@ -163,8 +181,8 @@ const LicUpdateButton = props => {
                         </div>
                         {settings.id === "engineLicense" && usi != null ? <small>
                             Unique System Identifier (USI): <b>{usi}</b>
-                            <Button className="p-0" variant="link" ref={copyUsiButton} onClick={() => { navigator.clipboard.writeText(usi); setShowCopyUsiToolTip(true); }} title="Copy to clipboard">
-                                <Clipboard size="20" />
+                            <Button className="p-0" variant="link" ref={copyUsiButton} onClick={copyUSIToClipboard} title="Copy to clipboard">
+                                <Clipboard size="16" />
                             </Button>
                             <Overlay target={copyUsiButton.current} show={showCopyUsiToolTip} placement="top">
                                 {(props) => (
