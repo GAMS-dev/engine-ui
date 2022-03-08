@@ -29,6 +29,9 @@ const SolveTraceEntryView = props => {
             )
                 .then(res => {
                     try {
+                        if (res.data.entry_value == null) {
+                            return;
+                        }
                         const dataRaw = res.data.entry_value
                             .trim()
                             .split(/\r\n|\n/)
