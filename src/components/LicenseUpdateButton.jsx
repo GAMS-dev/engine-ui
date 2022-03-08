@@ -90,7 +90,11 @@ const LicUpdateButton = props => {
         }
         try {
             const res = await axios.get(`${server}/licenses/engine`);
-            setLicenseExpiration(res.data.expiration_date);
+            let expirationDate = res.data.expiration_date;
+            if (res.data.license != null) {
+                expirationDate = 'perpetual';
+            }
+            setLicenseExpiration(expirationDate);
         }
         catch (err) {
             console.error(getResponseError(err));
@@ -180,7 +184,7 @@ const LicUpdateButton = props => {
                             {submissionErrorMsg}
                         </div>
                         {settings.id === "engineLicense" && usi != null ? <small>
-                            Unique System Identifier (USI): <b>{usi}</b>
+                            Unique System Identifier (USI): <b className="text-monospace">{usi}</b>
                             <Button className="p-0" variant="link" ref={copyUsiButton} onClick={copyUSIToClipboard} title="Copy to clipboard">
                                 <Clipboard size="16" />
                             </Button>
