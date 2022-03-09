@@ -521,7 +521,8 @@ const JobSubmissionForm = props => {
                                                                         value={instance}
                                                                         isSearchable={true}
                                                                         onChange={selected => setInstance(selected)}
-                                                                        options={availableInstances}
+                                                                        options={availableInstances
+                                                                            .sort((a, b) => ('' + a.label).localeCompare(b.label))}
                                                                     />
                                                                 </div>
                                                             </div>
