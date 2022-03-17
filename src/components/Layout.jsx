@@ -23,11 +23,13 @@ import Usage from "./Usage";
 import { getResponseError } from "./util";
 import Instances from "./Instances";
 import InstanceSubmissionForm from "./InstanceSubmissionForm";
+import Webhooks from "./Webhooks";
 import { ServerInfoContext } from "../ServerInfoContext";
 import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
 import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import GroupMembers from "./GroupMembers";
+import WebhookSubmissionForm from "./WebhookSubmissionForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -140,6 +142,12 @@ const Layout = () => {
                     <InstanceSubmissionForm />
                   </Route>
                 }
+                <Route exact path="/webhooks">
+                  <Webhooks />
+                </Route>
+                <Route exact path="/webhooks/create">
+                  <WebhookSubmissionForm />
+                </Route>
                 <Route>
                   <Jobs key="jobs" />
                 </Route>

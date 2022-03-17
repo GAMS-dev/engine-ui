@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Package, Users, Play, Archive, Server } from "react-feather";
+import { Package, Users, Play, Archive, Server, ExternalLink } from "react-feather";
 import { withRouter } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
@@ -18,7 +18,7 @@ const SidebarRaw = props => {
         <ul className="nav sidebar-nav">
           <li className="nav-item">
             <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users",
-              "/groups", "/cleanup", "/licenses", "/usage", "/instances", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+              "/groups", "/cleanup", "/licenses", "/usage", "/instances", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
@@ -33,6 +33,12 @@ const SidebarRaw = props => {
             <Link to="/users" className={`nav-link nav-block${["/users", "/licenses", "/usage", "/new-user"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
               <Users className="feather" />
               <span className="nav-link-text">Users</span>
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/webhooks" className={`nav-link nav-block${pathname.startsWith("/webhooks") ? " active" : ""}`}>
+              <ExternalLink className="feather" />
+              <span className="nav-link-text">Webhooks</span>
             </Link>
           </li>
           {(roles && roles.find(role => role === "admin") !== undefined) &&
