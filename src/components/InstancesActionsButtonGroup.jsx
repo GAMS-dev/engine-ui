@@ -27,7 +27,7 @@ const InstancesActionsButtonGroup = props => {
             }));
         }
         catch (err) {
-            setSubmissionErrorMsg(`Problems deleting model. Error message: ${getResponseError(err)}`);
+            setSubmissionErrorMsg(`Problems deleting instance. Error message: ${getResponseError(err)}`);
         }
         setIsSubmitting(false);
     }
