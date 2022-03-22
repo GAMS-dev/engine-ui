@@ -50,7 +50,7 @@ const UserUpdateForm = () => {
                             maxPerm: 7
                         }));
                         setNamespacePermissions(nsPerm);
-                        setCurrNamespacePermissions(nsPerm);
+                        setCurrNamespacePermissions(nsPerm.map(el => ({ name: el.name, perm: el.perm })));
                     })
                     .catch(err => {
                         setErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
@@ -130,7 +130,7 @@ const UserUpdateForm = () => {
                 return;
             }
         }
-        setCurrNamespacePermissions(namespacePermissions);
+        setCurrNamespacePermissions(namespacePermissions.map(el => ({ name: el.name, perm: el.perm })));
         setAlertMsg("success:User permissions successfully updated!");
         setUserEdited(true);
     }
