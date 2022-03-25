@@ -36,8 +36,14 @@ const Layout = () => {
   const [serverInfo] = useContext(ServerInfoContext);
   const alertHook = useState("");
   const [licenseExpiration, setLicenseExpiration] = useState(null);
+  const [webhookAccess, setWebhookAccess] = useState("DISABLED");
 
   useEffect(() => {
+    axios.get(`${server}/configuration`).then(res => {
+      setWebhookAccess(res.data.webhook_access);
+    }).catch(err => {
+      console.log(getResponseError(err));
+    });
     if (roles.includes("admin")) {
       axios
         .get(
@@ -61,7 +67,10 @@ const Layout = () => {
         <div className="container-fluid">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
-              <Sidebar inKubernetes={serverInfo.in_kubernetes === true} />
+              <Sidebar
+                inKubernetes={serverInfo.in_kubernetes === true}
+                webhooksVisible={webhookAccess === "ENABLED" ||
+                  (roles && roles.includes("admin"))} />
             </div>
             <main className="col" role="main">
               <Alert />
@@ -143,7 +152,7 @@ const Layout = () => {
                   </Route>
                 }
                 <Route exact path="/webhooks">
-                  <Webhooks />
+                  <Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />
                 </Route>
                 <Route exact path="/webhooks/create">
                   <WebhookSubmissionForm />

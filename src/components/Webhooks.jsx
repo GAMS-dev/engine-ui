@@ -8,12 +8,17 @@ import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
 import { getResponseError } from "./util";
 import WebhooksActionsButtonGroup from "./WebhooksActionsButtonGroup";
+import { Button, Modal } from "react-bootstrap";
+import SubmitButton from "./SubmitButton";
 
-const Webhooks = () => {
-
+const Webhooks = props => {
+    const { webhookAccess, setWebhookAccess } = props;
     const [isLoading, setIsLoading] = useState(true);
     const [refresh, setRefresh] = useState(0);
     const [webhooks, setWebhooks] = useState([]);
+    const [showModalDialog, setShowModalDialog] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
     const [displayFields] = useState([
@@ -53,7 +58,29 @@ const Webhooks = () => {
         }
     ]);
 
+    const setWebhookAccessConfig = (accessConfig) => {
+        setIsSubmitting(true);
+        setSubmissionErrorMsg("");
+        const payload = new FormData();
+        payload.append('webhook_access', accessConfig);
+        axios
+            .patch(`${server}/configuration`, payload)
+            .then(() => {
+                setWebhookAccess(accessConfig);
+                setIsSubmitting(false);
+                setShowModalDialog(false);
+            })
+            .catch(err => {
+                setSubmissionErrorMsg(`Problems updating webhook access configuration. Error message: ${getResponseError(err)}`);
+                setIsSubmitting(false);
+            });
+    }
+
     useEffect(() => {
+        if (webhookAccess === "DISABLED") {
+            setIsLoading(false);
+            return;
+        }
         setIsLoading(true);
         axios
             .get(`${server}/users/webhooks`)
@@ -70,7 +97,7 @@ const Webhooks = () => {
                 setAlertMsg(`Problems fetching webhooks. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
-    }, [jwt, server, roles, refresh, setAlertMsg]);
+    }, [webhookAccess, jwt, server, roles, refresh, setAlertMsg]);
 
     return (
         <div>
@@ -78,11 +105,22 @@ const Webhooks = () => {
                 <h1 className="h2">Webhooks</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
                     <div className="btn-group mr-2">
-                        <Link to="/webhooks/create">
-                            <button type="button" className="btn btn-sm btn-outline-primary h-100">
-                                New Webhook
-                            </button>
-                        </Link>
+                        {roles && roles.includes('admin') && webhookAccess !== "ENABLED" &&
+                            <button type="button" className="btn btn-sm btn-outline-primary h-100"
+                                onClick={() => setShowModalDialog('enable')} >
+                                Enable Webhooks
+                            </button>}
+                        {roles && roles.includes('admin') && webhookAccess !== "DISABLED" &&
+                            <button type="button" className="btn btn-sm btn-outline-primary h-100"
+                                onClick={() => setShowModalDialog('disable')} >
+                                Disable Webhooks
+                            </button>}
+                        {webhookAccess === "ENABLED" || (webhookAccess === "ADMIN_ONLY" && (roles && roles.includes('admin'))) ?
+                            <Link to="/webhooks/create">
+                                <button type="button" className="btn btn-sm btn-outline-primary h-100">
+                                    New Webhook
+                                </button>
+                            </Link> : <></>}
                         <button
                             type="button"
                             className="btn btn-sm btn-outline-secondary"
@@ -96,16 +134,47 @@ const Webhooks = () => {
                     </div>
                 </div>
             </div>
-            <Table
-                data={webhooks}
-                noDataMsg="No Webhooks Found"
-                isLoading={isLoading}
-                displayFields={displayFields}
-                idFieldName="id"
-                sortedAsc={false}
-                sortedCol="created_at"
-            />
-        </div>
+            {webhookAccess === "DISABLED" ? <p className="text-center">Webhooks disabled</p> :
+                <Table
+                    data={webhooks}
+                    noDataMsg="No Webhooks Found"
+                    isLoading={isLoading}
+                    displayFields={displayFields}
+                    idFieldName="id"
+                    sortedAsc={false}
+                    sortedCol="created_at"
+                />}
+            <Modal show={showModalDialog !== false} onHide={() => setShowModalDialog(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Please Confirm</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                        {submissionErrorMsg}
+                    </div>
+                    {showModalDialog === 'enable' ? 'Are you sure that you want to enable webhooks?' :
+                        'Are you sure that you want to disable webhooks?'}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModalDialog(false)}>
+                        Cancel
+                    </Button>
+                    {webhookAccess !== "ADMIN_ONLY" && <SubmitButton isSubmitting={isSubmitting} onClick={() => setWebhookAccessConfig("ADMIN_ONLY")} className="btn-primary">
+                        Enable for admins only
+                    </SubmitButton>}
+                    {showModalDialog === 'enable' ?
+                        <>
+                            <SubmitButton isSubmitting={isSubmitting} onClick={() => setWebhookAccessConfig("ENABLED")} className="btn-primary">
+                                Enable for everyone
+                            </SubmitButton>
+                        </> :
+                        <SubmitButton isSubmitting={isSubmitting} onClick={() => setWebhookAccessConfig("DISABLED")} className="btn-primary">
+                            Disable
+                        </SubmitButton>
+                    }
+                </Modal.Footer>
+            </Modal>
+        </div >
     );
 };
 

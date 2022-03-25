@@ -35,12 +35,12 @@ const SidebarRaw = props => {
               <span className="nav-link-text">Users</span>
             </Link>
           </li>
-          <li className="nav-item">
+          {props.webhooksVisible === true && <li className="nav-item">
             <Link to="/webhooks" className={`nav-link nav-block${pathname.startsWith("/webhooks") ? " active" : ""}`}>
               <ExternalLink className="feather" />
               <span className="nav-link-text">Webhooks</span>
             </Link>
-          </li>
+          </li>}
           {(roles && roles.find(role => role === "admin") !== undefined) &&
             <>
               <li className="nav-item">
