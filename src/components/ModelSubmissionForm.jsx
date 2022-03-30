@@ -336,6 +336,7 @@ const ModelSubmissionForm = () => {
                                         placeholder={'User Groups'}
                                         isDisabled={isSubmitting}
                                         closeMenuOnSelect={false}
+                                        blurInputOnSelect={false}
                                         onChange={setUserGroups}
                                         options={availableUserGroups}
                                     />
