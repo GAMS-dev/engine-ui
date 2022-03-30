@@ -82,6 +82,11 @@ body {
   padding-top: 77px;
 }
 
+.scroll-content {
+  -webkit-overflow-scrolling:touch;
+  overflow:auto;
+}
+
 .nav-block {
   padding: 2em 1rem;
 }

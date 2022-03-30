@@ -56,7 +56,7 @@ const Layout = () => {
         <Header
           isAdmin={roles.includes("admin")}
           licenseExpiration={licenseExpiration} />
-        <div className="container-fluid">
+        <div className="container-fluid scroll-content">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
               <Sidebar inKubernetes={serverInfo.in_kubernetes === true} />
