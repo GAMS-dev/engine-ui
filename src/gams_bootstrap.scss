@@ -95,6 +95,12 @@ body {
   display: flex;
 }
 
+ .table-cell-editable:hover {
+   outline: 1px solid #ced4da;
+   cursor: pointer;
+   position: relative;
+ }
+
 @media only screen and (max-width: 767px) {
   .sidebar-container {
     width: 100%;
