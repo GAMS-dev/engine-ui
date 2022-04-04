@@ -28,6 +28,7 @@ const ModelSubmissionForm = () => {
     const [clArgs, setClArgs] = useState("");
     const [inexObject, setInexObject] = useState("");
     const [inexJSON, setInexJSON] = useState("");
+    const [protectModelFiles, setProtectModelFiles] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const [modelAdded, setModelAdded] = useState(false);
@@ -39,7 +40,8 @@ const ModelSubmissionForm = () => {
             setErrorMsg("");
             try {
                 const modelDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`, {
-                    params: { model: modelname }
+                    params: { model: modelname },
+                    headers: { "X-Fields": "*" }
                 });
                 const groupDataPromise = axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`);
                 const resModelData = await modelDataPromise;
@@ -67,6 +69,7 @@ const ModelSubmissionForm = () => {
                     setTextEntries(resModelData.data[0].text_entries.join(","));
                     setStreamEntries(resModelData.data[0].stream_entries.join(","));
                     setInexObject(resModelData.data[0].inex);
+                    setProtectModelFiles(resModelData.data[0].protect_model_files === true);
                 } else {
                     setErrorMsg(`Model: ${modelname} does not exist in namespace: ${namespace}`);
                 }
@@ -148,6 +151,8 @@ const ModelSubmissionForm = () => {
         } else if (modelname) {
             modelSubmissionForm.append("delete_text_entries", "true");
         }
+
+        modelSubmissionForm.append("protect_model_files", protectModelFiles);
 
         if (streamEntries.trim() !== "") {
             const splitStreamEntries = streamEntries.trim().split(",");
@@ -340,6 +345,14 @@ const ModelSubmissionForm = () => {
                                         options={availableUserGroups}
                                     />
                                 </div>}
+                            <div className="form-check">
+                                <input type="checkbox"
+                                    className="form-check-input"
+                                    checked={protectModelFiles}
+                                    onChange={e => setProtectModelFiles(e.target.checked)}
+                                    id="protectModelFiles" />
+                                <label className="form-check-label" htmlFor="protectModelFiles">Should model files be protected from being overwritten by data files?</label>
+                            </div>
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
