@@ -1,17 +1,23 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Overlay from "react-bootstrap/Overlay";
+import Tooltip from "react-bootstrap/Tooltip";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import SubmitButton from "./SubmitButton";
 import axios from "axios";
 import { getResponseError } from "./util";
+import { Clipboard } from "react-feather";
 
 
 const LicUpdateButton = props => {
     const { type, setLicenseExpiration } = props;
     const [{ server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
+    const copyUsiButton = useRef(null);
+    const [showCopyUsiToolTip, setShowCopyUsiToolTip] = useState(false);
+    const [usi, setUsi] = useState("");
     const settings = {}
     let path;
     let b64enc;
@@ -23,6 +29,7 @@ const LicUpdateButton = props => {
         settings.fontSize = "10pt";
         settings.buttonLabel = "Update Engine license";
         settings.successMsg = "Engine license successfully updated!";
+        settings.noRows = 8;
         b64enc = false;
     } else {
         path = "system-wide";
@@ -32,6 +39,7 @@ const LicUpdateButton = props => {
         settings.fontSize = "8pt";
         settings.buttonLabel = "Update GAMS license";
         settings.successMsg = "GAMS license successfully updated!";
+        settings.noRows = 6;
         b64enc = true;
     }
 
@@ -66,6 +74,7 @@ const LicUpdateButton = props => {
                         }
                     }
                     setIsSubmitting(false);
+                    setUsi(res.data.usi);
                     setEngineLicense(licFormatted);
                 })
                 .catch(err => {
@@ -81,7 +90,11 @@ const LicUpdateButton = props => {
         }
         try {
             const res = await axios.get(`${server}/licenses/engine`);
-            setLicenseExpiration(res.data.expiration_date);
+            let expirationDate = res.data.expiration_date;
+            if (res.data.license != null) {
+                expirationDate = 'perpetual';
+            }
+            setLicenseExpiration(expirationDate);
         }
         catch (err) {
             console.error(getResponseError(err));
@@ -129,6 +142,27 @@ const LicUpdateButton = props => {
         setShowDialog(false);
         setAlertMsg(`success:${settings.successMsg}`);
     }
+    useEffect(() => {
+        setShowCopyUsiToolTip(false);
+    }, [showDialog]);
+
+    useEffect(() => {
+        if (showCopyUsiToolTip !== true) {
+            return;
+        }
+        const requestTimer = setTimeout(() => {
+            setShowCopyUsiToolTip(false);
+        }, 3000);
+        return () => {
+            clearTimeout(requestTimer)
+        }
+    }, [showCopyUsiToolTip])
+
+    const copyUSIToClipboard = () => {
+        navigator.clipboard.writeText(usi);
+        setShowCopyUsiToolTip(true);
+    }
+
     return (
         <>
             <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowDialog(true)}>
@@ -149,6 +183,19 @@ const LicUpdateButton = props => {
                         <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                             {submissionErrorMsg}
                         </div>
+                        {settings.id === "engineLicense" && usi != null ? <small>
+                            Unique System Identifier (USI): <b className="text-monospace">{usi}</b>
+                            <Button className="p-0" variant="link" ref={copyUsiButton} onClick={copyUSIToClipboard} title="Copy to clipboard">
+                                <Clipboard size="16" />
+                            </Button>
+                            <Overlay target={copyUsiButton.current} show={showCopyUsiToolTip} placement="top">
+                                {(props) => (
+                                    <Tooltip id="overlay-example" {...props}>
+                                        Copied!
+                                    </Tooltip>
+                                )}
+                            </Overlay>
+                        </small> : <></>}
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
                                 <label htmlFor={settings.id}>
@@ -156,7 +203,7 @@ const LicUpdateButton = props => {
                                 </label>
                                 <textarea
                                     id={settings.id}
-                                    rows={6}
+                                    rows={settings.noRows}
                                     cols={52}
                                     className="form-control monospace no-resize monospace"
                                     style={{ fontSize: settings.fontSize }}

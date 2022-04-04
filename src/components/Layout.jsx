@@ -42,7 +42,11 @@ const Layout = () => {
           `${server}/licenses/engine`,
         )
         .then(res => {
-          setLicenseExpiration(res.data.expiration_date);
+          let expirationDate = res.data.expiration_date;
+          if (res.data.license != null) {
+            expirationDate = 'perpetual';
+          }
+          setLicenseExpiration(expirationDate);
         })
         .catch(err => {
           console.error(getResponseError(err));
