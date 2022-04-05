@@ -9,6 +9,7 @@ import SubmitButton from "./SubmitButton";
 import { Button } from "react-bootstrap";
 import { getResponseError } from "./util";
 import axios from "axios";
+import { Edit3 } from "react-feather";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
@@ -124,14 +125,14 @@ const JobReqInfoTable = props => {
           <td>{job.namespace}</td>
         </tr>
         <tr>
-          <th>Access groups</th>
+          <th>Access groups
+            <button className="btn btn-sm ml-1" onClick={() => setShowEditAccessGroupsDialog(true)}>
+              <Edit3 size={18} />
+            </button></th>
           <td>
-            <div className="table-cell-editable"
-              onClick={() => setShowEditAccessGroupsDialog(true)}>
-              {job.access_groups == null || job.access_groups.length === 0 ? "-" :
-                job.access_groups.map(group =>
-                  (<Link key={group} className="badge badge-secondary mr-1" to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}>{group}</Link>))}
-            </div>
+            {job.access_groups == null || job.access_groups.length === 0 ? "-" :
+              job.access_groups.map(group =>
+                (<Link key={group} className="badge badge-secondary mr-1" to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}>{group}</Link>))}
           </td>
         </tr>
       </tbody>
