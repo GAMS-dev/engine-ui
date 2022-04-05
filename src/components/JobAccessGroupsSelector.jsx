@@ -42,23 +42,28 @@ const JobAccessGroupsSelector = props => {
         }
     }, [jwt, server, userGroupsLoaded, namespace, groupWhitelist, onChange, setAlertMsg, isInitialized]);
 
-    return (!(userGroupsLoaded === namespace && availableUserGroups.length === 0) ?
+    return (userGroupsLoaded === namespace ?
         <div className="form-group">
-            <label htmlFor="access-groups">
-                Select access groups
-            </label>
-            <Select
-                id="access-groups"
-                isClearable={true}
-                isMulti={true}
-                isSearchable={true}
-                closeMenuOnSelect={false}
-                blurInputOnSelect={false}
-                isLoading={userGroupsLoaded !== namespace}
-                onChange={selected => onChange(selected)}
-                value={value}
-                options={availableUserGroups}
-            />
+            {availableUserGroups.length === 0 ?
+                "No groups available" :
+                <>
+                    <label htmlFor="access-groups">
+                        Select access groups
+                    </label>
+                    <Select
+                        id="access-groups"
+                        isClearable={true}
+                        isMulti={true}
+                        isSearchable={true}
+                        closeMenuOnSelect={false}
+                        blurInputOnSelect={false}
+                        isLoading={userGroupsLoaded !== namespace}
+                        onChange={selected => onChange(selected)}
+                        value={value}
+                        options={availableUserGroups}
+                    />
+                </>
+            }
         </div> : <></>
     );
 };

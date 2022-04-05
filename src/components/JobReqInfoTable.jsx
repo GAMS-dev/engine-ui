@@ -307,7 +307,7 @@ const JobReqInfoTable = props => {
         }}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Add Namespace</Modal.Title>
+          <Modal.Title>Change Access Groups</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
