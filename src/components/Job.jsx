@@ -86,13 +86,18 @@ const Job = () => {
               params: {
                 model: jobData.model
               },
-              headers: { "X-Fields": "arguments" }
+              headers: { "X-Fields": "upload_date" }
             })
               .then(res => {
                 if (res.data.length === 1) {
+                  console.log(res.data)
                   const newJobData = jobData;
-                  newJobData.includes_model_args = true;
-                  newJobData.arguments.push(...res.data[0].arguments);
+                  if (Date.parse(newJobData.submitted_at) > Date.parse(res.data[0].upload_date)) {
+                    // TODO: we can get false positives here as the submission time is not the time the
+                    // model is extracted. We should consider using the time the job was actually
+                    // started (using the /usage endpoint)
+                    newJobData.model_consistent = true;
+                  }
                   setJob(newJobData);
                 } else {
                   setJob(jobData);

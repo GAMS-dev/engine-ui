@@ -116,13 +116,17 @@ const JobReqInfoTable = props => {
                   Temporary
                 </span>
               </span>
-            ) : (
+            ) : (job.model_consistent === true ?
               <DownloadLink
                 url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/models/${encodeURIComponent(job.model)}`}
                 filename={`${job.model}.zip`}
                 className="badge badge-secondary">
                 {job.model}
-              </DownloadLink>
+              </DownloadLink> :
+              <span className="badge badge-secondary"
+                title="The model used for this job no longer exists or was updated after submission">
+                {job.model}
+              </span>
             )}
           </td>
         </tr>
@@ -139,11 +143,12 @@ const JobReqInfoTable = props => {
         </tr>
       </thead>
       <tbody>
-        {!job.is_temporary_model && job.includes_model_args !== true && <tr>
+        {!job.is_temporary_model && <tr>
           <td colSpan="2">
             <div className="alert alert-info" role="alert" style={{ fontSize: "10pt" }}>
               The arguments provided with the model are not mentioned here.
               Therefore the list of arguments shown here may not be complete!
+              See the GAMS log for a complete list of arguments.
             </div>
           </td>
         </tr>}
