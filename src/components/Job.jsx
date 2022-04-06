@@ -29,6 +29,7 @@ const Job = () => {
       "is_temporary_model",
       "model",
       "namespace",
+      "access_groups",
       "process_status",
       "status",
       "stdout_filename",
@@ -140,7 +141,8 @@ const Job = () => {
               <JobReqInfoTable
                 job={job}
                 isHcJob={isHcJob}
-                inKubernetes={serverInfo.in_kubernetes === true} />
+                inKubernetes={serverInfo.in_kubernetes === true}
+                setRefreshJob={setRefresh} />
             </div>
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
               <JobRespInfoTable

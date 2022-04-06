@@ -254,6 +254,7 @@ const UserInstanceUpdateForm = () => {
                                                     isMulti={true}
                                                     isSearchable={true}
                                                     closeMenuOnSelect={false}
+                                                    blurInputOnSelect={false}
                                                     onChange={selected => {
                                                         setSelectedInstancesAllowed(selected);
                                                         if (defaultInstance == null ||

@@ -1,14 +1,24 @@
-import React, { useContext, useState } from "react";
-import { useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Modal from "react-bootstrap/Modal";
 import { AuthContext } from "../AuthContext";
 import DownloadLink from "./DownloadLink";
 import TimeDisplay from "./TimeDisplay";
+import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
+import SubmitButton from "./SubmitButton";
+import { Button } from "react-bootstrap";
+import { getResponseError } from "./util";
+import axios from "axios";
+import { Edit3 } from "react-feather";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
-  const { job, isHcJob, inKubernetes } = props;
+  const { job, isHcJob, inKubernetes, setRefreshJob } = props;
   const [jobLabels, setJobLabels] = useState(null);
+  const [showEditAccessGroupsDialog, setShowEditAccessGroupsDialog] = useState(false);
+  const [accessGroups, setAccessGroups] = useState(job.access_groups == null ? [] : job.access_groups.map(group => ({ label: group, value: group })));
+  const [isSubmitting, setIsSubmitting] = useState("");
+  const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
 
   const formatLabel = (label) => {
     if (label == null || label.length < 2 || label[1] === "") {
@@ -55,7 +65,28 @@ const JobReqInfoTable = props => {
     }
   }, [job, inKubernetes, setJobLabels]);
 
-  return (
+  const handleCloseEditAccessGroupsDialog = () => {
+    setShowEditAccessGroupsDialog(false);
+    setSubmissionErrorMsg("");
+  }
+
+  const handleUpdateAccessGroups = async () => {
+    setIsSubmitting(true);
+    setSubmissionErrorMsg("");
+    try {
+      const newAccessGroupsForm = new FormData();
+      accessGroups.forEach(group => {
+        newAccessGroupsForm.append("access_groups", group.value);
+      })
+      await axios.put(`${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/access-groups`, newAccessGroupsForm);
+      setRefreshJob(refresh => refresh + 1);
+    } catch (err) {
+      setSubmissionErrorMsg(`Problems updating access groups. Error message: ${getResponseError(err)}`);
+    }
+    setIsSubmitting(false);
+  }
+
+  return <>
     <table className="table table-sm table-fixed">
       <thead className="thead-dark">
         <tr>
@@ -92,6 +123,17 @@ const JobReqInfoTable = props => {
         <tr>
           <th>Namespace</th>
           <td>{job.namespace}</td>
+        </tr>
+        <tr>
+          <th>Access groups
+            <button className="btn btn-sm ml-1" onClick={() => setShowEditAccessGroupsDialog(true)}>
+              <Edit3 size={18} />
+            </button></th>
+          <td>
+            {job.access_groups == null || job.access_groups.length === 0 ? "-" :
+              job.access_groups.map(group =>
+                (<Link key={group} className="badge badge-secondary mr-1" to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}>{group}</Link>))}
+          </td>
         </tr>
       </tbody>
       <thead className="thead-light">
@@ -262,7 +304,40 @@ const JobReqInfoTable = props => {
         </tr>
       </tbody>
     </table >
-  );
+    <Modal show={showEditAccessGroupsDialog} onHide={handleCloseEditAccessGroupsDialog}>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleUpdateAccessGroups();
+          return false;
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Change Access Groups</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+            {submissionErrorMsg}
+          </div>
+          <fieldset disabled={isSubmitting}>
+            <JobAccessGroupsSelector
+              namespace={job.namespace}
+              value={accessGroups}
+              onChange={setAccessGroups}
+              groupWhitelist={job.access_groups} />
+          </fieldset>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseEditAccessGroupsDialog}>
+            Cancel
+          </Button>
+          <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
+            Update
+          </SubmitButton>
+        </Modal.Footer>
+      </form>
+    </Modal>
+  </>
 };
 
 export default JobReqInfoTable;

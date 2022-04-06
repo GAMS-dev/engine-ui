@@ -1,8 +1,6 @@
-$theme-colors: (
-  "primary": #f39619,
+$theme-colors: ("primary": #f39619,
   "secondary": #494d55,
-  "info": #17a2b8
-);
+  "info": #17a2b8);
 
 $border-color: #adb5bd;
 $border-radius: 0;
@@ -21,8 +19,8 @@ $border-radius-sm: 0;
 
 #logoPostfix {
   position: absolute;
-  top:0;
-  margin-left:10px;
+  top: 0;
+  margin-left: 10px;
 }
 
 .form-signin {
@@ -83,8 +81,8 @@ body {
 }
 
 .scroll-content {
-  -webkit-overflow-scrolling:touch;
-  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
 }
 
 .nav-block {
@@ -100,36 +98,44 @@ body {
     width: 100%;
     position: fixed;
     z-index: 999;
-    bottom:0;
+    bottom: 0;
   }
+
   .nav-top {
     width: 100%;
     position: fixed;
     z-index: 999;
     padding: 17px 0 0;
     border-bottom: 1px solid #adb5bd !important;
-    top:0;
+    top: 0;
   }
+
   .nav-top .nav-block {
     display: inline-block;
   }
+
   .nav-block {
     padding: 0.5em 1rem;
     padding-bottom: 16px;
   }
+
   .sidebar-sticky {
     height: auto;
   }
+
   [role="main"] {
     padding-bottom: 100px;
   }
+
   .sidebar {
     border-top: 1px solid #adb5bd !important;
-    padding-top:0;
+    padding-top: 0;
   }
+
   .nav-link-text {
     display: block;
   }
+
   .sidebar-nav {
     justify-content: space-between !important;
     flex-direction: row;
@@ -142,9 +148,11 @@ body {
   .sidebar-container {
     width: 140px;
   }
+
   .sidebar {
     border-right: 1px solid #adb5bd !important;
   }
+
   .sidebar-nav {
     flex-direction: column;
   }
@@ -154,22 +162,24 @@ body {
   max-height: 200px;
   overflow: auto;
 }
+
 @media only screen and (min-width: 768px) {
   .namespace-list {
     max-height: 500px;
     max-height: 60vh;
   }
 }
+
 .namespace-list .list-group-item {
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .alert-absolute {
-  position:absolute; 
+  position: absolute;
   width: 100%;
-  z-index:10;
+  z-index: 10;
 }
 
 .no-resize {
@@ -177,7 +187,7 @@ body {
 }
 
 .monospace {
-  font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+  font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
 }
 
 .nowrap {
@@ -210,7 +220,7 @@ body {
   padding: 0.3em 1em;
   position: absolute;
   bottom: 0;
-  left:0;
+  left: 0;
 }
 
 .info-header-right {
@@ -254,7 +264,7 @@ body {
   overflow: hidden;
 }
 
-.job-timings-info-bar div{
+.job-timings-info-bar div {
   display: inline-block;
   font-size: 10pt;
   text-align: center;
@@ -277,6 +287,7 @@ body {
   background-color: theme-color("info");
   color: white;
 }
+
 .dropzone-file-info {
   font-size: 10pt;
   max-height: 100px;
