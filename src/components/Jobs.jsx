@@ -46,6 +46,11 @@ const Jobs = () => {
       displayer: String
     },
     {
+      field: "tag",
+      column: "Tag",
+      displayer: e => <div className="table-cell-overflow">{e}</div>
+    },
+    {
       field: "submitted_at",
       column: "Submitted",
       sorter: "datetime",
@@ -89,7 +94,7 @@ const Jobs = () => {
       axios
         .get(server + `/jobs/`, {
           params: {
-            everyone: isInviter,
+            everyone: true,
             per_page: 10,
             page: currentPageJobs,
             order_by: sortedColJobs,
@@ -111,7 +116,7 @@ const Jobs = () => {
       axios
         .get(server + `/hypercube/`, {
           params: {
-            everyone: isInviter,
+            everyone: true,
             per_page: 10,
             page: currentPageHcJobs,
             order_by: sortedColHcJobs,

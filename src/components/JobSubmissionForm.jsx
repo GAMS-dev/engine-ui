@@ -7,6 +7,7 @@ import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
 import { zipAsync, getResponseError } from "./util";
+import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -37,6 +38,7 @@ const JobSubmissionForm = props => {
     const [streamEntries, setStreamEntries] = useState("");
     const [inexJSON, setInexJSON] = useState("");
     const [jobDeps, setJobDeps] = useState("");
+    const [jobTag, setJobTag] = useState("");
     const [validCpuReq, setValidCpuReq] = useState(true);
     const [validMemReq, setValidMemReq] = useState(true);
     const [validWsReq, setValidWsReq] = useState(true);
@@ -52,6 +54,7 @@ const JobSubmissionForm = props => {
     const [instance, setInstance] = useState("");
     const [jobPosted, setJobPosted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [accessGroups, setAccessGroups] = useState([]);
 
     useEffect(() => {
         axios
@@ -113,7 +116,7 @@ const JobSubmissionForm = props => {
         if (submissionErrorMsg !== "") {
             setIsSubmitting(false);
         }
-    }, [submissionErrorMsg])
+    }, [submissionErrorMsg]);
 
     const handleJobSubmission = () => {
         if (!validCpuReq || !validMemReq || !validWsReq) {
@@ -171,9 +174,13 @@ const JobSubmissionForm = props => {
                 jobSubmissionForm.append("data", modelData[0], "data.zip");
             }
         }
+        if (jobTag) {
+            jobSubmissionForm.append('tag', jobTag);
+        }
         jobSubmissionForm.append("stdout_filename", logFileName ? logFileName : "log_stdout.txt");
 
-        let optionalArgs = [{ key: "arguments", value: clArgs }, { key: "dep_tokens", value: jobDeps }];
+        let optionalArgs = [{ key: "arguments", value: clArgs }, { key: "dep_tokens", value: jobDeps },
+        ...accessGroups.map(el => ({ key: "access_groups", value: el.label }))];
 
         if (newHcJob) {
             if (!hcFile.name.toLowerCase().endsWith(".json")) {
@@ -428,6 +435,20 @@ const JobSubmissionForm = props => {
                                                 />
                                             </div>
                                             <div className="form-group">
+                                                <label htmlFor="jobTag" className="sr-only">
+                                                    Job tag (human-readable identifier, optional)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="jobTag"
+                                                    placeholder="Job tag (human-readable identifier, optional)"
+                                                    autoComplete="on"
+                                                    value={jobTag}
+                                                    onChange={e => setJobTag(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="form-group">
                                                 <label htmlFor="logFileName" className="sr-only">
                                                     Log Filename
                                                 </label>
@@ -487,6 +508,7 @@ const JobSubmissionForm = props => {
                                                     onChange={e => setJobDeps(e.target.value)}
                                                 />
                                             </div>
+                                            <JobAccessGroupsSelector namespace={namespace} value={accessGroups} onChange={setAccessGroups} />
                                             <InexJSONSelector onChangeHandler={e => setInexJSON(e)} />
                                             {serverInfo && serverInfo.in_kubernetes === true &&
                                                 <>

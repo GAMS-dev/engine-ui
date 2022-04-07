@@ -29,6 +29,7 @@ const Job = () => {
       "is_temporary_model",
       "model",
       "namespace",
+      "access_groups",
       "process_status",
       "status",
       "stdout_filename",
@@ -37,7 +38,8 @@ const Job = () => {
       "submitted_at",
       "result_exists",
       "text_entries{entry_name}",
-      "token"
+      "token",
+      "tag"
     ];
     if (serverInfo.in_kubernetes === true) {
       fields.push("labels{*}");
@@ -86,13 +88,18 @@ const Job = () => {
               params: {
                 model: jobData.model
               },
-              headers: { "X-Fields": "arguments" }
+              headers: { "X-Fields": "upload_date" }
             })
               .then(res => {
                 if (res.data.length === 1) {
+                  console.log(res.data)
                   const newJobData = jobData;
-                  newJobData.includes_model_args = true;
-                  newJobData.arguments.push(...res.data[0].arguments);
+                  if (Date.parse(newJobData.submitted_at) > Date.parse(res.data[0].upload_date)) {
+                    // TODO: we can get false positives here as the submission time is not the time the
+                    // model is extracted. We should consider using the time the job was actually
+                    // started (using the /usage endpoint)
+                    newJobData.model_consistent = true;
+                  }
                   setJob(newJobData);
                 } else {
                   setJob(jobData);
@@ -135,7 +142,8 @@ const Job = () => {
               <JobReqInfoTable
                 job={job}
                 isHcJob={isHcJob}
-                inKubernetes={serverInfo.in_kubernetes === true} />
+                inKubernetes={serverInfo.in_kubernetes === true}
+                setRefreshJob={setRefresh} />
             </div>
             <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
               <JobRespInfoTable

@@ -50,7 +50,11 @@ const Layout = () => {
           `${server}/licenses/engine`,
         )
         .then(res => {
-          setLicenseExpiration(res.data.expiration_date);
+          let expirationDate = res.data.expiration_date;
+          if (res.data.license != null) {
+            expirationDate = 'perpetual';
+          }
+          setLicenseExpiration(expirationDate);
         })
         .catch(err => {
           console.error(getResponseError(err));
@@ -64,7 +68,7 @@ const Layout = () => {
         <Header
           isAdmin={roles.includes("admin")}
           licenseExpiration={licenseExpiration} />
-        <div className="container-fluid">
+        <div className="container-fluid scroll-content">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
               <Sidebar

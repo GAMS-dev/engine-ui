@@ -1,14 +1,31 @@
-import React, { useContext, useState } from "react";
-import { useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Modal from "react-bootstrap/Modal";
 import { AuthContext } from "../AuthContext";
+import { AlertContext } from "./Alert";
 import DownloadLink from "./DownloadLink";
 import TimeDisplay from "./TimeDisplay";
+import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
+import SubmitButton from "./SubmitButton";
+import { Button } from "react-bootstrap";
+import { getResponseError } from "./util";
+import axios from "axios";
+import { Edit3 } from "react-feather";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
-  const { job, isHcJob, inKubernetes } = props;
+  const [, setAlertMsg] = useContext(AlertContext);
+  const { job, isHcJob, inKubernetes, setRefreshJob } = props;
   const [jobLabels, setJobLabels] = useState(null);
+  const [showEditAccessGroupsDialog, setShowEditAccessGroupsDialog] = useState(false);
+  const [accessGroups, setAccessGroups] = useState(job.access_groups == null ? [] : job.access_groups.map(group => ({ label: group, value: group })));
+  const [isSubmitting, setIsSubmitting] = useState("");
+  const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
+  const [jobTag, setJobTag] = useState(job.tag == null ? "" : job.tag);
+  const [tmpJobTag, setTmpJobTag] = useState(job.tag == null ? "" : job.tag);
+  const [jobTagUpdating, setJobTagUpdating] = useState(false);
+
+  let preventUpdateTag = false;
 
   const formatLabel = (label) => {
     if (label == null || label.length < 2 || label[1] === "") {
@@ -24,6 +41,34 @@ const JobReqInfoTable = props => {
       return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])}x`;
     }
     return "";
+  }
+
+  const updateJobTag = async (e) => {
+    if (e.key !== 'Enter') {
+      if (e.key === 'Escape') {
+        setTmpJobTag(jobTag);
+        preventUpdateTag = true;
+        e.target.blur();
+      }
+      return;
+    }
+    try {
+      setJobTagUpdating(true);
+      await axios.put(`${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/tag`, {
+        tag: tmpJobTag
+      });
+      setJobTag(tmpJobTag);
+      if (e.target != null) {
+        preventUpdateTag = true;
+        e.target.blur();
+      }
+    }
+    catch (err) {
+      setAlertMsg(`Problems updating job tag. Error message: ${getResponseError(err)}`);
+    }
+    finally {
+      setJobTagUpdating(false);
+    }
   }
 
   useEffect(() => {
@@ -55,7 +100,28 @@ const JobReqInfoTable = props => {
     }
   }, [job, inKubernetes, setJobLabels]);
 
-  return (
+  const handleCloseEditAccessGroupsDialog = () => {
+    setShowEditAccessGroupsDialog(false);
+    setSubmissionErrorMsg("");
+  }
+
+  const handleUpdateAccessGroups = async () => {
+    setIsSubmitting(true);
+    setSubmissionErrorMsg("");
+    try {
+      const newAccessGroupsForm = new FormData();
+      accessGroups.forEach(group => {
+        newAccessGroupsForm.append("access_groups", group.value);
+      })
+      await axios.put(`${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/access-groups`, newAccessGroupsForm);
+      setRefreshJob(refresh => refresh + 1);
+    } catch (err) {
+      setSubmissionErrorMsg(`Problems updating access groups. Error message: ${getResponseError(err)}`);
+    }
+    setIsSubmitting(false);
+  }
+
+  return <>
     <table className="table table-sm table-fixed">
       <thead className="thead-dark">
         <tr>
@@ -77,6 +143,26 @@ const JobReqInfoTable = props => {
           </td>
         </tr>
         <tr>
+          <th>Tag</th>
+          <td>
+            <input
+              type="text"
+              className="table-form-control"
+              value={tmpJobTag}
+              disabled={jobTagUpdating}
+              onBlur={() => {
+                if (preventUpdateTag) {
+                  preventUpdateTag = false;
+                } else {
+                  updateJobTag({ key: 'Enter' });
+                }
+              }}
+              onChange={e => setTmpJobTag(e.target.value)}
+              onKeyDown={updateJobTag}
+            />
+          </td>
+        </tr>
+        <tr>
           <th>Submitted by</th>
           <td>
             {job.user.deleted ? <span className="badge badge-pill badge-secondary ml-1">deleted</span>
@@ -92,6 +178,17 @@ const JobReqInfoTable = props => {
         <tr>
           <th>Namespace</th>
           <td>{job.namespace}</td>
+        </tr>
+        <tr>
+          <th>Access groups
+            <button className="btn btn-sm ml-1" onClick={() => setShowEditAccessGroupsDialog(true)}>
+              <Edit3 size={18} />
+            </button></th>
+          <td>
+            {job.access_groups == null || job.access_groups.length === 0 ? "-" :
+              job.access_groups.map(group =>
+                (<Link key={group} className="badge badge-secondary mr-1" to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}>{group}</Link>))}
+          </td>
         </tr>
       </tbody>
       <thead className="thead-light">
@@ -116,13 +213,17 @@ const JobReqInfoTable = props => {
                   Temporary
                 </span>
               </span>
-            ) : (
+            ) : (job.model_consistent === true ?
               <DownloadLink
                 url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/models/${encodeURIComponent(job.model)}`}
                 filename={`${job.model}.zip`}
                 className="badge badge-secondary">
                 {job.model}
-              </DownloadLink>
+              </DownloadLink> :
+              <span className="badge badge-secondary"
+                title="The model used for this job no longer exists or was updated after submission">
+                {job.model}
+              </span>
             )}
           </td>
         </tr>
@@ -139,11 +240,12 @@ const JobReqInfoTable = props => {
         </tr>
       </thead>
       <tbody>
-        {!job.is_temporary_model && job.includes_model_args !== true && <tr>
+        {!job.is_temporary_model && <tr>
           <td colSpan="2">
             <div className="alert alert-info" role="alert" style={{ fontSize: "10pt" }}>
               The arguments provided with the model are not mentioned here.
               Therefore the list of arguments shown here may not be complete!
+              See the GAMS log for a complete list of arguments.
             </div>
           </td>
         </tr>}
@@ -257,7 +359,40 @@ const JobReqInfoTable = props => {
         </tr>
       </tbody>
     </table >
-  );
+    <Modal show={showEditAccessGroupsDialog} onHide={handleCloseEditAccessGroupsDialog}>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleUpdateAccessGroups();
+          return false;
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Change Access Groups</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+            {submissionErrorMsg}
+          </div>
+          <fieldset disabled={isSubmitting}>
+            <JobAccessGroupsSelector
+              namespace={job.namespace}
+              value={accessGroups}
+              onChange={setAccessGroups}
+              groupWhitelist={job.access_groups} />
+          </fieldset>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseEditAccessGroupsDialog}>
+            Cancel
+          </Button>
+          <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
+            Update
+          </SubmitButton>
+        </Modal.Footer>
+      </form>
+    </Modal>
+  </>
 };
 
 export default JobReqInfoTable;

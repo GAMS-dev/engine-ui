@@ -153,6 +153,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                                 placeholder={'Select User Groups'}
                                 isDisabled={isLoading}
                                 closeMenuOnSelect={false}
+                                blurInputOnSelect={false}
                                 onChange={selected => {
                                     updateNsGroups(selected.map(group => group.value))
                                     setSelectedGroups(selected)
