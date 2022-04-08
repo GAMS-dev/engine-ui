@@ -43,7 +43,7 @@ const Layout = () => {
         )
         .then(res => {
           let expirationDate = res.data.expiration_date;
-          if (res.data.license != null) {
+          if (expirationDate == null && res.data.license != null) {
             expirationDate = 'perpetual';
           }
           setLicenseExpiration(expirationDate);
