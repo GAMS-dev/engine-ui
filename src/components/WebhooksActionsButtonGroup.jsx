@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
-import axios from "axios";
+import { AlertContext } from "./Alert";
 
 const WebhooksActionsButtonGroup = props => {
     const { id, url, events, server, setRefresh } = props;
+
+    const [, setAlertMsg] = useContext(AlertContext);
 
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -33,6 +36,13 @@ const WebhooksActionsButtonGroup = props => {
 
     return (
         <>
+            {window.isSecureContext &&
+                <button
+                    type="button"
+                    className="btn btn-sm btn-outline-info"
+                    onClick={() => { navigator.clipboard.writeText(url); setAlertMsg("success:URL copied to clipboard!") }}>
+                    Copy URL
+                </button>}
             <button className="btn btn-sm btn-outline-danger" onClick={() => setShowConfirmDialog(true)}>Delete</button>
             <Modal show={showConfirmDialog} onHide={() => setShowConfirmDialog(false)}>
                 <form

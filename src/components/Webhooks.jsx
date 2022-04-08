@@ -26,7 +26,14 @@ const Webhooks = props => {
             field: "url",
             column: "Payload URL",
             sorter: "alphabetical",
-            displayer: String
+            displayer: url => {
+                const urlTmp = new URL(url);
+                let urlTrimmed = urlTmp.href;
+                if (urlTmp.pathname.length > 1) {
+                    urlTrimmed = `${urlTrimmed.substring(0, urlTrimmed.lastIndexOf('/'))}****`;
+                }
+                return <span title={url}>{urlTrimmed}</span>
+            }
         },
         {
             field: "events",
