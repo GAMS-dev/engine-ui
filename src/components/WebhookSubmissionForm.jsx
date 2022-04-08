@@ -12,7 +12,7 @@ const WebhookSubmissionForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server, roles }] = useContext(AuthContext);
 
-    const allContentTypes = [{ value: 'form', label: 'Form' }, { value: 'json', label: 'JSON' }];
+    const allContentTypes = [{ value: 'json', label: 'JSON' }, { value: 'form', label: 'Form' }];
     const allEvents = [{ value: 'ALL', label: 'All events' }, { value: 'JOB_FINISHED', label: 'Job finished' }];
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
