@@ -23,19 +23,27 @@ import Usage from "./Usage";
 import { getResponseError } from "./util";
 import Instances from "./Instances";
 import InstanceSubmissionForm from "./InstanceSubmissionForm";
+import Webhooks from "./Webhooks";
 import { ServerInfoContext } from "../ServerInfoContext";
 import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
 import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import GroupMembers from "./GroupMembers";
+import WebhookSubmissionForm from "./WebhookSubmissionForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
   const [serverInfo] = useContext(ServerInfoContext);
   const alertHook = useState("");
   const [licenseExpiration, setLicenseExpiration] = useState(null);
+  const [webhookAccess, setWebhookAccess] = useState("DISABLED");
 
   useEffect(() => {
+    axios.get(`${server}/configuration`).then(res => {
+      setWebhookAccess(res.data.webhook_access);
+    }).catch(err => {
+      console.log(getResponseError(err));
+    });
     if (roles.includes("admin")) {
       axios
         .get(
@@ -63,7 +71,10 @@ const Layout = () => {
         <div className="container-fluid scroll-content">
           <div className="row flex-nowrap">
             <div className="sidebar-container">
-              <Sidebar inKubernetes={serverInfo.in_kubernetes === true} />
+              <Sidebar
+                inKubernetes={serverInfo.in_kubernetes === true}
+                webhooksVisible={webhookAccess === "ENABLED" ||
+                  (roles && roles.includes("admin"))} />
             </div>
             <main className="col" role="main">
               <Alert />
@@ -144,6 +155,12 @@ const Layout = () => {
                     <InstanceSubmissionForm />
                   </Route>
                 }
+                <Route exact path="/webhooks">
+                  <Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />
+                </Route>
+                <Route exact path="/webhooks/create">
+                  <WebhookSubmissionForm />
+                </Route>
                 <Route>
                   <Jobs key="jobs" />
                 </Route>
