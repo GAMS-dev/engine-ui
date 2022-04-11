@@ -13,7 +13,8 @@ const WebhookSubmissionForm = () => {
     const [{ server, roles }] = useContext(AuthContext);
 
     const allContentTypes = [{ value: 'json', label: 'JSON' }, { value: 'form', label: 'Form' }];
-    const allEvents = [{ value: 'ALL', label: 'All events' }, { value: 'JOB_FINISHED', label: 'Job finished' }];
+    const allEvents = [{ value: 'ALL', label: 'All events' }, { value: 'JOB_FINISHED', label: 'Job finished' },
+    { value: 'HC_JOB_FINISHED', label: 'Hypercube job finished' }];
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [formErrors, setFormErrors] = useState("");
@@ -45,7 +46,13 @@ const WebhookSubmissionForm = () => {
             webhookSubmissionForm.append("recursive", recursive);
             webhookSubmissionForm.append("content_type", contentType.value);
             webhookSubmissionForm.append("insecure_ssl", insecureSsl);
-            webhookSubmissionForm.append("events", Array.isArray(events) ? events.map(el => el.value) : events.value);
+            if (Array.isArray(events)) {
+                for (let i = 0; i < events.length; i++) {
+                    webhookSubmissionForm.append("events", events[i].value);
+                }
+            } else {
+                webhookSubmissionForm.append("events", events.value);
+            }
 
             await axios.post(`${server}/users/webhooks`, webhookSubmissionForm);
             setAlertMsg('success:Webhook created successfully');
