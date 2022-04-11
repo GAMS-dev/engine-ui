@@ -22,7 +22,11 @@ const Job = () => {
   const [serverInfo,] = useContext(ServerInfoContext);
 
   useEffect(() => {
-    setIsLoading(true);
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+    if (refresh !== false) {
+      setIsLoading(true);
+    }
     const fields = [
       "arguments",
       "is_data_provided",
@@ -52,7 +56,8 @@ const Job = () => {
           headers: { "X-Fields": "*, labels{*}" },
           params: {
             hypercube_token: token.substring(3)
-          }
+          },
+          cancelToken: source.token
         })
         .then(res => {
           if (!Array.isArray(res.data.results) || res.data.results.length === 0) {
@@ -62,19 +67,24 @@ const Job = () => {
           return res.data.results[0];
         })
         .catch(err => {
-          setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
+          if (!axios.isCancel(err)) {
+            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
+          }
         });
     } else {
       setIsHcJob(false);
       jobDataPromise = axios
         .get(`${server}/jobs/${encodeURIComponent(token)}`, {
-          headers: { "X-Fields": fields.join(", ") + ',user' }
+          headers: { "X-Fields": fields.join(", ") + ',user' },
+          cancelToken: source.token
         })
         .then(res => {
           return res.data;
         })
         .catch(err => {
-          setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
+          if (!axios.isCancel(err)) {
+            setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
+          }
         });
     }
     jobDataPromise
@@ -88,11 +98,11 @@ const Job = () => {
               params: {
                 model: jobData.model
               },
-              headers: { "X-Fields": "upload_date" }
+              headers: { "X-Fields": "upload_date" },
+              cancelToken: source.token
             })
               .then(res => {
                 if (res.data.length === 1) {
-                  console.log(res.data)
                   const newJobData = jobData;
                   if (Date.parse(newJobData.submitted_at) > Date.parse(res.data[0].upload_date)) {
                     // TODO: we can get false positives here as the submission time is not the time the
@@ -107,7 +117,7 @@ const Job = () => {
                 setIsLoading(false);
               })
               .catch(err => {
-                if (err.response && err.response.status !== 403) {
+                if (!axios.isCancel(err) && err.response && err.response.status !== 403) {
                   setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`);
                 }
                 setIsLoading(false);
@@ -115,6 +125,9 @@ const Job = () => {
           }
         }
       });
+    return () => {
+      source.cancel('Fetching job info canceled due to component being unmounted.');
+    }
   }, [jwt, server, token, setAlertMsg, refresh, serverInfo]);
 
   useEffect(() => {

@@ -6,9 +6,11 @@ import { useContext } from "react";
 import { AuthContext } from "../AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Tooltip, OverlayTrigger } from "react-bootstrap";
+import { ServerInfoContext } from "../ServerInfoContext";
 
-const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
+const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDelayedRefresh }) => {
     const [{ jwt, server }] = useContext(AuthContext);
+    const [serverInfo] = useContext(ServerInfoContext);
     const [, setAlertMsg] = useContext(AlertContext);
     const [refresh, setRefresh] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
@@ -71,6 +73,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                                 } else {
                                     // job is still running
                                     intervalDuration = (new Date() - new Date(interval.start)) / 1000;
+                                    setJobStatus(1);
                                 }
                             } else {
                                 intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;
@@ -104,6 +107,14 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
                         setIsFinished(true);
                         if (refresh > 0) {
                             setRefreshJob(refresh => refresh + 1);
+                            if (serverInfo.in_kubernetes === true) {
+                                // labels for resource warnings might come in delayed,
+                                // so we update job info once more delayed. Setting refreshJob
+                                // to false results in no spinner being displayed while fetching data.
+                                setTimeout(() => {
+                                    setRefreshJob(false);
+                                }, 3000);
+                            }
                         }
                     } else {
                         setRefresh(refresh + 1);
@@ -125,7 +136,8 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob }) => {
             }
         }
     }, [jwt, server, token, setIsFinished, isFinished,
-        refresh, setRefreshJob, setTimingData, setAlertMsg, jobOwner, setHasError]);
+        refresh, setRefreshJob, setTimingData, setAlertMsg, jobOwner,
+        setHasError, setJobStatus, serverInfo]);
 
     return (
         timingData == null ?

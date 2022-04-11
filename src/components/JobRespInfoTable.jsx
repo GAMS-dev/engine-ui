@@ -14,6 +14,7 @@ import JobTimingInfoBar from "./JobTimingInfoBar";
 const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
   let solveTraceEntries;
+  const [jobStatus, setJobStatus] = useState(job.status);
   if (isHcJob) {
     solveTraceEntries = [];
   } else if (job.status >= 10) {
@@ -65,9 +66,9 @@ const JobRespInfoTable = props => {
           <tr>
             <th>Status</th>
             <td>
-              {job.status in statusCodes ? statusCodes[job.status] : job.status}
+              {jobStatus in statusCodes ? statusCodes[jobStatus] : jobStatus}
               &nbsp;
-              {isActiveJob(job.status) &&
+              {isActiveJob(jobStatus) &&
                 <button className="btn btn-sm btn-warning" onClick={() => setRefreshJob(refreshCnt => ({
                   refresh: refreshCnt + 1
                 }))}>
@@ -81,7 +82,7 @@ const JobRespInfoTable = props => {
                 <th>Progress</th>
                 <td>{`${job.finished}/${job.job_count} (${job.successfully_finished} successful)`}</td>
               </tr>
-              {isActiveJob(job.status) &&
+              {isActiveJob(jobStatus) &&
                 <tr>
                   <th>Terminate Job</th>
                   <td>
@@ -89,7 +90,7 @@ const JobRespInfoTable = props => {
                       token={isHcJob ? `hc:${job.token}` : job.token}
                       setRefresh={setRefreshJob}
                       server={server}
-                      status={job.status} />
+                      status={jobStatus} />
                   </td>
                 </tr>}
             </> :
@@ -104,14 +105,15 @@ const JobRespInfoTable = props => {
                     <JobTimingInfoBar
                       token={job.token}
                       jobOwner={job.user.username}
-                      setRefreshJob={setRefreshJob} />}
+                      setRefreshJob={setRefreshJob}
+                      setJobStatus={setJobStatus} />}
                 </td>
               </tr>
               <tr>
                 <th>Process Status</th>
                 <td>{job.process_status !== null ? job.process_status : "-"}</td>
               </tr>
-              {job.status >= 10 && <tr>
+              {jobStatus >= 10 && <tr>
                 <th>Text Entries</th>
                 <td>
                   {job.text_entries && job.text_entries.length > 0 ?
@@ -144,7 +146,7 @@ const JobRespInfoTable = props => {
                     </span>}
                 </td>
               </tr>}
-              {isActiveJob(job.status) &&
+              {isActiveJob(jobStatus) &&
                 <>
                   <tr>
                     <th>Stream Entries</th>
@@ -178,12 +180,12 @@ const JobRespInfoTable = props => {
                         token={job.token}
                         setRefresh={setRefreshJob}
                         server={server}
-                        status={job.status} />
+                        status={jobStatus} />
                     </td>
                   </tr>
                 </>
               }
-              {job.status > 0 && solveTraceEntries.length > 0 &&
+              {jobStatus > 0 && solveTraceEntries.length > 0 &&
                 <tr>
                   <th>Solve Trace</th>
                   <td>
@@ -204,14 +206,14 @@ const JobRespInfoTable = props => {
                       server={server}
                       solveTraceEntry={solveTraceEntry}
                       setRefreshJob={setRefreshJob}
-                      jobFinished={job.status >= 10}
+                      jobFinished={jobStatus >= 10}
                     />
                   </td>
                 </tr>
               }
             </>
           }
-          {(job.status >= 10 || (isHcJob && job.status === -3)) && <tr>
+          {(jobStatus >= 10 || (isHcJob && jobStatus === -3)) && <tr>
             <th>Result ZIP</th>
             <td>
               {job.result_exists ?
