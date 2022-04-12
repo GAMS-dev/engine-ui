@@ -15,6 +15,7 @@ import Table from "./Table";
 import { getResponseError } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
+import Select from 'react-select';
 
 ChartJS.register(
     LinearScale,
@@ -33,7 +34,11 @@ const Usage = () => {
     const { username } = useParams();
     const [data, setData] = useState([]);
     const [dataDisaggregated, setDataDisaggregated] = useState([]);
-    const [chartData, setChartData] = useState([]);
+    const [availableUsers, setAvailableUsers] = useState([]);
+    const [usersToFiler, setUsersToFiler] = useState([]);
+    const [aggregatedChartData, setAggregatedChartData] = useState([]);
+    const [disaggregatedChartData, setDisaggregatedChartData] = useState([]);
+    const [chartDataLabels, setChartDataLabels] = useState([]);
     const [recursive, setRecursive] = useState(false);
     const [aggregated, setAggregated] = useState(true);
     const [totalTime, setTotalTime] = useState(0);
@@ -238,6 +243,7 @@ const Usage = () => {
                     labels[i] = new Date(startDate.getTime() + i * intervalLength);
                 }
                 const chartDataTmp = {};
+                const aggregatedChartDataTmp = new Array(noSamples).fill(0);
                 const chartColors = ["#1f78b4", "#33a02c",
                     "#e31a1c", "#ff7f00",
                     "#6a3d9a", "#b15928",
@@ -303,14 +309,23 @@ const Usage = () => {
                         for (let k = 0; k < labels.length - 1; k += 1) {
                             if (times[j].times[0] < labels[k + 1] && times[j].times[1] > labels[k]) {
                                 chartDataTmp[dataDisaggregatedTmp[i].username].data[k] += times[j].multiplier;
+                                aggregatedChartDataTmp[k] += times[j].multiplier;
                             }
                         }
                     }
                 }
-                setChartData({
-                    labels: labels,
-                    datasets: Object.values(chartDataTmp)
-                });
+                setChartDataLabels(labels);
+                setAggregatedChartData([{
+                    label: 'Total',
+                    backgroundColor: '#000000',
+                    borderColor: '#000000',
+                    fill: true,
+                    data: aggregatedChartDataTmp
+                }]);
+                const availableUsersTmp = Object.keys(chartDataTmp).map((el, idx) => ({ label: el, value: idx }));
+                setAvailableUsers(availableUsersTmp.sort((a, b) => ('' + a.label).localeCompare(b.label)));
+                setUsersToFiler(availableUsersTmp.slice(0, 5));
+                setDisaggregatedChartData(Object.values(chartDataTmp));
                 setData(aggregatedUsageData);
                 setDataDisaggregated(dataDisaggregatedTmp.sort((a, b) => ('' + a.username).localeCompare(b.username)));
                 setTotalSolveTime(aggregatedUsageData.reduce((a, c) => {
@@ -397,86 +412,104 @@ const Usage = () => {
                     </div>
                 </div>
             </div>
-            {aggregated ?
-                (data.length > 1 &&
-                    <div className="row">
-                        <div className="col-md-6 col-12 mb-2">
-                            <small>
-                                <div className="row">
-                                    <div className="col-4">
-                                        Total Time:
-                                    </div>
-                                    <div className="col-8">
-                                        <TimeDiffDisplay time={totalTime} classNames="badge badge-secondary" />
-                                    </div>
+            {data.length > 1 &&
+                <div className="row">
+                    <div className="col-md-6 col-12 mb-2">
+                        <small>
+                            <div className="row">
+                                <div className="col-4">
+                                    Total Time:
                                 </div>
-                            </small>
-                        </div>
-                        <div className="col-md-6 col-12 mb-2">
-                            <small>
-                                <div className="row">
-                                    <div className="col-4">
-                                        Total Solve Time:
-                                    </div>
-                                    <div className="col-8">
-                                        <TimeDiffDisplay time={totalSolveTime} classNames="badge badge-secondary" />
-                                    </div>
+                                <div className="col-8">
+                                    <TimeDiffDisplay time={totalTime} classNames="badge badge-secondary" />
                                 </div>
-                            </small>
-                        </div>
-                    </div>) :
-                (data.length > 0 && <Line data={chartData}
-                    height={80}
-                    options={{
-                        interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
-                            intersect: false
-                        },
-                        plugins: {
-                            zoom: {
+                            </div>
+                        </small>
+                    </div>
+                    <div className="col-md-6 col-12 mb-2">
+                        <small>
+                            <div className="row">
+                                <div className="col-4">
+                                    Total Solve Time:
+                                </div>
+                                <div className="col-8">
+                                    <TimeDiffDisplay time={totalSolveTime} classNames="badge badge-secondary" />
+                                </div>
+                            </div>
+                        </small>
+                    </div>
+                </div>}
+            {data.length > 0 &&
+                <>
+                    {!aggregated && <Select
+                        id="usersToFiler"
+                        isMulti={true}
+                        isSearchable={true}
+                        placeholder={'Filter users'}
+                        closeMenuOnSelect={false}
+                        blurInputOnSelect={false}
+                        value={usersToFiler}
+                        onChange={users => setUsersToFiler(users)}
+                        options={availableUsers}
+                        isOptionDisabled={() => usersToFiler.length >= 5}
+                    />}
+                    <Line data={{
+                        labels: chartDataLabels,
+                        datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
+                            usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
+                    }}
+                        height={80}
+                        options={{
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            },
+                            plugins: {
                                 zoom: {
-                                    wheel: {
-                                        enabled: true
+                                    zoom: {
+                                        wheel: {
+                                            enabled: true
+                                        },
+                                        pinch: {
+                                            enabled: true
+                                        },
+                                        mode: "x"
                                     },
-                                    pinch: {
-                                        enabled: true
-                                    },
-                                    mode: "x"
-                                },
-                                pan: {
-                                    enabled: true,
-                                    mode: "x"
-                                }
-                            }
-                        },
-                        elements: {
-                            point: {
-                                radius: 0
-                            }
-                        },
-                        animation: {
-                            duration: 0
-                        },
-                        scales: {
-                            x: {
-                                type: 'timeseries',
-                                time: {
-                                    displayFormats: {
-                                        hour: 'LLL',
-                                        day: 'L'
+                                    pan: {
+                                        enabled: true,
+                                        mode: "x"
                                     }
                                 }
                             },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Weighted parallel jobs'
+                            elements: {
+                                point: {
+                                    radius: 0
+                                }
+                            },
+                            animation: {
+                                duration: 0
+                            },
+                            scales: {
+                                x: {
+                                    type: 'timeseries',
+                                    time: {
+                                        displayFormats: {
+                                            hour: 'LLL',
+                                            day: 'L'
+                                        }
+                                    }
                                 },
-                                stacked: true
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Weighted parallel jobs (approximation)'
+                                    },
+                                    stacked: true
+                                }
                             }
-                        }
-                    }} />)}
+                        }} />
+                </>}
             <Table data={aggregated ? data : dataDisaggregated}
                 noDataMsg="No Usage data found"
                 displayFields={aggregated ? displayFields : displayFieldsDisaggregated}
