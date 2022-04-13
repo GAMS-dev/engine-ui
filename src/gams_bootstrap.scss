@@ -80,11 +80,6 @@ body {
   padding-top: 77px;
 }
 
-.scroll-content {
-  -webkit-overflow-scrolling: touch;
-  overflow: auto;
-}
-
 .nav-block {
   padding: 2em 1rem;
 }
@@ -99,6 +94,11 @@ body {
     position: fixed;
     z-index: 999;
     bottom: 0;
+  }
+
+  .scroll-content {
+    -webkit-overflow-scrolling: touch;
+    overflow: auto;
   }
 
   .nav-top {
@@ -125,6 +125,7 @@ body {
 
   [role="main"] {
     padding-bottom: 100px;
+    height: 100vh;
   }
 
   .sidebar {
@@ -259,7 +260,9 @@ body {
   border: 1px solid transparent;
 }
 
-.table-form-control:hover, .table-form-control:active, .table-form-control:focus {
+.table-form-control:hover,
+.table-form-control:active,
+.table-form-control:focus {
   border: 1px solid #ced4da;
   border-radius: 0;
 }
