@@ -48,7 +48,7 @@ const Webhooks = props => {
             displayer: e => <TimeDisplay time={e} />
         },
         {
-            field: "Recursive",
+            field: "recursive",
             column: "Recursive",
             sorter: "numerical",
             displayer: e => e === true ? 1 : 0
