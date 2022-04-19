@@ -1,6 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Chart as ChartJS, LinearScale, TimeSeriesScale, PointElement, LineElement, Legend, Tooltip, Filler } from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
 import "moment";
 import zoomPlugin from 'chartjs-plugin-zoom'
@@ -14,6 +15,7 @@ import Table from "./Table";
 import { getResponseError } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
+import Select from 'react-select';
 
 ChartJS.register(
     LinearScale,
@@ -32,6 +34,11 @@ const Usage = () => {
     const { username } = useParams();
     const [data, setData] = useState([]);
     const [dataDisaggregated, setDataDisaggregated] = useState([]);
+    const [availableUsers, setAvailableUsers] = useState([]);
+    const [usersToFiler, setUsersToFiler] = useState([]);
+    const [aggregatedChartData, setAggregatedChartData] = useState([]);
+    const [disaggregatedChartData, setDisaggregatedChartData] = useState([]);
+    const [chartDataLabels, setChartDataLabels] = useState([]);
     const [recursive, setRecursive] = useState(false);
     const [aggregated, setAggregated] = useState(true);
     const [totalTime, setTotalTime] = useState(0);
@@ -307,6 +314,18 @@ const Usage = () => {
                         }
                     }
                 }
+                setChartDataLabels(labels);
+                setAggregatedChartData([{
+                    label: 'Total',
+                    backgroundColor: '#000000',
+                    borderColor: '#000000',
+                    fill: true,
+                    data: aggregatedChartDataTmp
+                }]);
+                const availableUsersTmp = Object.keys(chartDataTmp).map((el, idx) => ({ label: el, value: idx }));
+                setAvailableUsers(availableUsersTmp.sort((a, b) => ('' + a.label).localeCompare(b.label)));
+                setUsersToFiler(availableUsersTmp.slice(0, 5));
+                setDisaggregatedChartData(Object.values(chartDataTmp));
                 setData(aggregatedUsageData);
                 setDataDisaggregated(dataDisaggregatedTmp.sort((a, b) => ('' + a.username).localeCompare(b.username)));
                 setTotalSolveTime(aggregatedUsageData.reduce((a, c) => {
@@ -420,6 +439,77 @@ const Usage = () => {
                         </small>
                     </div>
                 </div>}
+            {data.length > 0 &&
+                <>
+                    {!aggregated && <Select
+                        id="usersToFiler"
+                        isMulti={true}
+                        isSearchable={true}
+                        placeholder={'Filter users'}
+                        closeMenuOnSelect={false}
+                        blurInputOnSelect={false}
+                        value={usersToFiler}
+                        onChange={users => setUsersToFiler(users)}
+                        options={availableUsers}
+                        isOptionDisabled={() => usersToFiler.length >= 5}
+                    />}
+                    <Line data={{
+                        labels: chartDataLabels,
+                        datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
+                            usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
+                    }}
+                        height={80}
+                        options={{
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            },
+                            plugins: {
+                                zoom: {
+                                    zoom: {
+                                        wheel: {
+                                            enabled: true
+                                        },
+                                        pinch: {
+                                            enabled: true
+                                        },
+                                        mode: "x"
+                                    },
+                                    pan: {
+                                        enabled: true,
+                                        mode: "x"
+                                    }
+                                }
+                            },
+                            elements: {
+                                point: {
+                                    radius: 0
+                                }
+                            },
+                            animation: {
+                                duration: 0
+                            },
+                            scales: {
+                                x: {
+                                    type: 'timeseries',
+                                    time: {
+                                        displayFormats: {
+                                            hour: 'LLL',
+                                            day: 'L'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Weighted parallel jobs (approximation)'
+                                    },
+                                    stacked: true
+                                }
+                            }
+                        }} />
+                </>}
             <Table data={aggregated ? data : dataDisaggregated}
                 noDataMsg="No Usage data found"
                 displayFields={aggregated ? displayFields : displayFieldsDisaggregated}
