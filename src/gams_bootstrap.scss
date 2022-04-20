@@ -96,7 +96,7 @@ body {
     bottom: 0;
   }
 
-  .scroll-content {
+  [role="main"] {
     -webkit-overflow-scrolling: touch;
     overflow: auto;
   }
@@ -125,7 +125,7 @@ body {
 
   [role="main"] {
     padding-bottom: 100px;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   .sidebar {
