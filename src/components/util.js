@@ -44,4 +44,36 @@ const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
     volume: calcRemainingQuotaInternal(data, "volume_quota", "volume_used", noQuotaVal),
     disk: calcRemainingQuotaInternal(data, "disk_quota", "disk_used", noQuotaVal)
 })
-export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota }
+const mergeSortedArrays = (arraysToMerge, comparisonFunction) => {
+    const mergeInner = (arrL, arrR, comparisonFunction) => {
+        if (arrR == null) {
+            return arrL;
+        }
+        const arrLen = arrL.length + arrR.length;
+        const retArr = new Array(arrLen);
+        let ptrL = 0;
+        let ptrR = 0;
+        while (ptrL + ptrR < arrLen) {
+            if (ptrL < arrL.length && (ptrR === arrR.length || comparisonFunction(arrL[ptrL], arrR[ptrR]) <= 0)) {
+                retArr[ptrL + ptrR] = arrL[ptrL];
+                ptrL++;
+            } else {
+                retArr[ptrL + ptrR] = arrR[ptrR];
+                ptrR++;
+            }
+        }
+        return retArr;
+    }
+    if (arraysToMerge.length === 0) {
+        return [];
+    }
+    while (arraysToMerge.length > 1) {
+        let arrTmp = [];
+        for (let i = 0; i < arraysToMerge.length; i += 2) {
+            arrTmp.push(mergeInner(arraysToMerge[i], arraysToMerge[i + 1], comparisonFunction));
+        }
+        arraysToMerge = arrTmp;
+    }
+    return arraysToMerge[0];
+}
+export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays }

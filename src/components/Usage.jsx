@@ -1,9 +1,8 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Chart as ChartJS, LinearScale, TimeSeriesScale, PointElement, LineElement, Legend, Tooltip, Filler } from 'chart.js';
+import { Chart as ChartJS, LinearScale, TimeScale, PointElement, LineElement, Legend, Tooltip, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import 'chartjs-adapter-moment';
-import "moment";
+import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom'
 import { RefreshCw } from "react-feather";
 import { AuthContext } from "../AuthContext";
@@ -12,14 +11,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Table from "./Table";
-import { getResponseError } from "./util";
+import { getResponseError, mergeSortedArrays } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
 import Select from 'react-select';
 
 ChartJS.register(
     LinearScale,
-    TimeSeriesScale,
+    TimeScale,
     PointElement,
     LineElement,
     Filler,
@@ -38,7 +37,6 @@ const Usage = () => {
     const [usersToFiler, setUsersToFiler] = useState([]);
     const [aggregatedChartData, setAggregatedChartData] = useState([]);
     const [disaggregatedChartData, setDisaggregatedChartData] = useState([]);
-    const [chartDataLabels, setChartDataLabels] = useState([]);
     const [recursive, setRecursive] = useState(false);
     const [aggregated, setAggregated] = useState(true);
     const [totalTime, setTotalTime] = useState(0);
@@ -235,15 +233,8 @@ const Usage = () => {
                     };
                     return a;
                 }, Object.create(null)));
-                const dateInterval = endDate.getTime() - startDate.getTime();
-                const noSamples = 2000;
-                let intervalLength = dateInterval / noSamples;
-                const labels = new Array(noSamples).fill('');
-                for (let i = 0; i <= noSamples - 1; i += 1) {
-                    labels[i] = new Date(startDate.getTime() + i * intervalLength);
-                }
                 const chartDataTmp = {};
-                const aggregatedChartDataTmp = new Array(noSamples).fill(0);
+                const aggregatedChartDataTmp = [];
                 const chartColors = ["#1f78b4", "#33a02c",
                     "#e31a1c", "#ff7f00",
                     "#6a3d9a", "#b15928",
@@ -264,61 +255,84 @@ const Usage = () => {
                     "#714955", "#2a2a72",
                     "#00ffc5", "#6c3a5c",
                     "#8b1e3f", "#3E721D"];
-                let colorIdx = 0;
+                let chartEvents = {};
+                // first, we build the array of events for each user
+                const getEvents = (el, multiplier) => {
+                    if (el.length === 0) {
+                        // job did not start yet
+                        return [];
+                    }
+                    const t = el[el.length - 1];
+                    let finished = new Date();
+                    if (t.finish != null) {
+                        // job finished
+                        finished = new Date(t.finish);
+                    }
+                    return [{
+                        isArrival: true,
+                        multiplier: multiplier,
+                        key: new Date(t.start)
+                    },
+                    {
+                        isArrival: false,
+                        multiplier: multiplier,
+                        key: finished
+                    }];
+                }
                 for (let i = 0; i < dataDisaggregatedTmp.length; i += 1) {
-                    if (!(dataDisaggregatedTmp[i].username in chartDataTmp)) {
-                        chartDataTmp[dataDisaggregatedTmp[i].username] = {
-                            label: dataDisaggregatedTmp[i].username,
-                            backgroundColor: colorIdx < chartColors.length ? chartColors[colorIdx] : '#000000',
-                            borderColor: colorIdx < chartColors.length ? chartColors[colorIdx] : '#000000',
-                            fill: true,
-                            data: new Array(noSamples).fill(0)
-                        }
-                        colorIdx += 1;
+                    if (!(dataDisaggregatedTmp[i].username in chartEvents)) {
+                        chartEvents[dataDisaggregatedTmp[i].username] = [];
                     }
-                    const times = [];
-                    const addToTimes = (el, multiplier) => {
-                        if (el.length === 0) {
-                            // job did not start yet
-                            return;
-                        }
-                        const t = el[el.length - 1];
-                        const tDate = [new Date(t.start), new Date()]
-                        if (t.finish != null) {
-                            // job finished
-                            tDate[1] = new Date(t.finish);
-                        }
-                        times.push({
-                            multiplier: multiplier,
-                            times: tDate
-                        });
-                        return;
-                    }
-                    const multiplier = (dataDisaggregatedTmp[i].labels && dataDisaggregatedTmp[i].multiplier) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
+                    const multiplier = (dataDisaggregatedTmp[i].labels && dataDisaggregatedTmp[i].labels.multiplier) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
                     if ('times' in dataDisaggregatedTmp[i]) {
                         // normal job
-                        addToTimes(dataDisaggregatedTmp[i].times, multiplier);
+                        chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier));
 
                     } else if ('jobs' in dataDisaggregatedTmp[i]) {
                         // Hypercube job
                         for (let j = 0; j < dataDisaggregatedTmp[i].jobs.length; j += 1) {
-                            addToTimes(dataDisaggregatedTmp[i].jobs[j].times, multiplier);
-                        }
-                    }
-                    for (let j = 0; j < times.length; j += 1) {
-                        for (let k = 0; k < labels.length - 1; k += 1) {
-                            if (times[j].times[0] < labels[k + 1] && times[j].times[1] > labels[k]) {
-                                chartDataTmp[dataDisaggregatedTmp[i].username].data[k] += times[j].multiplier;
-                                aggregatedChartDataTmp[k] += times[j].multiplier;
-                            }
+                            chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].jobs[j].times, multiplier));
                         }
                     }
                 }
-                setChartDataLabels(labels);
+                // next, we sort the events for each user
+                const usernames = Object.keys(chartEvents);
+                for (let i = 0; i < usernames.length; i += 1) {
+                    chartEvents[usernames[i]] = chartEvents[usernames[i]].sort((a, b) => (a.key - b.key));
+                    const seriesData = [];
+                    let parallelCount = 0;
+                    for (let j = 0; j < chartEvents[usernames[i]].length; j += 1) {
+                        if (chartEvents[usernames[i]][j].isArrival) {
+                            parallelCount += chartEvents[usernames[i]][j].multiplier;
+                        } else {
+                            parallelCount -= chartEvents[usernames[i]][j].multiplier;
+                        }
+                        seriesData.push({ x: chartEvents[usernames[i]][j].key, y: parallelCount });
+                    }
+                    chartDataTmp[usernames[i]] = {
+                        label: usernames[i],
+                        backgroundColor: i < chartColors.length ? chartColors[i] : '#000000',
+                        borderColor: i < chartColors.length ? chartColors[i] : '#000000',
+                        fill: true,
+                        stepped: true,
+                        data: seriesData
+                    }
+                }
+                let parallelCount = 0;
+                const chartEventsAggregated = mergeSortedArrays(Object.values(chartEvents), (a, b) => (a.key - b.key));
+                for (let i = 0; i < chartEventsAggregated.length; i += 1) {
+                    if (chartEventsAggregated[i].isArrival) {
+                        parallelCount += chartEventsAggregated[i].multiplier;
+                    } else {
+                        parallelCount -= chartEventsAggregated[i].multiplier;
+                    }
+                    aggregatedChartDataTmp.push({ x: chartEventsAggregated[i].key, y: parallelCount });
+                }
                 setAggregatedChartData([{
                     label: 'Total',
                     backgroundColor: '#000000',
                     borderColor: '#000000',
+                    stepped: true,
                     fill: true,
                     data: aggregatedChartDataTmp
                 }]);
@@ -454,7 +468,6 @@ const Usage = () => {
                         isOptionDisabled={() => usersToFiler.length >= 5}
                     />}
                     <Line data={{
-                        labels: chartDataLabels,
                         datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
                             usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
                     }}
@@ -492,20 +505,16 @@ const Usage = () => {
                             },
                             scales: {
                                 x: {
-                                    type: 'timeseries',
-                                    time: {
-                                        displayFormats: {
-                                            hour: 'LLL',
-                                            day: 'L'
-                                        }
-                                    }
+                                    type: 'time',
+                                    min: startDate,
+                                    max: endDate,
+                                    autoSkip: true
                                 },
                                 y: {
                                     title: {
                                         display: true,
-                                        text: 'Weighted parallel jobs (approximation)'
-                                    },
-                                    stacked: true
+                                        text: 'Weighted parallel jobs'
+                                    }
                                 }
                             }
                         }} />
