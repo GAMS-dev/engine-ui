@@ -30,6 +30,7 @@ import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import GroupMembers from "./GroupMembers";
 import WebhookSubmissionForm from "./WebhookSubmissionForm";
+import PreferencesForm from "./PreferencesForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -153,6 +154,11 @@ const Layout = () => {
                 {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
                   <Route exact path="/instances/update/:label?">
                     <InstanceSubmissionForm />
+                  </Route>
+                }
+                {serverInfo.in_kubernetes === true &&
+                  <Route exact path="/preferences">
+                    <PreferencesForm />
                   </Route>
                 }
                 <Route exact path="/webhooks">

@@ -45,7 +45,7 @@ const JobAccessGroupsSelector = props => {
     return (userGroupsLoaded === namespace ?
         <div className="form-group">
             {availableUserGroups.length === 0 ?
-                "No groups available" :
+                (props.hideIfNoGroupsAvailable === true ? <></> : "No groups available") :
                 <>
                     <label htmlFor="access-groups">
                         Select access groups
