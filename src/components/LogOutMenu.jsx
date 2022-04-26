@@ -60,10 +60,10 @@ export const LogOutMenu = () => {
                             className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button mt-1 d-none d-sm-inline d-md-block">
                             Preferences
                         </Link>
-                    </> : <Link to={`/preferences`}
-                        className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button mt-1">
-                        Preferences
-                    </Link>}
+                    </> : <Link to={`/users/${username}/change-pass`}
+                            className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button d-none d-sm-inline d-md-block">
+                            Change password
+                        </Link>}
             </li>
         </>
     );
