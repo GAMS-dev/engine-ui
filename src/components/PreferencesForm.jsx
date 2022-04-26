@@ -45,7 +45,6 @@ const PreferencesForm = () => {
                     setNewDefaultInstance(currentDefault);
                 } else {
                     const currentDefault = availableInstancesTmp[0];
-                    setCurrentDefaultInstance(currentDefault);
                     setNewDefaultInstance(currentDefault);
                 }
             } else {
@@ -59,7 +58,7 @@ const PreferencesForm = () => {
         if (!availableInstances || availableInstances.length === 0) {
             return;
         }
-        if (newDefaultInstance.value === currentDefaultInstance.value) {
+        if (currentDefaultInstance != null && newDefaultInstance.value === currentDefaultInstance.value) {
             setAlertMsg("success:Default instance updated!");
             setPreferencesUpdated(true);
             return;
@@ -106,6 +105,9 @@ const PreferencesForm = () => {
                                 <label htmlFor="defaultInstance">
                                     Default instance
                                 </label>
+                                <div className="invalid-feedback" style={{ display: currentDefaultInstance === null ? "block" : "none" }}>
+                                    You do not currently have a default instance assigned
+                                </div>
                                 <Select
                                     id="defaultInstance"
                                     isClearable={false}
