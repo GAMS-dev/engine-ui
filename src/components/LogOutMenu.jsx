@@ -17,7 +17,7 @@ export const LogOutMenu = () => {
         const fetchInstanceData = async () => {
             const userInstances = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
             if (userInstances.data && userInstances.data.instances_available.length > 0) {
-                setPreferencesAvailable(false);
+                setPreferencesAvailable(true);
                 return;
             }
             const globalInstances = await axios.get(`${server}/usage/instances`);
@@ -61,9 +61,9 @@ export const LogOutMenu = () => {
                             Preferences
                         </Link>
                     </> : <Link to={`/users/${username}/change-pass`}
-                            className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button d-none d-sm-inline d-md-block">
-                            Change password
-                        </Link>}
+                        className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button d-none d-sm-inline d-md-block">
+                        Change password
+                    </Link>}
             </li>
         </>
     );
