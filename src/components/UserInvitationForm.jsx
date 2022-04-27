@@ -55,15 +55,14 @@ const UserInvitationForm = () => {
             ]
             try {
                 let availableInstancesTmp;
-                if (roles && roles.includes('admin')) {
-                    const instanceData = await axios.get(`${server}/usage/instances`);
-                    availableInstancesTmp = instanceData.data.map(instance => ({
-                        "value": instance.label,
-                        "label": instance.label
-                    }));
-                } else {
-                    const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-                    availableInstancesTmp = instanceData.data.instances_available.map(instance => ({
+                const userInstanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
+                availableInstancesTmp = userInstanceData.data.instances_available.map(instance => ({
+                    "value": instance.label,
+                    "label": instance.label
+                }));
+                if (availableInstancesTmp == null || availableInstancesTmp.length === 0) {
+                    const globalInstanceData = await axios.get(`${server}/usage/instances`);
+                    availableInstancesTmp = globalInstanceData.data.map(instance => ({
                         "value": instance.label,
                         "label": instance.label
                     }));
