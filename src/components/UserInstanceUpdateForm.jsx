@@ -17,8 +17,9 @@ const UserInstanceUpdateForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [useRawRequests, setUseRawRequests] = useState(false);
+    const [unassignDefault, setUnassignDefault] = useState(false);
     const [instancesAllowed, setInstancesAllowed] = useState(null);
-    const [selectedInstancesAllowed, setSelectedInstancesAllowed] = useState(null);
+    const [selectedInstancesAllowed, setSelectedInstancesAllowed] = useState([]);
     const [defaultInstance, setDefaultInstance] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -53,107 +54,87 @@ const UserInstanceUpdateForm = () => {
                     setIsLoading(false);
                     return;
                 }
-                setInviterName(resUserInfo.data[0].inviter_name);
-                if (roles && roles.includes("admin")) {
-                    const resMe = await axios
-                        .get(`${server}/usage/instances`);
-                    if (resMe.status !== 200) {
-                        setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
-                        return;
-                    }
-                    if (!resMe.data ||
-                        resMe.data.length === 0) {
-                        setErrorMsg("No instances available.");
-                        setIsLoading(false);
-                        return;
-                    }
-                    const instancesAllowedTmp = resMe.data
+                const inviterNameTmp = resUserInfo.data[0].inviter_name;
+                setInviterName(inviterNameTmp);
+
+                userToEditIsAdminTmp = resUserInfo.data[0].roles &&
+                    resUserInfo.data[0].roles.includes("admin");
+                setUserToEditIsAdmin(userToEditIsAdminTmp);
+
+                const resUser = await axios
+                    .get(`${server}/usage/instances/${encodeURIComponent(userToEdit)}`);
+                const resInviter = inviterNameTmp == null ? resUser : await axios
+                    .get(`${server}/usage/instances/${encodeURIComponent(inviterNameTmp)}`);
+
+                const inviterHasInstancesAssignedTmp = resInviter.data && resInviter.data.instances_available && resInviter.data.instances_available.length > 0;
+                setInviterHasInstancesAssigned(inviterHasInstancesAssignedTmp);
+
+                let instancesAllowedTmp = [];
+
+                if (!userToEditIsAdminTmp && resInviter.data && resInviter.data.instances_available.length > 0) {
+                    instancesAllowedTmp = resInviter.data.instances_available
                         .map(instance => ({
                             "value": instance.label,
                             "label": instance.label
                         }));
-                    setInstancesAllowed(instancesAllowedTmp);
-
-                    userToEditIsAdminTmp = resUserInfo.data[0].roles &&
-                        resUserInfo.data[0].roles.includes("admin");
-                    setUserToEditIsAdmin(userToEditIsAdminTmp);
-                    if (userToEditIsAdminTmp) {
-                        setSelectedInstancesAllowed(instancesAllowedTmp);
-                        setIsLoading(false);
-                        return;
-                    }
-                    const inviterName = resUserInfo.data[0].inviter_name;
-                    if (inviterName == null) {
-                        setErrorMsg("Invalid inviter name. This should never happen. Please contact GAMS support!");
-                        setInviterHasInstancesAssigned(false);
-                        setIsLoading(false);
-                        return;
-                    }
-                    const resInviter = await axios
-                        .get(`${server}/usage/instances/${encodeURIComponent(inviterName)}`);
-                    if (resInviter.status !== 200) {
-                        setErrorMsg("An error occurred while retrieving inviter instances. Please try again later.");
-                        return;
-                    }
-                    setInviterHasInstancesAssigned(resInviter.data && resInviter.data.instances_available && resInviter.data.instances_available.length > 0);
                 } else {
-                    const resMe = await axios
-                        .get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-                    if (resMe.status !== 200) {
-                        setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
-                        return;
-                    }
-                    if (!resMe.data ||
-                        !resMe.data.instances_available ||
-                        resMe.data.instances_available.length === 0) {
+                    // in case inviter is allowed to use raw resource requests,
+                    // we can assign any instance available
+                    const globalInstanceData = await axios
+                        .get(`${server}/usage/instances`);
+                    if (!globalInstanceData.data ||
+                        globalInstanceData.data.length === 0) {
                         setErrorMsg("No instances available.");
-                        setInviterHasInstancesAssigned(false);
                         setIsLoading(false);
                         return;
                     }
-                    setInviterHasInstancesAssigned(true);
-                    setInstancesAllowed(resMe.data.instances_available
+                    instancesAllowedTmp = globalInstanceData.data
                         .map(instance => ({
                             "value": instance.label,
                             "label": instance.label
-                        })));
-                }
-                const resUser = await axios
-                    .get(`${server}/usage/instances/${encodeURIComponent(userToEdit)}`);
-                if (resUser.status !== 200) {
-                    setErrorMsg("An error occurred while retrieving user instances. Please try again later.");
-                    return;
-                }
-                if (resUser.data) {
-                    if (resUser.data.instances_available) {
-                        const selectedInstances = resUser.data.instances_available
-                            .map(instance => ({
-                                "value": instance.label,
-                                "label": instance.label
-                            }));
-                        if (resUser.data.instances_inherited_from != null &&
-                            resUser.data.instances_inherited_from !== userToEdit) {
-                            setInstancesInfoMsg(`Inherited from ${resUser.data.instances_inherited_from}`);
-                            setUseRawRequests(true);
-                        }
-                        if (!roles || !roles.includes("admin")) {
-                            setInstancesAllowed(selectedInstances);
-                        }
-                        if (!userToEditIsAdminTmp) {
-                            setSelectedInstancesAllowed(selectedInstances);
-                        }
-                    }
-                    if (resUser.data.default_inherited_from != null &&
-                        resUser.data.default_inherited_from !== userToEdit) {
-                        setDefaultInstanceInfoMsg(`Inherited from ${resUser.data.default_inherited_from}`);
-                    }
-                    if (resUser.data.default_instance && resUser.data.default_instance.label) {
-                        const defaultLabel = resUser.data.default_instance.label;
-                        setDefaultInstance({ "value": defaultLabel, "label": defaultLabel });
-                    } else {
-                        setUseRawRequests(true);
+                        }));
+                    if (userToEditIsAdminTmp) {
+                        setSelectedInstancesAllowed(instancesAllowedTmp);
                     }
                 }
+
+                setInstancesAllowed(instancesAllowedTmp);
+
+                let useRawRequestsTmp = false;
+
+                if (resUser.data.instances_available != null && resUser.data.instances_available.length > 0) {
+                    const selectedInstances = resUser.data.instances_available
+                        .map(instance => ({
+                            "value": instance.label,
+                            "label": instance.label
+                        }));
+                    if (resUser.data.instances_inherited_from != null &&
+                        resUser.data.instances_inherited_from !== userToEdit) {
+                        setInstancesInfoMsg(`Inherited from ${resUser.data.instances_inherited_from === username ? "you" : resUser.data.instances_inherited_from
+                            }`);
+                        useRawRequestsTmp = true;
+                    }
+                    if (!userToEditIsAdminTmp) {
+                        setSelectedInstancesAllowed(selectedInstances);
+                    }
+                } else {
+                    useRawRequestsTmp = true;
+                }
+                if (resUser.data.default_inherited_from != null &&
+                    resUser.data.default_inherited_from !== userToEdit) {
+                    setDefaultInstanceInfoMsg(`Inherited from ${resUser.data.default_inherited_from === username ? "you" : resUser.data.default_inherited_from
+                        } `);
+                    setUnassignDefault(inviterHasInstancesAssignedTmp);
+                } else {
+                    setUnassignDefault(false);
+                }
+                if (resUser.data.default_instance && resUser.data.default_instance.label) {
+                    const defaultLabel = resUser.data.default_instance.label;
+                    setDefaultInstance({ "value": defaultLabel, "label": defaultLabel });
+                } else {
+                    useRawRequestsTmp = true;
+                }
+                setUseRawRequests(useRawRequestsTmp);
             }
             catch (err) {
                 setErrorMsg(`Problems while while retrieving user instances. Error message: ${getResponseError(err)}.`);
@@ -171,13 +152,17 @@ const UserInstanceUpdateForm = () => {
             try {
                 await axios.delete(`${server}/usage/instances/${encodeURIComponent(userToEdit)}`);
                 setAlertMsg(`success:Instances of user: ${userToEdit} updated successfully`);
-                setUserEdited(true);
             }
             catch (err) {
                 setIsSubmitting(false);
                 setSubmissionErrorMsg(`An error occurred while updating user instances. Error message: ${getResponseError(err)}.`);
+                return;
             }
-            return;
+            if (unassignDefault) {
+                setIsSubmitting(false);
+                setUserEdited(true);
+                return;
+            }
         }
         try {
             const defaultLabel = defaultInstance.value;
@@ -189,7 +174,7 @@ const UserInstanceUpdateForm = () => {
             const requestData = {
                 default_label: defaultLabel
             };
-            if (!userToEditIsAdmin) {
+            if (!userToEditIsAdmin && !useRawRequests) {
                 if (selectedInstancesAllowed == null || !selectedInstancesAllowed.findIndex(instance => instance.value === defaultLabel) === -1) {
                     setIsSubmitting(false);
                     setSubmissionErrorMsg(`The default instance: ${defaultLabel} must be part of the allowed instances.`);
@@ -232,57 +217,66 @@ const UserInstanceUpdateForm = () => {
                                 {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
-                                <div className="form-check mb-3">
-                                    <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
-                                        id="useRawRequests" />
-                                    <label className="form-check-label" htmlFor="useRawRequests">{inviterHasInstancesAssigned ?
-                                        `Inherit instances from ${inviterName === username ? "you" : inviterName}` : "Allowed to use raw resource requests"}</label>
-                                </div>
-                                {!useRawRequests &&
-                                    <>
-                                        {!userToEditIsAdmin &&
-                                            <div className="form-group">
-                                                <label htmlFor="instancesAllowed">
-                                                    Instances user is allowed to use
-                                                </label>
-                                                <div className="invalid-feedback text-center" style={{ display: instancesInfoMsg !== "" ? "block" : "none" }}>
-                                                    {instancesInfoMsg}
-                                                </div>
-                                                <Select
-                                                    id="instancesAllowed"
-                                                    value={selectedInstancesAllowed}
-                                                    isMulti={true}
-                                                    isSearchable={true}
-                                                    closeMenuOnSelect={false}
-                                                    blurInputOnSelect={false}
-                                                    onChange={selected => {
-                                                        setSelectedInstancesAllowed(selected);
-                                                        if (defaultInstance == null ||
-                                                            !selected.map(el => el.value).includes(selected.value)) {
-                                                            setDefaultInstance(selected[0]);
-                                                        }
-                                                    }}
-                                                    options={instancesAllowed}
-                                                />
-                                            </div>}
-                                        <div className="form-group">
-                                            <label htmlFor="instancesDefault">
-                                                Default Instance
-                                            </label>
-                                            <div className="invalid-feedback text-center" style={{ display: defaultInstanceInfoMsg !== "" ? "block" : "none" }}>
-                                                {defaultInstanceInfoMsg}
-                                            </div>
-                                            <Select
-                                                id="instancesDefault"
-                                                isClearable={false}
-                                                value={defaultInstance}
-                                                isSearchable={true}
-                                                onChange={selected => setDefaultInstance(selected)}
-                                                options={selectedInstancesAllowed}
-                                            />
-
+                                {!userToEditIsAdmin &&
+                                    <div className="form-check mb-3">
+                                        <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => {
+                                            setUseRawRequests(e.target.checked);
+                                            setUnassignDefault(e.target.checked);
+                                        }}
+                                            id="useRawRequests" />
+                                        <label className="form-check-label" htmlFor="useRawRequests">{inviterHasInstancesAssigned ?
+                                            `Inherit instances from ${inviterName === username ? "you" : inviterName}` : "Allowed to use raw resource requests"}</label>
+                                    </div>}
+                                {(!useRawRequests && !userToEditIsAdmin) &&
+                                    <div className="form-group">
+                                        <label htmlFor="instancesAllowed">
+                                            Instances user is allowed to use
+                                        </label>
+                                        <div className="invalid-feedback text-center" style={{ display: instancesInfoMsg !== "" ? "block" : "none" }}>
+                                            {instancesInfoMsg}
                                         </div>
-                                    </>}
+                                        <Select
+                                            id="instancesAllowed"
+                                            value={selectedInstancesAllowed}
+                                            isMulti={true}
+                                            isSearchable={true}
+                                            closeMenuOnSelect={false}
+                                            blurInputOnSelect={false}
+                                            onChange={selected => {
+                                                setSelectedInstancesAllowed(selected);
+                                                if (defaultInstance == null ||
+                                                    !selected.map(el => el.value).includes(selected.value)) {
+                                                    setDefaultInstance(selected[0]);
+                                                }
+                                            }}
+                                            options={instancesAllowed}
+                                        />
+                                    </div>}
+                                {(inviterHasInstancesAssigned && useRawRequests) &&
+                                    <div className="form-check mb-3">
+                                        <input type="checkbox" className="form-check-input" checked={unassignDefault} onChange={e => setUnassignDefault(e.target.checked)}
+                                            id="unassignDefault" />
+                                        <label className="form-check-label" htmlFor="unassignDefault">
+                                            {`Inherit default from ${inviterName === username ? "you" : inviterName}`}
+                                        </label>
+                                    </div>}
+                                {selectedInstancesAllowed.length > 0 && !unassignDefault &&
+                                    <div className="form-group">
+                                        <label htmlFor="instancesDefault">
+                                            Default Instance
+                                        </label>
+                                        <div className="invalid-feedback text-center" style={{ display: defaultInstanceInfoMsg !== "" ? "block" : "none" }}>
+                                            {defaultInstanceInfoMsg}
+                                        </div>
+                                        <Select
+                                            id="instancesDefault"
+                                            isClearable={false}
+                                            value={defaultInstance}
+                                            isSearchable={true}
+                                            onChange={selected => setDefaultInstance(selected)}
+                                            options={useRawRequests ? instancesAllowed : selectedInstancesAllowed}
+                                        />
+                                    </div>}
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
