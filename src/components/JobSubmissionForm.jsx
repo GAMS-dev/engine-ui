@@ -42,7 +42,6 @@ const JobSubmissionForm = props => {
     const [validCpuReq, setValidCpuReq] = useState(true);
     const [validMemReq, setValidMemReq] = useState(true);
     const [validWsReq, setValidWsReq] = useState(true);
-    const [openLabelsWrapper, setOpenLabelsWrapper] = useState(false);
     const [instancesLoaded, setInstancesLoaded] = useState(false);
     const [availableInstances, setAvailableInstances] = useState([]);
     const [useRawRequests, setUseRawRequests] = useState(false);
@@ -85,32 +84,70 @@ const JobSubmissionForm = props => {
     }, [server, jwt, roles, username]);
 
     useEffect(() => {
-        if (namespace !== "") {
-            axios
-                .get(`${server}/namespaces/${encodeURIComponent(namespace)}`)
-                .then(res => {
-                    if (res.status !== 200) {
-                        setSubmissionErrorMsg("An error occurred while retrieving registered models. Please try again later.");
-                        setIsLoading(false);
-                        return;
-                    }
-                    if (res.data.length > 0) {
-                        const modelsTmp = res.data.map(el => el.name);
-                        setRegisteredModels(modelsTmp);
-                        setRegisteredModelName(modelsTmp[0]);
-                    } else {
-                        setUseRegisteredModel(false);
-                        setRegisteredModels([]);
-                        setRegisteredModelName("");
-                    }
-                    setIsLoading(false);
-                })
-                .catch(err => {
-                    setSubmissionErrorMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
-                    setIsLoading(false);
-                });
+        const loadNamespaceData = async () => {
+            if (namespace === "") {
+                return;
+            }
+            try {
+                const namespaceData = await axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}`);
+                if (namespaceData.data.length > 0) {
+                    const modelsTmp = namespaceData.data.map(el => el.name);
+                    setRegisteredModels(modelsTmp);
+                    setRegisteredModelName(modelsTmp[0]);
+                } else {
+                    setUseRegisteredModel(false);
+                    setRegisteredModels([]);
+                    setRegisteredModelName("");
+                }
+            } catch (err) {
+                setSubmissionErrorMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
+                return;
+            }
+            setIsLoading(false);
         }
+        loadNamespaceData();
     }, [server, namespace]);
+
+    useEffect(() => {
+        const loadInstanceData = async () => {
+            if (serverInfo == null || serverInfo.in_kubernetes !== true || instancesLoaded === true) {
+                return;
+            }
+            try {
+                const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
+                if (instanceData.data && instanceData.data.instances_available.length > 0) {
+                    const availableInstancesTmp = instanceData.data.instances_available
+                        .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
+                    setAvailableInstances(availableInstancesTmp);
+                    setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
+                    setUseRawRequests(false);
+                } else {
+                    // User can use raw resource requests or use any instance
+                    let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
+                    if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
+                        availableInstancesTmp = availableInstancesTmp.data
+                            .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
+                        setAvailableInstances(availableInstancesTmp);
+                        if (instanceData.data.default_instance != null &&
+                            instanceData.data.default_instance.label != null) {
+                            setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
+                        } else {
+                            setInstance(availableInstancesTmp[0]);
+                        }
+                        setUseRawRequests(false);
+                    } else {
+                        setUseRawRequests(true);
+                    }
+                }
+                setInstancesLoaded(true);
+            }
+            catch (err) {
+                setSubmissionErrorMsg(`An error occurred fetching instances. Error message: ${getResponseError(err)}.`);
+                return;
+            }
+        }
+        loadInstanceData();
+    }, [server, serverInfo, username, instancesLoaded]);
 
     useEffect(() => {
         if (submissionErrorMsg !== "") {
@@ -261,45 +298,6 @@ const JobSubmissionForm = props => {
                 setSubmissionErrorMsg(`Problems posting job.`);
             });
     }
-    const loadInstanceData = async () => {
-        if (openLabelsWrapper) {
-            setOpenLabelsWrapper(false);
-            return;
-        }
-        setOpenLabelsWrapper(true);
-        try {
-            const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-            if (instanceData.data && instanceData.data.instances_available.length > 0) {
-                const availableInstancesTmp = instanceData.data.instances_available
-                    .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
-                setAvailableInstances(availableInstancesTmp);
-                setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
-                setUseRawRequests(false);
-            } else {
-                // User can use raw resource requests or use any instance
-                let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
-                if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
-                    availableInstancesTmp = availableInstancesTmp.data
-                        .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
-                    setAvailableInstances(availableInstancesTmp);
-                    if (instanceData.data.default_instance != null &&
-                        instanceData.data.default_instance.label != null) {
-                        setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
-                    } else {
-                        setInstance(availableInstancesTmp[0]);
-                    }
-                    setUseRawRequests(false);
-                } else {
-                    setUseRawRequests(true);
-                }
-            }
-            setInstancesLoaded(true);
-        }
-        catch (err) {
-            setSubmissionErrorMsg(`An error occurred fetching instances. Error message: ${getResponseError(err)}.`);
-            return;
-        }
-    }
     const updateModelFiles = useCallback(acceptedFiles => {
         if (modelName === "") {
             setModelName(`${acceptedFiles[0].name.split(".")[0]}.gms`);
@@ -329,6 +327,146 @@ const JobSubmissionForm = props => {
                         <div className="row">
                             <div className="col-md-6 col-12">
                                 <fieldset disabled={isSubmitting}>
+                                    {serverInfo && serverInfo.in_kubernetes === true &&
+                                        <div id="labelsWrapperContent">
+                                            <ClipLoader loading={!instancesLoaded} />
+                                            {instancesLoaded && availableInstances.length > 0 &&
+                                                <div className="form-check mb-3">
+                                                    <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
+                                                        id="useRawRequests" />
+                                                    <label className="form-check-label" htmlFor="useRawRequests">Use raw resource requests?</label>
+                                                </div>}
+                                            <div style={{
+                                                display: !useRawRequests ? "block" : "none"
+                                            }}>
+                                                <div className="form-group">
+                                                    <label htmlFor="instance">
+                                                        Select Instance
+                                                    </label>
+                                                    <Select
+                                                        id="instance"
+                                                        isClearable={false}
+                                                        value={instance}
+                                                        isSearchable={true}
+                                                        onChange={selected => setInstance(selected)}
+                                                        options={availableInstances
+                                                            .sort((a, b) => ('' + a.label).localeCompare(b.label))}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div style={{
+                                                display: useRawRequests ? "block" : "none"
+                                            }}>
+                                                <div className="form-group">
+                                                    <label htmlFor="cpuReq">
+                                                        Required CPU Units (vCPU/Core, Hyperthread)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        className={`form-control${validCpuReq ? '' : ' is-invalid'}`}
+                                                        id="cpuReq"
+                                                        step="any"
+                                                        min="0"
+                                                        value={cpuReq}
+                                                        onChange={e => {
+                                                            if (!e.target.value) {
+                                                                setValidCpuReq(true);
+                                                                setCpuReq("");
+                                                                return;
+                                                            }
+                                                            const val = parseFloat(e.target.value);
+                                                            if (isNaN(val) || !isFinite(val)) {
+                                                                setValidCpuReq(false);
+                                                                setCpuReq(e.target.value);
+                                                                return;
+                                                            }
+                                                            setValidCpuReq(true);
+                                                            setCpuReq(val);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="memReq">
+                                                        Required Memory Units (MiB)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        className={`form-control${validMemReq ? '' : ' is-invalid'}`}
+                                                        id="memReq"
+                                                        min="0"
+                                                        value={memReq}
+                                                        onChange={e => {
+                                                            if (!e.target.value) {
+                                                                setValidMemReq(true);
+                                                                setMemReq("");
+                                                                return;
+                                                            }
+                                                            const val = parseFloat(e.target.value);
+                                                            if (isNaN(val) || !isFinite(val)) {
+                                                                setValidMemReq(false);
+                                                                setMemReq(e.target.value);
+                                                                return;
+                                                            }
+                                                            setValidMemReq(true);
+                                                            setMemReq(val);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="wsReq">
+                                                        Required Workspace Size (MiB)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        className={`form-control${validWsReq ? '' : ' is-invalid'}`}
+                                                        id="wsReq"
+                                                        min="0"
+                                                        value={wsReq}
+                                                        onChange={e => {
+                                                            if (!e.target.value) {
+                                                                setValidWsReq(true);
+                                                                setWsReq("");
+                                                                return;
+                                                            }
+                                                            const val = parseFloat(e.target.value);
+                                                            if (isNaN(val) || !isFinite(val)) {
+                                                                setValidWsReq(false);
+                                                                setWsReq(e.target.value);
+                                                                return;
+                                                            }
+                                                            setValidWsReq(true);
+                                                            setWsReq(val);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="tolerations">
+                                                        Tolerations (comma-separated)
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="tolerations"
+                                                        autoComplete="on"
+                                                        value={tolerations}
+                                                        onChange={e => setTolerations(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="nodeSelectors">
+                                                        Node Selectors (comma-separated)
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="nodeSelectors"
+                                                        autoComplete="on"
+                                                        value={nodeSelectors}
+                                                        onChange={e => setNodeSelectors(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>}
                                     <div className="form-group">
                                         <label htmlFor="namespace">
                                             Select a Namespace
@@ -411,13 +549,7 @@ const JobSubmissionForm = props => {
                                 <fieldset disabled={isSubmitting}>
                                     <Button
                                         variant="link"
-                                        onClick={() => {
-                                            if (openAdvancedOptions) {
-                                                return setOpenAdvancedOptions(false);
-                                            }
-                                            loadInstanceData()
-                                            setOpenAdvancedOptions(true)
-                                        }}
+                                        onClick={() => setOpenAdvancedOptions(prevState => !prevState)}
                                         aria-expanded={openAdvancedOptions}
                                     >
                                         Advanced Options
@@ -514,146 +646,6 @@ const JobSubmissionForm = props => {
                                             </div>
                                             <JobAccessGroupsSelector namespace={namespace} value={accessGroups} onChange={setAccessGroups} hideIfNoGroupsAvailable={true} />
                                             <InexJSONSelector onChangeHandler={e => setInexJSON(e)} />
-                                            {serverInfo && serverInfo.in_kubernetes === true &&
-                                                <div id="labelsWrapperContent">
-                                                    <ClipLoader loading={!instancesLoaded} />
-                                                    {instancesLoaded && availableInstances.length > 0 &&
-                                                        <div className="form-check mb-3">
-                                                            <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
-                                                                id="useRawRequests" />
-                                                            <label className="form-check-label" htmlFor="useRawRequests">Use raw resource requests?</label>
-                                                        </div>}
-                                                    <div style={{
-                                                        display: !useRawRequests ? "block" : "none"
-                                                    }}>
-                                                        <div className="form-group">
-                                                            <label htmlFor="instance">
-                                                                Select Instance
-                                                            </label>
-                                                            <Select
-                                                                id="instance"
-                                                                isClearable={false}
-                                                                value={instance}
-                                                                isSearchable={true}
-                                                                onChange={selected => setInstance(selected)}
-                                                                options={availableInstances
-                                                                    .sort((a, b) => ('' + a.label).localeCompare(b.label))}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div style={{
-                                                        display: useRawRequests ? "block" : "none"
-                                                    }}>
-                                                        <div className="form-group">
-                                                            <label htmlFor="cpuReq">
-                                                                Required CPU Units (vCPU/Core, Hyperthread)
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                className={`form-control${validCpuReq ? '' : ' is-invalid'}`}
-                                                                id="cpuReq"
-                                                                step="any"
-                                                                min="0"
-                                                                value={cpuReq}
-                                                                onChange={e => {
-                                                                    if (!e.target.value) {
-                                                                        setValidCpuReq(true);
-                                                                        setCpuReq("");
-                                                                        return;
-                                                                    }
-                                                                    const val = parseFloat(e.target.value);
-                                                                    if (isNaN(val) || !isFinite(val)) {
-                                                                        setValidCpuReq(false);
-                                                                        setCpuReq(e.target.value);
-                                                                        return;
-                                                                    }
-                                                                    setValidCpuReq(true);
-                                                                    setCpuReq(val);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="memReq">
-                                                                Required Memory Units (MiB)
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                className={`form-control${validMemReq ? '' : ' is-invalid'}`}
-                                                                id="memReq"
-                                                                min="0"
-                                                                value={memReq}
-                                                                onChange={e => {
-                                                                    if (!e.target.value) {
-                                                                        setValidMemReq(true);
-                                                                        setMemReq("");
-                                                                        return;
-                                                                    }
-                                                                    const val = parseFloat(e.target.value);
-                                                                    if (isNaN(val) || !isFinite(val)) {
-                                                                        setValidMemReq(false);
-                                                                        setMemReq(e.target.value);
-                                                                        return;
-                                                                    }
-                                                                    setValidMemReq(true);
-                                                                    setMemReq(val);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="wsReq">
-                                                                Required Workspace Size (MiB)
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                className={`form-control${validWsReq ? '' : ' is-invalid'}`}
-                                                                id="wsReq"
-                                                                min="0"
-                                                                value={wsReq}
-                                                                onChange={e => {
-                                                                    if (!e.target.value) {
-                                                                        setValidWsReq(true);
-                                                                        setWsReq("");
-                                                                        return;
-                                                                    }
-                                                                    const val = parseFloat(e.target.value);
-                                                                    if (isNaN(val) || !isFinite(val)) {
-                                                                        setValidWsReq(false);
-                                                                        setWsReq(e.target.value);
-                                                                        return;
-                                                                    }
-                                                                    setValidWsReq(true);
-                                                                    setWsReq(val);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="tolerations">
-                                                                Tolerations (comma-separated)
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="tolerations"
-                                                                autoComplete="on"
-                                                                value={tolerations}
-                                                                onChange={e => setTolerations(e.target.value)}
-                                                            />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="nodeSelectors">
-                                                                Node Selectors (comma-separated)
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="nodeSelectors"
-                                                                autoComplete="on"
-                                                                value={nodeSelectors}
-                                                                onChange={e => setNodeSelectors(e.target.value)}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>}
                                         </div>
                                     </Collapse>
                                 </fieldset>
