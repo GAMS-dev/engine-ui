@@ -1,10 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import { AlertContext } from "./Alert";
 import { isActiveJob, getResponseError } from "./util";
 
 const TerminateJobButton = props => {
     const { token, status, server, setRefresh } = props;
+
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     const [, setAlertMsg] = useContext(AlertContext);
 
@@ -28,10 +32,28 @@ const TerminateJobButton = props => {
     return (
         <>
             {isActiveJob(status) &&
-                (status === -2 ?
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob(true)}>Hard Kill</button> :
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => terminateJob()}>Cancel</button>
-                )}
+                <button className="btn btn-sm btn-outline-danger"
+                    onClick={() => setShowConfirmDialog(true)}>
+                    {status === -2 ? 'Hard Kill' : 'Cancel'} </button>}
+            <Modal show={showConfirmDialog} onHide={() => setShowConfirmDialog(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Please Confirm</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to cancel this job? This cannot be undone!
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirmDialog(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={() => {
+                        setShowConfirmDialog(false);
+                        terminateJob(status === -2);
+                    }}>
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 };
