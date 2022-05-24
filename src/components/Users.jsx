@@ -234,7 +234,7 @@ const Users = props => {
           </Modal.Header>
           <Modal.Body>
             <fieldset disabled={isSubmitting}>
-              Are you sure you want to delete this {deleteInvitation ? 'invitation' : 'user'}? This cannot be undone!
+              Are you sure you want to remove the {deleteInvitation ? 'invitation' : 'user'}: <code>{userToDelete}</code>? This cannot be undone!
               {!deleteInvitation && <div className="form-check mt-3">
                 <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
                   id="deleteData" />
