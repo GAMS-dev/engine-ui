@@ -59,7 +59,7 @@ const WebhooksActionsButtonGroup = props => {
                         <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                             {submissionErrorMsg}
                         </div>
-                        <p>Are you sure you want to remove the webhook(url: <code>{url}</code>) for the event(s): <code>{events}</code >? This cannot be undone!</p>
+                        <p>Are you sure you want to remove the webhook (url: <code>{url}</code>) for the event(s): <code>{events}</code >? This cannot be undone!</p>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setShowConfirmDialog(false)}>

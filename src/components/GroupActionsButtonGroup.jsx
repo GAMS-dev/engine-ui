@@ -54,7 +54,7 @@ const GroupActionsButtonGroup = props => {
                                     <Modal.Title>Please Confirm</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    Are you sure you want to delete the group: '{id}' from the namespace: '{namespace.name}'? This cannot be undone!
+                                    Are you sure you want to delete the group: <code>{id}</code> from the namespace: <code>{namespace.name}</code>? This cannot be undone!
                                 </Modal.Body>
                                 <Modal.Footer>
                                     <Button variant="secondary" onClick={() => setShowDeleteDialog(false)}>

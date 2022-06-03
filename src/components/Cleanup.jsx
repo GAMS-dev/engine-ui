@@ -69,10 +69,11 @@ const Cleanup = () => {
             displayer: e => <TimeDisplay time={e} />
         },
         {
-            field: "id,type",
+            field: "id,type,username",
             column: "Actions",
-            displayer: (token, type) => <CleanupActionsButtonGroup
+            displayer: (token, type, username) => <CleanupActionsButtonGroup
                 token={token}
+                username={username}
                 type={type}
                 setDataToRemove={setDataToRemove}
                 setShowDeleteConfirmDialog={setShowDeleteConfirmDialog} />
@@ -298,7 +299,7 @@ const Cleanup = () => {
                     <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                         {submissionErrorMsg}
                     </div>
-                    Are you sure you want to delete this data? This cannot be undone!
+                    Are you sure you want to delete the data of job with token: <code>{dataToRemove.length ? dataToRemove[0].token: ''}</code> (user: <code>{dataToRemove.length? dataToRemove[0].username: ''}</code>) data? This cannot be undone!
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseDeleteConfirmDialog}>

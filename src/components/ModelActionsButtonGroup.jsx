@@ -58,7 +58,7 @@ const ModelActionsButtonGroup = props => {
                   <Modal.Title>Please Confirm</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  Are you sure you want to delete the model: '{id}' from the namespace: '{namespace.name}'? This cannot be undone!
+                  Are you sure you want to delete the model: <code>{id}</code> from the namespace: <code>{namespace.name}</code>? This cannot be undone!
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={() => setShowDeleteModelDialog(false)}>
