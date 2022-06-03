@@ -144,7 +144,8 @@ const Users = props => {
         }
         axios
           .get(`${server}/users/invitation`, {
-            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" }
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" },
+            params: {"everyone": roles && roles.includes("admin")}
           })
           .then(resInv => {
             if (resInv.status !== 200) {
