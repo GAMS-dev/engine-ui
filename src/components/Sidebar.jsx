@@ -18,15 +18,15 @@ const SidebarRaw = props => {
         <ul className="nav sidebar-nav">
           <li className="nav-item">
             <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users",
-              "/groups", "/cleanup", "/licenses", "/usage", "/instances", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+              "/groups", "/nsusers", "/cleanup", "/licenses", "/usage", "/instances", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/models" className={`nav-link nav-block${["/models", "/groups"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
+            <Link to="/models" className={`nav-link nav-block${["/models", "/groups", "/nsusers"].filter(el => pathname.startsWith(el)).length > 0 ? " active" : ""}`}>
               <Package className="feather" />
-              <span className="nav-link-text">Models</span>
+              <span className="nav-link-text">Namespaces</span>
             </Link>
           </li>
           <li className="nav-item">

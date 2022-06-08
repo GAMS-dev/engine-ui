@@ -55,7 +55,7 @@ const UserActionsButtonGroup = props => {
         <Link
           to={`/users/${username}/usage`}
           className="btn btn-sm btn-outline-info">Usage</Link>}
-      {(isAdmin || (isInviter && username !== me)) && username !== "admin" && (
+      {(isAdmin || (isInviter && username !== me)) && username !== "admin" && setUserToDelete != null && (
         username === "" ?
           <>
             {window.isSecureContext && <div>

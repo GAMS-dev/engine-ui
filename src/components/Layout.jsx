@@ -101,7 +101,7 @@ const Layout = () => {
                 <Route exact path="/groups/:namespace/:label">
                   <GroupMembers />
                 </Route>
-                <Route exact path={["/models/:selectedNs?", "/groups/:selectedNs?"]}>
+                <Route exact path={["/models/:selectedNs?", "/groups/:selectedNs?", "/nsusers/:selectedNs?"]}>
                   <Models />
                 </Route>
                 {(roles && roles.includes('admin')) &&

@@ -13,6 +13,7 @@ import axios from "axios";
 import AddUserGroupModal from "./AddUserGroupModal";
 import GroupActionsButtonGroup from "./GroupActionsButtonGroup";
 import { Tab, Tabs } from "react-bootstrap";
+import UserActionsButtonGroup from "./UserActionsButtonGroup";
 
 const Models = () => {
   const location = useLocation();
@@ -24,10 +25,12 @@ const Models = () => {
 
   const [refresh, setRefresh] = useState(0);
   const [refreshModels, setRefreshModels] = useState(0);
-  const [tabSelected, setTabSelected] = useState(location.pathname.startsWith("/models") ? "models" : "groups");
+  const [tabSelected, setTabSelected] = useState(location.pathname.startsWith("/models") ? "models" :
+    (location.pathname.startsWith("/nsusers") ? "nsusers" : "groups"));
   const [isLoading, setIsLoading] = useState(true);
   const [models, setModels] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
+  const [users, setUsers] = useState([]);
   const [namespace, setNamespace] = useState({ name: "", permission: 0 });
   const [availableNamespaces, setAvailableNamespaces] = useState([]);
   const [showGroupModal, setShowGroupModal] = useState(false);
@@ -85,11 +88,6 @@ const Models = () => {
       axios
         .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`)
         .then(res => {
-          if (res.status !== 200) {
-            setAlertMsg("An error occurred while retrieving user groups. Please try again later.");
-            setIsLoading(false);
-            return;
-          }
           const groupsTmp = res.data
             .map(group => ({
               id: group.label,
@@ -106,16 +104,35 @@ const Models = () => {
           setAlertMsg(`Problems while retrieving user groups. Error message: ${getResponseError(err)}.`);
           setIsLoading(false);
         });
+    } else if (tabSelected === "nsusers") {
+      history.push("/nsusers/" + encodeURIComponent(namespace.name));
+      axios
+        .get(`${server}/namespaces/`, {
+          headers: { "X-Fields": "name,permissions" }
+        })
+        .then(res => {
+          console.log(res.data
+            .filter(ns => ns.name === namespace.name))
+          setUsers(res.data
+            .filter(ns => ns.name === namespace.name)[0].permissions
+            .filter(user => user.permission > 0)
+            .map(user => {
+              const newUserInfo = user;
+              newUserInfo.id = newUserInfo.username;
+              return newUserInfo;
+            })
+            .sort((a, b) => ('' + a.username).localeCompare(b.username)));
+          setIsLoading(false);
+        })
+        .catch(err => {
+          setAlertMsg(`Problems while retrieving users in namespace. Error message: ${getResponseError(err)}.`);
+          setIsLoading(false);
+        });
     } else {
       history.push("/models/" + encodeURIComponent(namespace.name));
       axios
         .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}`)
         .then(res => {
-          if (res.status !== 200) {
-            setAlertMsg("An error occurred while retrieving registered models. Please try again later.");
-            setIsLoading(false);
-            return;
-          }
           if (res.data.length > 0) {
             setModels(res.data
               .map(model => {
@@ -160,7 +177,7 @@ const Models = () => {
   return (
     <>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 className="h2">Models</h1>
+        <h1 className="h2">Namespaces</h1>
       </div>
       <div className="row">
         <div className="col-md-4 col-12 mt-1 font-weight-bold">
@@ -344,6 +361,44 @@ const Models = () => {
                   idFieldName="id"
                   sortedAsc={true}
                   sortedCol="label"
+                />
+              </Tab>
+              <Tab eventKey="nsusers" title="Users">
+                <Table
+                  data={users}
+                  noDataMsg="No User Found"
+                  isLoading={isLoading}
+                  displayFields={[{
+                    field: "id,username",
+                    column: "User",
+                    sorter: "alphabetical",
+                    displayer: user =>
+                      user === username ?
+                        <>
+                          {user}
+                          <sup>
+                            <span className="badge badge-pill badge-primary ml-1">me</span>
+                          </sup>
+                        </> : user
+                  },
+                  {
+                    field: "permission",
+                    column: "Permissions",
+                    sorter: "numerical",
+                    displayer: Number
+                  },
+                  {
+                    field: "username",
+                    column: "Actions",
+                    displayer: name => <UserActionsButtonGroup
+                      username={name}
+                      me={username}
+                      isAdmin={roles && roles.includes("admin")}
+                      isInviter={roles && roles.includes("inviter")} />
+                  }]}
+                  idFieldName="id"
+                  sortedAsc={true}
+                  sortedCol="id"
                 />
               </Tab>
             </Tabs> : "No Namespace Found"}

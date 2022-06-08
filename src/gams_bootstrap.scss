@@ -1,6 +1,8 @@
-$theme-colors: ("primary": #f39619,
+$theme-colors: (
+  "primary": #f39619,
   "secondary": #494d55,
-  "info": #17a2b8);
+  "info": #17a2b8
+);
 
 $border-color: #adb5bd;
 $border-radius: 0;
@@ -147,7 +149,7 @@ body {
 
 @media only screen and (min-width: 768px) {
   .sidebar-container {
-    width: 140px;
+    width: 155px;
   }
 
   .sidebar {
