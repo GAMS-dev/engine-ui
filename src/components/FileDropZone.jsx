@@ -29,13 +29,13 @@ const rejectStyle = {
     borderColor: '#ff1744'
 };
 
-const FileDropZone = ({ label, onDrop }) => {
+const FileDropZone = ({ label, onDrop, accept = null, multiple = true }) => {
     const { acceptedFiles,
         getRootProps,
         getInputProps,
         isDragActive,
         isDragAccept,
-        isDragReject } = useDropzone({ onDrop });
+        isDragReject } = useDropzone({ onDrop, accept, multiple });
 
     const files = acceptedFiles.map(file => (
         <li key={file.path}>

@@ -305,8 +305,11 @@ const JobSubmissionForm = props => {
         setModelFiles([...acceptedFiles]);
     }, [modelName]);
 
-    const updatDataFiles = useCallback(acceptedFiles => {
+    const updateDataFiles = useCallback(acceptedFiles => {
         setModelData([...acceptedFiles])
+    }, []);
+    const updateHcFile = useCallback(acceptedFiles => {
+        setHcFile([...acceptedFiles][0])
     }, []);
 
     return (
@@ -527,21 +530,13 @@ const JobSubmissionForm = props => {
                                     <div className="form-group">
                                         <FileDropZone
                                             label="Drop data files here (optional)"
-                                            onDrop={updatDataFiles} />
+                                            onDrop={updateDataFiles} />
                                     </div>
                                     {newHcJob &&
                                         <div className="form-group">
-                                            <div className="custom-file">
-                                                <input type="file" className="custom-file-input"
-                                                    id="hcFile"
-                                                    accept="application/JSON"
-                                                    onChange={e => setHcFile(e.target.files[0])}
-                                                    required
-                                                />
-                                                <label className="custom-file-label" htmlFor="modelFiles">
-                                                    {hcFile ? hcFile.name : "Hypercube description file..."}
-                                                </label>
-                                            </div>
+                                            <FileDropZone
+                                                label="Drop Hypercube description file here"
+                                                onDrop={updateHcFile} multiple={false} accept={["application/JSON"]} />
                                         </div>}
                                 </fieldset>
                             </div>
