@@ -285,6 +285,11 @@ body {
   white-space: pre-line
 }
 
+.job-timings-info-wrapper {
+  max-height: 290px;
+  overflow: auto;
+}
+
 .job-timings-info-bar {
   width: 100%;
   height: 25px;

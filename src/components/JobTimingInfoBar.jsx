@@ -8,7 +8,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { Tooltip, OverlayTrigger } from "react-bootstrap";
 import { ServerInfoContext } from "../ServerInfoContext";
 
-const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDelayedRefresh }) => {
+const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDelayedRefresh, isHcJob }) => {
     const [{ jwt, server }] = useContext(AuthContext);
     const [serverInfo] = useContext(ServerInfoContext);
     const [, setAlertMsg] = useContext(AlertContext);
@@ -27,9 +27,9 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
                 username: jobOwner
             }
             const reqHeaders = {};
-            if (token.startsWith("hc:")) {
-                setHasError(true);
-                return;
+            if (isHcJob === true) {
+                reqParams.hypercube_token = token;
+                reqHeaders["X-Fields"] = "hypercube_job_usage";
             } else {
                 reqParams.token = token;
                 reqHeaders["X-Fields"] = "job_usage";
@@ -40,7 +40,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
                     headers: reqHeaders
                 })
                 .then(res => {
-                    const data = res.data.job_usage[0];
+                    const data = isHcJob ? res.data.hypercube_job_usage[0] : res.data.job_usage[0];
                     if (data.submitted == null) {
                         setHasError(true);
                         setAlertMsg("A problem occurred while retrieving job progress info.");
@@ -53,55 +53,58 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
                     } else {
                         totalDuration = (new Date() - new Date(data.submitted)) / 1000;
                     }
-                    let timingsTmp;
-                    if (data.times.length > 0) {
-                        const intervalDuration = (new Date(data.times[0].start) - new Date(data.submitted)) / 1000;
-                        timingsTmp = [{
-                            desc: 'Queued',
-                            className: 'job-timings-info-queued',
-                            duration: intervalDuration,
-                            width: intervalDuration / totalDuration * 100
-                        }].concat(data.times.map((interval, idx) => {
-                            let intervalDuration;
-                            if (interval.finish == null) {
-                                if (data.times.length > idx + 1) {
-                                    // job was restarted
-                                    intervalDuration = (new Date(data.times[idx + 1].start) - new Date(interval.start)) / 1000;
-                                } else if (isFinishedTmp) {
-                                    // job is finished, but 'finish' was not set for interval
-                                    intervalDuration = (new Date(data.finished) - new Date(interval.start)) / 1000;
+                    const timingsTmp = (isHcJob ? data.jobs.map(el => el.times) : [data.times]).map(jobTimes => {
+                        let jobTimingTmp;
+                        if (jobTimes.length > 0) {
+                            const intervalDuration = (new Date(jobTimes[0].start) - new Date(data.submitted)) / 1000;
+                            jobTimingTmp = [{
+                                desc: 'Queued',
+                                className: 'job-timings-info-queued',
+                                duration: intervalDuration,
+                                width: intervalDuration / totalDuration * 100
+                            }].concat(jobTimes.map((interval, idx) => {
+                                let intervalDuration;
+                                if (interval.finish == null) {
+                                    if (jobTimes.length > idx + 1) {
+                                        // job was restarted
+                                        intervalDuration = (new Date(jobTimes[idx + 1].start) - new Date(interval.start)) / 1000;
+                                    } else if (isFinishedTmp) {
+                                        // job is finished, but 'finish' was not set for interval
+                                        intervalDuration = (new Date(data.finished) - new Date(interval.start)) / 1000;
+                                    } else {
+                                        // job is still running
+                                        intervalDuration = (new Date() - new Date(interval.start)) / 1000;
+                                        setJobStatus(1);
+                                    }
                                 } else {
-                                    // job is still running
-                                    intervalDuration = (new Date() - new Date(interval.start)) / 1000;
-                                    setJobStatus(1);
+                                    intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;
                                 }
-                            } else {
-                                intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;
+                                return {
+                                    desc: 'Running',
+                                    className: 'job-timings-info-running',
+                                    duration: intervalDuration,
+                                    width: intervalDuration / totalDuration * 100
+                                }
+                            }));
+                            if (isFinishedTmp && jobTimes[jobTimes.length - 1].finish != null) {
+                                const intervalDuration = (new Date(data.finished) - new Date(jobTimes[jobTimes.length - 1].finish)) / 1000;
+                                jobTimingTmp.push({
+                                    desc: 'Finalizing',
+                                    className: 'job-timings-info-finalizing',
+                                    duration: intervalDuration,
+                                    width: intervalDuration / totalDuration * 100
+                                })
                             }
-                            return {
-                                desc: 'Running',
-                                className: 'job-timings-info-running',
-                                duration: intervalDuration,
-                                width: intervalDuration / totalDuration * 100
-                            }
-                        }));
-                        if (isFinishedTmp && data.times[data.times.length - 1].finish != null) {
-                            const intervalDuration = (new Date(data.finished) - new Date(data.times[data.times.length - 1].finish)) / 1000;
-                            timingsTmp.push({
-                                desc: 'Finalizing',
-                                className: 'job-timings-info-finalizing',
-                                duration: intervalDuration,
-                                width: intervalDuration / totalDuration * 100
-                            })
+                        } else {
+                            jobTimingTmp = [{
+                                desc: 'Queued',
+                                className: 'job-timings-info-queued',
+                                duration: totalDuration,
+                                width: 100
+                            }];
                         }
-                    } else {
-                        timingsTmp = [{
-                            desc: 'Queued',
-                            className: 'job-timings-info-queued',
-                            duration: totalDuration,
-                            width: 100
-                        }];
-                    }
+                        return jobTimingTmp;
+                    });
                     setTimingData(timingsTmp);
                     if (isFinishedTmp) {
                         setIsFinished(true);
@@ -137,37 +140,39 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
         }
     }, [jwt, server, token, setIsFinished, isFinished,
         refresh, setRefreshJob, setTimingData, setAlertMsg, jobOwner,
-        setHasError, setJobStatus, serverInfo]);
+        setHasError, setJobStatus, serverInfo, isHcJob]);
 
-    return (
-        timingData == null ?
+    return <div className="job-timings-info-wrapper">
+        {timingData == null ?
             (hasError ?
                 <span className="badge badge-danger">
                     Problems fetching timing data.
                 </span> :
                 <ClipLoader />) :
-            <div className="job-timings-info-bar">
-                {timingData.map((timingObj, idx) => {
-                    const durationSeconds = `${Math.round(timingObj.duration)}s`;
-                    const durationDisplayed = timingObj.duration > 3600 ?
-                        `${Math.round(timingObj.duration / 360) / 10}h` : durationSeconds;
-                    return <OverlayTrigger
-                        key={`jobTimings${idx}`}
-                        placement="top"
-                        overlay={(props) =>
-                            <Tooltip id={`jobTimingsTT${idx}`} {...props}>
-                                {`${timingObj.desc}: ${durationDisplayed} (${Math.round(timingObj.width)}%)`}
-                            </Tooltip>
-                        }
-                    >
-                        <div
-                            className={timingObj.className} style={{ width: `${Math.floor(timingObj.width * 100) / 100}%` }}>
-                            {timingObj.width > 10 ? durationSeconds : ''}
-                        </div>
-                    </OverlayTrigger>
-                })}
-            </div>
-    );
+            timingData.map((jobTimingData, idx) =>
+                <div key={`jobTiminBar${idx}`} className="job-timings-info-bar">
+                    {jobTimingData.map((timingObj, idx) => {
+                        const durationSeconds = `${Math.round(timingObj.duration)}s`;
+                        const durationDisplayed = timingObj.duration > 3600 ?
+                            `${Math.round(timingObj.duration / 360) / 10}h` : durationSeconds;
+                        return <OverlayTrigger
+                            key={`jobTimings${idx}`}
+                            placement="top"
+                            overlay={(props) =>
+                                <Tooltip id={`jobTimingsTT${idx}`} {...props}>
+                                    {`${timingObj.desc}: ${durationDisplayed} (${Math.round(timingObj.width)}%)`}
+                                </Tooltip>
+                            }
+                        >
+                            <div
+                                className={timingObj.className} style={{ width: `${Math.floor(timingObj.width * 100) / 100}%` }}>
+                                {timingObj.width > 10 ? durationSeconds : ''}
+                            </div>
+                        </OverlayTrigger>
+                    })}
+                </div>
+            )}
+    </div>
 };
 
 export default JobTimingInfoBar;

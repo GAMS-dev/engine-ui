@@ -76,6 +76,21 @@ const JobRespInfoTable = props => {
                 </button>}
             </td>
           </tr>
+          <tr>
+            <th>Timing</th>
+            <td>
+              {job.user.deleted ?
+                <span className="badge badge-danger">
+                  Timing information not available.
+                </span> :
+                <JobTimingInfoBar
+                  token={job.token}
+                  isHcJob={isHcJob}
+                  jobOwner={job.user.username}
+                  setRefreshJob={setRefreshJob}
+                  setJobStatus={setJobStatus} />}
+            </td>
+          </tr>
           {isHcJob ?
             <>
               <tr>
@@ -95,20 +110,6 @@ const JobRespInfoTable = props => {
                 </tr>}
             </> :
             <>
-              <tr>
-                <th>Timing</th>
-                <td>
-                  {job.user.deleted ?
-                    <span className="badge badge-danger">
-                      Timing information not available.
-                    </span> :
-                    <JobTimingInfoBar
-                      token={job.token}
-                      jobOwner={job.user.username}
-                      setRefreshJob={setRefreshJob}
-                      setJobStatus={setJobStatus} />}
-                </td>
-              </tr>
               <tr>
                 <th>Process Status</th>
                 <td>{job.process_status !== null ? job.process_status : "-"}</td>
