@@ -127,6 +127,9 @@ const Usage = () => {
                     username: username,
                     from_datetime: startDate,
                     to_datetime: endDate
+                },
+                headers: {
+                    "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}}"
                 }
             })
             .then(res => {
@@ -283,7 +286,7 @@ const Usage = () => {
                     if (!(dataDisaggregatedTmp[i].username in chartEvents)) {
                         chartEvents[dataDisaggregatedTmp[i].username] = [];
                     }
-                    const multiplier = (dataDisaggregatedTmp[i].labels && dataDisaggregatedTmp[i].labels.multiplier) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
+                    const multiplier = (dataDisaggregatedTmp[i].labels != null && dataDisaggregatedTmp[i].labels.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
                     if ('times' in dataDisaggregatedTmp[i]) {
                         // normal job
                         chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier));
