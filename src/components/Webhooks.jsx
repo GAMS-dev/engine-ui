@@ -23,6 +23,12 @@ const Webhooks = props => {
     const [{ jwt, server, roles }] = useContext(AuthContext);
     const [displayFields] = useState([
         {
+            field: "username",
+            column: "User",
+            sorter: "alphabetical",
+            displayer: String
+        },
+        {
             field: "url",
             column: "Payload URL",
             sorter: "alphabetical",
