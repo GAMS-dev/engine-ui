@@ -27,6 +27,7 @@ const Jobs = () => {
   const [sortAscHcJobs, setSortAscHcJobs] = useState(false);
   const [hcJobData, setHcJobData] = useState([]);
   const [filterActive, setFilterActive] = useState(false);
+  const [resetPageNumber, setResetPageNumber] = useState(false);
   const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
@@ -81,6 +82,8 @@ const Jobs = () => {
         <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
     }].concat(displayFieldsDefault) :
     displayFieldsDefault);
+  
+  const [displayFieldKeys,] = useState(displayFields.map(e => e.field));
 
   const statusCodeReducer = (accumulator, currentValue) => {
     accumulator[currentValue.status_code] = currentValue.description;
@@ -101,7 +104,7 @@ const Jobs = () => {
             order_asc: sortAscJobs,
             show_only_active: filterActive
           },
-          headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
+          headers: { "X-Fields":  displayFieldKeys.join(",")}
         })
         .then(res => {
           setTotalJobs(res.data.count);
@@ -123,7 +126,7 @@ const Jobs = () => {
             order_asc: sortAscHcJobs,
             show_only_active: filterActive
           },
-          headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
+          headers: { "X-Fields": displayFieldKeys.join(",") }
         })
         .then(resHc => {
           setTotalHcJobs(resHc.data.count);
@@ -135,9 +138,9 @@ const Jobs = () => {
           setIsLoading(false);
         });
     }
-  }, [jwt, server, isInviter, filterActive, refresh, displayFields, setAlertMsg,
+  }, [jwt, server, isInviter, filterActive, refresh, setAlertMsg,
     currentPageJobs, currentPageHcJobs, sortedColJobs, sortedColHcJobs, sortAscJobs,
-    sortAscHcJobs, tabSelected]);
+    sortAscHcJobs, tabSelected, displayFieldKeys]);
 
   //fetch status codes
   useEffect(() => {
@@ -182,6 +185,8 @@ const Jobs = () => {
               type="button"
               className="btn btn-sm btn-outline-secondary"
               onClick={() => {
+                setResetPageNumber(true);
+                setCurrentPageJobs(1);
                 setFilterActive(currFilterActive => !currFilterActive)
               }}
             >
@@ -226,7 +231,15 @@ const Jobs = () => {
             sortedCol={sortedColJobs}
             total={totalJobs}
             sortedAsc={sortAscJobs}
+            resetPageNumber={resetPageNumber}
             onChange={(currentPage, sortedCol, sortAsc) => {
+              if (resetPageNumber === true) {
+                setResetPageNumber(false);
+                if (currentPage !== 0) {
+                  // will refresh again
+                  return;
+                }
+              }
               setCurrentPageJobs(currentPage + 1)
               setSortedColJobs(sortedCol)
               setSortAscJobs(sortAsc)
@@ -243,7 +256,15 @@ const Jobs = () => {
             sortedCol={sortedColHcJobs}
             total={totalHcJobs}
             sortedAsc={sortAscHcJobs}
+            resetPageNumber={resetPageNumber}
             onChange={(currentPage, sortedCol, sortAsc) => {
+              if (resetPageNumber === true) {
+                setResetPageNumber(false);
+                if (currentPage !== 0) {
+                  // will refresh again
+                  return;
+                }
+              }
               setCurrentPageHcJobs(currentPage + 1)
               setSortedColHcJobs(sortedCol)
               setSortAscHcJobs(sortAsc)

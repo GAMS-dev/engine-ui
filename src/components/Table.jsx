@@ -7,7 +7,7 @@ import { FormControl, Button, InputGroup } from "react-bootstrap";
 import OverlayFilter from "./OverlayFilter";
 
 const Table = props => {
-  const { noDataMsg, isLoading, onChange, total } = props;
+  const { noDataMsg, isLoading, onChange, total, resetPageNumber } = props;
 
   const [currentPage, setCurrentPage] = useState(0);
   const [idFieldName, setIdFieldName] = useState(props.idFieldName);
@@ -22,13 +22,24 @@ const Table = props => {
 
   const [currentFilters, setCurrentFilters] = useState({});
 
-  const noRows = onChange == null ? data.length : total;
+  const [noRows, setNoRows] = useState(onChange == null ? props.data.length : total);
   const rowsPerPage = 10;
-  const noPages = Math.ceil(noRows / rowsPerPage);
+  const [noPages, setNoPages] = useState(Math.ceil(noRows / rowsPerPage));
+
+  useEffect(() => {
+    if (resetPageNumber === true) {
+      setCurrentPage(0);
+    }
+  }, [resetPageNumber])
 
   useEffect(() => {
     setData([...props.data]);
     setDataRaw([...props.data]);
+    const newNoRows = onChange == null ? props.data.length : total;
+    setNoRows(newNoRows);
+    const newNoPages = Math.ceil(newNoRows / rowsPerPage);
+    setNoPages(newNoPages);
+    setCurrentPage(current => Math.max(0, Math.min(current, newNoPages - 1)));
     setSortAsc(props.sortedAsc === true);
     setSortedCol(props.sortedCol);
     setCurrentFilters({});
@@ -36,7 +47,7 @@ const Table = props => {
     setDisplayFields(props.displayFields);
     setRefreshCount(prev => prev + 1);
   }, [props.data, props.sortedAsc, props.sortedCol, props.idFieldName,
-  props.displayFields])
+  props.displayFields, onChange, total])
 
   useEffect(() => {
     if (onChange != null) {
