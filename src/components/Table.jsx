@@ -149,10 +149,11 @@ const Table = props => {
       ...currentFilters
     }
     gotoFirstPage();
+    let newDataTmp = null;
     if (currentFiltersTmp[colName] == null || currentFiltersTmp[colName].length < filterText.length) {
       const filterTextLower = filterText.toLowerCase();
-      setData(data
-        .filter(dataTmp => dataTmp[colName] && dataTmp[colName].toLowerCase().includes(filterTextLower)));
+      newDataTmp = data
+        .filter(dataTmp => dataTmp[colName] && dataTmp[colName].toLowerCase().includes(filterTextLower));
       currentFiltersTmp[colName] = filterText;
     } else {
       if (filterText.length > 0) {
@@ -161,15 +162,20 @@ const Table = props => {
         delete currentFiltersTmp[colName];
       }
       if (Object.keys(currentFiltersTmp).length === 0) {
-        setData(dataRaw);
+        newDataTmp = dataRaw;
       } else {
-        setData(dataRaw
+        newDataTmp = dataRaw
           .filter(dataTmp =>
             Object.keys(currentFiltersTmp).every(colNameTmp => dataTmp[colNameTmp] && dataTmp[colNameTmp].includes(currentFiltersTmp[colNameTmp]))
-          ));
+          );
       }
     }
     setCurrentFilters(currentFiltersTmp);
+    const newNoRows = newDataTmp.length;
+    setNoRows(newNoRows);
+    const newNoPages = Math.ceil(newNoRows / rowsPerPage);
+    setNoPages(newNoPages);
+    setData(newDataTmp);
   }
   return (
     <>
