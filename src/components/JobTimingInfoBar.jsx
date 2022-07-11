@@ -74,7 +74,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
                                     } else {
                                         // job is still running
                                         intervalDuration = (new Date() - new Date(interval.start)) / 1000;
-                                        setJobStatus(1);
+                                        setJobStatus(data.status);
                                     }
                                 } else {
                                     intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;

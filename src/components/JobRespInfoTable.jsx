@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AlertContext } from "./Alert";
 import axios from "axios";
-import { FileText, RefreshCw } from "react-feather";
+import { FileText } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import DownloadLink from "./DownloadLink";
@@ -67,13 +67,6 @@ const JobRespInfoTable = props => {
             <th>Status</th>
             <td>
               {jobStatus in statusCodes ? statusCodes[jobStatus] : jobStatus}
-              &nbsp;
-              {isActiveJob(jobStatus) &&
-                <button className="btn btn-sm btn-warning" onClick={() => setRefreshJob(refreshCnt => ({
-                  refresh: refreshCnt + 1
-                }))}>
-                  <RefreshCw size={18} />
-                </button>}
             </td>
           </tr>
           <tr>
