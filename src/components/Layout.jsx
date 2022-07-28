@@ -141,11 +141,9 @@ const Layout = () => {
                 <Route exact path="/users/:username/usage">
                   <Usage />
                 </Route>
-                {(roles && roles.includes('admin')) &&
-                  <Route exact path="/cleanup">
-                    <Cleanup />
-                  </Route>
-                }
+                <Route exact path="/cleanup">
+                  <Cleanup />
+                </Route>
                 {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
                   <Route exact path="/instances">
                     <Instances />

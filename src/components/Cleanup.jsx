@@ -31,7 +31,7 @@ const Cleanup = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [{ jwt, server }] = useContext(AuthContext);
     const [displayFields] = useState([
         {
             field: "token,type",
@@ -81,10 +81,6 @@ const Cleanup = () => {
     ]);
 
     useEffect(() => {
-        if (!roles.length) {
-            setIsLoading(false);
-            return;
-        }
         setIsLoading(true);
         axios
             .get(`${server}/cleanup/results`, {
@@ -114,7 +110,7 @@ const Cleanup = () => {
                 setAlertMsg(`Problems fetching cleanup information. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
-    }, [jwt, server, roles, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
+    }, [jwt, server, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
 
     const handleCloseDeleteConfirmDialog = () => {
         setSubmissionErrorMsg("");
@@ -206,18 +202,16 @@ const Cleanup = () => {
                             Run Housekeeping
                             <Send width="12px" className="ml-2" />
                         </button>
-                        {roles.length &&
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => {
-                                    setRefresh(refresh + 1);
-                                }}
-                            >
-                                Refresh
-                                <RefreshCw width="12px" className="ml-2" />
-                            </button>
-                        }
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={() => {
+                                setRefresh(refresh + 1);
+                            }}
+                        >
+                            Refresh
+                            <RefreshCw width="12px" className="ml-2" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -299,7 +293,7 @@ const Cleanup = () => {
                     <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                         {submissionErrorMsg}
                     </div>
-                    Are you sure you want to delete the data of job with token: <code>{dataToRemove.length ? dataToRemove[0].token: ''}</code> (user: <code>{dataToRemove.length? dataToRemove[0].username: ''}</code>) data? This cannot be undone!
+                    Are you sure you want to delete the data of job with token: <code>{dataToRemove.length ? dataToRemove[0].token : ''}</code> (user: <code>{dataToRemove.length ? dataToRemove[0].username : ''}</code>) data? This cannot be undone!
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseDeleteConfirmDialog}>

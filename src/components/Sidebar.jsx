@@ -41,21 +41,19 @@ const SidebarRaw = props => {
               <span className="nav-link-text">Webhooks</span>
             </Link>
           </li>}
-          {(roles && roles.find(role => role === "admin") !== undefined) &&
-            <>
-              <li className="nav-item">
-                <Link to="/cleanup" className={`nav-link nav-block${pathname === "/cleanup" ? " active" : ""}`}>
-                  <Archive className="feather" />
-                  <span className="nav-link-text">Cleanup</span>
-                </Link>
-              </li>
-              {props.inKubernetes && <li className="nav-item">
-                <Link to="/instances" className={`nav-link nav-block${pathname.startsWith("/instances") ? " active" : ""}`}>
-                  <Server className="feather" />
-                  <span className="nav-link-text">Instances</span>
-                </Link>
-              </li>}
-            </>
+          <li className="nav-item">
+            <Link to="/cleanup" className={`nav-link nav-block${pathname === "/cleanup" ? " active" : ""}`}>
+              <Archive className="feather" />
+              <span className="nav-link-text">Cleanup</span>
+            </Link>
+          </li>
+          {(props.inKubernetes && roles && roles.find(role => role === "admin") !== undefined) &&
+            <li className="nav-item">
+              <Link to="/instances" className={`nav-link nav-block${pathname.startsWith("/instances") ? " active" : ""}`}>
+                <Server className="feather" />
+                <span className="nav-link-text">Instances</span>
+              </Link>
+            </li>
           }
         </ul>
       </div>
