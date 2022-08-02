@@ -8,7 +8,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { Tooltip, OverlayTrigger } from "react-bootstrap";
 import { ServerInfoContext } from "../ServerInfoContext";
 
-const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDelayedRefresh, isHcJob }) => {
+const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setQueuePosition, setDelayedRefresh, isHcJob }) => {
     const [{ jwt, server }] = useContext(AuthContext);
     const [serverInfo] = useContext(ServerInfoContext);
     const [, setAlertMsg] = useContext(AlertContext);
@@ -45,6 +45,22 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
                         setHasError(true);
                         setAlertMsg("A problem occurred while retrieving job progress info.");
                         return;
+                    }
+                    if (data.status === 0 && serverInfo.in_kubernetes !== true) {
+                        // refresh queue position
+                        axios
+                            .get(isHcJob ? `${server}/hypercube/` : `${server}/jobs/${encodeURIComponent(token)}`, {
+                                params: isHcJob ? {
+                                    hypercube_token: token
+                                } : null,
+                                headers: { "X-Fields": "queue_position" }
+                            })
+                            .then(res => {
+                                setQueuePosition(res.data.queue_position);
+                            })
+                            .catch(err => {
+                                console.error(`A problem occurred while retrieving job queue position. Error message: ${getResponseError(err)}`);
+                            });
                     }
                     let totalDuration;
                     const isFinishedTmp = data.finished != null;
@@ -102,6 +118,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
                                 duration: totalDuration,
                                 width: 100
                             }];
+                            setJobStatus(data.status);
                         }
                         return jobTimingTmp;
                     });
@@ -140,7 +157,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setDel
         }
     }, [jwt, server, token, setIsFinished, isFinished,
         refresh, setRefreshJob, setTimingData, setAlertMsg, jobOwner,
-        setHasError, setJobStatus, serverInfo, isHcJob]);
+        setHasError, setJobStatus, setQueuePosition, serverInfo, isHcJob]);
 
     return <div className="job-timings-info-wrapper">
         {timingData == null ?

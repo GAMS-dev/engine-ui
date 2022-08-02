@@ -15,6 +15,7 @@ const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
   let solveTraceEntries;
   const [jobStatus, setJobStatus] = useState(job.status);
+  const [queuePosition, setQueuePosition] = useState(job.queue_position);
   if (isHcJob) {
     solveTraceEntries = [];
   } else if (job.status >= 10) {
@@ -66,7 +67,8 @@ const JobRespInfoTable = props => {
           <tr>
             <th>Status</th>
             <td>
-              {jobStatus in statusCodes ? statusCodes[jobStatus] : jobStatus}
+              <span>{jobStatus in statusCodes ? statusCodes[jobStatus] : jobStatus}</span>
+              <small>{jobStatus === 0 && queuePosition != null && queuePosition !== -1 ? ` (queue position: ${queuePosition})` : ''}</small>
             </td>
           </tr>
           <tr>
@@ -81,7 +83,8 @@ const JobRespInfoTable = props => {
                   isHcJob={isHcJob}
                   jobOwner={job.user.username}
                   setRefreshJob={setRefreshJob}
-                  setJobStatus={setJobStatus} />}
+                  setJobStatus={setJobStatus}
+                  setQueuePosition={setQueuePosition} />}
             </td>
           </tr>
           {isHcJob ?
