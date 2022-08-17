@@ -9,7 +9,7 @@ import QuotaWidget from "./QuotaWidget";
 
 
 export const LogOutMenu = () => {
-    const [{ username }] = useContext(AuthContext);
+    const [{ username, roles }] = useContext(AuthContext);
     const [serverInfo] = useContext(ServerInfoContext);
     const [{ server }] = useContext(AuthContext);
     const [prefrencesAvailable, setPreferencesAvailable] = useState(false);
@@ -63,6 +63,11 @@ export const LogOutMenu = () => {
                     </> : <Link to={`/users/${username}/change-pass`}
                         className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button d-none d-sm-inline d-md-block">
                         Change password
+                    </Link>}
+                {roles && roles.includes('admin') &&
+                    <Link to={`/administration`}
+                        className="btn nav-link nav-block btn-link btn-sm pt-md-0 pt-3 cp-button mt-1 d-none d-sm-inline d-md-block">
+                        Administration
                     </Link>}
             </li>
         </>

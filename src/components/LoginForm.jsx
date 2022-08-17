@@ -1,9 +1,13 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useCallback, useState } from "react";
+import { randomBytes } from "crypto";
+import { generatePKCEParams } from "./oauth";
 import logo from "../assets/images/logo.svg";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
 import { Redirect, Link } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
+import { getResponseError } from "./util";
+import { useEffect } from "react";
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
 
@@ -20,6 +24,8 @@ const LoginForm = props => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const register = props.register === "true";
 
+  const [oidcAuthConfig, setOidcAuthConfig] = useState([]);
+
   const [login, setLogin] = useContext(AuthContext);
 
   function clearRegisterErrors() {
@@ -27,6 +33,89 @@ const LoginForm = props => {
     setPasswordError(false);
     setConfirmPasswordError(false);
   }
+
+  const loginUser = useCallback(async (jwt) => {
+    if (jwt == null) {
+      return;
+    }
+    try {
+      const reponse = await axios.get(`${server}/users/`, {
+        params: {
+          'everyone': false
+        },
+        headers: {
+          "X-Fields": "username,roles",
+          "Authorization": "Bearer " + jwt
+        }
+      });
+      setIsSubmitting(false);
+      if (reponse.data.length === 1) {
+        setLogin({ jwt, server, roles: reponse.data[0].roles, username: reponse.data[0].username });
+      } else {
+        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+      }
+    } catch (err) {
+      setLoginErrorMsg(`Some error occurred while trying to retrieve user information from Engine. Error message: ${getResponseError(err)}.`);
+      setIsSubmitting(false);
+    }
+  }, [server, setLogin]);
+
+  useEffect(() => {
+    const oauthLogin = async (authParams, code) => {
+      if (code == null) {
+        setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
+        setIsSubmitting(false);
+        return;
+      }
+      try {
+        const params = new URLSearchParams();
+        params.append('grant_type', 'authorization_code');
+        params.append('client_id', authParams.clientId);
+        params.append('redirect_uri', window.location.origin);
+        params.append('code_verifier', authParams.codeVerifier);
+        params.append('code', code);
+        const response = await axios.post(authParams.tokenEndpoint, params);
+        const jwt = response.data.access_token;
+        if (jwt == null) {
+          setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
+          setIsSubmitting(false);
+          return;
+        }
+        loginUser(jwt);
+      } catch (err) {
+        setLoginErrorMsg(`Problems retrieving authentication token from OAuth provider. Error message: ${getResponseError(err)}.`);
+        setIsSubmitting(false);
+      }
+    }
+
+    const fetchAuthProviders = async () => {
+      try {
+        const response = await axios.get(`${server}/auth/providers`);
+        setOidcAuthConfig(response.data.filter(config => Object.keys(config).includes('oidc')).map(config => {
+          const newConfig = config;
+          newConfig.oidc.client_id = '0oa60kyzqqzanyFDF5d7'
+          newConfig.oidc.scopes = ['openid']
+          return newConfig;
+        }))
+      } catch (err) {
+        setLoginErrorMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+      }
+    }
+
+    if (document.location.search.includes('state=')) {
+      setIsSubmitting(true);
+      const searchParams = new URLSearchParams(document.location.search);
+      const authParams = JSON.parse(sessionStorage.getItem('authParams'));
+      sessionStorage.removeItem('authParams');
+      if (authParams != null && authParams.state === searchParams.get('state')) {
+        const code = searchParams.get('code');
+        oauthLogin(authParams, code);
+      } else {
+        setIsSubmitting(false);
+      }
+    }
+    fetchAuthProviders();
+  }, [server, setLogin, loginUser]);
 
 
   function handleLogin() {
@@ -46,33 +135,7 @@ const LoginForm = props => {
           setIsSubmitting(false);
           return;
         }
-        const jwt = res.data.token;
-        axios
-          .get(
-            `${server}/users/`,
-            {
-              params: {
-                username: username
-              },
-              auth: {
-                username,
-                password
-              },
-              headers: { "X-Fields": "roles" }
-            }
-          )
-          .then(res => {
-            setIsSubmitting(false);
-            if (res.status === 200 && res.data.length === 1) {
-              setLogin({ jwt, server, roles: res.data[0].roles, username: username });
-            } else {
-              setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
-            }
-          })
-          .catch(err => {
-            setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
-            setIsSubmitting(false);
-          });
+        loginUser(res.data.token);
       })
       .catch(err => {
         if (err.response == null || err.response.status !== 401) {
@@ -235,6 +298,35 @@ const LoginForm = props => {
         <SubmitButton isSubmitting={isSubmitting}>
           {register ? "Register" : "Login"}
         </SubmitButton>
+        {register ? <></> : oidcAuthConfig.map((config, idx) => {
+          return <div key={`oauth_button_${idx}`} className="mt-2">
+            <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary btn-block'
+              onClick={() => {
+                setIsSubmitting(true);
+                const state = randomBytes(32).toString('hex');
+                const pkceParams = generatePKCEParams();
+                const queryParams = [
+                  'response_type=code',
+                  `client_id=${encodeURIComponent(config.oidc.client_id)}`,
+                  `scope=${encodeURIComponent(config.oidc.scopes.join(' '))}`,
+                  `state=${state}`,
+                  `redirect_uri=${encodeURIComponent(window.location.origin)}`,
+                  `code_challenge=${pkceParams.codeChallenge}`,
+                  'code_challenge_method=S256'
+                ];
+                sessionStorage.setItem('authParams', JSON.stringify({
+                  clientId: config.oidc.client_id,
+                  tokenEndpoint: config.oidc.token_endpoint,
+                  codeChallenge: pkceParams.codeChallenge,
+                  codeVerifier: pkceParams.codeVerifier,
+                  state
+                }));
+                window.location.replace(`${config.oidc.authorization_endpoint}?${queryParams.join('&')} `);
+              }}>
+              {config.label}
+            </button>
+          </div>
+        })}
         <div className="mt-2">
           <small>
             <Link to={register ? "/login" : "/register"} onClick={clearRegisterErrors}>{register ? "Login" : "Register"}</Link>

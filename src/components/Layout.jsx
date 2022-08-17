@@ -31,6 +31,7 @@ import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import GroupMembers from "./GroupMembers";
 import WebhookSubmissionForm from "./WebhookSubmissionForm";
 import PreferencesForm from "./PreferencesForm";
+import AdministrationForm from "./AdministrationForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -157,6 +158,12 @@ const Layout = () => {
                 {serverInfo.in_kubernetes === true &&
                   <Route exact path="/preferences">
                     <PreferencesForm />
+                  </Route>
+                }
+                {
+                  roles && roles.includes('admin') &&
+                  <Route exact path="/administration">
+                    <AdministrationForm />
                   </Route>
                 }
                 <Route exact path="/webhooks">

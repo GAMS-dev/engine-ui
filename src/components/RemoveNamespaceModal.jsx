@@ -14,6 +14,7 @@ const RemoveNamespaceModal = props => {
   const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
 
   const handleCloseDialog = () => {
+    setSubmissionErrorMsg("");
     setShowDialog(false);
   }
   const handleRemoveNamespace = () => {
@@ -32,7 +33,7 @@ const RemoveNamespaceModal = props => {
         }
       })
       .catch(err => {
-        setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${getResponseError(err)}.`);
+        setSubmissionErrorMsg(`Some error occurred while trying to remove the namespace. Error message: ${getResponseError(err)}.`);
         setIsSubmitting(false);
       });
   }
@@ -59,10 +60,10 @@ const RemoveNamespaceModal = props => {
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseDialog}>
             Cancel
-                </Button>
+          </Button>
           <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
             Remove Namespace
-                </SubmitButton>
+          </SubmitButton>
         </Modal.Footer>
       </form>
     </Modal>

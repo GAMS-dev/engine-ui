@@ -21,7 +21,7 @@ const App = () => {
     <React.Fragment>
       <Router basename={BASENAME}>
         <ServerInfoProvider>
-          {!login && <Redirect to="/login" />}
+          {!login && <Redirect to={`/login${window.location.search}`} />}
           <Switch>
             <Route path="/login" exact render={() => <LoginForm />} />
             <Route path="/register" exact render={() => <LoginForm register="true" />} />
