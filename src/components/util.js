@@ -1,4 +1,6 @@
+import axios from "axios";
 import JSZip from "jszip";
+import { Layers } from "react-feather";
 
 const getResponseError = err => {
     if (!navigator.onLine) {
@@ -86,4 +88,48 @@ const formatFileSize = (fileSize) => {
     }
     return `${(fileSize / 1e9).toFixed(2)}GB`;
 }
-export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays, formatFileSize }
+
+const getInstanceData = async (server, username) => {
+    const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
+    let defaultInstance = null;
+    if (instanceData.data.default_instance != null) {
+        defaultInstance = instanceData.data.default_instance.label;
+    }
+    if (instanceData.data && instanceData.data.instances_available.length > 0) {
+        const availableInstancesTmp = instanceData.data.instances_available
+            .sort((a, b) => ('' + a.label).localeCompare(b.label));
+        return {
+            instances: availableInstancesTmp, default: defaultInstance,
+            rawResourceRequestsAllowed: false
+        }
+    }
+    // User can use raw resource requests or use any instance
+    let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
+    if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
+        availableInstancesTmp = availableInstancesTmp.data
+            .sort((a, b) => ('' + a.label).localeCompare(b.label));
+        return {
+            instances: availableInstancesTmp, default: defaultInstance,
+            rawResourceRequestsAllowed: true
+        }
+    }
+    return { instances: [], default: defaultInstance, rawResourceRequestsAllowed: true }
+}
+const formatInstancesSelectInput = (instances) => {
+    const formatLabel = (instance) => (
+        `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)`
+    )
+    return instances
+        .filter(instance => instance.pool_canceling !== true)
+        .map(instance => ({
+            value: instance.label,
+            label: instance.is_pool === true ? (
+                <>
+                    <Layers size={12} />
+                    <span style={{ paddingLeft: "5px" }}>{formatLabel(instance)}</span>
+                </>
+            ) : formatLabel(instance)
+        }))
+        .sort((a, b) => ('' + a.label).localeCompare(b.label))
+}
+export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays, formatFileSize, getInstanceData, formatInstancesSelectInput }

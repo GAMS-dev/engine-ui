@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Package, Users, Play, Archive, Settings, ExternalLink } from "react-feather";
+import { Package, Users, Play, Archive, Settings, ExternalLink, Server } from "react-feather";
 import { useLocation } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
@@ -18,7 +18,7 @@ const Sidebar = props => {
         <ul className="nav sidebar-nav">
           <li className="nav-item">
             <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users",
-              "/groups", "/nsusers", "/cleanup", "/licenses", "/usage", "/administration", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+              "/groups", "/nsusers", "/cleanup", "/licenses", "/usage", "/pools", "/administration", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
@@ -47,6 +47,14 @@ const Sidebar = props => {
               <span className="nav-link-text">Cleanup</span>
             </Link>
           </li>
+          {props.instancesVisible === true &&
+            <li className="nav-item">
+              <Link to="/pools" className={`nav-link nav-block${pathname.startsWith("/pools") ? " active" : ""}`}>
+                <Server className="feather" />
+                <span className="nav-link-text">Pools</span>
+              </Link>
+            </li>
+          }
           {roles && roles.find(role => role === "admin") !== undefined &&
             <li className="nav-item">
               <Link to="/administration" className={`nav-link nav-block${pathname.startsWith("/administration") ? " active" : ""}`}>

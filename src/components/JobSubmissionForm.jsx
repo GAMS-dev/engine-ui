@@ -6,7 +6,7 @@ import Collapse from "react-bootstrap/Collapse";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
-import { zipAsync, getResponseError } from "./util";
+import { zipAsync, getResponseError, getInstanceData, formatInstancesSelectInput } from "./util";
 import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
@@ -44,6 +44,7 @@ const JobSubmissionForm = props => {
     const [validWsReq, setValidWsReq] = useState(true);
     const [instancesLoaded, setInstancesLoaded] = useState(false);
     const [availableInstances, setAvailableInstances] = useState([]);
+    const [rawResourceRequestsAllowed, setRawResourceRequestsAllowed] = useState(false);
     const [useRawRequests, setUseRawRequests] = useState(false);
     const [cpuReq, setCpuReq] = useState("");
     const [wsReq, setWsReq] = useState("");
@@ -114,31 +115,18 @@ const JobSubmissionForm = props => {
                 return;
             }
             try {
-                const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-                if (instanceData.data && instanceData.data.instances_available.length > 0) {
-                    const availableInstancesTmp = instanceData.data.instances_available
-                        .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
-                    setAvailableInstances(availableInstancesTmp);
-                    setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
-                    setUseRawRequests(false);
+                const instanceData = await getInstanceData(server, username);
+                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+                setAvailableInstances(availableInstancesTmp);
+                let defaultInstance;
+                if (instanceData.default == null) {
+                    defaultInstance = availableInstancesTmp[0]
                 } else {
-                    // User can use raw resource requests or use any instance
-                    let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
-                    if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
-                        availableInstancesTmp = availableInstancesTmp.data
-                            .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
-                        setAvailableInstances(availableInstancesTmp);
-                        if (instanceData.data.default_instance != null &&
-                            instanceData.data.default_instance.label != null) {
-                            setInstance(availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label));
-                        } else {
-                            setInstance(availableInstancesTmp[0]);
-                        }
-                        setUseRawRequests(false);
-                    } else {
-                        setUseRawRequests(true);
-                    }
+                    defaultInstance = availableInstancesTmp.find(instance => instance.value === instanceData.default)
                 }
+                setInstance(defaultInstance);
+                setRawResourceRequestsAllowed(instanceData.rawResourceRequestsAllowed);
+                setUseRawRequests(instanceData.rawResourceRequestsAllowed && availableInstancesTmp.length === 0);
                 setInstancesLoaded(true);
             }
             catch (err) {
@@ -333,7 +321,7 @@ const JobSubmissionForm = props => {
                                     {serverInfo && serverInfo.in_kubernetes === true &&
                                         <div id="labelsWrapperContent">
                                             <ClipLoader loading={!instancesLoaded} />
-                                            {instancesLoaded && availableInstances.length > 0 &&
+                                            {instancesLoaded && rawResourceRequestsAllowed &&
                                                 <div className="form-check mb-3">
                                                     <input type="checkbox" className="form-check-input" checked={useRawRequests} onChange={e => setUseRawRequests(e.target.checked)}
                                                         id="useRawRequests" />
@@ -352,8 +340,7 @@ const JobSubmissionForm = props => {
                                                         value={instance}
                                                         isSearchable={true}
                                                         onChange={selected => setInstance(selected)}
-                                                        options={availableInstances
-                                                            .sort((a, b) => ('' + a.label).localeCompare(b.label))}
+                                                        options={availableInstances}
                                                     />
                                                 </div>
                                             </div>

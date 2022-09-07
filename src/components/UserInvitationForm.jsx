@@ -66,20 +66,23 @@ const UserInvitationForm = () => {
                     })
             ]
             try {
-                let availableInstancesTmp;
                 const userInstanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-                availableInstancesTmp = userInstanceData.data.instances_available.map(instance => ({
-                    "value": instance.label,
-                    "label": instance.label
-                }));
-                if (availableInstancesTmp == null || availableInstancesTmp.length === 0) {
-                    const globalInstanceData = await axios.get(`${server}/usage/instances`);
-                    availableInstancesTmp = globalInstanceData.data.map(instance => ({
+                let availableInstancesTmp = userInstanceData.data.instances_available
+                    .filter(instance => instance.pool_cancelling !== true)
+                    .map(instance => ({
                         "value": instance.label,
                         "label": instance.label
                     }));
+                if (availableInstancesTmp.length === 0) {
+                    const globalInstanceData = await axios.get(`${server}/usage/instances`);
+                    availableInstancesTmp = globalInstanceData.data
+                        .filter(instance => instance.pool_cancelling !== true)
+                        .map(instance => ({
+                            "value": instance.label,
+                            "label": instance.label
+                        }));
                 }
-                if (availableInstancesTmp && availableInstancesTmp.length > 0) {
+                if (availableInstancesTmp.length > 0) {
                     setAvailableInstances(availableInstancesTmp);
                     setSelectedInstancesAllowed([availableInstancesTmp[0]]);
                     setDefaultInstance(availableInstancesTmp[0]);

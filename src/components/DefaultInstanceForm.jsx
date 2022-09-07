@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import { ClipLoader } from "react-spinners";
 
@@ -23,33 +23,17 @@ const DefaultInstanceForm = () => {
 
     useEffect(() => {
         const fetchInstanceData = async () => {
-            const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-            if (instanceData.data && instanceData.data.instances_available.length > 0) {
-                const availableInstancesTmp = instanceData.data.instances_available
-                    .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
-                setAvailableInstances(availableInstancesTmp.sort((a, b) => ('' + a.label).localeCompare(b.label)));
-                const currentDefault = availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label);
-                setCurrentDefaultInstance(currentDefault);
-                setNewDefaultInstance(currentDefault);
-                return;
-            }
-            let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
-            if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
-                availableInstancesTmp = availableInstancesTmp.data
-                    .map(instance => ({ value: instance.label, label: `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)` }));
-                setAvailableInstances(availableInstancesTmp.sort((a, b) => ('' + a.label).localeCompare(b.label)));
-                if (instanceData.data.default_instance != null &&
-                    instanceData.data.default_instance.label != null) {
-                    const currentDefault = availableInstancesTmp.find(instance => instance.value === instanceData.data.default_instance.label);
-                    setCurrentDefaultInstance(currentDefault);
-                    setNewDefaultInstance(currentDefault);
-                } else {
-                    const currentDefault = availableInstancesTmp[0];
-                    setNewDefaultInstance(currentDefault);
-                }
+            const instanceData = await getInstanceData(server, username);
+            const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+            setAvailableInstances(availableInstancesTmp);
+            let defaultInstance;
+            if (instanceData.default == null) {
+                defaultInstance = availableInstancesTmp[0]
             } else {
-                setAvailableInstances([]);
+                defaultInstance = availableInstancesTmp.find(instance => instance.value === instanceData.default);
+                setCurrentDefaultInstance(defaultInstance);
             }
+            setNewDefaultInstance(defaultInstance);
         }
         fetchInstanceData()
     }, [server, username])

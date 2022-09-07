@@ -22,6 +22,7 @@ const InstanceSubmissionForm = () => {
     const [tolerations, setTolerations] = useState("");
     const [nodeSelectors, setNodeSelectors] = useState("");
     const [multiplier, setMultiplier] = useState("");
+    const [multiplierIdle, setMultiplierIdle] = useState("");
     const [assignLicense, setAssignLicense] = useState(false);
     const [GAMSLicense, setGAMSLicense] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -38,13 +39,14 @@ const InstanceSubmissionForm = () => {
         setErrorMsg("");
         axios.get(`${server}/usage/instances`)
             .then(res => {
-                const instanceData = res.data.filter(el => el.label === label);
+                const instanceData = res.data.filter(el => el.label === label && el.is_pool !== true);
                 if (instanceData.length > 0) {
                     setInstanceLabel(instanceData[0].label);
                     setCpuReq(instanceData[0].cpu_request);
                     setMemReq(instanceData[0].memory_request);
                     setWsReq(instanceData[0].workspace_request);
                     setMultiplier(instanceData[0].multiplier);
+                    setMultiplierIdle(instanceData[0].multiplier_idle);
                     setTolerations(instanceData[0].tolerations.map(el => `${el.key}=${el.value}`).join(","));
                     setNodeSelectors(instanceData[0].node_selectors.map(el => `${el.key}=${el.value}`).join(","));
                     const gamsLicenseAssigned = instanceData[0].gams_license != null && instanceData[0].gams_license !== "";
@@ -71,7 +73,8 @@ const InstanceSubmissionForm = () => {
                 cpu_request: cpuReq,
                 memory_request: memReq,
                 workspace_request: wsReq,
-                multiplier: multiplier
+                multiplier: multiplier,
+                multiplier_idle: multiplierIdle
             }
             if (label) {
                 payload['old_label'] = label;
@@ -103,7 +106,7 @@ const InstanceSubmissionForm = () => {
             if (err.response && err.response.data && err.response.data.errors) {
                 const formErrorsTmp = {};
                 ['label', 'cpu_request', 'memory_request',
-                    'multiplier', 'workspace_request', 'tolerations',
+                    'multiplier', 'multiplier_idle', 'workspace_request', 'tolerations',
                     'node_selectors'].forEach(key => {
                         if (err.response.data.errors.hasOwnProperty(key)) {
                             formErrorsTmp[key] = err.response.data.errors[key]
@@ -231,6 +234,23 @@ const InstanceSubmissionForm = () => {
                                         />
                                         <div className="invalid-feedback">
                                             {formErrors.multiplier ? formErrors.multiplier : ""}
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="multiplier_idle">
+                                            Multiplier (applied when worker is idle, only relevant for instance pools)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className={"form-control" + (formErrors.multiplier_idle ? " is-invalid" : "")}
+                                            id="multiplier_idle"
+                                            step="any"
+                                            value={multiplierIdle}
+                                            required
+                                            onChange={e => setMultiplierIdle(e.target.value)}
+                                        />
+                                        <div className="invalid-feedback">
+                                            {formErrors.multiplier_idle ? formErrors.multiplier_idle : ""}
                                         </div>
                                     </div>
                                     <div className="form-group">

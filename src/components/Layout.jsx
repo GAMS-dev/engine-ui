@@ -10,6 +10,7 @@ import ModelSubmissionForm from "./ModelSubmissionForm";
 import UserInvitationForm from "./UserInvitationForm";
 import UserChangePassForm from "./UserChangePassForm";
 import UserChangeNameForm from "./UserChangeNameForm";
+import InstancePoolSubmissionForm from "./InstancePoolSubmissionForm";
 import Job from "./Job";
 import Models from "./Models";
 import NamespaceQuotaUpdateForm from "./NamespaceQuotaUpdateForm";
@@ -20,7 +21,7 @@ import { Routes, Route } from "react-router-dom";
 import Cleanup from "./Cleanup";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import Usage from "./Usage";
-import { getResponseError } from "./util";
+import { getInstanceData, getResponseError } from "./util";
 import Webhooks from "./Webhooks";
 import { ServerInfoContext } from "../ServerInfoContext";
 import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
@@ -32,20 +33,48 @@ import DefaultInstanceForm from "./DefaultInstanceForm";
 import AdministrationForm from "./AdministrationForm";
 import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
 import CreateAuthTokenForm from "./CreateAuthTokenForm";
+import InstancePools from "./InstancePools";
 
 const Layout = () => {
-  const [{ server, roles }] = useContext(AuthContext);
+  const [{ server, roles, username }] = useContext(AuthContext);
   const [serverInfo] = useContext(ServerInfoContext);
   const alertHook = useState("");
   const [licenseExpiration, setLicenseExpiration] = useState(null);
   const [webhookAccess, setWebhookAccess] = useState("DISABLED");
+  const [instancePoolAccess, setInstancePoolAccess] = useState("DISABLED");
+  const [instancesVisible, setInstancesVisible] = useState(false);
 
   useEffect(() => {
-    axios.get(`${server}/configuration`).then(res => {
-      setWebhookAccess(res.data.webhook_access);
-    }).catch(err => {
-      console.log(getResponseError(err));
-    });
+    const fetchConfigData = async () => {
+      try {
+        const resConfig = await axios.get(`${server}/configuration`);
+        setWebhookAccess(resConfig.data.webhook_access);
+        const instancePoolAccessTmp = resConfig.data.instance_pool_access;
+        setInstancePoolAccess(instancePoolAccessTmp);
+        if (serverInfo.in_kubernetes !== true) {
+          setInstancesVisible(false);
+          return;
+        }
+        if (roles.includes("admin")) {
+          setInstancesVisible(true);
+          return;
+        }
+        if (instancePoolAccessTmp === "ENABLED" || (roles.includes("inviter") && instancePoolAccessTmp === "INVITER_ONLY")) {
+          setInstancesVisible(true);
+          return;
+        }
+        const instanceData = await getInstanceData(server, username);
+        if (instanceData.instances.find(instance => instance.is_pool === true) != null) {
+          setInstancesVisible(true);
+          return;
+        }
+        setInstancesVisible(false);
+      }
+      catch (err) {
+        console.log(getResponseError(err));
+      }
+    }
+    fetchConfigData();
     if (roles.includes("admin")) {
       axios
         .get(
@@ -62,7 +91,7 @@ const Layout = () => {
           console.error(getResponseError(err));
         });
     }
-  }, [server, roles])
+  }, [serverInfo, server, roles, username])
 
   return (
     <React.Fragment>
@@ -75,6 +104,7 @@ const Layout = () => {
             <div className="sidebar-container">
               <Sidebar
                 inKubernetes={serverInfo.in_kubernetes === true}
+                instancesVisible={instancesVisible}
                 webhooksVisible={webhookAccess === "ENABLED" ||
                   (roles && roles.includes("admin"))} />
             </div>
@@ -127,6 +157,12 @@ const Layout = () => {
                 }
                 <Route path="/webhooks" element={<Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />} />
                 <Route path="/webhooks/create" element={<WebhookSubmissionForm />} />
+                {serverInfo.in_kubernetes === true &&
+                  <Route path="/pools" element={<InstancePools instancePoolAccess={instancePoolAccess} setInstancePoolAccess={setInstancePoolAccess} />} />
+                }
+                {serverInfo.in_kubernetes === true &&
+                  <Route path="/pools/new" element={<InstancePoolSubmissionForm />} />
+                }
                 <Route path="*" element={<Jobs key="jobs" />} />
               </Routes>
             </main >
