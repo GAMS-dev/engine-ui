@@ -120,7 +120,7 @@ const formatInstancesSelectInput = (instances) => {
         `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)`
     )
     return instances
-        .filter(instance => instance.pool_canceling !== true)
+        .filter(instance => instance.pool_cancelling !== true)
         .map(instance => ({
             value: instance.label,
             label: instance.is_pool === true ? (
