@@ -44,13 +44,13 @@ const TerminateJobButton = props => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowConfirmDialog(false)}>
-                        Cancel
+                        No
                     </Button>
                     <Button variant="primary" onClick={() => {
                         setShowConfirmDialog(false);
                         terminateJob(status === -2);
                     }}>
-                        Cancel
+                        Yes, cancel job
                     </Button>
                 </Modal.Footer>
             </Modal>
