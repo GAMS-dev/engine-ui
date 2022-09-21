@@ -60,6 +60,10 @@ body {
   white-space: nowrap;
 }
 
+.nav-link {
+  color: theme-color("primary");
+}
+
 .sidebar .nav-link {
   font-weight: 500;
   color: #6c757d;

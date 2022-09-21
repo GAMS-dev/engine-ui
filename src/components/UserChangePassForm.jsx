@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Redirect, useParams, useHistory } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
@@ -19,7 +19,7 @@ const UserChangePassForm = () => {
     const [newPassword, setNewPassword] = useState("");
     const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleChangePassword = () => {
         setIsSubmitting(true);
@@ -40,7 +40,7 @@ const UserChangePassForm = () => {
                 setIsSubmitting(false);
                 if (res.status === 200) {
                     if (user === username) {
-                        history.push("/logout")
+                        navigate("/logout")
                     } else {
                         setAlertMsg("success:Password successfully updated!");
                         setPasswordUpdated(true);
@@ -116,7 +116,7 @@ const UserChangePassForm = () => {
                                 Change Password
                             </SubmitButton>
                         </div>
-                        {passwordUpdated && <Redirect to="/users" />}
+                        {passwordUpdated && <Navigate to="/users" />}
                     </form>
                 </div>}
         </>

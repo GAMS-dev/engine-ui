@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
@@ -265,7 +265,7 @@ const InstanceSubmissionForm = () => {
                                 {label ? "Update Instance" : "Add Instance"}
                             </SubmitButton>
                         </div>
-                        {instanceUpdated && <Redirect to="/instances" />}
+                        {instanceUpdated && <Navigate to="/instances" />}
                     </form>
                 )}
         </div>

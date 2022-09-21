@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState } from "react";
 import { RefreshCw, Send, Layers, ToggleLeft, ToggleRight } from "react-feather";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
@@ -11,11 +11,12 @@ import JobActionsButtonGroup from "./JobActionsButtonGroup";
 import { Tab, Tabs } from "react-bootstrap";
 
 const Jobs = () => {
+  const location = useLocation();
   const [statusCodes, setStatusCodes] = useState([]);
   const [refresh, setRefresh] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const history = useHistory();
-  const [tabSelected, setTabSelected] = useState(history.location.pathname === "/hc" ? "hc" : "jobs");
+  const navigate = useNavigate();
+  const [tabSelected, setTabSelected] = useState(location.pathname === "/hc" ? "hc" : "jobs");
   const [totalJobs, setTotalJobs] = useState(0);
   const [currentPageJobs, setCurrentPageJobs] = useState(1);
   const [sortedColJobs, setSortedColJobs] = useState("submitted_at");
@@ -82,7 +83,7 @@ const Jobs = () => {
         <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
     }].concat(displayFieldsDefault) :
     displayFieldsDefault);
-  
+
   const [displayFieldKeys,] = useState(displayFields.map(e => e.field));
 
   const statusCodeReducer = (accumulator, currentValue) => {
@@ -104,7 +105,7 @@ const Jobs = () => {
             order_asc: sortAscJobs,
             show_only_active: filterActive
           },
-          headers: { "X-Fields":  displayFieldKeys.join(",")}
+          headers: { "X-Fields": displayFieldKeys.join(",") }
         })
         .then(res => {
           setTotalJobs(res.data.count);
@@ -218,7 +219,7 @@ const Jobs = () => {
       <Tabs
         activeKey={tabSelected}
         onSelect={(k) => {
-          history.push(`/${k}`)
+          navigate(`/${k}`)
           setTabSelected(k)
         }}>
         <Tab eventKey="jobs" title="Jobs">

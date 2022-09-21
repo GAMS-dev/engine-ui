@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
@@ -132,9 +132,9 @@ const NamespaceQuotaUpdateForm = () => {
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
                                     Update Quota
-                            </SubmitButton>
+                                </SubmitButton>
                             </div>
-                            {quotaEdited && <Redirect to={`/models/${encodeURIComponent(namespace)}`} />}
+                            {quotaEdited && <Navigate to={`/models/${encodeURIComponent(namespace)}`} />}
                         </form>)}
             </div>
         </>

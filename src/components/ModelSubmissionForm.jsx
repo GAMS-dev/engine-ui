@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
@@ -360,7 +360,7 @@ const ModelSubmissionForm = () => {
                                 {modelname ? "Update Model" : "Add Model"}
                             </SubmitButton>
                         </div>
-                        {modelAdded && <Redirect to={`/models/${encodeURIComponent(namespace)}`} />}
+                        {modelAdded && <Navigate to={`/models/${encodeURIComponent(namespace)}`} />}
                     </form>
                 )}
         </div>

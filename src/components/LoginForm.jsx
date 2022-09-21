@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import logo from "../assets/images/logo.svg";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
-import { Redirect, Link } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
@@ -240,7 +240,7 @@ const LoginForm = props => {
             <Link to={register ? "/login" : "/register"} onClick={clearRegisterErrors}>{register ? "Login" : "Register"}</Link>
           </small>
         </div>
-        {login ? <Redirect to="/" /> : ""}
+        {login ? <Navigate replace to="/" /> : ""}
       </form>
     </div>
   );

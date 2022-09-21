@@ -7,9 +7,9 @@ import { AuthContext } from "./AuthContext";
 import { ServerInfoProvider } from "./ServerInfoContext";
 import {
   BrowserRouter as Router,
-  Switch,
+  Routes,
   Route,
-  Redirect
+  Navigate
 } from "react-router-dom";
 
 const BASENAME = process.env.REACT_APP_BASE_NAME ? process.env.REACT_APP_BASE_NAME : "/";
@@ -21,13 +21,12 @@ const App = () => {
     <React.Fragment>
       <Router basename={BASENAME}>
         <ServerInfoProvider>
-          {!login && <Redirect to="/login" />}
-          <Switch>
-            <Route path="/login" exact render={() => <LoginForm />} />
-            <Route path="/register" exact render={() => <LoginForm register="true" />} />
-            <Route path="/logout" exact render={() => <LogOut />} />
-            {login && <Route path="/" render={() => <Layout />} />}
-          </Switch>
+          <Routes>
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/register" element={<LoginForm register="true" />} />
+            <Route path="/logout" element={<LogOut />} />
+            <Route path="*" element={login ? <Layout /> : <Navigate replace to="/login" />} />
+          </Routes>
         </ServerInfoProvider>
       </Router>
     </React.Fragment>

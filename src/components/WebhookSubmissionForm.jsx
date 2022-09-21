@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState, useContext } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Select from 'react-select';
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
@@ -8,7 +8,6 @@ import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 
 const WebhookSubmissionForm = () => {
-    const { label } = useParams();
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server, roles }] = useContext(AuthContext);
 
@@ -230,7 +229,7 @@ const WebhookSubmissionForm = () => {
                         Add Webhook
                     </SubmitButton>
                 </div>
-                {webhookCreated && <Redirect to="/webhooks" />}
+                {webhookCreated && <Navigate to="/webhooks" />}
             </form >
         </div >
     );

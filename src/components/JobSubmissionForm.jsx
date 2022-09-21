@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
 import Select from 'react-select';
-import { Redirect } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
 import { AlertContext } from "./Alert";
@@ -654,7 +654,7 @@ const JobSubmissionForm = props => {
                                 Submit Job
                             </SubmitButton>
                         </div>
-                        {jobPosted && <Redirect to={newHcJob ? "/hc" : "/jobs"} />}
+                        {jobPosted && <Navigate to={newHcJob ? "/hc" : "/jobs"} />}
                     </form>
                     :
                     <div className="alert alert-danger">

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Select from 'react-select';
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
@@ -123,7 +123,7 @@ const PreferencesForm = () => {
                                 Update Preferences
                             </SubmitButton>
                         </div>
-                        {preferencesUpdated && <Redirect to="/" />}
+                        {preferencesUpdated && <Navigate to="/" />}
                     </form>)}
         </div>);
 }

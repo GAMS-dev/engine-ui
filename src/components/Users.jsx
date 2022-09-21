@@ -4,7 +4,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import axios from "axios";
 import Table from "./Table";
@@ -16,7 +16,7 @@ import LicUpdateButton from "./LicenseUpdateButton";
 
 const Users = props => {
   const { setLicenseExpiration } = props;
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
   const [userToDelete, setUserToDelete] = useState({ username: "", roles: [] });
@@ -104,7 +104,7 @@ const Users = props => {
       .then(() => {
         if (!deleteInvitation && userToDelete.username === username) {
           // log me out when I deleted myself
-          history.push("/logout");
+          navigate("/logout");
           return;
         }
         setRefresh(refreshCnt => ({
