@@ -24,7 +24,7 @@ const LoginForm = props => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const register = props.register === "true";
 
-  const [oidcAuthConfig, setOidcAuthConfig] = useState([]);
+  const [OAuthConfig, setOAuthConfig] = useState([]);
 
   const [login, setLogin] = useContext(AuthContext);
 
@@ -61,7 +61,8 @@ const LoginForm = props => {
   }, [server, setLogin]);
 
   useEffect(() => {
-    const oauthLogin = async (authParams, code) => {
+      const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE', 'CLEANUP', 'LICENSES', 'USAGE'];
+      const oauthLogin = async (authParams, code) => {
       if (code == null) {
         setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
         setIsSubmitting(false);
@@ -91,10 +92,10 @@ const LoginForm = props => {
     const fetchAuthProviders = async () => {
       try {
         const response = await axios.get(`${server}/auth/providers`);
-        setOidcAuthConfig(response.data.filter(config => Object.keys(config).includes('oidc')).map(config => {
+        setOAuthConfig(response.data.filter(config => Object.keys(config).includes('oauth2')).map(config => {
           const newConfig = config;
-          newConfig.oidc.client_id = '0oa60kyzqqzanyFDF5d7'
-          newConfig.oidc.scopes = ['openid']
+          newConfig.oauth2.scopes = newConfig.oauth2.scopes.filter(
+              scope_object => defaultScopes.includes(scope_object.scope)).map(scope_object => scope_object.request_scope);
           return newConfig;
         }))
       } catch (err) {
@@ -298,7 +299,7 @@ const LoginForm = props => {
         <SubmitButton isSubmitting={isSubmitting}>
           {register ? "Register" : "Login"}
         </SubmitButton>
-        {register ? <></> : oidcAuthConfig.map((config, idx) => {
+        {register ? <></> : OAuthConfig.map((config, idx) => {
           return <div key={`oauth_button_${idx}`} className="mt-2">
             <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary btn-block'
               onClick={() => {
@@ -307,21 +308,21 @@ const LoginForm = props => {
                 const pkceParams = generatePKCEParams();
                 const queryParams = [
                   'response_type=code',
-                  `client_id=${encodeURIComponent(config.oidc.client_id)}`,
-                  `scope=${encodeURIComponent(config.oidc.scopes.join(' '))}`,
+                  `client_id=${encodeURIComponent(config.oauth2.web_ui_client_id)}`,
+                  `scope=${encodeURIComponent(config.oauth2.scopes.join(' '))}`,
                   `state=${state}`,
                   `redirect_uri=${encodeURIComponent(window.location.origin)}`,
                   `code_challenge=${pkceParams.codeChallenge}`,
                   'code_challenge_method=S256'
                 ];
                 sessionStorage.setItem('authParams', JSON.stringify({
-                  clientId: config.oidc.client_id,
-                  tokenEndpoint: config.oidc.token_endpoint,
+                  clientId: config.oauth2.web_ui_client_id,
+                  tokenEndpoint: config.oauth2.token_endpoint,
                   codeChallenge: pkceParams.codeChallenge,
                   codeVerifier: pkceParams.codeVerifier,
                   state
                 }));
-                window.location.replace(`${config.oidc.authorization_endpoint}?${queryParams.join('&')} `);
+                window.location.replace(`${config.oauth2.authorization_endpoint}?${queryParams.join('&')} `);
               }}>
               {config.label}
             </button>
