@@ -10,7 +10,8 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "react-scripts": "^5.0.1",
-    "sass": "^1.54.9"
+    "sass": "^1.54.9",
+    "eslint-plugin-no-unsanitized": "^4.0.1"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -39,7 +40,21 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app"
+    ],
+    "plugins": [
+      "no-unsanitized",
+      "react"
+    ],
+    "rules": {
+      "react/no-danger": "error",
+      "react/no-find-dom-node": "error",
+      "react/jsx-no-script-url": "error",
+      "react/jsx-no-target-blank": "error",
+      "no-unsanitized/method": "error",
+      "no-unsanitized/property": "error"
+    }
   },
   "browserslist": {
     "production": [
