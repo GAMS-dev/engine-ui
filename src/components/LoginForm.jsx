@@ -92,7 +92,7 @@ const LoginForm = props => {
     const fetchAuthProviders = async () => {
       try {
         const response = await axios.get(`${server}/auth/providers`);
-        setOAuthConfig(response.data.filter(config => Object.keys(config).includes('oauth2')).map(config => {
+        setOAuthConfig(response.data.filter(config => config.oauth2 !== null).map(config => {
           const newConfig = config;
           newConfig.oauth2.scopes = newConfig.oauth2.scopes.filter(
               scope_object => defaultScopes.includes(scope_object.scope)).map(scope_object => scope_object.request_scope);
