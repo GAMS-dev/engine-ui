@@ -178,6 +178,7 @@ RUN chmod +x /docker-entrypoint.d/30-fix-ui-vars.sh
 COPY engine.conf /etc/nginx/templates/default.conf.template
 COPY engine-ssl.conf /etc/nginx/templates/default.conf.template-secure
 
+RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
 EXPOSE 80
 
 STOPSIGNAL SIGQUIT
