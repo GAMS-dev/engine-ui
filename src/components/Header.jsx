@@ -37,7 +37,8 @@ const Header = props => {
         </div>}
         <Link to="/" className="navbar-brand m-auto d-none d-md-block">
           <img src={logo} className="navbar-logo" alt="GAMS Logo" />
-          {serverInfo.in_kubernetes === true && <Badge id="logoPostfix" pill variant="primary">K</Badge>}
+          {serverInfo.in_kubernetes === true &&
+          <Badge id="logoPostfix" pill variant="primary">{window.location.hostname.endsWith("engine.gams.com")? "SaaS": "K"}</Badge>}
         </Link>
       </header>
       <ul className="nav flex-column nav-top d-block bg-light d-md-none">
