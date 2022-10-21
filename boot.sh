@@ -23,7 +23,7 @@ then
 fi
 
 BASE_URL_STRIPPED=$(echo ${BASE_URL} | sed -e 's@/$@@g')
-find /usr/share/nginx/engine -type f -name 'main*.chunk.js*' | xargs sed -i "s@AAAABBBBCCCC@${ENGINE_URL}@g"
-find /usr/share/nginx/engine -type f -name 'main*.chunk.js*' | xargs sed -i "s@DDDDEEEEFFFF@${BASE_URL}@g"
+find /usr/share/nginx/engine -type f -name 'main*.js*' | xargs sed -i "s@AAAABBBBCCCC@${ENGINE_URL}@g"
+find /usr/share/nginx/engine -type f -name 'main*.js*' | xargs sed -i "s@DDDDEEEEFFFF@${BASE_URL}@g"
 grep -lr "GGGGHHHHIIIIJJJJ" /usr/share/nginx/engine | xargs -r sed -i "s@GGGGHHHHIIIIJJJJ@${BASE_URL_STRIPPED}@g"
 sed -i -E "s/listen [0-9]+;/listen ${ENGINE_HTTP_PORT};/" /etc/nginx/conf.d/default.conf
