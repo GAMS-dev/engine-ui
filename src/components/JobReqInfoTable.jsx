@@ -318,7 +318,7 @@ const JobReqInfoTable = props => {
                     return <span key="resource_warning"></span>
                   } else {
                     return <span key="resource_warning" className="badge badge-danger m-1" title="Resource Warning">
-                      {`Out of ${el[1]}`}
+                      {`Out of ${el[1].replaceAll('_', ' ')}`}
                     </span>
                   }
                 } else if (el[0] === "instance") {
