@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
@@ -105,7 +105,7 @@ const LicenseUpdateForm = () => {
 
     return (
         <>
-            {!roles.includes('admin') && <Redirect to="/users" />}
+            {!roles.includes('admin') && <Navigate replace to="/users" />}
             {isLoading ? <ClipLoader /> :
                 <div>
                     <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -125,7 +125,7 @@ const LicenseUpdateForm = () => {
                         <fieldset disabled={isSubmitting}>
                             <label htmlFor="licenseBox">
                                 GAMS License for User
-                        </label>
+                            </label>
                             <textarea
                                 id="licenseBox"
                                 rows="6"
@@ -138,14 +138,14 @@ const LicenseUpdateForm = () => {
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
                                 Update License
-                        </SubmitButton>
+                            </SubmitButton>
                             {registeredLicense !== "" &&
                                 <button type="submit" className={`btn btn-lg btn-danger btn-block`}
                                     disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
                                     {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
                                 </button>}
                         </div>
-                        {userEdited && <Redirect to="/users" />}
+                        {userEdited && <Navigate to="/users" />}
                     </form>
                 </div>}
         </>

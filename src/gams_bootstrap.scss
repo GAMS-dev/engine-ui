@@ -60,6 +60,10 @@ body {
   white-space: nowrap;
 }
 
+.nav-link {
+  color: theme-color("primary");
+}
+
 .sidebar .nav-link {
   font-weight: 500;
   color: #6c757d;
@@ -149,7 +153,7 @@ body {
 
 @media only screen and (min-width: 768px) {
   .sidebar-container {
-    width: 155px;
+    width: 160px;
   }
 
   .sidebar {

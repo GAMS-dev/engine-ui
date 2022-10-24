@@ -19,7 +19,7 @@ const UserActionsButtonGroup = props => {
     } else {
       setDeleteInvitation(false);
     }
-    setUserToDelete(user);
+    setUserToDelete({ username: user, roles: userroles });
     handleShowDeleteConfirmDialog();
   }
 

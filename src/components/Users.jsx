@@ -4,7 +4,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import axios from "axios";
 import Table from "./Table";
@@ -16,15 +16,16 @@ import LicUpdateButton from "./LicenseUpdateButton";
 
 const Users = props => {
   const { setLicenseExpiration } = props;
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
-  const [userToDelete, setUserToDelete] = useState("");
+  const [userToDelete, setUserToDelete] = useState({ username: "", roles: [] });
   const [deleteInvitation, setDeleteInvitation] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteResults, setDeleteResults] = useState(false);
+  const [deleteChildren, setDeleteChildren] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setAlertMsg] = useContext(AlertContext);
   const [{ jwt, server, roles, username }] = useContext(AuthContext);
@@ -76,6 +77,7 @@ const Users = props => {
         setDeleteInvitation={setDeleteInvitation}
         handleShowDeleteConfirmDialog={() => {
           setDeleteResults(false);
+          setDeleteChildren(true);
           setShowDeleteConfirmDialog(true);
         }} />
     }
@@ -84,10 +86,11 @@ const Users = props => {
   const deleteUser = () => {
     const deleteRequestParams = {};
     if (deleteInvitation) {
-      deleteRequestParams['token'] = userToDelete;
+      deleteRequestParams['token'] = userToDelete.username;
     } else {
-      deleteRequestParams['username'] = userToDelete;
+      deleteRequestParams['username'] = userToDelete.username;
       deleteRequestParams['delete_results'] = deleteResults;
+      deleteRequestParams['delete_children'] = deleteChildren;
     }
     axios
       .delete(
@@ -99,9 +102,9 @@ const Users = props => {
         }
       )
       .then(() => {
-        if (!deleteInvitation && userToDelete === username) {
+        if (!deleteInvitation && userToDelete.username === username) {
           // log me out when I deleted myself
-          history.push("/logout");
+          navigate("/logout");
           return;
         }
         setRefresh(refreshCnt => ({
@@ -145,7 +148,7 @@ const Users = props => {
         axios
           .get(`${server}/users/invitation`, {
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" },
-            params: {"everyone": roles && roles.includes("admin")}
+            params: { "everyone": roles && roles.includes("admin") }
           })
           .then(resInv => {
             if (resInv.status !== 200) {
@@ -235,12 +238,21 @@ const Users = props => {
           </Modal.Header>
           <Modal.Body>
             <fieldset disabled={isSubmitting}>
-              Are you sure you want to remove the {deleteInvitation ? 'invitation' : 'user'}: <code>{userToDelete}</code>? This cannot be undone!
-              {!deleteInvitation && <div className="form-check mt-3">
-                <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
-                  id="deleteData" />
-                <label className="form-check-label" htmlFor="deleteData">Delete all data associated with this user?</label>
-              </div>}
+              Are you sure you want to remove the {deleteInvitation ? 'invitation' : 'user'}: <code>{userToDelete.username}</code>? This cannot be undone!
+              {!deleteInvitation &&
+                <>
+                  <div className="form-check mt-3">
+                    <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
+                      id="deleteData" />
+                    <label className="form-check-label" htmlFor="deleteData">Delete all data associated with this user?</label>
+                  </div>
+                  {userToDelete.roles.length > 0 &&
+                    <div className="form-check mt-3">
+                      <input type="checkbox" className="form-check-input" checked={deleteChildren} onChange={e => setDeleteChildren(e.target.checked)}
+                        id="deleteChildren" />
+                      <label className="form-check-label" htmlFor="deleteChildren">Also delete all invitees of this user?</label>
+                    </div>}
+                </>}
             </fieldset>
           </Modal.Body>
           <Modal.Footer>

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import Select from 'react-select';
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
@@ -284,7 +284,7 @@ const UserInstanceUpdateForm = () => {
                                 </SubmitButton>
                             </div>
                         </form>)}
-                {userEdited && <Redirect to="/users" />}
+                {userEdited && <Navigate to="/users" />}
             </div>
         </>
     );

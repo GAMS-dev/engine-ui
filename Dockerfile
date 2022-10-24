@@ -5,7 +5,6 @@ COPY package*.json ./
 RUN apk add g++ make python
 RUN npm install
 COPY . .
-RUN npm run build-css
 ARG REACT_APP_ENGINE_URL=AAAABBBBCCCC
 ARG REACT_APP_BASE_NAME=DDDDEEEEFFFF
 ARG PUBLIC_URL=GGGGHHHHIIIIJJJJ
@@ -42,126 +41,126 @@ RUN npm run build
 FROM alpine:3.16
 
 RUN set -x \
-# create nginx user/group first, to be consistent throughout docker variants
+    # create nginx user/group first, to be consistent throughout docker variants
     && addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
-# install prerequisites for public key and pkg-oss checks
+    # install prerequisites for public key and pkg-oss checks
     && apk add --no-cache --virtual .checksum-deps \
-        openssl \
-            && set -x \
-            && apk add --no-cache --virtual .build-deps \
-                gcc \
-                libc-dev \
-                make \
-                openssl-dev \
-                pcre2-dev \
-                zlib-dev \
-                linux-headers \
-                libxslt-dev \
-                gd-dev \
-                geoip-dev \
-                perl-dev \
-                libedit-dev \
-                bash \
-                alpine-sdk \
-                findutils \
-                git \
-                patch \
-            && tempDir="$(mktemp -d)" \
-            && chown nobody:nobody $tempDir \
-            && su nobody -s /bin/sh -c " \
-                export HOME=${tempDir} \
-                && cd ${tempDir} \
-                && wget https://nginx.org/download/nginx-1.22.1.tar.gz \
-                && PKGOSSCHECKSUM=\"1d468dcfa9bbd348b8a5dc514ac1428a789e73a92384c039b73a51ce376785f74bf942872c5594a9fcda6bbf44758bd727ce15ac2395f1aa989c507014647dcc *nginx-1.22.1.tar.gz\" \
-                && if [ \"\$(openssl sha512 -r nginx-1.22.1.tar.gz)\" = \"\$PKGOSSCHECKSUM\" ]; then \
-                    echo \"pkg-oss tarball checksum verification succeeded!\"; \
-                else \
-                    echo \"pkg-oss tarball checksum verification failed!\"; \
-                    exit 1; \
-                fi \
-                && tar xzvf nginx-1.22.1.tar.gz\
-                && git clone https://github.com/chobits/ngx_http_proxy_connect_module\
-                && cd nginx-1.22.1\
-                && patch -p1 < ../ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_102101.patch\
-                && ./configure \
-                   --prefix=/etc/nginx \
-                   --sbin-path=/usr/sbin/nginx \
-                   --modules-path=/usr/lib/nginx/modules \
-                   --conf-path=/etc/nginx/nginx.conf \
-                   --error-log-path=/var/log/nginx/error.log \
-                   --http-log-path=/var/log/nginx/access.log \
-                   --pid-path=/var/run/nginx.pid \
-                   --lock-path=/var/run/nginx.lock \
-                   --http-client-body-temp-path=/var/cache/nginx/client_temp \
-                   --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
-                   --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
-                   --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
-                   --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
-                   --with-perl_modules_path=/usr/lib/perl5/vendor_perl \
-                   --user=nginx \
-                   --group=nginx \
-                   --with-compat \
-                   --with-file-aio \
-                   --with-threads \
-                   --with-http_addition_module \
-                   --with-http_auth_request_module \
-                   --with-http_dav_module \
-                   --with-http_flv_module \
-                   --with-http_gunzip_module \
-                   --with-http_gzip_static_module \
-                   --with-http_mp4_module \
-                   --with-http_random_index_module \
-                   --with-http_realip_module \
-                   --with-http_secure_link_module \
-                   --with-http_slice_module \
-                   --with-http_ssl_module \
-                   --with-http_stub_status_module \
-                   --with-http_sub_module \
-                   --with-http_v2_module \
-                   --with-mail \
-                   --with-mail_ssl_module \
-                   --with-stream \
-                   --with-stream_realip_module \
-                   --with-stream_ssl_module \
-                   --with-stream_ssl_preread_module\
-                   --add-module=../ngx_http_proxy_connect_module\
-                && make \
-                " \
-            && cd ${tempDir}/nginx-1.22.1 && make install \
-            && mkdir /var/cache/nginx /etc/nginx/templates /etc/nginx/conf.d \
-            && apk del .build-deps \
+    openssl \
+    && set -x \
+    && apk add --no-cache --virtual .build-deps \
+    gcc \
+    libc-dev \
+    make \
+    openssl-dev \
+    pcre2-dev \
+    zlib-dev \
+    linux-headers \
+    libxslt-dev \
+    gd-dev \
+    geoip-dev \
+    perl-dev \
+    libedit-dev \
+    bash \
+    alpine-sdk \
+    findutils \
+    git \
+    patch \
+    && tempDir="$(mktemp -d)" \
+    && chown nobody:nobody $tempDir \
+    && su nobody -s /bin/sh -c " \
+    export HOME=${tempDir} \
+    && cd ${tempDir} \
+    && wget https://nginx.org/download/nginx-1.22.1.tar.gz \
+    && PKGOSSCHECKSUM=\"1d468dcfa9bbd348b8a5dc514ac1428a789e73a92384c039b73a51ce376785f74bf942872c5594a9fcda6bbf44758bd727ce15ac2395f1aa989c507014647dcc *nginx-1.22.1.tar.gz\" \
+    && if [ \"\$(openssl sha512 -r nginx-1.22.1.tar.gz)\" = \"\$PKGOSSCHECKSUM\" ]; then \
+    echo \"pkg-oss tarball checksum verification succeeded!\"; \
+    else \
+    echo \"pkg-oss tarball checksum verification failed!\"; \
+    exit 1; \
+    fi \
+    && tar xzvf nginx-1.22.1.tar.gz\
+    && git clone https://github.com/chobits/ngx_http_proxy_connect_module\
+    && cd nginx-1.22.1\
+    && patch -p1 < ../ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_102101.patch\
+    && ./configure \
+    --prefix=/etc/nginx \
+    --sbin-path=/usr/sbin/nginx \
+    --modules-path=/usr/lib/nginx/modules \
+    --conf-path=/etc/nginx/nginx.conf \
+    --error-log-path=/var/log/nginx/error.log \
+    --http-log-path=/var/log/nginx/access.log \
+    --pid-path=/var/run/nginx.pid \
+    --lock-path=/var/run/nginx.lock \
+    --http-client-body-temp-path=/var/cache/nginx/client_temp \
+    --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+    --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+    --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+    --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+    --with-perl_modules_path=/usr/lib/perl5/vendor_perl \
+    --user=nginx \
+    --group=nginx \
+    --with-compat \
+    --with-file-aio \
+    --with-threads \
+    --with-http_addition_module \
+    --with-http_auth_request_module \
+    --with-http_dav_module \
+    --with-http_flv_module \
+    --with-http_gunzip_module \
+    --with-http_gzip_static_module \
+    --with-http_mp4_module \
+    --with-http_random_index_module \
+    --with-http_realip_module \
+    --with-http_secure_link_module \
+    --with-http_slice_module \
+    --with-http_ssl_module \
+    --with-http_stub_status_module \
+    --with-http_sub_module \
+    --with-http_v2_module \
+    --with-mail \
+    --with-mail_ssl_module \
+    --with-stream \
+    --with-stream_realip_module \
+    --with-stream_ssl_module \
+    --with-stream_ssl_preread_module\
+    --add-module=../ngx_http_proxy_connect_module\
+    && make \
+    " \
+    && cd ${tempDir}/nginx-1.22.1 && make install \
+    && mkdir /var/cache/nginx /etc/nginx/templates /etc/nginx/conf.d \
+    && apk del .build-deps \
     && apk del .checksum-deps \
-# if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
+    # if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
     && if [ -n "$tempDir" ]; then rm -rf "$tempDir"; fi \
     && if [ -n "/etc/apk/keys/abuild-key.rsa.pub" ]; then rm -f /etc/apk/keys/abuild-key.rsa.pub; fi \
     && if [ -n "/etc/apk/keys/nginx_signing.rsa.pub" ]; then rm -f /etc/apk/keys/nginx_signing.rsa.pub; fi \
-# Bring in gettext so we can get `envsubst`, then throw
-# the rest away. To do this, we need to install `gettext`
-# then move `envsubst` out of the way so `gettext` can
-# be deleted completely, then move `envsubst` back.
+    # Bring in gettext so we can get `envsubst`, then throw
+    # the rest away. To do this, we need to install `gettext`
+    # then move `envsubst` out of the way so `gettext` can
+    # be deleted completely, then move `envsubst` back.
     && apk add --no-cache --virtual .gettext gettext \
     && mv /usr/bin/envsubst /tmp/ \
     \
     && runDeps="$( \
-        scanelf --needed --nobanner /tmp/envsubst \
-            | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
-            | sort -u \
-            | xargs -r apk info --installed \
-            | sort -u \
+    scanelf --needed --nobanner /tmp/envsubst \
+    | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+    | sort -u \
+    | xargs -r apk info --installed \
+    | sort -u \
     )" \
     && apk add --no-cache $runDeps \
     && apk del .gettext \
     && mv /tmp/envsubst /usr/local/bin/ \
-# Bring in tzdata so users could set the timezones through the environment
-# variables
+    # Bring in tzdata so users could set the timezones through the environment
+    # variables
     && apk add --no-cache tzdata pcre2 pcre2-dev \
-# Bring in curl and ca-certificates to make registering on DNS SD easier
+    # Bring in curl and ca-certificates to make registering on DNS SD easier
     && apk add --no-cache curl ca-certificates \
-# forward request and error logs to docker log collector
+    # forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
-# create a docker-entrypoint.d directory
+    # create a docker-entrypoint.d directory
     && mkdir /docker-entrypoint.d
 
 COPY docker-entrypoint.sh /

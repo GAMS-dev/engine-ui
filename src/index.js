@@ -1,15 +1,16 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import "./gams_bootstrap.css";
+import "./gams_bootstrap.scss";
 import { AuthProvider } from "./AuthContext";
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root"));
+
+root.render(
   <AuthProvider>
     <App />
-  </AuthProvider>,
-  document.getElementById("root")
+  </AuthProvider>
 );
 
 // If you want your app to work offline and load faster, you can change

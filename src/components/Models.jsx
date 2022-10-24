@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { Send, Folder, RefreshCw, Trash2, Save, Users } from "react-feather";
-import { Link, useHistory, useLocation, useParams } from "react-router-dom";
+import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import Table from "./Table";
@@ -17,7 +17,7 @@ import UserActionsButtonGroup from "./UserActionsButtonGroup";
 
 const Models = () => {
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { selectedNs } = useParams();
   const refSelectedNs = useRef(selectedNs);
   const [{ jwt, server, roles, username }] = useContext(AuthContext);
@@ -84,7 +84,7 @@ const Models = () => {
     setIsLoading(true);
     refSelectedNs.current = namespace.name;
     if (tabSelected === "groups") {
-      history.push("/groups/" + encodeURIComponent(namespace.name));
+      navigate("/groups/" + encodeURIComponent(namespace.name));
       axios
         .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`)
         .then(res => {
@@ -105,14 +105,12 @@ const Models = () => {
           setIsLoading(false);
         });
     } else if (tabSelected === "nsusers") {
-      history.push("/nsusers/" + encodeURIComponent(namespace.name));
+      navigate("/nsusers/" + encodeURIComponent(namespace.name));
       axios
         .get(`${server}/namespaces/`, {
           headers: { "X-Fields": "name,permissions" }
         })
         .then(res => {
-          console.log(res.data
-            .filter(ns => ns.name === namespace.name))
           setUsers(res.data
             .filter(ns => ns.name === namespace.name)[0].permissions
             .filter(user => user.permission > 0)
@@ -129,7 +127,7 @@ const Models = () => {
           setIsLoading(false);
         });
     } else {
-      history.push("/models/" + encodeURIComponent(namespace.name));
+      navigate("/models/" + encodeURIComponent(namespace.name));
       axios
         .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}`)
         .then(res => {
@@ -152,7 +150,7 @@ const Models = () => {
           setIsLoading(false);
         });
     }
-  }, [server, namespace, history, refreshModels, setAlertMsg, tabSelected]);
+  }, [server, namespace, navigate, refreshModels, setAlertMsg, tabSelected]);
 
   const updateNamespace = e => {
     if (e.target.dataset.ns) {
@@ -272,7 +270,7 @@ const Models = () => {
             <Tabs
               activeKey={tabSelected}
               onSelect={(k) => {
-                history.push(`/${k}/${encodeURIComponent(namespace.name)}`);
+                navigate(`/${k}/${encodeURIComponent(namespace.name)}`);
                 setTabSelected(k)
               }}>
               <Tab eventKey="models" title="Models">

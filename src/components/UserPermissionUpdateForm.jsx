@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
@@ -180,7 +180,7 @@ const UserUpdateForm = () => {
                                     Update Permissions
                                 </SubmitButton>
                             </div>
-                            {userEdited && <Redirect to="/users" />}
+                            {userEdited && <Navigate to="/users" />}
                         </form>)}
             </div>
         </>

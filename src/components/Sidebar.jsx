@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
 import { Package, Users, Play, Archive, Server, ExternalLink } from "react-feather";
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import LogOutMenu from "./LogOutMenu";
 
-const SidebarRaw = props => {
+const Sidebar = props => {
   const [{ roles }] = useContext(AuthContext);
-  const pathname = props.location.pathname;
+  const pathname = useLocation().pathname;
   return (
     <nav className="sidebar bg-light">
       <div className="sidebar-sticky">
@@ -60,7 +60,5 @@ const SidebarRaw = props => {
     </nav>
   );
 };
-
-const Sidebar = withRouter(props => <SidebarRaw {...props} />);
 
 export default Sidebar;

@@ -16,7 +16,7 @@ import NamespaceQuotaUpdateForm from "./NamespaceQuotaUpdateForm";
 import Users from "./Users";
 import { AlertContext, Alert } from "./Alert";
 
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Cleanup from "./Cleanup";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import Usage from "./Usage";
@@ -80,107 +80,65 @@ const Layout = () => {
             </div>
             <main className="col" role="main">
               <Alert />
-              <Switch>
-                <Route exact path="/hc">
-                  <Jobs key="hc" />
-                </Route>
-                <Route exact path="/jobs/:token">
-                  <Job />
-                </Route>
-                <Route exact path="/new-hc-job">
-                  <JobSubmissionForm newHcJob={true} />
-                </Route>
-                <Route exact path="/new-job">
-                  <JobSubmissionForm newHcJob={false} />
-                </Route>
-                <Route exact path="/new-user">
-                  <UserInvitationForm />
-                </Route>
-                <Route exact path={["/models/:namespace/new", "/models/:namespace/:modelname"]}>
-                  <ModelSubmissionForm />
-                </Route>
-                <Route exact path="/groups/:namespace/:label">
-                  <GroupMembers />
-                </Route>
-                <Route exact path={["/models/:selectedNs?", "/groups/:selectedNs?", "/nsusers/:selectedNs?"]}>
-                  <Models />
-                </Route>
+              <Routes>
+                <Route path="/hc" element={<Jobs key="hc" />} />
+                <Route path="/jobs/:token" element={<Job />} />
+                <Route path="/new-hc-job" element={<JobSubmissionForm newHcJob={true} />} />
+                <Route path="/new-job" element={<JobSubmissionForm newHcJob={false} />} />
+                <Route path="/new-user" element={<UserInvitationForm />} />
+                <Route path="/models/:namespace/new" element={<ModelSubmissionForm />} />
+                <Route path="/models/:namespace/:modelname" element={<ModelSubmissionForm />} />
+                <Route path="/groups/:namespace/:label" element={<GroupMembers />} />
+                <Route path="/models" element={<Models />} />
+                <Route path="/models/:selectedNs" element={<Models />} />
+                <Route path="/groups" element={<Models />} />
+                <Route path="/groups/:selectedNs" element={<Models />} />
+                <Route path="/selectedNs" element={<Models />} />
+                <Route path="/nsusers/:selectedNs" element={<Models />} />
                 {(roles && roles.includes('admin')) &&
-                  <Route exact path="/quotas/:namespace">
-                    <NamespaceQuotaUpdateForm />
-                  </Route>
+                  <Route exact path="/quotas/:namespace" element={<NamespaceQuotaUpdateForm />} />
                 }
-                <Route exact path="/users">
-                  <Users setLicenseExpiration={setLicenseExpiration} />
-                </Route>
+                <Route path="/users" element={<Users setLicenseExpiration={setLicenseExpiration} />} />
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
-                  <Route exact path="/users/:username/permissions">
-                    <UserPermissionUpdateForm />
-                  </Route>
+                  <Route path="/users/:username/permissions" element={<UserPermissionUpdateForm />} />
                 }
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
-                  <Route exact path="/users/:username/quotas">
-                    <UserQuotaUpdateForm />
-                  </Route>
+                  <Route path="/users/:username/quotas" element={<UserQuotaUpdateForm />} />
                 }
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1 && serverInfo.in_kubernetes === true) &&
-                  <Route exact path="/users/:userToEdit/instances">
-                    <UserInstanceUpdateForm />
-                  </Route>
+                  <Route path="/users/:userToEdit/instances" element={<UserInstanceUpdateForm />} />
                 }
-                <Route exact path="/users/:user/change-pass">
-                  <UserChangePassForm />
-                </Route>
-                <Route exact path="/users/:user/change-username">
-                  <UserChangeNameForm />
-                </Route>
+                <Route path="/users/:user/change-pass" element={<UserChangePassForm />} />
+                <Route path="/users/:user/change-username" element={<UserChangeNameForm />} />
                 {(roles && roles.includes('admin')) &&
-                  <Route exact path="/users/:username/licenses">
-                    <LicenseUpdateForm />
-                  </Route>
+                  <Route path="/users/:username/licenses" element={<LicenseUpdateForm />} />
                 }
-                <Route exact path="/users/:username/usage">
-                  <Usage />
-                </Route>
-                <Route exact path="/cleanup">
-                  <Cleanup />
-                </Route>
+                <Route path="/users/:username/usage" element={<Usage />} />
+                <Route path="/cleanup" element={<Cleanup />} />
                 {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
-                  <Route exact path="/instances">
-                    <Instances />
-                  </Route>
+                  <Route path="/instances" element={<Instances />} />
                 }
                 {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
-                  <Route exact path="/instances/update/:label?">
-                    <InstanceSubmissionForm />
+                  <Route path="/instances/update">
+                    <Route path=":label" element={<InstanceSubmissionForm />} />
+                    <Route path="" element={<InstanceSubmissionForm />} />
                   </Route>
                 }
                 {serverInfo.in_kubernetes === true &&
-                  <Route exact path="/preferences">
-                    <PreferencesForm />
-                  </Route>
+                  <Route path="/preferences" element={<PreferencesForm />} />
                 }
-                {
-                  roles && roles.includes('admin') &&
-                  <Route exact path="/administration">
-                    <AdministrationForm />
-                  </Route>
+                {roles && roles.includes('admin') &&
+                  <Route path="/administration" element={<AdministrationForm />} />
                 }
-                <Route exact path="/webhooks">
-                  <Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />
-                </Route>
-                <Route exact path="/webhooks/create">
-                  <WebhookSubmissionForm />
-                </Route>
-                <Route>
-                  <Jobs key="jobs" />
-                </Route>
-              </Switch>
-            </main>
-          </div>
-        </div>
-      </AlertContext.Provider>
-    </React.Fragment>
+                <Route path="/webhooks" element={<Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />} />
+                <Route path="/webhooks/create" element={<WebhookSubmissionForm />} />
+                <Route path="*" element={<Jobs key="jobs" />} />
+              </Routes>
+            </main >
+          </div >
+        </div >
+      </AlertContext.Provider >
+    </React.Fragment >
   );
 };
 
