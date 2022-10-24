@@ -72,17 +72,17 @@ RUN set -x \
             && su nobody -s /bin/sh -c " \
                 export HOME=${tempDir} \
                 && cd ${tempDir} \
-                && wget https://nginx.org/download/nginx-1.22.0.tar.gz \
-                && PKGOSSCHECKSUM=\"074782dba9cd5f8f493fbb57e20bda6dc9171814d919a47ee9f825d93f12c9f9d496e25d063c983191b55ad6a236bcef252ce16ecc1d253dc8b23433557559b1 *nginx-1.22.0.tar.gz\" \
-                && if [ \"\$(openssl sha512 -r nginx-1.22.0.tar.gz)\" = \"\$PKGOSSCHECKSUM\" ]; then \
+                && wget https://nginx.org/download/nginx-1.22.1.tar.gz \
+                && PKGOSSCHECKSUM=\"1d468dcfa9bbd348b8a5dc514ac1428a789e73a92384c039b73a51ce376785f74bf942872c5594a9fcda6bbf44758bd727ce15ac2395f1aa989c507014647dcc *nginx-1.22.1.tar.gz\" \
+                && if [ \"\$(openssl sha512 -r nginx-1.22.1.tar.gz)\" = \"\$PKGOSSCHECKSUM\" ]; then \
                     echo \"pkg-oss tarball checksum verification succeeded!\"; \
                 else \
                     echo \"pkg-oss tarball checksum verification failed!\"; \
                     exit 1; \
                 fi \
-                && tar xzvf nginx-1.22.0.tar.gz\
+                && tar xzvf nginx-1.22.1.tar.gz\
                 && git clone https://github.com/chobits/ngx_http_proxy_connect_module\
-                && cd nginx-1.22.0\
+                && cd nginx-1.22.1\
                 && patch -p1 < ../ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_102101.patch\
                 && ./configure \
                    --prefix=/etc/nginx \
@@ -128,7 +128,7 @@ RUN set -x \
                    --add-module=../ngx_http_proxy_connect_module\
                 && make \
                 " \
-            && cd ${tempDir}/nginx-1.22.0 && make install \
+            && cd ${tempDir}/nginx-1.22.1 && make install \
             && mkdir /var/cache/nginx /etc/nginx/templates /etc/nginx/conf.d \
             && apk del .build-deps \
     && apk del .checksum-deps \
