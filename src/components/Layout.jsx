@@ -32,6 +32,7 @@ import GroupMembers from "./GroupMembers";
 import WebhookSubmissionForm from "./WebhookSubmissionForm";
 import PreferencesForm from "./PreferencesForm";
 import AdministrationForm from "./AdministrationForm";
+import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -104,6 +105,9 @@ const Layout = () => {
                 }
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
                   <Route path="/users/:username/quotas" element={<UserQuotaUpdateForm />} />
+                }
+                {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
+                  <Route path="/users/:user/identity-provider" element={<UserUpdateIdentityProviderForm />} />
                 }
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1 && serverInfo.in_kubernetes === true) &&
                   <Route path="/users/:userToEdit/instances" element={<UserInstanceUpdateForm />} />

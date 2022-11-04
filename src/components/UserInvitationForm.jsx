@@ -26,7 +26,14 @@ const UserInvitationForm = () => {
     const [defaultInstance, setDefaultInstance] = useState(null);
     const [assignQuotas, setAssignQuotas] = useState(false);
     const [quotas, setQuotas] = useState(null);
+
+    const [availableIdentityProviders, setAvailableIdentityProviders] = useState([{ value: "gams_engine", label: "GAMS Engine" }]);
+    const [selectedIdentityProvidersAllowed, setSelectedIdentityProvidersAllowed] = useState({ value: "gams_engine", label: "GAMS Engine" });
+    const [identityProvider, setIdentityProvider] = useState({ value: "gams_engine", label: "GAMS Engine" });
+    const [identityProviderSubject, setIdentityProviderSubject] = useState("");
+
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState("");
 
     const [invitationCode, setInvitationCode] = useState("");
 
@@ -38,11 +45,6 @@ const UserInvitationForm = () => {
                         headers: { "X-Fields": "name,permissions" }
                     })
                     .then(res => {
-                        if (res.status !== 200) {
-                            setSubmissionErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
-                            setIsLoading(false);
-                            return;
-                        }
                         setNamespacePermissions(res.data.map(el =>
                         ({
                             name: el.name, maxPerm: roles && roles.includes("admin") ? 7 : el.permissions
@@ -51,6 +53,16 @@ const UserInvitationForm = () => {
                     })
                     .catch(err => {
                         setSubmissionErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
+                    }),
+                axios
+                    .get(`${server}/auth/inviters-providers/${encodeURIComponent(username)}`)
+                    .then(res => {
+                        const availableIdentityProvidersTmp = res.data.map(provider => ({ value: provider.name, label: provider.label }));
+                        setAvailableIdentityProviders(availableIdentityProvidersTmp);
+                        setSelectedIdentityProvidersAllowed(availableIdentityProvidersTmp);
+                    })
+                    .catch(err => {
+                        setSubmissionErrorMsg(`Problems while retrieving authentication providers. Error message: ${getResponseError(err)}.`);
                     })
             ]
             try {
@@ -91,8 +103,13 @@ const UserInvitationForm = () => {
     }, [server, jwt, roles, username]);
 
     const handleInvitationSubmission = () => {
+        setFormErrors("");
         if (assignInstances && (selectedInstancesAllowed == null || selectedInstancesAllowed.length === 0)) {
             setSubmissionErrorMsg("Please assign at least one instance that user is allowed to use.");
+            return;
+        }
+        if (role === "inviter" && selectedIdentityProvidersAllowed.length === 0) {
+            setSubmissionErrorMsg('Please select at least one identity provider that the user is allowed to invite with, or select the "User" role for the invitee.');
             return;
         }
         setIsSubmitting(true);
@@ -137,9 +154,20 @@ const UserInvitationForm = () => {
                 invitationSubmissionForm.append("default_label", defaultInstance.value);
             }
             if (assignLicense && license !== "") {
-                const license_b64 = btoa(license);
+                const license_b64 = window.btoa(license);
                 invitationSubmissionForm.append("gams_license", license_b64);
             }
+        }
+        if (role === "inviter") {
+            selectedIdentityProvidersAllowed.forEach(provider => {
+                invitationSubmissionForm.append("invitable_identity_providers", provider.value);
+            });
+        }
+        if (identityProvider == null || identityProvider.value === "gams_engine") {
+            invitationSubmissionForm.append("identity_provider_name", "gams_engine");
+        } else {
+            invitationSubmissionForm.append("identity_provider_name", identityProvider.value);
+            invitationSubmissionForm.append("identity_provider_user_subject", identityProviderSubject);
         }
         axios
             .post(
@@ -159,7 +187,12 @@ const UserInvitationForm = () => {
                 setInvitationCode(res.data.invitation_token);
             })
             .catch(err => {
-                setSubmissionErrorMsg(`An error occurred while creating an invitation code. Error message: ${getResponseError(err)}.`);
+                if (err.response && err.response.data && err.response.data.errors) {
+                    setFormErrors(err.response.data.errors);
+                    setSubmissionErrorMsg('Problems creating invitation code.');
+                } else {
+                    setSubmissionErrorMsg(`An error occurred while creating an invitation code. Error message: ${getResponseError(err)}.`);
+                }
                 setIsSubmitting(false);
             });
     }
@@ -286,6 +319,49 @@ const UserInvitationForm = () => {
                                                 </textarea> </div>
                                             }
                                         </div>}
+                                        {role === "inviter" && <div className="form-group">
+                                            <label htmlFor="identityProvidersAllowed">
+                                                Identity providers user is allowed to invite with
+                                            </label>
+                                            <Select
+                                                id="identityProvidersAllowed"
+                                                value={selectedIdentityProvidersAllowed}
+                                                isMulti={true}
+                                                isSearchable={true}
+                                                onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
+                                                options={availableIdentityProviders}
+                                            />
+                                        </div>}
+                                        {availableIdentityProviders.length > 1 && <div className="form-group">
+                                            <label htmlFor="identityProvider">
+                                                Identity provider
+                                            </label>
+                                            <Select
+                                                id="identityProvider"
+                                                value={identityProvider}
+                                                isSearchable={true}
+                                                onChange={selected => setIdentityProvider(selected)}
+                                                options={availableIdentityProviders}
+                                            />
+                                        </div>}
+                                        {availableIdentityProviders.length > 1 && identityProvider.value !== "gams_engine" &&
+                                            <div className="form-group">
+                                                <label htmlFor="identityProviderSubject" className="sr-only">
+                                                    Identity provider subject
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className={"form-control" + (formErrors.identity_provider_user_subject ? " is-invalid" : "")}
+                                                    placeholder="Identity provider subject"
+                                                    name="identityProviderSubject"
+                                                    value={identityProviderSubject}
+                                                    onChange={e => setIdentityProviderSubject(e.target.value)}
+                                                    required
+                                                />
+                                                <div className="invalid-feedback">
+                                                    {formErrors.identity_provider_user_subject ? formErrors.identity_provider_user_subject : ""}
+                                                </div>
+                                            </div>}
                                     </>}
                             </fieldset>
                             <div className="mt-3">

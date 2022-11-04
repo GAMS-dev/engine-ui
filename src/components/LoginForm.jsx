@@ -1,6 +1,5 @@
 import React, { useContext, useCallback, useState } from "react";
-import { randomBytes } from "crypto";
-import { generatePKCEParams } from "./oauth";
+import { generateRandomString, generatePKCEParams } from "./oauth";
 import logo from "../assets/images/logo.svg";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
@@ -8,10 +7,12 @@ import { Navigate, Link } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
 import { useEffect } from "react";
+import { Nav } from "react-bootstrap";
+import Alert from 'react-bootstrap/Alert';
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
 
-const LoginForm = props => {
+const LoginForm = ({ showRegistrationForm }) => {
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState(false);
   const [password, setPassword] = useState("");
@@ -19,12 +20,18 @@ const LoginForm = props => {
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [server, setServer] = useState(SERVER_NAME);
+  const [isValidInvitationCode, setIsValidInvitationCode] = useState(false);
   const [invitationCode, setInvitationCode] = useState("");
+  const [invitationCodeIdentityProvider, setInvitationCodeIdentityProvider] = useState("");
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const register = props.register === "true";
+  const [register, setRegister] = useState(showRegistrationForm === "true");
+  const [showRegistrationSuccessAlert, setShowRegistrationSuccessAlert] = useState(false);
 
   const [OAuthConfig, setOAuthConfig] = useState([]);
+  const [ldapConfig, setLDAPConfig] = useState([]);
+
+  const [selectedAuthProvider, setSelectedAuthProvider] = useState("standard");
 
   const [login, setLogin] = useContext(AuthContext);
 
@@ -61,8 +68,8 @@ const LoginForm = props => {
   }, [server, setLogin]);
 
   useEffect(() => {
-      const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE', 'CLEANUP', 'LICENSES', 'USAGE'];
-      const oauthLogin = async (authParams, code) => {
+    const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE', 'CLEANUP', 'LICENSES', 'USAGE'];
+    const oauthLogin = async (authParams, code) => {
       if (code == null) {
         setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
         setIsSubmitting(false);
@@ -89,19 +96,34 @@ const LoginForm = props => {
       }
     }
 
-    const fetchAuthProviders = async () => {
+    const fetchAuthProviders = async (selectedProvider) => {
       try {
         const response = await axios.get(`${server}/auth/providers`);
-        setOAuthConfig(response.data.filter(config => config.oauth2 != null).map(config => {
+        const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null).map(config => {
           const newConfig = config;
           newConfig.oauth2.scopes = newConfig.oauth2.scopes.filter(
-              scope_object => defaultScopes.includes(scope_object.scope)).map(scope_object => scope_object.request_scope);
+            scope_object => defaultScopes.includes(scope_object.scope)).map(scope_object => scope_object.request_scope);
           return newConfig;
-        }))
+        });
+        const LDAPConfigTmp = response.data.filter(config => config.is_ldap_identity_provider === true);
+
+        if (selectedProvider != null) {
+          const selectedOAuthProvider = OAuthConfigTmp.filter(config => config.name === selectedProvider);
+          if (selectedOAuthProvider.length > 0) {
+            initiateOAuthLogin(selectedOAuthProvider[0]);
+            return;
+          }
+          if (LDAPConfigTmp.findIndex(config => config.name === selectedProvider) !== -1) {
+            setSelectedAuthProvider(selectedProvider);
+          }
+        }
+        setOAuthConfig(OAuthConfigTmp);
+        setLDAPConfig(LDAPConfigTmp);
       } catch (err) {
         setLoginErrorMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
       }
     }
+    let selectedProvider = null;
 
     if (document.location.search.includes('state=')) {
       setIsSubmitting(true);
@@ -114,41 +136,109 @@ const LoginForm = props => {
       } else {
         setIsSubmitting(false);
       }
+    } else if (document.location.search.includes('provider=')) {
+      const searchParams = new URLSearchParams(document.location.search);
+      selectedProvider = searchParams.get('provider');
     }
-    fetchAuthProviders();
+    fetchAuthProviders(selectedProvider);
   }, [server, setLogin, loginUser]);
 
-
-  function handleLogin() {
-    setIsSubmitting(true);
-    axios
-      .post(
-        `${server}/auth/login`,
-        {
-          username: username,
-          password: password,
-          expires_in: 604800
+  useEffect(() => {
+    setLoginErrorMsg('');
+    if (invitationCode.length !== 36) {
+      if (invitationCode.length !== 0) {
+        setLoginErrorMsg('Invalid invitation code.');
+      }
+      setIsValidInvitationCode(false);
+      return;
+    }
+    const fetchInvitationCodeMetadata = async () => {
+      try {
+        setIsValidInvitationCode(false);
+        const response = await axios.get(`${server}/users/invitation/${invitationCode}`);
+        setInvitationCodeIdentityProvider(response.data.identity_provider);
+        const userSubject = response.data.identity_provider_user_subject;
+        const usernameTmp = [];
+        for (let i = 0; i < userSubject.length; i += 1) {
+          const char = userSubject.charAt(i);
+          if (!/^[a-zA-Z0-9_]+$/.test(char) || usernameTmp.length > 70) {
+            break;
+          }
+          usernameTmp.push(char);
         }
-      )
-      .then(res => {
-        if (res.status !== 200) {
-          setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
-          setIsSubmitting(false);
-          return;
-        }
-        loginUser(res.data.token);
-      })
-      .catch(err => {
-        if (err.response == null || err.response.status !== 401) {
-          setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+        setUsername(usernameTmp.join(""));
+        setIsValidInvitationCode(true);
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          setLoginErrorMsg('Invalid invitation code.');
         } else {
-          setLoginErrorMsg("Invalid username and/or password");
+          setLoginErrorMsg(`Problems retrieving invitation code metadata. Error message: ${getResponseError(err)}.`);
         }
-        setIsSubmitting(false);
-      });
+      }
+    }
+    fetchInvitationCodeMetadata();
+  }, [server, invitationCode]);
+
+  const initiateOAuthLogin = async (config) => {
+    setIsSubmitting(true);
+    const state = generateRandomString(32);
+    const pkceParams = await generatePKCEParams();
+    const queryParams = [
+      'response_type=code',
+      `client_id=${encodeURIComponent(config.oauth2.web_ui_client_id)}`,
+      `scope=${encodeURIComponent(config.oauth2.scopes.join(' '))}`,
+      `state=${state}`,
+      `redirect_uri=${encodeURIComponent(window.location.origin)}`,
+      `code_challenge=${pkceParams.codeChallenge}`,
+      'code_challenge_method=S256'
+    ];
+    sessionStorage.setItem('authParams', JSON.stringify({
+      clientId: config.oauth2.web_ui_client_id,
+      tokenEndpoint: config.oauth2.token_endpoint,
+      codeChallenge: pkceParams.codeChallenge,
+      codeVerifier: pkceParams.codeVerifier,
+      state
+    }));
+    window.location.replace(`${config.oauth2.authorization_endpoint}?${queryParams.join('&')} `);
+  };
+
+
+  const handleLogin = async () => {
+    setShowRegistrationSuccessAlert(false);
+    setIsSubmitting(true);
+    try {
+      let authResponse;
+      if (selectedAuthProvider === "standard") {
+        authResponse = await axios.post(`${server}/auth/login`,
+          {
+            username: username,
+            password: password,
+            expires_in: 604800
+          }
+        );
+      } else {
+        authResponse = await axios.post(`${server}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
+          {
+            username: username,
+            password: password,
+            expires_in: 604800
+          }
+        );
+      }
+      loginUser(authResponse.data.token);
+    } catch (err) {
+      if (err.response == null || err.response.status !== 401) {
+        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+      } else {
+        setLoginErrorMsg("Invalid username and/or password");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   function handleRegistration() {
     clearRegisterErrors();
+    setShowRegistrationSuccessAlert(false);
     if (password !== confirmPassword) {
       setConfirmPasswordError("The password does not match.");
       return;
@@ -159,16 +249,25 @@ const LoginForm = props => {
         `${server}/users/`,
         {
           username: username,
-          password: password,
+          password: invitationCodeIdentityProvider === "gams_engine" ? password : "dummypassword123", // TODO: remove dummy password once API no longer requires it
           invitation_code: invitationCode,
         }
       )
-      .then(res => {
+      .then(_ => {
         setIsSubmitting(false);
-        if (res.status === 201) {
+        if (invitationCodeIdentityProvider === "gams_engine") {
           handleLogin();
+        } else if (ldapConfig.findIndex(config => config.name === invitationCodeIdentityProvider) !== -1) {
+          setSelectedAuthProvider(invitationCodeIdentityProvider);
+          setRegister(false);
+          setShowRegistrationSuccessAlert(true);
         } else {
-          setLoginErrorMsg("Oops. Something went wrong! Please try again later..");
+          const selectedOAuthProvider = OAuthConfig.filter(config => config.name === invitationCodeIdentityProvider);
+          if (selectedOAuthProvider.length > 0) {
+            initiateOAuthLogin(selectedOAuthProvider[0]);
+            return;
+          }
+          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists. You will not be able to log in.");
         }
       })
       .catch(err => {
@@ -208,10 +307,13 @@ const LoginForm = props => {
           className="bg-dark p-4 mb-4 rounded w-100"
           alt="GAMS Logo"
         />
-        <h1 className="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <h1 className="h3 mb-3 font-weight-normal">{register ? "Register" : "Please sign in"}</h1>
         <div className="invalid-feedback" style={{ display: loginErrorMsg != null ? "block" : "none" }}>
           {loginErrorMsg}
         </div>
+        {showRegistrationSuccessAlert && <Alert variant="success">
+          Registration successful, you can log in now!
+        </Alert>}
         <fieldset disabled={isSubmitting}>
           {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
             <div className="form-group">
@@ -230,7 +332,7 @@ const LoginForm = props => {
               />
             </div>
           }
-          {register && <div className="form-group">
+          {register ? <div className="form-group">
             <label htmlFor="inputInvitationCode" className="sr-only">
               Invitation Code
             </label>
@@ -243,8 +345,19 @@ const LoginForm = props => {
               onChange={e => setInvitationCode(e.target.value)}
               required
             />
-          </div>}
-          <div className="form-group">
+          </div> :
+            (ldapConfig.length > 0 ?
+              <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
+                <Nav.Item>
+                  <Nav.Link eventKey="standard" title="Standard">Standard</Nav.Link>
+                </Nav.Item>
+                {ldapConfig.map(config =>
+                  <Nav.Item key={config.name}>
+                    <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
+                  </Nav.Item>
+                )}
+              </Nav> : <></>)}
+          {(!register || isValidInvitationCode) && <div className="form-group">
             <label htmlFor="inputUsername" className="sr-only">
               Username
             </label>
@@ -256,12 +369,12 @@ const LoginForm = props => {
               autoComplete="username"
               name="username"
               value={username}
-              onChange={e => setUsername(e.target.value.trim())}
+              onChange={e => setUsername(e.target.value)}
               required
             />
             <div className="invalid-feedback"> {usernameError} </div>
-          </div>
-          <div className="form-group">
+          </div>}
+          {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) && <div className="form-group">
             <label htmlFor="inputPassword" className="sr-only">
               Password
             </label>
@@ -277,8 +390,8 @@ const LoginForm = props => {
               required
             />
             <div className="invalid-feedback"> {passwordError} </div>
-          </div>
-          {register && <div className="form-group">
+          </div>}
+          {register && invitationCodeIdentityProvider === "gams_engine" && <div className="form-group">
             <label htmlFor="confirmPassword" className="sr-only">
               Confirm Password
             </label>
@@ -302,35 +415,17 @@ const LoginForm = props => {
         {register ? <></> : OAuthConfig.map((config, idx) => {
           return <div key={`oauth_button_${idx}`} className="mt-2">
             <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary btn-block'
-              onClick={() => {
-                setIsSubmitting(true);
-                const state = randomBytes(32).toString('hex');
-                const pkceParams = generatePKCEParams();
-                const queryParams = [
-                  'response_type=code',
-                  `client_id=${encodeURIComponent(config.oauth2.web_ui_client_id)}`,
-                  `scope=${encodeURIComponent(config.oauth2.scopes.join(' '))}`,
-                  `state=${state}`,
-                  `redirect_uri=${encodeURIComponent(window.location.origin)}`,
-                  `code_challenge=${pkceParams.codeChallenge}`,
-                  'code_challenge_method=S256'
-                ];
-                sessionStorage.setItem('authParams', JSON.stringify({
-                  clientId: config.oauth2.web_ui_client_id,
-                  tokenEndpoint: config.oauth2.token_endpoint,
-                  codeChallenge: pkceParams.codeChallenge,
-                  codeVerifier: pkceParams.codeVerifier,
-                  state
-                }));
-                window.location.replace(`${config.oauth2.authorization_endpoint}?${queryParams.join('&')} `);
-              }}>
+              onClick={() => initiateOAuthLogin(config)}>
               {config.label}
             </button>
           </div>
         })}
         <div className="mt-2">
           <small>
-            <Link to={register ? "/login" : "/register"} onClick={clearRegisterErrors}>{register ? "Login" : "Register"}</Link>
+            <Link to={register ? "/login" : "/register"} onClick={() => {
+              clearRegisterErrors();
+              setRegister(current => !current);
+            }}>{register ? "Login" : "Register"}</Link>
           </small>
         </div>
         {login ? <Navigate replace to="/" /> : ""}

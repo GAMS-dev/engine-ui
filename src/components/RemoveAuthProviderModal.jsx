@@ -5,10 +5,12 @@ import { AuthContext } from "../AuthContext";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
 import axios from "axios";
+import { AlertContext } from "./Alert";
 
 const RemoveAuthProviderModal = props => {
-    const { showDialog, setShowDialog, providerId } = props;
+    const { showDialog, setShowDialog, providerId, setRefreshProviders } = props;
     const [{ server }] = useContext(AuthContext);
+    const [, setAlertMsg] = useContext(AlertContext);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -16,10 +18,17 @@ const RemoveAuthProviderModal = props => {
     const handleRemoveAuthProvider = async () => {
         try {
             setIsSubmitting(true);
-            setSubmissionErrorMsg('NOT IMPLEMENTED');
-            setIsSubmitting(false);
+            await axios.delete(`${server}/auth/providers`, {
+                params: {
+                    name: providerId
+                }
+            });
+            setAlertMsg(`Authentication provider: ${providerId} removed successfully!`);
+            setRefreshProviders(curr => curr + 1);
         } catch (err) {
-            setSubmissionErrorMsg(`Some error occurred while trying to remove the authentication provider. Error message: ${getResponseError(err)}.`);
+            setSubmissionErrorMsg(`Some error occurred while trying to remove the authentication provider: ${providerId}. Error message: ${getResponseError(err)}.`);
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -45,7 +54,9 @@ const RemoveAuthProviderModal = props => {
                         {submissionErrorMsg}
                     </div>
                     <p>Are you sure you want to remove the authentication provider: <code>{providerId}</code>?</p>
-                    <p>This will also remove all users registered with this authentication provider and cancel all jobs currently running by these users!</p>
+                    <p>Unused invitations that use this identity provider are considered invalid.
+                        Users using this identity provider can no longer sign in, and their identity provider must be updated before they can sign in again.
+                        All JWT tokens signed by this identity provider are considered invalid.</p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseDialog}>

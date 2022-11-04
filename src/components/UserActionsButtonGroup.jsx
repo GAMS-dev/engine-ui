@@ -50,6 +50,9 @@ const UserActionsButtonGroup = props => {
             <Dropdown.Item as={Link} to={`/users/${username}/instances`}>
               Edit Instances
             </Dropdown.Item>}
+          {username !== "admin" && <Dropdown.Item as={Link} to={`/users/${username}/identity-provider`}>
+            Change Identity Provider
+          </Dropdown.Item>}
         </DropdownButton>}
       {!isAdmin && username === me &&
         <Link

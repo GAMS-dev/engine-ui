@@ -23,7 +23,7 @@ const App = () => {
         <ServerInfoProvider>
           <Routes>
             <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<LoginForm register="true" />} />
+            <Route path="/register" element={<LoginForm showRegistrationForm="true" />} />
             <Route path="/logout" element={<LogOut />} />
             <Route path="*" element={login ? <Layout /> : <Navigate replace to={`/login${window.location.search}`} />} />
           </Routes>
