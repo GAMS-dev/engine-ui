@@ -7,7 +7,7 @@ import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 
 const UserChangePassForm = () => {
-    const [{ username, server, roles }] = useContext(AuthContext);
+    const [{ username, server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
     const { user } = useParams();
 
@@ -22,12 +22,11 @@ const UserChangePassForm = () => {
     const navigate = useNavigate();
 
     const handleChangePassword = () => {
-        setIsSubmitting(true);
         if (newPassword !== newPasswordConfirm) {
-            setIsSubmitting(false);
             setSubmissionErrorMsg("The passwords you entered do not match. Please try again.");
             return;
         }
+        setIsSubmitting(true);
         axios
             .put(
                 `${server}/users/`,
@@ -52,7 +51,7 @@ const UserChangePassForm = () => {
             .catch(err => {
                 if (err.response == null || err.response.status !== 400 ||
                     err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('password')) {
-                    setSubmissionErrorMsg(`Some error occurred while trying to change your password. Error message: ${getResponseError(err)}.`);
+                    setSubmissionErrorMsg(`Some error occurred while trying to changing the password. Error message: ${getResponseError(err)}.`);
                 } else {
                     setSubmissionErrorMsg(err.response.data.errors.password);
                 }
@@ -62,63 +61,59 @@ const UserChangePassForm = () => {
 
     return (
         <>
-            {username !== user && !roles.includes('admin') ?
-                <div className="alert alert-danger">
-                    <p><strong>You have no permission to change password of user: {user}.</strong></p>
-                </div> :
-                <div>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 className="h2">{username === user ? 'Change Password' : `Change Password of User: ${user}`}</h1>
+            <div>
+                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 className="h2">{username === user ? 'Change Password' : `Change Password of User: ${user}`}</h1>
+                </div>
+                <form
+                    className="m-auto"
+                    onSubmit={e => {
+                        e.preventDefault();
+                        handleChangePassword();
+                        return false;
+                    }}
+                >
+                    <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                        {submissionErrorMsg}
                     </div>
-                    <form
-                        className="m-auto"
-                        onSubmit={e => {
-                            e.preventDefault();
-                            handleChangePassword();
-                            return false;
-                        }}
-                    >
-                        <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                            {submissionErrorMsg}
+                    <fieldset disabled={isSubmitting}>
+                        <div className="form-group">
+                            <label htmlFor="newPassword" className="sr-only">
+                                New password
+                            </label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="newPassword"
+                                placeholder="New password"
+                                value={newPassword}
+                                onChange={e => setNewPassword(e.target.value)}
+                                required
+                            />
                         </div>
-                        <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
-                                <label htmlFor="modelName" className="sr-only">
-                                    New Password
-                                </label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="newPassword"
-                                    placeholder="New password"
-                                    value={newPassword}
-                                    onChange={e => setNewPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="modelName" className="sr-only">
-                                    Confirm Password
-                                </label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="newPasswordConfirm"
-                                    placeholder="Confirm password"
-                                    value={newPasswordConfirm}
-                                    onChange={e => setNewPasswordConfirm(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </fieldset>
-                        <div className="mt-3">
-                            <SubmitButton isSubmitting={isSubmitting}>
-                                Change Password
-                            </SubmitButton>
+                        <div className="form-group">
+                            <label htmlFor="newPasswordConfirm" className="sr-only">
+                                Confirm password
+                            </label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="newPasswordConfirm"
+                                placeholder="Confirm password"
+                                value={newPasswordConfirm}
+                                onChange={e => setNewPasswordConfirm(e.target.value)}
+                                required
+                            />
                         </div>
-                        {passwordUpdated && <Navigate to="/users" />}
-                    </form>
-                </div>}
+                    </fieldset>
+                    <div className="mt-3">
+                        <SubmitButton isSubmitting={isSubmitting}>
+                            Change Password
+                        </SubmitButton>
+                    </div>
+                    {passwordUpdated && <Navigate to="/users" />}
+                </form>
+            </div>
         </>
     );
 }

@@ -35,9 +35,9 @@ const UserActionsButtonGroup = props => {
             <>
               {username === 'admin' ? <></> :
                 <Dropdown.Item as={Link} to={`/users/${username}/change-username`}>Change Username</Dropdown.Item>}
-              <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>Change Password</Dropdown.Item>
               <Dropdown.Item as={Link} to={`/users/${username}/licenses`}>Update License</Dropdown.Item>
             </>}
+          <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>Change Password</Dropdown.Item>
           <Dropdown.Item as={Link} to={`/users/${username}/usage`}>Usage</Dropdown.Item>
           <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
             Edit Permissions
