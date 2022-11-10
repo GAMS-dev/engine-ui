@@ -236,7 +236,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       setIsSubmitting(false);
     }
   }
-  function handleRegistration() {
+  const handleRegistration = async () => {
     clearRegisterErrors();
     setShowRegistrationSuccessAlert(false);
     if (password !== confirmPassword) {
@@ -244,48 +244,45 @@ const LoginForm = ({ showRegistrationForm }) => {
       return;
     }
     setIsSubmitting(true);
-    axios
-      .post(
-        `${server}/users/`,
-        {
-          username: username,
-          password: invitationCodeIdentityProvider === "gams_engine" ? password : "dummypassword123", // TODO: remove dummy password once API no longer requires it
-          invitation_code: invitationCode,
+    try {
+      const registrationForm = new FormData();
+      registrationForm.append("username", username);
+      registrationForm.append("invitation_code", invitationCode);
+      if (invitationCodeIdentityProvider === "gams_engine") {
+        registrationForm.append("password", password);
+      }
+      await axios.post(`${server}/users/`, registrationForm);
+      if (invitationCodeIdentityProvider === "gams_engine") {
+        handleLogin();
+      } else if (ldapConfig.findIndex(config => config.name === invitationCodeIdentityProvider) !== -1) {
+        setSelectedAuthProvider(invitationCodeIdentityProvider);
+        setRegister(false);
+        setShowRegistrationSuccessAlert(true);
+      } else {
+        const selectedOAuthProvider = OAuthConfig.filter(config => config.name === invitationCodeIdentityProvider);
+        if (selectedOAuthProvider.length > 0) {
+          initiateOAuthLogin(selectedOAuthProvider[0]);
+          return;
         }
-      )
-      .then(_ => {
-        setIsSubmitting(false);
-        if (invitationCodeIdentityProvider === "gams_engine") {
-          handleLogin();
-        } else if (ldapConfig.findIndex(config => config.name === invitationCodeIdentityProvider) !== -1) {
-          setSelectedAuthProvider(invitationCodeIdentityProvider);
-          setRegister(false);
-          setShowRegistrationSuccessAlert(true);
-        } else {
-          const selectedOAuthProvider = OAuthConfig.filter(config => config.name === invitationCodeIdentityProvider);
-          if (selectedOAuthProvider.length > 0) {
-            initiateOAuthLogin(selectedOAuthProvider[0]);
-            return;
+        setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists. You will not be able to log in.");
+      }
+    } catch (err) {
+      if (err.response == null || err.response.status !== 400) {
+        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+      } else {
+        setLoginErrorMsg(err.response.data.message);
+        if (err.response.data.hasOwnProperty('errors')) {
+          if (err.response.data.errors.hasOwnProperty('username')) {
+            setUsernameError(err.response.data.errors.username);
           }
-          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists. You will not be able to log in.");
-        }
-      })
-      .catch(err => {
-        setIsSubmitting(false);
-        if (err.response == null || err.response.status !== 400) {
-          setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
-        } else {
-          setLoginErrorMsg(err.response.data.message);
-          if (err.response.data.hasOwnProperty('errors')) {
-            if (err.response.data.errors.hasOwnProperty('username')) {
-              setUsernameError(err.response.data.errors.username);
-            }
-            if (err.response.data.errors.hasOwnProperty('password')) {
-              setPasswordError(err.response.data.errors.password);
-            }
+          if (err.response.data.errors.hasOwnProperty('password')) {
+            setPasswordError(err.response.data.errors.password);
           }
         }
-      });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
