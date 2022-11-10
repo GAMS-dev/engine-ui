@@ -347,10 +347,10 @@ const AdministrationForm = () => {
                     </div>
                 </div>
                 <div className="namespace-list col-md-4 col-12 order-1 order-md-2 mt-1">
-                    <ul className="list-group" id="list-tab" role="tablist" onClick={(e) => setSelectedAuthProvider(e.target.dataset.id)}>
+                    <ul className="list-group" id="list-tab" role="tablist">
                         <li
                             key='__+add_new'
-                            data-id='__+add_new'
+                            onClick={() => setSelectedAuthProvider('__+add_new')}
                             className={`list-group-item list-group-item-add list-group-item-action${selectedAuthProvider === '__+add_new' ? " active" : ""}`}
                         >
                             Add New Provider
@@ -358,20 +358,19 @@ const AdministrationForm = () => {
                         {authProviders.map(authProvider => (
                             <li
                                 key={authProvider.name}
-                                data-id={authProvider.name}
+                                onClick={() => setSelectedAuthProvider(authProvider.name)}
                                 className={`list-group-item list-group-item-action${authProvider.name === selectedAuthProvider ? " active" : ""}`}
                             >
                                 {authProvider.name}
-                                <span data-id={authProvider.name} className="float-right">
+                                <span className="float-right">
                                     <button
                                         type="button"
                                         className="btn btn-sm btn-danger"
-                                        data-id={authProvider.name}
                                         onClick={() => {
                                             setShowRemoveAuthProviderModal(true);
                                         }}
                                     >
-                                        <Trash2 data-id={authProvider.name} width="14px" />
+                                        <Trash2 width="14px" />
                                     </button>
                                 </span>
                             </li>
