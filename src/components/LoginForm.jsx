@@ -156,6 +156,10 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         setIsValidInvitationCode(false);
         const response = await axios.get(`${server}/users/invitation/${invitationCode}`);
+        if (response.data.identity_provider == null) {
+          setLoginErrorMsg('Invalid invitation code: Identity provider has been deleted.');
+          return;
+        }
         setInvitationCodeIdentityProvider(response.data.identity_provider);
         const userSubject = response.data.identity_provider_user_subject;
         const usernameTmp = [];
