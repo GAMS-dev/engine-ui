@@ -42,7 +42,9 @@ const UserUpdateIdentityProviderForm = () => {
                 const userInfoResponse = await userInfoPromise;
                 const userInfo = userInfoResponse.data[0];
                 setAvailableIdentityProviders(availableIdentityProvidersTmp);
-                setIdentityProvider(availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0]);
+                setIdentityProvider(userInfo.identity_provider == null ?
+                    availableIdentityProvidersTmp[availableIdentityProvidersTmp.length - 1] :
+                    availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0]);
                 setIdentityProviderSubject(userInfo.identity_provider_user_subject == null ? "" : userInfo.identity_provider_user_subject);
             } catch (err) {
                 setSubmissionErrorMsg(`Problems while retrieving authentication providers. Error message: ${getResponseError(err)}.`);
