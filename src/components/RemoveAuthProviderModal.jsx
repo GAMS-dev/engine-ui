@@ -23,7 +23,7 @@ const RemoveAuthProviderModal = props => {
                     name: providerId
                 }
             });
-            setAlertMsg(`Authentication provider: ${providerId} removed successfully!`);
+            setAlertMsg(`success:Authentication provider: ${providerId} removed successfully!`);
             setRefreshProviders(curr => curr + 1);
         } catch (err) {
             setSubmissionErrorMsg(`Some error occurred while trying to remove the authentication provider: ${providerId}. Error message: ${getResponseError(err)}.`);
