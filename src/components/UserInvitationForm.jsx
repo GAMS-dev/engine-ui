@@ -153,10 +153,10 @@ const UserInvitationForm = () => {
                 });
                 invitationSubmissionForm.append("default_label", defaultInstance.value);
             }
-            if (assignLicense && license !== "") {
-                const license_b64 = window.btoa(license);
-                invitationSubmissionForm.append("gams_license", license_b64);
-            }
+        }
+        if (assignLicense && license !== "") {
+            const license_b64 = window.btoa(license);
+            invitationSubmissionForm.append("gams_license", license_b64);
         }
         if (role === "inviter") {
             selectedIdentityProvidersAllowed.forEach(provider => {
@@ -299,70 +299,70 @@ const UserInvitationForm = () => {
                                                         </div>
                                                     </> : <></>}
                                             </>}
-
-                                        {roles && roles.includes('admin') && <div className="form-group form-check mt-3 mb-3">
-                                            <input type="checkbox" className="form-check-input"
-                                                checked={assignLicense !== false} onChange={e => setAssignLicense(e.target.checked)}
-                                                id="assignLicense" />
-                                            <label className="form-check-label" htmlFor="assignLicense">Assign License?</label>
-                                            {assignLicense && <div>
-                                                <label htmlFor="licenseBox">
-                                                    GAMS License for User
-                                                </label>
-                                                <textarea
-                                                    id="licenseBox"
-                                                    rows="6"
-                                                    cols="50"
-                                                    className="form-control monospace no-resize"
-                                                    value={license}
-                                                    onChange={e => setLicense(e.target.value)} >
-                                                </textarea> </div>
-                                            }
-                                        </div>}
-                                        {role === "inviter" && <div className="form-group">
-                                            <label htmlFor="identityProvidersAllowed">
-                                                Identity providers user is allowed to invite with
-                                            </label>
-                                            <Select
-                                                id="identityProvidersAllowed"
-                                                value={selectedIdentityProvidersAllowed}
-                                                isMulti={true}
-                                                isSearchable={true}
-                                                onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
-                                                options={availableIdentityProviders}
-                                            />
-                                        </div>}
-                                        {availableIdentityProviders.length > 1 && <div className="form-group">
-                                            <label htmlFor="identityProvider">
-                                                Identity provider
-                                            </label>
-                                            <Select
-                                                id="identityProvider"
-                                                value={identityProvider}
-                                                isSearchable={true}
-                                                onChange={selected => setIdentityProvider(selected)}
-                                                options={availableIdentityProviders}
-                                            />
-                                        </div>}
-                                        {availableIdentityProviders.length > 1 && identityProvider.value !== "gams_engine" &&
-                                            <div className="form-group">
-                                                <label htmlFor="identityProviderSubject" className="sr-only">
-                                                    Identity provider subject
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className={"form-control" + (formErrors.identity_provider_user_subject ? " is-invalid" : "")}
-                                                    placeholder="Identity provider subject"
-                                                    name="identityProviderSubject"
-                                                    value={identityProviderSubject}
-                                                    onChange={e => setIdentityProviderSubject(e.target.value)}
-                                                    required
-                                                />
-                                                <div className="invalid-feedback">
-                                                    {formErrors.identity_provider_user_subject ? formErrors.identity_provider_user_subject : ""}
-                                                </div>
-                                            </div>}
-                                    </>}
+                                    </>
+                                }
+                                {roles && roles.includes('admin') && <div className="form-group form-check mt-3 mb-3">
+                                    <input type="checkbox" className="form-check-input"
+                                        checked={assignLicense !== false} onChange={e => setAssignLicense(e.target.checked)}
+                                        id="assignLicense" />
+                                    <label className="form-check-label" htmlFor="assignLicense">Assign License?</label>
+                                    {assignLicense && <div>
+                                        <label htmlFor="licenseBox">
+                                            GAMS License for User
+                                        </label>
+                                        <textarea
+                                            id="licenseBox"
+                                            rows="6"
+                                            cols="50"
+                                            className="form-control monospace no-resize"
+                                            value={license}
+                                            onChange={e => setLicense(e.target.value)} >
+                                        </textarea> </div>
+                                    }
+                                </div>}
+                                {role === "inviter" && <div className="form-group">
+                                    <label htmlFor="identityProvidersAllowed">
+                                        Identity providers user is allowed to invite with
+                                    </label>
+                                    <Select
+                                        id="identityProvidersAllowed"
+                                        value={selectedIdentityProvidersAllowed}
+                                        isMulti={true}
+                                        isSearchable={true}
+                                        onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
+                                        options={availableIdentityProviders}
+                                    />
+                                </div>}
+                                {availableIdentityProviders.length > 1 && <div className="form-group">
+                                    <label htmlFor="identityProvider">
+                                        Identity provider
+                                    </label>
+                                    <Select
+                                        id="identityProvider"
+                                        value={identityProvider}
+                                        isSearchable={true}
+                                        onChange={selected => setIdentityProvider(selected)}
+                                        options={availableIdentityProviders}
+                                    />
+                                </div>}
+                                {availableIdentityProviders.length > 1 && identityProvider.value !== "gams_engine" &&
+                                    <div className="form-group">
+                                        <label htmlFor="identityProviderSubject" className="sr-only">
+                                            Identity provider subject
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className={"form-control" + (formErrors.identity_provider_user_subject ? " is-invalid" : "")}
+                                            placeholder="Identity provider subject"
+                                            name="identityProviderSubject"
+                                            value={identityProviderSubject}
+                                            onChange={e => setIdentityProviderSubject(e.target.value)}
+                                            required
+                                        />
+                                        <div className="invalid-feedback">
+                                            {formErrors.identity_provider_user_subject ? formErrors.identity_provider_user_subject : ""}
+                                        </div>
+                                    </div>}
                             </fieldset>
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
