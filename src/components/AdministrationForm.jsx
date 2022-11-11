@@ -1,5 +1,7 @@
 import React, { useEffect, useContext, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Select from 'react-select';
+import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { Trash2 } from "react-feather";
 import { AlertContext } from "./Alert";
@@ -22,6 +24,7 @@ const AdministrationForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
 
     const updateHostnameButton = useRef(null);
+    const navigate = useNavigate();
 
     const [refreshProviders, setRefreshProviders] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -74,6 +77,7 @@ const AdministrationForm = () => {
     const [ldapUserFilter, setLdapUserFilter] = useState("");
 
     const [showRemoveAuthProviderModal, setShowRemoveAuthProviderModal] = useState(false);
+    const [showUpdateHostnameModal, setShowUpdateHostnameModal] = useState(false);
 
     useEffect(() => {
         const fetchAuthProviders = async () => {
@@ -232,7 +236,11 @@ const AdministrationForm = () => {
         }
     }, [selectedAuthProvider, authProviders, ldapProviders, setAlertMsg, server, currentConfigHostname]);
 
-    const updateHostname = async () => {
+    const updateHostname = async (acceptLogout) => {
+        if (acceptLogout === false) {
+            setShowUpdateHostnameModal(true);
+            return;
+        }
         try {
             setHostnameUpdating(true);
             const patchConfigForm = new FormData();
@@ -243,6 +251,7 @@ const AdministrationForm = () => {
             setAlertMsg(`Problems updating hostname. Error message: ${getResponseError(err)}.`);
         } finally {
             setHostnameUpdating(false);
+            navigate("/logout");
         }
     }
 
@@ -490,7 +499,7 @@ const AdministrationForm = () => {
                                             <div>
                                                 {hostnameUpdating ? <ClipLoader /> : <small>
                                                     The Engine configuration does not seem to be set to the correct hostname (current: {currentConfigHostname}, expected: {expectedConfigHostname}). Do you want to update the hostname now?
-                                                    <Button className="btn-update-hostname" variant="link" ref={updateHostnameButton} onClick={updateHostname}>Update</Button>
+                                                    <Button className="btn-update-hostname" variant="link" ref={updateHostnameButton} onClick={() => updateHostname(false)}>Update</Button>
                                                 </small>}
                                             </div> : <></>}
                                         <input
@@ -977,6 +986,22 @@ const AdministrationForm = () => {
                 providerId={selectedAuthProvider}
                 setRefreshProviders={setRefreshProviders}
             />
+            <Modal show={showUpdateHostnameModal} onHide={() => setShowUpdateHostnameModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Please Confirm</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to update the hostname to: <code>{expectedConfigHostname}</code>? This will invalidate all JWT tokens and consequently log out all users (including yourself).
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowUpdateHostnameModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={() => updateHostname(true)}>
+                        Update
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 };
