@@ -27,9 +27,9 @@ const UserInvitationForm = () => {
     const [assignQuotas, setAssignQuotas] = useState(false);
     const [quotas, setQuotas] = useState(null);
 
-    const [availableIdentityProviders, setAvailableIdentityProviders] = useState([{ value: "gams_engine", label: "GAMS Engine" }]);
-    const [selectedIdentityProvidersAllowed, setSelectedIdentityProvidersAllowed] = useState({ value: "gams_engine", label: "GAMS Engine" });
-    const [identityProvider, setIdentityProvider] = useState({ value: "gams_engine", label: "GAMS Engine" });
+    const [availableIdentityProviders, setAvailableIdentityProviders] = useState([{ value: "gams_engine", label: "gams_engine" }]);
+    const [selectedIdentityProvidersAllowed, setSelectedIdentityProvidersAllowed] = useState({ value: "gams_engine", label: "gams_engine" });
+    const [identityProvider, setIdentityProvider] = useState({ value: "gams_engine", label: "gams_engine" });
     const [identityProviderSubject, setIdentityProviderSubject] = useState("");
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +57,7 @@ const UserInvitationForm = () => {
                 axios
                     .get(`${server}/auth/inviters-providers/${encodeURIComponent(username)}`)
                     .then(res => {
-                        const availableIdentityProvidersTmp = res.data.map(provider => ({ value: provider.name, label: provider.label }));
+                        const availableIdentityProvidersTmp = res.data.map(provider => ({ value: provider.name, label: provider.name }));
                         setAvailableIdentityProviders(availableIdentityProvidersTmp);
                         setSelectedIdentityProvidersAllowed(availableIdentityProvidersTmp);
                     })

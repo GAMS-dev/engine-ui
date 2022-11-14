@@ -22,7 +22,7 @@ const UserUpdateIdentityProviderForm = () => {
     const [providerUpdated, setProviderUpdated] = useState(false);
 
     const [availableIdentityProviders, setAvailableIdentityProviders] = useState([]);
-    const [identityProvider, setIdentityProvider] = useState({ value: "gams_engine", label: "GAMS Engine" });
+    const [identityProvider, setIdentityProvider] = useState({ value: "gams_engine", label: "gams_engine" });
     const [identityProviderSubject, setIdentityProviderSubject] = useState("");
     const [enginePassword, setEnginePassword] = useState("");
     const [enginePasswordConfirm, setEnginePasswordConfirm] = useState("");
@@ -36,7 +36,7 @@ const UserUpdateIdentityProviderForm = () => {
                     params: { username: user }
                 });
                 const response = await axios.get(`${server}/auth/inviters-providers/${encodeURIComponent(username)}`);
-                const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.label })).concat(
+                const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
                     [{ value: "", label: "None (block user)" }]
                 );
                 const userInfoResponse = await userInfoPromise;
