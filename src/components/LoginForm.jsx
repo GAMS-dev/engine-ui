@@ -162,15 +162,17 @@ const LoginForm = ({ showRegistrationForm }) => {
         }
         setInvitationCodeIdentityProvider(response.data.identity_provider);
         const userSubject = response.data.identity_provider_user_subject;
-        const usernameTmp = [];
-        for (let i = 0; i < userSubject.length; i += 1) {
-          const char = userSubject.charAt(i);
-          if (!/^[a-zA-Z0-9_]+$/.test(char) || usernameTmp.length > 70) {
-            break;
+        if (userSubject != null) {
+          const usernameTmp = [];
+          for (let i = 0; i < userSubject.length; i += 1) {
+            const char = userSubject.charAt(i);
+            if (!/^[a-zA-Z0-9_]+$/.test(char) || usernameTmp.length > 70) {
+              break;
+            }
+            usernameTmp.push(char);
           }
-          usernameTmp.push(char);
+          setUsername(usernameTmp.join(""));
         }
-        setUsername(usernameTmp.join(""));
         setIsValidInvitationCode(true);
       } catch (err) {
         if (err.response && err.response.status === 404) {
