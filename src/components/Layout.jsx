@@ -101,7 +101,7 @@ const Layout = () => {
                 }
                 <Route path="/users" element={<Users setLicenseExpiration={setLicenseExpiration} />} />
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
-                  <Route path="/users/:username/permissions" element={<UserPermissionUpdateForm />} />
+                  <Route path="/users/:user/permissions" element={<UserPermissionUpdateForm />} />
                 }
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
                   <Route path="/users/:username/quotas" element={<UserQuotaUpdateForm />} />
