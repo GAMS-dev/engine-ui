@@ -810,7 +810,7 @@ const AdministrationForm = () => {
                                             {formErrors.port ? formErrors.port : ""}
                                         </div>
                                         <small id="ldapPortHelp" className="form-text text-muted">
-                                            Examples: 389 (default) and 636 (for Simple TLS)
+                                            Examples: 389 (Plain or StartTLS) and 636 (for Simple TLS)
                                         </small>
                                     </div>
                                     <div className="form-check mt-3">
