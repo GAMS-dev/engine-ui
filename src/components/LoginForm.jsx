@@ -68,7 +68,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   }, [server, setLogin]);
 
   useEffect(() => {
-    const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE', 'CLEANUP', 'LICENSES', 'USAGE'];
+    const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE', 'CLEANUP', 'LICENSES', 'USAGE', 'AUTH'];
     const oauthLogin = async (authParams, code) => {
       if (code == null) {
         setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');

@@ -63,6 +63,7 @@ const AdministrationForm = () => {
     const [requestScopeCLEANUP, setRequestScopeCLEANUP] = useState("CLEANUP");
     const [requestScopeLICENSES, setRequestScopeLICENSES] = useState("LICENSES");
     const [requestScopeUSAGE, setRequestScopeUSAGE] = useState("USAGE");
+    const [requestScopeAUTH, setRequestScopeAUTH] = useState("AUTH");
 
     const [ldapHost, setLdapHost] = useState("");
     const [ldapPort, setLdapPort] = useState(389);
@@ -177,6 +178,7 @@ const AdministrationForm = () => {
             setRequestScopeCLEANUP('CLEANUP');
             setRequestScopeLICENSES('LICENSES');
             setRequestScopeUSAGE('USAGE');
+            setRequestScopeAUTH('AUTH');
             setLdapHost('');
             setLdapPort(389);
             setLdapUid('');
@@ -216,6 +218,7 @@ const AdministrationForm = () => {
                 setRequestScopeCLEANUP(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "CLEANUP")[0].request_scope);
                 setRequestScopeLICENSES(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "LICENSES")[0].request_scope);
                 setRequestScopeUSAGE(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "USAGE")[0].request_scope);
+                setRequestScopeAUTH(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "AUTH")[0].request_scope);
             } else if (providerConfig[0].is_ldap_identity_provider === true) {
                 setProviderType('ldap');
                 const ldapProviderConfig = ldapProviders.filter(config => config.name === providerConfig[0].name)[0];
@@ -302,6 +305,7 @@ const AdministrationForm = () => {
             authProviderForm.append("request_scope_CLEANUP", requestScopeCLEANUP);
             authProviderForm.append("request_scope_LICENSES", requestScopeLICENSES);
             authProviderForm.append("request_scope_USAGE", requestScopeUSAGE);
+            authProviderForm.append("request_scope_AUTH", requestScopeAUTH);
         } else if (providerType === "ldap") {
             authURI = `${server}/auth/ldap-providers`;
 
@@ -652,6 +656,23 @@ const AdministrationForm = () => {
                                         />
                                         <div className="invalid-feedback">
                                             {formErrors.request_scope_USAGE ? formErrors.request_scope_USAGE : ""}
+                                        </div>
+                                    </div>
+                                    <div className="form-group mt-3 mb-3">
+                                        <label htmlFor="requestScopeAUTH">
+                                            Scope that the client should request from the OP to get 'AUTH' scope
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className={"form-control" + (formErrors.request_scope_AUTH ? " is-invalid" : "")}
+                                            id="requestScopeAUTH"
+                                            autoComplete="on"
+                                            required
+                                            value={requestScopeAUTH}
+                                            onChange={e => setRequestScopeAUTH(e.target.value)}
+                                        />
+                                        <div className="invalid-feedback">
+                                            {formErrors.request_scope_AUTH ? formErrors.request_scope_AUTH : ""}
                                         </div>
                                     </div>
                                     <div className="form-group mt-3 mb-3">
