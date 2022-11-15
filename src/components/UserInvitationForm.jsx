@@ -55,7 +55,7 @@ const UserInvitationForm = () => {
                         setSubmissionErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
                     }),
                 axios
-                    .get(`${server}/auth/inviters-providers/${encodeURIComponent(username)}`)
+                    .get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`)
                     .then(res => {
                         const availableIdentityProvidersTmp = res.data.map(provider => ({ value: provider.name, label: provider.name }));
                         setAvailableIdentityProviders(availableIdentityProvidersTmp);

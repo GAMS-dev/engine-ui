@@ -35,7 +35,7 @@ const UserUpdateIdentityProviderForm = () => {
                 const userInfoPromise = axios.get(`${server}/users/`, {
                     params: { username: user }
                 });
-                const response = await axios.get(`${server}/auth/inviters-providers/${encodeURIComponent(username)}`);
+                const response = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`);
                 const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
                     [{ value: "", label: "None (block user)" }]
                 );
