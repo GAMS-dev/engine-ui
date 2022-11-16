@@ -36,12 +36,13 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [login, setLogin] = useContext(AuthContext);
 
   function clearRegisterErrors() {
+    setLoginErrorMsg("");
     setUsernameError(false);
     setPasswordError(false);
     setConfirmPasswordError(false);
   }
 
-  const loginUser = useCallback(async (jwt) => {
+  const loginUser = useCallback(async (jwt, isOauth) => {
     if (jwt == null) {
       return;
     }
@@ -62,7 +63,11 @@ const LoginForm = ({ showRegistrationForm }) => {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
       }
     } catch (err) {
-      setLoginErrorMsg(`Some error occurred while trying to retrieve user information from Engine. Error message: ${getResponseError(err)}.`);
+      if (isOauth === true && err.response && err.response.status === 401) {
+        setLoginErrorMsg("There does not appear to be a GAMS Engine user associated with your account. Please register first.");
+      } else {
+        setLoginErrorMsg(`Some error occurred while trying to retrieve user information from Engine. Error message: ${getResponseError(err)}.`);
+      }
       setIsSubmitting(false);
     }
   }, [server, setLogin]);
@@ -89,7 +94,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           setIsSubmitting(false);
           return;
         }
-        loginUser(jwt);
+        loginUser(jwt, true);
       } catch (err) {
         setLoginErrorMsg(`Problems retrieving authentication token from OAuth provider. Error message: ${getResponseError(err)}.`);
         setIsSubmitting(false);
