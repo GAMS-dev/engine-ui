@@ -34,7 +34,7 @@ const InstancesActionsButtonGroup = props => {
 
     return (
         <>
-            <Link to={`/instances/update/${label}`} className="btn btn-sm btn-outline-info">
+            <Link to={`update/${label}`} className="btn btn-sm btn-outline-info">
                 Update
             </Link>
             <button className="btn btn-sm btn-outline-danger" onClick={() => setShowConfirmDialog(true)}>Delete</button>

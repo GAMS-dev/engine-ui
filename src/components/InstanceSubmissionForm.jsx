@@ -265,7 +265,7 @@ const InstanceSubmissionForm = () => {
                                 {label ? "Update Instance" : "Add Instance"}
                             </SubmitButton>
                         </div>
-                        {instanceUpdated && <Navigate to="/instances" />}
+                        {instanceUpdated && <Navigate to=".." />}
                     </form>
                 )}
         </div>

@@ -1,18 +1,15 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
 import { calcRemainingQuota, getResponseError } from "./util";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import ClipLoader from "react-spinners/ClipLoader";
-import { Server } from "react-feather";
+import { Cpu, HardDrive } from "react-feather";
 
 
-const QuotaWidget = () => {
+const QuotaWidget = ({isVisible, className}) => {
     const [{ server, username }] = useContext(AuthContext);
 
-    const [showTT, setShowTT] = useState(false);
     const [data, setData] = useState([]);
-    const target = useRef(null);
 
     useEffect(() => {
         const cancelTokenSource = axios.CancelToken.source();
@@ -24,9 +21,6 @@ const QuotaWidget = () => {
                     params: { username: username },
                     cancelToken: cancelTokenSource.token
                 });
-                if (!showTT) {
-                    return;
-                }
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
                     const quotaFormatted = {
@@ -39,23 +33,31 @@ const QuotaWidget = () => {
                     }
                     setData([{
                         key: 'volume',
-                        text: `Volume: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume) + quotaFormatted.unitVolume}\n`,
+                        title: 'Volume quota',
+                        icon: <Cpu size={14}/>,
+                        text: `: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume) + quotaFormatted.unitVolume}\n`,
                         className: quotaRemaining.volume < 10000 ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
-                        text: `Disk: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.disk) + quotaFormatted.unitDisk}`,
+                        title: 'Disk quota',
+                        icon: <HardDrive size={14}/>,
+                        text: `: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.disk) + quotaFormatted.unitDisk}`,
                         className: quotaRemaining.disk < 100 ? 'text-danger' : ''
                     }]);
                 } else {
                     setData([{
                         key: 'volume',
-                        text: 'Volume: unlimited\n',
+                        title: 'Volume quota',
+                        icon: <Cpu size={14}/>,
+                        text: ': unlimited\n',
                         val: ''
                     },
                     {
                         key: 'disk',
-                        text: 'Disk: unlimited',
+                        title: 'Disk quota',
+                        icon: <HardDrive size={14}/>,
+                        text: ': unlimited',
                         className: ''
                     }]);
                 }
@@ -66,39 +68,25 @@ const QuotaWidget = () => {
                 }
             }
         }
-        if (showTT) {
+        if (isVisible !== false) {
             updateData();
         }
         return () => {
             cancelTokenSource.cancel()
         }
-    }, [server, username, showTT])
+    }, [server, username, isVisible])
 
-    return (
-        <>
-            <OverlayTrigger
-                placement="right"
-                show={showTT}
-                onToggle={show => setShowTT(show)}
-                delay={{ hide: 600 }}
-                overlay={
-                    <Tooltip id="quota-tooltip">
-                        {data ?
-                            <span className="pre-line">
-                                {data.map(quotaEl =>
-                                    <span key={quotaEl.key}
-                                        className={quotaEl.className}>
-                                        {quotaEl.text}
-                                    </span>)}
-                            </span> :
-                            <ClipLoader size={12} />}
-                    </Tooltip>
-                }
-            >
-                <span ref={target} id="quota-icon"><Server size={12} /></span>
-            </OverlayTrigger>
-        </>
-    );
+    return  (data ?
+        <span className="pre-line">
+            <small className={`${className == null? '': className} pb-0`}>Quotas:</small>
+            {data.map(quotaEl =>
+                <span key={quotaEl.key}
+                    className={`${className == null? '': className} ${quotaEl.className}`}
+                    title={quotaEl.title}>
+                    {quotaEl.icon}{quotaEl.text}
+                </span>)}
+        </span> :
+        <ClipLoader size={12} />)
 };
 
 export default QuotaWidget;

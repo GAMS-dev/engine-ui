@@ -21,8 +21,6 @@ import Cleanup from "./Cleanup";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import Usage from "./Usage";
 import { getResponseError } from "./util";
-import Instances from "./Instances";
-import InstanceSubmissionForm from "./InstanceSubmissionForm";
 import Webhooks from "./Webhooks";
 import { ServerInfoContext } from "../ServerInfoContext";
 import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
@@ -119,20 +117,11 @@ const Layout = () => {
                 }
                 <Route path="/users/:username/usage" element={<Usage />} />
                 <Route path="/cleanup" element={<Cleanup />} />
-                {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
-                  <Route path="/instances" element={<Instances />} />
-                }
-                {(roles && roles.includes('admin') && serverInfo.in_kubernetes === true) &&
-                  <Route path="/instances/update">
-                    <Route path=":label" element={<InstanceSubmissionForm />} />
-                    <Route path="" element={<InstanceSubmissionForm />} />
-                  </Route>
-                }
                 {serverInfo.in_kubernetes === true &&
                   <Route path="/preferences" element={<PreferencesForm />} />
                 }
                 {roles && roles.includes('admin') &&
-                  <Route path="/administration" element={<AdministrationForm />} />
+                  <Route path="/administration/*" element={<AdministrationForm />} />
                 }
                 <Route path="/webhooks" element={<Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />} />
                 <Route path="/webhooks/create" element={<WebhookSubmissionForm />} />

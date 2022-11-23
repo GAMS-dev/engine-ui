@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
-import { Package, Users, Play, Archive, Server, ExternalLink } from "react-feather";
+import { Package, Users, Play, Archive, Settings, ExternalLink } from "react-feather";
 import { useLocation } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
-import LogOutMenu from "./LogOutMenu";
+import UserMenu from "./UserMenu";
 
 const Sidebar = props => {
   const [{ roles }] = useContext(AuthContext);
@@ -12,13 +12,13 @@ const Sidebar = props => {
     <nav className="sidebar bg-light">
       <div className="sidebar-sticky">
         <ul className="nav flex-column nav-top d-md-block bg-light d-none">
-          <LogOutMenu />
+          <UserMenu />
         </ul>
         <hr className="d-none d-md-block" />
         <ul className="nav sidebar-nav">
           <li className="nav-item">
             <Link to="/jobs" className={`nav-link nav-block${["/models", "/new-user", "/users",
-              "/groups", "/nsusers", "/cleanup", "/licenses", "/usage", "/instances", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
+              "/groups", "/nsusers", "/cleanup", "/licenses", "/usage", "/administration", "/webhooks", "/quotas"].filter(el => pathname.startsWith(el)).length > 0 ? "" : " active"}`}>
               <Play className="feather" />
               <span className="nav-link-text">Jobs</span>
             </Link>
@@ -47,11 +47,11 @@ const Sidebar = props => {
               <span className="nav-link-text">Cleanup</span>
             </Link>
           </li>
-          {(props.inKubernetes && roles && roles.find(role => role === "admin") !== undefined) &&
+          {roles && roles.find(role => role === "admin") !== undefined &&
             <li className="nav-item">
-              <Link to="/instances" className={`nav-link nav-block${pathname.startsWith("/instances") ? " active" : ""}`}>
-                <Server className="feather" />
-                <span className="nav-link-text">Instances</span>
+              <Link to="/administration" className={`nav-link nav-block${pathname.startsWith("/administration") ? " active" : ""}`}>
+                <Settings className="feather" />
+                <span className="nav-link-text">Administration</span>
               </Link>
             </li>
           }

@@ -3,7 +3,7 @@ import { Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg";
 import { ServerInfoContext } from "../ServerInfoContext";
-import LogOutMenu from "./LogOutMenu";
+import UserMenu from "./UserMenu";
 
 const Header = props => {
   const { licenseExpiration, isAdmin } = props;
@@ -42,7 +42,7 @@ const Header = props => {
         </Link>
       </header>
       <ul className="nav flex-column nav-top d-block bg-light d-md-none">
-        <LogOutMenu />
+        <UserMenu />
       </ul>
     </>
   );
