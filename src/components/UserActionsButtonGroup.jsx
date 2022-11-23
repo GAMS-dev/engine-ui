@@ -39,9 +39,9 @@ const UserActionsButtonGroup = props => {
             </>}
           <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>Change Password</Dropdown.Item>
           <Dropdown.Item as={Link} to={`/users/${username}/usage`}>Usage</Dropdown.Item>
-          <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
+          {username !== 'admin' && <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
             Edit Permissions
-          </Dropdown.Item>
+          </Dropdown.Item>}
           {userroles && !userroles.includes("admin") ?
             <Dropdown.Item as={Link} to={`/users/${username}/quotas`}>
               Edit Quotas
