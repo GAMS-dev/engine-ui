@@ -72,8 +72,37 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
   }, [server, setLogin]);
 
+  const initiateOAuthLogin = useCallback(async (config) => {
+    setIsSubmitting(true);
+    const state = generateRandomString(32);
+    const pkceParams = await generatePKCEParams();
+    const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE',
+      'CLEANUP', 'LICENSES', 'USAGE', 'AUTH'];
+    const requestScopes = config.oauth2.scopes.filter(
+      scope_object => defaultScopes.includes(scope_object.scope))
+      .map(scope_object => scope_object.request_scope);
+    const queryParams = [
+      'response_type=code',
+      `client_id=${encodeURIComponent(config.oauth2.web_ui_client_id)}`,
+      `scope=${encodeURIComponent(requestScopes.join(' '))}`,
+      `state=${state}`,
+      `redirect_uri=${encodeURIComponent(window.location.origin)}`,
+      `code_challenge=${pkceParams.codeChallenge}`,
+      'code_challenge_method=S256'
+    ];
+    sessionStorage.setItem('authParams', JSON.stringify({
+      clientId: config.oauth2.web_ui_client_id,
+      tokenEndpoint: config.oauth2.has_client_secret ? `${server}/auth/oauth2-token` : config.oauth2.token_endpoint,
+      codeChallenge: pkceParams.codeChallenge,
+      codeVerifier: pkceParams.codeVerifier,
+      name: config.name,
+      hasClientSecret: config.oauth2.has_client_secret,
+      state
+    }));
+    window.location.replace(`${config.oauth2.authorization_endpoint}?${queryParams.join('&')} `);
+  }, [server]);
+
   useEffect(() => {
-    const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE', 'CLEANUP', 'LICENSES', 'USAGE', 'AUTH'];
     const oauthLogin = async (authParams, code) => {
       if (code == null) {
         setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
@@ -82,11 +111,15 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
       try {
         const params = new URLSearchParams();
-        params.append('grant_type', 'authorization_code');
-        params.append('client_id', authParams.clientId);
         params.append('redirect_uri', window.location.origin);
         params.append('code_verifier', authParams.codeVerifier);
         params.append('code', code);
+        if (authParams.hasClientSecret === true) {
+          params.append('identity_provider_name', authParams.name);
+        } else {
+          params.append('grant_type', 'authorization_code');
+          params.append('client_id', authParams.clientId);
+        }
         const response = await axios.post(authParams.tokenEndpoint, params);
         const jwt = response.data.access_token;
         if (jwt == null) {
@@ -102,31 +135,49 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
 
     const fetchAuthProviders = async (selectedProvider) => {
+      let response;
       try {
-        const response = await axios.get(`${server}/auth/providers`);
-        const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null).map(config => {
-          const newConfig = config;
-          newConfig.oauth2.scopes = newConfig.oauth2.scopes.filter(
-            scope_object => defaultScopes.includes(scope_object.scope)).map(scope_object => scope_object.request_scope);
-          return newConfig;
-        });
-        const LDAPConfigTmp = response.data.filter(config => config.is_ldap_identity_provider === true);
-
-        if (selectedProvider != null) {
-          const selectedOAuthProvider = OAuthConfigTmp.filter(config => config.name === selectedProvider);
-          if (selectedOAuthProvider.length > 0) {
-            initiateOAuthLogin(selectedOAuthProvider[0]);
-            return;
-          }
-          if (LDAPConfigTmp.findIndex(config => config.name === selectedProvider) !== -1) {
-            setSelectedAuthProvider(selectedProvider);
-          }
-        }
-        setOAuthConfig(OAuthConfigTmp);
-        setLDAPConfig(LDAPConfigTmp);
+        response = await axios.get(`${server}/auth/providers`);
       } catch (err) {
         setLoginErrorMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+        return;
       }
+      const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null);
+      const LDAPConfigTmp = response.data.filter(config => config.is_ldap_identity_provider === true);
+
+      if (selectedProvider != null) {
+        let selectedProviderFound = false;
+        const selectedOAuthProvider = OAuthConfigTmp.filter(config => config.name === selectedProvider);
+        if (selectedOAuthProvider.length > 0) {
+          initiateOAuthLogin(selectedOAuthProvider[0]);
+          return;
+        }
+        if (LDAPConfigTmp.findIndex(config => config.name === selectedProvider) !== -1) {
+          setSelectedAuthProvider(selectedProvider);
+          selectedProviderFound = true;
+        }
+        if (!selectedProviderFound) {
+          try {
+            response = await axios.get(`${server}/auth/providers`, { params: { name: selectedProvider } });
+          } catch (err) {
+            setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${selectedProvider}. Error message: ${getResponseError(err)}.`);
+            return;
+          }
+          if (response.data.length > 0) {
+            const providerConfig = response.data[0];
+            if (providerConfig.oauth2 != null) {
+              initiateOAuthLogin(providerConfig);
+              return;
+            }
+            if (providerConfig.is_ldap_identity_provider) {
+              LDAPConfigTmp.push(providerConfig);
+              setSelectedAuthProvider(providerConfig);
+            }
+          }
+        }
+      }
+      setOAuthConfig(OAuthConfigTmp);
+      setLDAPConfig(LDAPConfigTmp);
     }
     let selectedProvider = null;
 
@@ -136,8 +187,15 @@ const LoginForm = ({ showRegistrationForm }) => {
       const authParams = JSON.parse(sessionStorage.getItem('authParams'));
       sessionStorage.removeItem('authParams');
       if (authParams != null && authParams.state === searchParams.get('state')) {
-        const code = searchParams.get('code');
-        oauthLogin(authParams, code);
+        if (document.location.search.includes('error=') &&
+          document.location.search.includes('error_description=')) {
+          const searchParams = new URLSearchParams(document.location.search);
+          setLoginErrorMsg(searchParams.get('error_description'));
+          setIsSubmitting(false);
+        } else {
+          const code = searchParams.get('code');
+          oauthLogin(authParams, code);
+        }
       } else {
         setIsSubmitting(false);
       }
@@ -146,10 +204,9 @@ const LoginForm = ({ showRegistrationForm }) => {
       selectedProvider = searchParams.get('provider');
     }
     fetchAuthProviders(selectedProvider);
-  }, [server, setLogin, loginUser]);
+  }, [server, setLogin, loginUser, initiateOAuthLogin]);
 
   useEffect(() => {
-    setLoginErrorMsg('');
     if (invitationCode.length !== 36) {
       if (invitationCode.length !== 0) {
         setLoginErrorMsg('Invalid invitation code.');
@@ -157,6 +214,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       setIsValidInvitationCode(false);
       return;
     }
+    setLoginErrorMsg('');
     const fetchInvitationCodeMetadata = async () => {
       try {
         setIsValidInvitationCode(false);
@@ -189,29 +247,6 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
     fetchInvitationCodeMetadata();
   }, [server, invitationCode]);
-
-  const initiateOAuthLogin = async (config) => {
-    setIsSubmitting(true);
-    const state = generateRandomString(32);
-    const pkceParams = await generatePKCEParams();
-    const queryParams = [
-      'response_type=code',
-      `client_id=${encodeURIComponent(config.oauth2.web_ui_client_id)}`,
-      `scope=${encodeURIComponent(config.oauth2.scopes.join(' '))}`,
-      `state=${state}`,
-      `redirect_uri=${encodeURIComponent(window.location.origin)}`,
-      `code_challenge=${pkceParams.codeChallenge}`,
-      'code_challenge_method=S256'
-    ];
-    sessionStorage.setItem('authParams', JSON.stringify({
-      clientId: config.oauth2.web_ui_client_id,
-      tokenEndpoint: config.oauth2.token_endpoint,
-      codeChallenge: pkceParams.codeChallenge,
-      codeVerifier: pkceParams.codeVerifier,
-      state
-    }));
-    window.location.replace(`${config.oauth2.authorization_endpoint}?${queryParams.join('&')} `);
-  };
 
 
   const handleLogin = async () => {
@@ -264,7 +299,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
       await axios.post(`${server}/users/`, registrationForm);
       if (invitationCodeIdentityProvider === "gams_engine") {
-        handleLogin();
+        await handleLogin();
       } else if (ldapConfig.findIndex(config => config.name === invitationCodeIdentityProvider) !== -1) {
         setSelectedAuthProvider(invitationCodeIdentityProvider);
         setRegister(false);
@@ -272,10 +307,22 @@ const LoginForm = ({ showRegistrationForm }) => {
       } else {
         const selectedOAuthProvider = OAuthConfig.filter(config => config.name === invitationCodeIdentityProvider);
         if (selectedOAuthProvider.length > 0) {
-          initiateOAuthLogin(selectedOAuthProvider[0]);
+          await initiateOAuthLogin(selectedOAuthProvider[0]);
           return;
         }
-        setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists. You will not be able to log in.");
+        try {
+          const response = await axios.get(`${server}/auth/providers`, { params: { name: invitationCodeIdentityProvider } });
+          if (response.data.length > 0) {
+            const providerConfig = response.data[0];
+            if (providerConfig.oauth2 != null) {
+              await initiateOAuthLogin(providerConfig);
+              return;
+            }
+          }
+          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists. You will not be able to log in.");
+        } catch (err) {
+          setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${invitationCodeIdentityProvider}. Error message: ${getResponseError(err)}.`);
+        }
       }
     } catch (err) {
       if (err.response == null || err.response.status !== 400) {
