@@ -519,7 +519,6 @@ const AuthProviderForm = () => {
                                         className={"form-control" + (formErrors.web_ui_client_secret ? " is-invalid" : "")}
                                         id="webuiClientSecret"
                                         autoComplete="on"
-                                        required
                                         value={webuiClientSecret}
                                         onChange={e => setWebuiClientSecret(e.target.value)}
                                     />
