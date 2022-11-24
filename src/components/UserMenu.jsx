@@ -41,7 +41,7 @@ export const UserMenu = () => {
                     <Dropdown.Menu>
                         <QuotaWidget isVisible={dropdownExpanded} className="dropdown-item dropdown-item-static small pe-none"/>
                         <Dropdown.Divider />
-                        {instancesAvailable && <Link to='/preferences' className="dropdown-item" role="button">
+                        {instancesAvailable && <Link to='/default-instance' className="dropdown-item" role="button">
                             <small>Set default instance</small>
                         </Link>}
                         <Link to={`/users/${username}/change-pass`} className="dropdown-item" role="button">

@@ -28,7 +28,7 @@ import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import GroupMembers from "./GroupMembers";
 import WebhookSubmissionForm from "./WebhookSubmissionForm";
-import PreferencesForm from "./PreferencesForm";
+import DefaultInstanceForm from "./DefaultInstanceForm";
 import AdministrationForm from "./AdministrationForm";
 import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
 
@@ -118,7 +118,7 @@ const Layout = () => {
                 <Route path="/users/:username/usage" element={<Usage />} />
                 <Route path="/cleanup" element={<Cleanup />} />
                 {serverInfo.in_kubernetes === true &&
-                  <Route path="/preferences" element={<PreferencesForm />} />
+                  <Route path="/default-instance" element={<DefaultInstanceForm />} />
                 }
                 {roles && roles.includes('admin') &&
                   <Route path="/administration/*" element={<AdministrationForm />} />

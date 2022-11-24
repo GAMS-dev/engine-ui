@@ -8,14 +8,14 @@ import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import { ClipLoader } from "react-spinners";
 
-const PreferencesForm = () => {
+const DefaultInstanceForm = () => {
     const [{ username, server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [preferencesUpdated, setPreferencesUpdated] = useState(false);
+    const [instanceUpdated, setInstanceUpdated] = useState(false);
 
     const [currentDefaultInstance, setCurrentDefaultInstance] = useState(null);
     const [newDefaultInstance, setNewDefaultInstance] = useState(null);
@@ -60,7 +60,7 @@ const PreferencesForm = () => {
         }
         if (currentDefaultInstance != null && newDefaultInstance.value === currentDefaultInstance.value) {
             setAlertMsg("success:Default instance updated!");
-            setPreferencesUpdated(true);
+            setInstanceUpdated(true);
             return;
         }
         setIsSubmitting(true);
@@ -74,7 +74,7 @@ const PreferencesForm = () => {
             .then(() => {
                 setIsSubmitting(false);
                 setAlertMsg("success:Default instance updated!");
-                setPreferencesUpdated(true);
+                setInstanceUpdated(true);
             })
             .catch(err => {
                 setSubmissionErrorMsg(`Some error occurred while trying to update default instance. Error message: ${getResponseError(err)}.`);
@@ -85,11 +85,11 @@ const PreferencesForm = () => {
     return (
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">Update Preferences</h1>
+                <h1 className="h2">Update Default Instance</h1>
             </div>
             {availableInstances == null ?
                 <ClipLoader /> : (availableInstances.length === 0 ?
-                    <>No preferences available</> : <form
+                    <>No instances available</> : <form
                         className="m-auto"
                         onSubmit={e => {
                             e.preventDefault();
@@ -120,12 +120,12 @@ const PreferencesForm = () => {
                         </fieldset>
                         <div className="mt-3">
                             <SubmitButton isSubmitting={isSubmitting}>
-                                Update Preferences
+                                Update Instance
                             </SubmitButton>
                         </div>
-                        {preferencesUpdated && <Navigate to="/" />}
+                        {instanceUpdated && <Navigate to="/" />}
                     </form>)}
         </div>);
 }
 
-export default PreferencesForm;
+export default DefaultInstanceForm;
