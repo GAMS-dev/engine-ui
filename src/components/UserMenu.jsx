@@ -44,6 +44,9 @@ export const UserMenu = () => {
                         {instancesAvailable && <Link to='/default-instance' className="dropdown-item" role="button">
                             <small>Set default instance</small>
                         </Link>}
+                        <Link to='/auth-token' className="dropdown-item" role="button">
+                            <small>Create auth token</small>
+                        </Link>
                         <Link to={`/users/${username}/change-pass`} className="dropdown-item" role="button">
                             <small>Change password</small>
                         </Link>

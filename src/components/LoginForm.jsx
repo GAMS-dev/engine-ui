@@ -58,7 +58,10 @@ const LoginForm = ({ showRegistrationForm }) => {
       });
       setIsSubmitting(false);
       if (reponse.data.length === 1) {
-        setLogin({ jwt, server, roles: reponse.data[0].roles, username: reponse.data[0].username });
+        setLogin({
+          jwt, server, roles: reponse.data[0].roles, username: reponse.data[0].username,
+          isOAuthToken: isOauth
+        });
       } else {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
       }

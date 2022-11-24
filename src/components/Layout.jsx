@@ -31,6 +31,7 @@ import WebhookSubmissionForm from "./WebhookSubmissionForm";
 import DefaultInstanceForm from "./DefaultInstanceForm";
 import AdministrationForm from "./AdministrationForm";
 import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
+import CreateAuthTokenForm from "./CreateAuthTokenForm";
 
 const Layout = () => {
   const [{ server, roles }] = useContext(AuthContext);
@@ -120,6 +121,7 @@ const Layout = () => {
                 {serverInfo.in_kubernetes === true &&
                   <Route path="/default-instance" element={<DefaultInstanceForm />} />
                 }
+                <Route path="/auth-token" element={<CreateAuthTokenForm />} />
                 {roles && roles.includes('admin') &&
                   <Route path="/administration/*" element={<AdministrationForm />} />
                 }

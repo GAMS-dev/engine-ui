@@ -1,8 +1,6 @@
 import React, { useState, useLayoutEffect, createContext } from "react";
 import axios from "axios";
 
-const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
-
 export const AuthContext = createContext();
 
 export const AuthProvider = props => {
@@ -24,11 +22,7 @@ export const AuthProvider = props => {
       setInterceptor([
         axios.interceptors.request.use(
           config => {
-            if (config.url.startsWith(login.server) &&
-              (config.url.startsWith(SERVER_NAME) ? config.url !== `${SERVER_NAME}/auth/` :
-                new URL(config.url).pathname !== "/auth")) {
-              config.headers.Authorization = "Bearer " + login.jwt;
-            }
+            config.headers.Authorization = "Bearer " + login.jwt;
             return config;
           },
           function (error) {
