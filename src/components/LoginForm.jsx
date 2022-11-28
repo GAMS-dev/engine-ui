@@ -79,7 +79,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     setIsSubmitting(true);
     const state = generateRandomString(32);
     const pkceParams = await generatePKCEParams();
-    const defaultScopes = ['NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE',
+    const defaultScopes = ['CONFIGURATION', 'NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE',
       'CLEANUP', 'LICENSES', 'USAGE', 'AUTH'];
     const requestScopes = config.oauth2.scopes.filter(
       scope_object => defaultScopes.includes(scope_object.scope))

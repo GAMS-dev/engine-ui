@@ -25,7 +25,8 @@ const CreateAuthTokenForm = () => {
     const minSeconds = 60;
 
     useEffect(() => {
-        const availableScopesTmp = [{ value: "NAMESPACES", label: "Namespaces/Models/Groups" },
+        const availableScopesTmp = [{ value: "CONFIGURATION", label: "Engine configuration" },
+        { value: "NAMESPACES", label: "Namespaces/Models/Groups" },
         { value: "JOBS", label: "Jobs" },
         { value: "HYPERCUBE", label: "Hypercube jobs" },
         { value: "USERS", label: "Users" },

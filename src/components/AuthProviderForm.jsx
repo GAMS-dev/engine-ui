@@ -35,6 +35,7 @@ const AuthProviderForm = () => {
     const [selectedAuthProvider, setSelectedAuthProvider] = useState("__+add_new");
     const [authProviders, setAuthProviders] = useState([]);
     const [ldapProviders, setLdapProviders] = useState([]);
+    const [OAuthProviders, setOAuthProviders] = useState([]);
     const [currentConfigHostname, setCurrentConfigHostname] = useState("http://localhost/api");
     const [expectedConfigHostname, setExpectedConfigHostname] = useState(server);
     const [hostnameUpdating, setHostnameUpdating] = useState(false);
@@ -58,6 +59,7 @@ const AuthProviderForm = () => {
     const [responseTypesSupported, setResponseTypesSupported] = useState("");
     const [grantTypesSupported, setGrantTypesSupported] = useState("");
     const [requestScopeREADONLY, setRequestScopeREADONLY] = useState("READONLY");
+    const [requestScopeCONFIGURATION, setRequestScopeCONFIGURATION] = useState("CONFIGURATION");
     const [requestScopeNAMESPACES, setRequestScopeNAMESPACES] = useState("NAMESPACES");
     const [requestScopeJOBS, setRequestScopeJOBS] = useState("JOBS");
     const [requestScopeUSERS, setRequestScopeUSERS] = useState("USERS");
@@ -89,9 +91,11 @@ const AuthProviderForm = () => {
                 setSelectedAuthProvider('__+add_new');
                 setIsLoading(true);
                 const responseLdapPromise = axios.get(`${server}/auth/ldap-providers`);
+                const responseOauthPromise = axios.get(`${server}/auth/oauth2-providers`);
                 const responseConfigPromise = axios.get(`${server}/configuration`);
                 const response = await axios.get(`${server}/auth/providers/all`);
                 const responseLdap = await responseLdapPromise;
+                const responseOAuth = await responseOauthPromise;
                 const responseConfig = await responseConfigPromise;
                 try {
                     setExpectedConfigHostname(new URL(server).href);
@@ -100,6 +104,7 @@ const AuthProviderForm = () => {
                 }
                 setCurrentConfigHostname(responseConfig.data.hostname);
                 setAuthProviders(response.data.filter(config => config.is_main_identity_provider !== true));
+                setOAuthProviders(responseOAuth.data);
                 setLdapProviders(responseLdap.data);
                 setIsLoading(false);
             } catch (err) {
@@ -175,6 +180,7 @@ const AuthProviderForm = () => {
             setResponseTypesSupported('');
             setGrantTypesSupported('');
             setRequestScopeREADONLY('READONLY');
+            setRequestScopeCONFIGURATION('CONFIGURATION');
             setRequestScopeNAMESPACES('NAMESPACES');
             setRequestScopeJOBS('JOBS');
             setRequestScopeUSERS('USERS');
@@ -205,26 +211,28 @@ const AuthProviderForm = () => {
             setProviderHidden(providerConfig[0].is_hidden === true);
             if (providerConfig[0].oauth2 != null) {
                 setProviderType('oauth2');
+                const oAuthProviderConfig = OAuthProviders.filter(config => config.name === providerConfig[0].name)[0];
                 setAutoDiscoveryMode(autoDiscoveryModes[0]);
-                setIssuerID(providerConfig[0].oauth2.issuer);
-                setWebuiClientId(providerConfig[0].oauth2.web_ui_client_id);
-                setWebuiClientSecret('');
-                setOauthAudience(providerConfig[0].oauth2.override_audience ? providerConfig[0].oauth2.override_audience : currentConfigHostname);
-                setAuthorizationEndpoint(providerConfig[0].oauth2.authorization_endpoint);
-                setTokenEndpoint(providerConfig[0].oauth2.token_endpoint);
-                setEndSessionEndpoint(providerConfig[0].oauth2.end_session_endpoint);
-                setJwksUri(providerConfig[0].oauth2.jwks_uri);
-                setResponseTypesSupported(providerConfig[0].oauth2.response_types_supported.join(","));
-                setGrantTypesSupported(providerConfig[0].oauth2.grant_types_supported.join(","));
-                setRequestScopeREADONLY(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "READONLY")[0].request_scope);
-                setRequestScopeNAMESPACES(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "NAMESPACES")[0].request_scope);
-                setRequestScopeJOBS(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "JOBS")[0].request_scope);
-                setRequestScopeUSERS(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "USERS")[0].request_scope);
-                setRequestScopeHYPERCUBE(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "HYPERCUBE")[0].request_scope);
-                setRequestScopeCLEANUP(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "CLEANUP")[0].request_scope);
-                setRequestScopeLICENSES(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "LICENSES")[0].request_scope);
-                setRequestScopeUSAGE(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "USAGE")[0].request_scope);
-                setRequestScopeAUTH(providerConfig[0].oauth2.scopes.filter(scope => scope.scope === "AUTH")[0].request_scope);
+                setIssuerID(oAuthProviderConfig.issuer);
+                setWebuiClientId(oAuthProviderConfig.web_ui_client_id);
+                setWebuiClientSecret(oAuthProviderConfig.web_ui_client_secret);
+                setOauthAudience(oAuthProviderConfig.override_audience ? oAuthProviderConfig.override_audience : currentConfigHostname);
+                setAuthorizationEndpoint(oAuthProviderConfig.authorization_endpoint);
+                setTokenEndpoint(oAuthProviderConfig.token_endpoint);
+                setEndSessionEndpoint(oAuthProviderConfig.end_session_endpoint);
+                setJwksUri(oAuthProviderConfig.jwks_uri);
+                setResponseTypesSupported(oAuthProviderConfig.response_types_supported.join(","));
+                setGrantTypesSupported(oAuthProviderConfig.grant_types_supported.join(","));
+                setRequestScopeREADONLY(oAuthProviderConfig.scopes.filter(scope => scope.scope === "READONLY")[0].request_scope);
+                setRequestScopeCONFIGURATION(oAuthProviderConfig.scopes.filter(scope => scope.scope === "CONFIGURATION")[0].request_scope);
+                setRequestScopeNAMESPACES(oAuthProviderConfig.scopes.filter(scope => scope.scope === "NAMESPACES")[0].request_scope);
+                setRequestScopeJOBS(oAuthProviderConfig.scopes.filter(scope => scope.scope === "JOBS")[0].request_scope);
+                setRequestScopeUSERS(oAuthProviderConfig.scopes.filter(scope => scope.scope === "USERS")[0].request_scope);
+                setRequestScopeHYPERCUBE(oAuthProviderConfig.scopes.filter(scope => scope.scope === "HYPERCUBE")[0].request_scope);
+                setRequestScopeCLEANUP(oAuthProviderConfig.scopes.filter(scope => scope.scope === "CLEANUP")[0].request_scope);
+                setRequestScopeLICENSES(oAuthProviderConfig.scopes.filter(scope => scope.scope === "LICENSES")[0].request_scope);
+                setRequestScopeUSAGE(oAuthProviderConfig.scopes.filter(scope => scope.scope === "USAGE")[0].request_scope);
+                setRequestScopeAUTH(oAuthProviderConfig.scopes.filter(scope => scope.scope === "AUTH")[0].request_scope);
             } else if (providerConfig[0].is_ldap_identity_provider === true) {
                 setProviderType('ldap');
                 const ldapProviderConfig = ldapProviders.filter(config => config.name === providerConfig[0].name)[0];
@@ -243,7 +251,7 @@ const AuthProviderForm = () => {
                 setAlertMsg('Unknown identity provider type')
             }
         }
-    }, [selectedAuthProvider, authProviders, ldapProviders, setAlertMsg, server, currentConfigHostname]);
+    }, [selectedAuthProvider, authProviders, ldapProviders, OAuthProviders, setAlertMsg, server, currentConfigHostname]);
 
     const updateHostname = async (acceptLogout) => {
         if (acceptLogout === false) {
@@ -308,6 +316,7 @@ const AuthProviderForm = () => {
                 authProviderForm.append("end_session_endpoint", endSessionEndpoint);
             }
             authProviderForm.append("request_scope_READONLY", requestScopeREADONLY);
+            authProviderForm.append("request_scope_CONFIGURATION", requestScopeCONFIGURATION);
             authProviderForm.append("request_scope_NAMESPACES", requestScopeNAMESPACES);
             authProviderForm.append("request_scope_JOBS", requestScopeJOBS);
             authProviderForm.append("request_scope_USERS", requestScopeUSERS);
@@ -571,6 +580,23 @@ const AuthProviderForm = () => {
                                     />
                                     <div className="invalid-feedback">
                                         {formErrors.request_scope_READONLY ? formErrors.request_scope_READONLY : ""}
+                                    </div>
+                                </div>
+                                <div className="form-group mt-3 mb-3">
+                                    <label htmlFor="requestScopeCONFIGURATION">
+                                        Scope that the client should request from the OP to get 'CONFIGURATION' scope
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className={"form-control" + (formErrors.request_scope_CONFIGURATION ? " is-invalid" : "")}
+                                        id="requestScopeCONFIGURATION"
+                                        autoComplete="on"
+                                        required
+                                        value={requestScopeCONFIGURATION}
+                                        onChange={e => setRequestScopeCONFIGURATION(e.target.value)}
+                                    />
+                                    <div className="invalid-feedback">
+                                        {formErrors.request_scope_CONFIGURATION ? formErrors.request_scope_CONFIGURATION : ""}
                                     </div>
                                 </div>
                                 <div className="form-group mt-3 mb-3">
