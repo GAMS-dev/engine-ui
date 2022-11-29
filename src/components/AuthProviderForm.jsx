@@ -473,8 +473,12 @@ const AuthProviderForm = () => {
                                 checked={providerHidden}
                                 onChange={e => setProviderHidden(e.target.checked)}
                                 id="providerHidden"
+                                aria-describedby="providerHiddenHelp"
                             />
                             <label className="form-check-label" htmlFor="providerHidden">Hide identity provider on login page?</label>
+                            <small id="providerHiddenHelp" className="form-text text-muted">
+                                Will be accessible on <code>/login</code> page via <code>provider</code> parameter (e.g. <code>/login?provider=provider1</code> for identity provider with name: <code>provider1</code>).
+                            </small>
                         </div>
                         {providerType === 'oauth2' ?
                             <>
