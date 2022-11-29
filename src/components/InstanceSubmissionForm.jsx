@@ -22,6 +22,8 @@ const InstanceSubmissionForm = () => {
     const [tolerations, setTolerations] = useState("");
     const [nodeSelectors, setNodeSelectors] = useState("");
     const [multiplier, setMultiplier] = useState("");
+    const [assignLicense, setAssignLicense] = useState(false);
+    const [GAMSLicense, setGAMSLicense] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const [instanceUpdated, setInstanceUpdated] = useState(false);
@@ -45,6 +47,9 @@ const InstanceSubmissionForm = () => {
                     setMultiplier(instanceData[0].multiplier);
                     setTolerations(instanceData[0].tolerations.map(el => `${el.key}=${el.value}`).join(","));
                     setNodeSelectors(instanceData[0].node_selectors.map(el => `${el.key}=${el.value}`).join(","));
+                    const gamsLicenseAssigned = instanceData[0].gams_license != null && instanceData[0].gams_license !== "";
+                    setAssignLicense(gamsLicenseAssigned);
+                    setGAMSLicense(gamsLicenseAssigned ? instanceData[0].gams_license.trim() : "");
                     setIsLoading(false);
                 } else {
                     setErrorMsg(`Instance: ${label} does not exist`);
@@ -82,6 +87,9 @@ const InstanceSubmissionForm = () => {
                 if (nodeSelectorsTmp.length) {
                     payload['node_selectors'] = nodeSelectorsTmp;
                 }
+            }
+            if (assignLicense && GAMSLicense !== "") {
+                payload['gams_license'] = window.btoa(GAMSLicense.trim());
             }
             await axios({
                 url: `${server}/usage/instances`,
@@ -257,6 +265,26 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.node_selectors ? formErrors.node_selectors : ""}
                                         </div>
                                     </div>
+                                    <div className="form-check mb-3">
+                                        <input type="checkbox" className="form-check-input"
+                                            checked={assignLicense !== false} onChange={e => setAssignLicense(e.target.checked)}
+                                            id="assignLicense" />
+                                        <label className="form-check-label" htmlFor="assignLicense">Attach GAMS license to the instance (takes precedence over user and system-wide licenses)?</label>
+                                    </div>
+                                    {assignLicense && <div className="form-group">
+                                        <label htmlFor="licenseBox">
+                                            GAMS License
+                                        </label>
+                                        <textarea
+                                            id="licenseBox"
+                                            rows="6"
+                                            cols="50"
+                                            className="form-control monospace no-resize"
+                                            value={GAMSLicense}
+                                            style={{ fontSize: '8pt' }}
+                                            onChange={e => setGAMSLicense(e.target.value)} >
+                                        </textarea> </div>
+                                    }
                                 </fieldset>
                             </div>
                         </div>

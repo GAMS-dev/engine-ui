@@ -106,7 +106,7 @@ const LicUpdateButton = props => {
         setSubmissionErrorMsg("");
         const licenseUpdateForm = new FormData();
         if (b64enc) {
-            const licenseB64 = btoa(engineLicense.trim());
+            const licenseB64 = window.btoa(engineLicense.trim());
             if (licenseB64 === "") {
                 setSubmissionErrorMsg("Cannot submit empty GAMS license");
                 setIsSubmitting(false);
