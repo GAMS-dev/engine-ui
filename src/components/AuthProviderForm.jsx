@@ -74,7 +74,6 @@ const AuthProviderForm = () => {
     const [ldapUid, setLdapUid] = useState("");
     const [ldapBindDN, setLdapBindDN] = useState("");
     const [ldapPassword, setLdapPassword] = useState("");
-    const [ldapUseUserPassword, setLdapUseUserPassword] = useState(true);
     const [ldapEncryptionMethod, setLdapEncryptionMethod] = useState("start_tls");
     const [ldapVerifyCertificates, setLdapVerifyCertificates] = useState(true);
     const [ldapActiveDirectory, setLdapActiveDirectory] = useState(false);
@@ -194,7 +193,6 @@ const AuthProviderForm = () => {
             setLdapUid('');
             setLdapBindDN('');
             setLdapPassword('');
-            setLdapUseUserPassword(true);
             setLdapEncryptionMethod('start_tls');
             setLdapVerifyCertificates(true);
             setLdapActiveDirectory(false);
@@ -208,14 +206,14 @@ const AuthProviderForm = () => {
             }
             setProviderName(providerConfig[0].name);
             setProviderLabel(providerConfig[0].label);
-            setProviderHidden(providerConfig[0].is_hidden === true);
+            setProviderHidden(providerConfig[0].hidden === true);
             if (providerConfig[0].oauth2 != null) {
                 setProviderType('oauth2');
                 const oAuthProviderConfig = OAuthProviders.filter(config => config.name === providerConfig[0].name)[0];
                 setAutoDiscoveryMode(autoDiscoveryModes[0]);
                 setIssuerID(oAuthProviderConfig.issuer);
                 setWebuiClientId(oAuthProviderConfig.web_ui_client_id);
-                setWebuiClientSecret(oAuthProviderConfig.web_ui_client_secret);
+                setWebuiClientSecret(oAuthProviderConfig.web_ui_client_secret == null? '': oAuthProviderConfig.web_ui_client_secret);
                 setOauthAudience(oAuthProviderConfig.override_audience ? oAuthProviderConfig.override_audience : currentConfigHostname);
                 setAuthorizationEndpoint(oAuthProviderConfig.authorization_endpoint);
                 setTokenEndpoint(oAuthProviderConfig.token_endpoint);
@@ -239,9 +237,8 @@ const AuthProviderForm = () => {
                 setLdapHost(ldapProviderConfig.host);
                 setLdapPort(ldapProviderConfig.port);
                 setLdapUid(ldapProviderConfig.uid);
-                setLdapBindDN(ldapProviderConfig.bind_dn);
-                setLdapPassword(ldapProviderConfig.password);
-                setLdapUseUserPassword(ldapProviderConfig.use_user_password !== false);
+                setLdapBindDN(ldapProviderConfig.bind_dn == null ? '' : ldapProviderConfig.bind_dn);
+                setLdapPassword(ldapProviderConfig.password == null ? '' : ldapProviderConfig.password);
                 setLdapEncryptionMethod(ldapProviderConfig.encryption);
                 setLdapVerifyCertificates(ldapProviderConfig.verify_certificates !== false);
                 setLdapActiveDirectory(ldapProviderConfig.active_directory === true);
@@ -331,9 +328,8 @@ const AuthProviderForm = () => {
             authProviderForm.append("host", ldapHost);
             authProviderForm.append("port", ldapPort);
             authProviderForm.append("uid", ldapUid);
-            authProviderForm.append("bind_dn", ldapBindDN);
-            authProviderForm.append("use_user_password", ldapUseUserPassword);
-            if (ldapUseUserPassword === false) {
+            if (ldapBindDN !== "") {
+                authProviderForm.append("bind_dn", ldapBindDN);
                 authProviderForm.append("password", ldapPassword);
             }
             authProviderForm.append("encryption", ldapEncryptionMethod);
@@ -903,7 +899,7 @@ const AuthProviderForm = () => {
                                         type="checkbox"
                                         className="form-check-input"
                                         checked={ldapActiveDirectory}
-                                        onChange={e => setLdapUseUserPassword(e.target.checked)}
+                                        onChange={e => setLdapActiveDirectory(e.target.checked)}
                                         id="ldapActiveDirectory"
                                         aria-describedby="ldapActiveDirectoryHelp"
                                     />
@@ -944,16 +940,32 @@ const AuthProviderForm = () => {
                                         autoComplete="on"
                                         aria-describedby="ldapBindDNHelp"
                                         value={ldapBindDN}
-                                        required
                                         onChange={e => setLdapBindDN(e.target.value)}
                                     />
                                     <div className="invalid-feedback">
                                         {formErrors.bind_dn ? formErrors.bind_dn : ""}
                                     </div>
                                     <small id="ldapBindDNHelp" className="form-text text-muted">
-                                        The field can include <code>%u</code> as a placeholder for the username who is logging in. Example for OpenLDAP: <code>uid=%u,ou=users,dc=example,dc=org</code>. Example for Active Directory: <code>EXAMPLE\%u</code>.
+                                        Example for OpenLDAP: <code>uid=admin,ou=users,dc=example,dc=org</code>. Example for Active Directory: <code>EXAMPLE\admin</code>.
                                     </small>
                                 </div>
+                                {ldapBindDN !== ""? <div className="form-group mt-3 mb-3">
+                                    <label htmlFor="ldapPassword">
+                                        Password of the user who is used for binding
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className={"form-control" + (formErrors.password ? " is-invalid" : "")}
+                                        id="ldapPassword"
+                                        autoComplete="on"
+                                        value={ldapPassword}
+                                        required
+                                        onChange={e => setLdapPassword(e.target.value)}
+                                    />
+                                    <div className="invalid-feedback">
+                                        {formErrors.password ? formErrors.password : ""}
+                                    </div>
+                                </div> : <></>}
                                 <div className="form-group mt-3 mb-3">
                                     <label htmlFor="ldapBase">
                                         DN of the base where users are located
@@ -993,39 +1005,9 @@ const AuthProviderForm = () => {
                                         {formErrors.user_filter ? formErrors.user_filter : ""}
                                     </div>
                                     <small id="ldapUserFilterHelp" className="form-text text-muted">
-                                        Examples: <code>(objectclass=User)</code> or <code>(memberOf=cn=gams-engine,ou=groups,dc=example,dc=com)</code> or <code>&((objectclass=User),(employeeType=developer))</code>.
+                                        Examples: <code>(objectClass=User)</code> or <code>(memberOf=cn=gams-engine,ou=groups,dc=example,dc=com)</code> or <code>&((objetClass=User),(employeeType=developer))</code>.
                                     </small>
                                 </div>
-                                <div className="form-check mt-3">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        checked={ldapUseUserPassword}
-                                        onChange={e => setLdapUseUserPassword(e.target.checked)}
-                                        id="ldapUseUserPassword"
-                                    />
-                                    <label className="form-check-label" htmlFor="ldapUseUserPassword">Use password of the user who is logging in for binding?</label>
-                                </div>
-                                {
-                                    ldapUseUserPassword === false ?
-                                        <div className="form-group mt-3 mb-3">
-                                            <label htmlFor="ldapPassword">
-                                                Password of the user who is used for binding
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className={"form-control" + (formErrors.user_password ? " is-invalid" : "")}
-                                                id="ldapPassword"
-                                                autoComplete="on"
-                                                value={ldapPassword}
-                                                required
-                                                onChange={e => setLdapPassword(e.target.value)}
-                                            />
-                                            <div className="invalid-feedback">
-                                                {formErrors.user_password ? formErrors.user_password : ""}
-                                            </div>
-                                        </div> : <></>
-                                }
                                 <div className="form-group mt-3 mb-3">
                                     <label htmlFor="encryption">
                                         Encryption method
