@@ -76,4 +76,14 @@ const mergeSortedArrays = (arraysToMerge, comparisonFunction) => {
     }
     return arraysToMerge[0];
 }
-export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays }
+
+const formatFileSize = (fileSize) => {
+    if (fileSize < 1e6) {
+        return `${(fileSize / 1e3).toFixed(2)}KB`;
+    }
+    if (fileSize < 1e9) {
+        return `${(fileSize / 1e6).toFixed(2)}MB`;
+    }
+    return `${(fileSize / 1e9).toFixed(2)}GB`;
+}
+export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays, formatFileSize }

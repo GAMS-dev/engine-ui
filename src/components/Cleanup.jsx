@@ -8,10 +8,11 @@ import { AlertContext } from "./Alert";
 import moment from "moment";
 import axios from "axios";
 import Table from "./Table";
-import { getResponseError } from "./util";
+import { getResponseError, formatFileSize, calcRemainingQuota } from "./util";
 import TimeDisplay from "./TimeDisplay";
 import SubmitButton from "./SubmitButton";
 import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
+import { ClipLoader } from "react-spinners";
 
 const Cleanup = () => {
 
@@ -20,6 +21,7 @@ const Cleanup = () => {
     const [deleteDataThreshold, setDeleteDataThreshold] = useState(0);
     const [deletedUsersOnly, setDeletedUsersOnly] = useState(false);
     const [totalFileSize, setTotalFileSize] = useState(0);
+    const [fileSizeQuota, setFileSizeQuota] = useState(-1);
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const [showHousekeepingDialog, setShowHousekeepingDialog] = useState(false);
     const [refresh, setRefresh] = useState(0);
@@ -31,7 +33,7 @@ const Cleanup = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server }] = useContext(AuthContext);
+    const [{ jwt, server, username }] = useContext(AuthContext);
     const [displayFields] = useState([
         {
             field: "token,type",
@@ -79,6 +81,35 @@ const Cleanup = () => {
                 setShowDeleteConfirmDialog={setShowDeleteConfirmDialog} />
         }
     ]);
+    useEffect(() => {
+        const cancelTokenSource = axios.CancelToken.source();
+        const fetchVolumeQuota = async () => {
+            try {
+                setFileSizeQuota(-1);
+                const result = await axios({
+                    url: `${server}/usage/quota`,
+                    method: "GET",
+                    params: { username: username },
+                    cancelToken: cancelTokenSource.token
+                });
+                if (result.data && result.data.length) {
+                    const quotaRemaining = calcRemainingQuota(result.data);
+                    setFileSizeQuota(quotaRemaining.disk);
+                } else {
+                    setFileSizeQuota(Infinity);
+                }
+            }
+            catch (err) {
+                if (!!!axios.isCancel(err)) {
+                    setAlertMsg(`Problems fetching volume quota. Error message: ${getResponseError(err)}`);
+                }
+            }
+        }
+        fetchVolumeQuota();
+        return () => {
+            cancelTokenSource.cancel()
+        }
+    }, [jwt, server, username, refresh, setAlertMsg]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -215,10 +246,9 @@ const Cleanup = () => {
                     </div>
                 </div>
             </div>
-            <small>Total File Size: {totalFileSize >= 1e6 ?
-                (totalFileSize >= 1e9 ? `${(totalFileSize / 1e9).toFixed(2)}GB` :
-                    `${(totalFileSize / 1e6).toFixed(2)}MB`) :
-                `${(totalFileSize / 1e3).toFixed(2)}KB`}</small>
+            <small>
+                Total File Size: {formatFileSize(totalFileSize)} {fileSizeQuota === -1 ? <ClipLoader size={12} /> : (isFinite(fileSizeQuota) ? `/${formatFileSize(fileSizeQuota)}` : '')}
+            </small>
             <Table data={datasets}
                 noDataMsg="No Datasets found"
                 displayFields={displayFields}
