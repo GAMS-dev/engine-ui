@@ -51,10 +51,12 @@ const AuthProviderForm = () => {
     const [issuerValid, setIssuerValid] = useState(true);
     const [webuiClientId, setWebuiClientId] = useState("");
     const [webuiClientSecret, setWebuiClientSecret] = useState("");
+    const [deviceClientId, setDeviceClientId] = useState("");
     const [autoDiscoveryMode, setAutoDiscoveryMode] = useState(autoDiscoveryModes[0]);
     const [authorizationEndpoint, setAuthorizationEndpoint] = useState("");
     const [tokenEndpoint, setTokenEndpoint] = useState("");
     const [endSessionEndpoint, setEndSessionEndpoint] = useState("");
+    const [deviceAuthorizationEndpoint, setDeviceAuthorizationEndpoint] = useState("");
     const [jwksUri, setJwksUri] = useState("");
     const [responseTypesSupported, setResponseTypesSupported] = useState("");
     const [grantTypesSupported, setGrantTypesSupported] = useState("");
@@ -171,9 +173,11 @@ const AuthProviderForm = () => {
             setIssuerID('');
             setWebuiClientId('');
             setWebuiClientSecret('');
+            setDeviceClientId('');
             setAuthorizationEndpoint('');
             setTokenEndpoint('');
             setEndSessionEndpoint('');
+            setDeviceAuthorizationEndpoint('');
             setJwksUri('');
             setOauthAudience(currentConfigHostname);
             setResponseTypesSupported('');
@@ -213,11 +217,13 @@ const AuthProviderForm = () => {
                 setAutoDiscoveryMode(autoDiscoveryModes[0]);
                 setIssuerID(oAuthProviderConfig.issuer);
                 setWebuiClientId(oAuthProviderConfig.web_ui_client_id);
-                setWebuiClientSecret(oAuthProviderConfig.web_ui_client_secret == null? '': oAuthProviderConfig.web_ui_client_secret);
+                setWebuiClientSecret(oAuthProviderConfig.web_ui_client_secret == null ? '' : oAuthProviderConfig.web_ui_client_secret);
+                setDeviceClientId(oAuthProviderConfig.device_client_id == null ? '' : oAuthProviderConfig.device_client_id);
                 setOauthAudience(oAuthProviderConfig.override_audience ? oAuthProviderConfig.override_audience : currentConfigHostname);
                 setAuthorizationEndpoint(oAuthProviderConfig.authorization_endpoint);
                 setTokenEndpoint(oAuthProviderConfig.token_endpoint);
                 setEndSessionEndpoint(oAuthProviderConfig.end_session_endpoint);
+                setDeviceAuthorizationEndpoint(oAuthProviderConfig.device_authorization_endpoint == null ? '' : oAuthProviderConfig.device_authorization_endpoint);
                 setJwksUri(oAuthProviderConfig.jwks_uri);
                 setResponseTypesSupported(oAuthProviderConfig.response_types_supported.join(","));
                 setGrantTypesSupported(oAuthProviderConfig.grant_types_supported.join(","));
@@ -288,6 +294,9 @@ const AuthProviderForm = () => {
             if (webuiClientSecret !== "") {
                 authProviderForm.append("web_ui_client_secret", webuiClientSecret);
             }
+            if (deviceClientId !== "") {
+                authProviderForm.append("device_client_id", deviceClientId);
+            }
             authProviderForm.append("issuer", issuerID);
             if (oauthAudience !== currentConfigHostname) {
                 authProviderForm.append("override_audience", oauthAudience);
@@ -311,6 +320,9 @@ const AuthProviderForm = () => {
                     authProviderForm.append("grant_types_supported", grantTypeSupported);
                 });
                 authProviderForm.append("end_session_endpoint", endSessionEndpoint);
+                if (deviceAuthorizationEndpoint !== "") {
+                    authProviderForm.append("device_authorization_endpoint", deviceAuthorizationEndpoint);
+                }
             }
             authProviderForm.append("request_scope_READONLY", requestScopeREADONLY);
             authProviderForm.append("request_scope_CONFIGURATION", requestScopeCONFIGURATION);
@@ -527,6 +539,7 @@ const AuthProviderForm = () => {
                                         type="text"
                                         className={"form-control" + (formErrors.web_ui_client_secret ? " is-invalid" : "")}
                                         id="webuiClientSecret"
+                                        aria-describedby="webuiClientSecretHelp"
                                         autoComplete="on"
                                         value={webuiClientSecret}
                                         onChange={e => setWebuiClientSecret(e.target.value)}
@@ -534,8 +547,28 @@ const AuthProviderForm = () => {
                                     <div className="invalid-feedback">
                                         {formErrors.web_ui_client_secret ? formErrors.web_ui_client_secret : ""}
                                     </div>
-                                    <small id="issuerHelp" className="form-text text-muted">
+                                    <small id="webuiClientSecretHelp" className="form-text text-muted">
                                         If your identity provider does not support registering public clients without a secret, the Engine API is used as a proxy when retrieving the authorization token.
+                                    </small>
+                                </div>
+                                <div className="form-group mt-3 mb-3">
+                                    <label htmlFor="deviceClientId">
+                                        Client ID to be used by clients that do not have browser access (optional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className={"form-control" + (formErrors.device_client_id ? " is-invalid" : "")}
+                                        id="deviceClientId"
+                                        autoComplete="on"
+                                        aria-describedby="deviceClientIdHelp"
+                                        value={deviceClientId}
+                                        onChange={e => setDeviceClientId(e.target.value)}
+                                    />
+                                    <div className="invalid-feedback">
+                                        {formErrors.device_client_id ? formErrors.device_client_id : ""}
+                                    </div>
+                                    <small id="deviceClientIdHelp" className="form-text text-muted">
+                                        The client must be a public client. Your identity provider must support the <kbd>urn:ietf:params:oauth:grant-type:device_code</kbd> grant type and the device authorization endpoint must be provided.
                                     </small>
                                 </div>
                                 <div className="form-group mt-3 mb-3">
@@ -554,6 +587,7 @@ const AuthProviderForm = () => {
                                         className={"form-control" + (formErrors.override_audience ? " is-invalid" : "")}
                                         id="oauthAudience"
                                         autoComplete="on"
+                                        aria-describedby="oauthAudienceHelp"
                                         value={oauthAudience}
                                         required
                                         onChange={e => setOauthAudience(e.target.value)}
@@ -561,8 +595,8 @@ const AuthProviderForm = () => {
                                     <div className="invalid-feedback">
                                         {formErrors.override_audience ? formErrors.override_audience : ""}
                                     </div>
-                                    <small id="issuerHelp" className="form-text text-muted">
-                                        <b>Please do not change the audience unless your authorization provider does not allow you to set the audience correctly!</b>
+                                    <small id="oauthAudienceHelp" className="form-text text-muted">
+                                        <b>Please do not change the audience unless your identity provider does not allow you to set the audience correctly!</b>
                                     </small>
                                 </div>
                                 <div className="form-group mt-3 mb-3">
@@ -800,6 +834,22 @@ const AuthProviderForm = () => {
                                         </div>
                                     </div>
                                     <div className="form-group mt-3 mb-3">
+                                        <label htmlFor="deviceAuthorizationEndpoint">
+                                            URL of the device authorization endpoint
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className={"form-control" + (formErrors.device_authorization_endpoint ? " is-invalid" : "")}
+                                            id="deviceAuthorizationEndpoint"
+                                            autoComplete="on"
+                                            value={deviceAuthorizationEndpoint}
+                                            onChange={e => setDeviceAuthorizationEndpoint(e.target.value)}
+                                        />
+                                        <div className="invalid-feedback">
+                                            {formErrors.device_authorization_endpoint ? formErrors.device_authorization_endpoint : ""}
+                                        </div>
+                                    </div>
+                                    <div className="form-group mt-3 mb-3">
                                         <label htmlFor="jwksUri">
                                             URL of the JSON Web Key Set document
                                         </label>
@@ -949,7 +999,7 @@ const AuthProviderForm = () => {
                                         Example for OpenLDAP: <code>uid=admin,ou=users,dc=example,dc=org</code>. Example for Active Directory: <code>EXAMPLE\admin</code>.
                                     </small>
                                 </div>
-                                {ldapBindDN !== ""? <div className="form-group mt-3 mb-3">
+                                {ldapBindDN !== "" ? <div className="form-group mt-3 mb-3">
                                     <label htmlFor="ldapPassword">
                                         Password of the user who is used for binding
                                     </label>
