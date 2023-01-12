@@ -42,7 +42,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     setConfirmPasswordError(false);
   }
 
-  const loginUser = useCallback(async (jwt, isOauth) => {
+  const loginUser = useCallback(async (jwt, isOAuthToken, refreshTokenData) => {
     if (jwt == null) {
       return;
     }
@@ -60,13 +60,13 @@ const LoginForm = ({ showRegistrationForm }) => {
       if (reponse.data.length === 1) {
         setLogin({
           jwt, server, roles: reponse.data[0].roles, username: reponse.data[0].username,
-          isOAuthToken: isOauth
+          isOAuthToken, refreshTokenData
         });
       } else {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
       }
     } catch (err) {
-      if (isOauth === true && err.response && err.response.status === 401) {
+      if (isOAuthToken === true && err.response && err.response.status === 401) {
         setLoginErrorMsg("There does not appear to be a GAMS Engine user associated with your account. Please register first.");
       } else {
         setLoginErrorMsg(`Some error occurred while trying to retrieve user information from Engine. Error message: ${getResponseError(err)}.`);
@@ -130,7 +130,15 @@ const LoginForm = ({ showRegistrationForm }) => {
           setIsSubmitting(false);
           return;
         }
-        loginUser(jwt, true);
+        let refreshTokenData = null;
+        if (response.data.refresh_token != null) {
+          refreshTokenData = {
+            clientId: authParams.clientId,
+            refreshTokenEndpoint: authParams.tokenEndpoint,
+            refreshToken: response.data.refresh_token
+          }
+        }
+        loginUser(jwt, true, refreshTokenData);
       } catch (err) {
         setLoginErrorMsg(`Problems retrieving authentication token from OAuth provider. Error message: ${getResponseError(err)}.`);
         setIsSubmitting(false);
