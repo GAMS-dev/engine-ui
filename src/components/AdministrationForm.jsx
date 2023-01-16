@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { Link, Routes, Route } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, Routes, Route, useLocation } from "react-router-dom";
 import { Tab, Nav } from "react-bootstrap";
 import Instances from "./Instances";
 import InstanceSubmissionForm from "./InstanceSubmissionForm";
@@ -8,13 +8,19 @@ import { ServerInfoContext } from "../ServerInfoContext";
 
 const AdministrationForm = () => {
     const [serverInfo] = useContext(ServerInfoContext);
+    const [activeTab, setActiveTab] = useState("authproviders");
+    let location = useLocation();
+
+    useEffect(() => {
+        setActiveTab(location.pathname.startsWith("/administration/instances") ? "instances" : "authproviders")
+    }, [location]);
     return (
         <>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">Administration</h1>
             </div>
             {serverInfo.in_kubernetes === true ? <>
-                <Tab.Container defaultActiveKey="authproviders">
+                <Tab.Container defaultActiveKey="authproviders" activeKey={activeTab}>
                     <Nav variant="tabs">
                         <Nav.Item>
                             <Nav.Link eventKey="authproviders" as={Link} to={`authproviders`}>Authentication Providers</Nav.Link>
