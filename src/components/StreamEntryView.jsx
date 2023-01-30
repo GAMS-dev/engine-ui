@@ -39,6 +39,7 @@ const StreamEntryView = props => {
                 )
                 .then(res => {
                     const entryValTmp = res.data[isStdOut ? "message" : "entry_value"];
+                    setErrorMsg('');
                     if (entryValTmp !== '') {
                         setEntryCache({ key: streamEntry, value: entryValTmp });
                         setRefresh(curr => curr + 1);
