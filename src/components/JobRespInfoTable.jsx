@@ -110,10 +110,10 @@ const JobRespInfoTable = props => {
               <tr>
                 <th>Process Status</th>
                 <td>{job.process_status != null ?
-                <span
-                className={`badge ${job.process_status === 0? '': 'badge-danger'}`}>
-                  {GAMSRcMap[job.process_status] != null ?
-                    `${GAMSRcMap[job.process_status]} (${job.process_status})` : job.process_status}
+                  <span
+                    className={`badge ${job.process_status === 0 ? '' : 'badge-danger'}`}>
+                    {GAMSRcMap[job.process_status] != null ?
+                      `${GAMSRcMap[job.process_status]} (${job.process_status})` : job.process_status}
                   </span> : "-"}</td>
               </tr>
               {jobStatus >= 10 && <tr>
@@ -149,7 +149,7 @@ const JobRespInfoTable = props => {
                     </span>}
                 </td>
               </tr>}
-              {isActiveJob(jobStatus) &&
+              {isActiveJob(jobStatus) && jobStatus !== 0 &&
                 <>
                   <tr>
                     <th>Stream Entries</th>
