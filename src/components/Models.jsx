@@ -291,10 +291,10 @@ const Models = () => {
                     displayer: e => <TimeDisplay time={e} />
                   },
                   {
-                    field: "arguments",
-                    column: "Arguments",
-                    sorter: "alphabetical-array",
-                    displayer: args => args ? args.join(",") : ""
+                    field: "length",
+                    column: "Size",
+                    sorter: "numerical",
+                    displayer: size => size >= 1e6 ? `${(size / 1e6).toFixed(2)}MB` : `${(size / 1e3).toFixed(2)}KB`
                   },
                   {
                     field: "id",
