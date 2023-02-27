@@ -5,8 +5,9 @@ import Instances from "./Instances";
 import InstanceSubmissionForm from "./InstanceSubmissionForm";
 import AuthProviderForm from "./AuthProviderForm.jsx";
 import { ServerInfoContext } from "../ServerInfoContext";
+import LicUpdateButton from "./LicenseUpdateButton";
 
-const AdministrationForm = () => {
+const AdministrationForm = ({ setLicenseExpiration }) => {
     const [serverInfo] = useContext(ServerInfoContext);
     const [activeTab, setActiveTab] = useState("authproviders");
     let location = useLocation();
@@ -18,6 +19,12 @@ const AdministrationForm = () => {
         <>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">Administration</h1>
+                <div className="btn-toolbar mb-2 mb-md-0">
+                    <div className="btn-group mr-2">
+                        <LicUpdateButton type="engine" setLicenseExpiration={setLicenseExpiration} />
+                        <LicUpdateButton type="system" />
+                    </div>
+                </div>
             </div>
             {serverInfo.in_kubernetes === true ? <>
                 <Tab.Container defaultActiveKey="authproviders" activeKey={activeTab}>
