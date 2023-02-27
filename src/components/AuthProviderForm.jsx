@@ -435,7 +435,7 @@ const AuthProviderForm = () => {
                         onClick={() => setSelectedAuthProvider('__+add_new')}
                         className={`list-group-item list-group-item-add list-group-item-action${selectedAuthProvider === '__+add_new' ? " active" : ""}`}
                     >
-                        Add New Provider
+                        Add New Authentication Provider
                     </li>
                     {authProviders.map(authProvider => (
                         <li
