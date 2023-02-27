@@ -1,14 +1,17 @@
 import React, { useContext, useCallback, useState } from "react";
-import { generateRandomString, generatePKCEParams } from "./oauth";
 import logo from "../assets/images/logo.svg";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
+import { sessionTokenExpirationSeconds } from "./constants";
 import { Navigate, Link } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
 import { useEffect } from "react";
 import { Nav } from "react-bootstrap";
 import Alert from 'react-bootstrap/Alert';
+import OAuth2Login from "./OAuth2Login";
+import { ClipLoader } from "react-spinners";
+import ShowHidePasswordInput from "./ShowHidePasswordInput";
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
 
@@ -20,18 +23,25 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [server, setServer] = useState(SERVER_NAME);
+  const [invitationTokenHasSub, setInvitationTokenHasSub] = useState(false);
   const [isValidInvitationCode, setIsValidInvitationCode] = useState(false);
   const [invitationCode, setInvitationCode] = useState("");
+  const [invitationCodeValidated, setInvitationCodeValidated] = useState("");
   const [invitationCodeIdentityProvider, setInvitationCodeIdentityProvider] = useState("");
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state='));
   const [register, setRegister] = useState(showRegistrationForm === "true");
   const [showRegistrationSuccessAlert, setShowRegistrationSuccessAlert] = useState(false);
 
   const [OAuthConfig, setOAuthConfig] = useState([]);
   const [ldapConfig, setLDAPConfig] = useState([]);
 
-  const [selectedAuthProvider, setSelectedAuthProvider] = useState("standard");
+  const [selectedAuthProvider, setSelectedAuthProvider] = useState("gams_engine");
+
+  const [OAuthLoginConfig, setOAuthLoginConfig] = useState(null);
+  const [OAuthToken, setOAuthToken] = useState(null);
+  const [OAuthErrorMsg, setOAuthErrorMsg] = useState("");
 
   const [login, setLogin] = useContext(AuthContext);
 
@@ -42,9 +52,34 @@ const LoginForm = ({ showRegistrationForm }) => {
     setConfirmPasswordError(false);
   }
 
-  const loginUser = useCallback(async (jwt, isOAuthToken, refreshTokenData) => {
-    if (jwt == null) {
+  const loginUser = useCallback(async (token) => {
+    if (token?.jwt == null) {
       return;
+    }
+    let jwt = token.jwt;
+    if (token?.isIdToken === true) {
+      try {
+        const oidcLoginResponse = await axios.post(`${server}/auth/oidc-providers/login`, {
+          id_token: jwt,
+          expires_in: sessionTokenExpirationSeconds
+        });
+        jwt = oidcLoginResponse?.data?.token;
+        if (jwt == null) {
+          setLoginErrorMsg('Internal error while retrieving authentication token from Engine.');
+          setIsSubmitting(false);
+          setIsOAuthProcessing(false);
+          return;
+        }
+      } catch (err) {
+        if (err?.response?.status === 401) {
+          setLoginErrorMsg("There does not appear to be a GAMS Engine user associated with your account. Please register first.");
+        } else {
+          setLoginErrorMsg(`Problems retrieving authentication token from Engine. Error message: ${getResponseError(err)}.`);
+        }
+        setIsSubmitting(false);
+        setIsOAuthProcessing(false);
+        return;
+      }
     }
     try {
       const reponse = await axios.get(`${server}/users/`, {
@@ -56,95 +91,179 @@ const LoginForm = ({ showRegistrationForm }) => {
           "Authorization": "Bearer " + jwt
         }
       });
-      setIsSubmitting(false);
       if (reponse.data.length === 1) {
         setLogin({
-          jwt, server, roles: reponse.data[0].roles, username: reponse.data[0].username,
-          isOAuthToken, refreshTokenData
+          jwt,
+          server,
+          roles: reponse.data[0].roles,
+          username: reponse.data[0].username,
+          isOAuthToken: token?.isOAuthToken,
+          refreshTokenData: token?.refreshTokenData
         });
       } else {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
       }
     } catch (err) {
-      if (isOAuthToken === true && err.response && err.response.status === 401) {
+      if (token?.isOAuthToken === true && err?.response?.status === 401) {
         setLoginErrorMsg("There does not appear to be a GAMS Engine user associated with your account. Please register first.");
       } else {
         setLoginErrorMsg(`Some error occurred while trying to retrieve user information from Engine. Error message: ${getResponseError(err)}.`);
       }
       setIsSubmitting(false);
+      setIsOAuthProcessing(false);
     }
   }, [server, setLogin]);
 
-  const initiateOAuthLogin = useCallback(async (config) => {
+  const handleLogin = async () => {
+    setShowRegistrationSuccessAlert(false);
     setIsSubmitting(true);
-    const state = generateRandomString(32);
-    const pkceParams = await generatePKCEParams();
-    const defaultScopes = ['CONFIGURATION', 'NAMESPACES', 'JOBS', 'USERS', 'HYPERCUBE',
-      'CLEANUP', 'LICENSES', 'USAGE', 'AUTH'];
-    const requestScopes = config.oauth2.scopes.filter(
-      scope_object => defaultScopes.includes(scope_object.scope))
-      .map(scope_object => scope_object.request_scope);
-    const queryParams = [
-      'response_type=code',
-      `client_id=${encodeURIComponent(config.oauth2.web_ui_client_id)}`,
-      `scope=${encodeURIComponent(requestScopes.join(' '))}`,
-      `state=${state}`,
-      `redirect_uri=${encodeURIComponent(window.location.origin)}`,
-      `code_challenge=${pkceParams.codeChallenge}`,
-      'code_challenge_method=S256'
-    ];
-    sessionStorage.setItem('authParams', JSON.stringify({
-      clientId: config.oauth2.web_ui_client_id,
-      tokenEndpoint: config.oauth2.has_client_secret ? `${server}/auth/oauth2-token` : config.oauth2.token_endpoint,
-      codeChallenge: pkceParams.codeChallenge,
-      codeVerifier: pkceParams.codeVerifier,
-      name: config.name,
-      hasClientSecret: config.oauth2.has_client_secret,
-      state
-    }));
-    window.location.replace(`${config.oauth2.authorization_endpoint}?${queryParams.join('&')} `);
-  }, [server]);
+    try {
+      let authResponse;
+      if (selectedAuthProvider === "gams_engine") {
+        authResponse = await axios.post(`${server}/auth/login`,
+          {
+            username: username,
+            password: password,
+            expires_in: sessionTokenExpirationSeconds
+          }
+        );
+      } else {
+        authResponse = await axios.post(`${server}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
+          {
+            username: username,
+            password: password,
+            expires_in: sessionTokenExpirationSeconds
+          }
+        );
+      }
+      loginUser({ jwt: authResponse.data.token });
+    } catch (err) {
+      if (err.response == null || err.response.status !== 401) {
+        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+      } else {
+        setLoginErrorMsg("Invalid username and/or password");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  useEffect(() => {
-    const oauthLogin = async (authParams, code) => {
-      if (code == null) {
-        setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
-        setIsSubmitting(false);
-        return;
+
+  const handleRegistration = async () => {
+    const getIdentityProviderInfo = async (providerName) => {
+      if (providerName === "gams_engine") {
+        return {
+          "type": "oauth",
+          "config": null
+        };
+      }
+      const selectedLDAPProvider = ldapConfig.filter(config => config.name === providerName);
+      if (selectedLDAPProvider.length > 0) {
+        return {
+          "type": "ldap",
+          "config": selectedLDAPProvider[0]
+        };
+      }
+      const selectedOAuthProvider = OAuthConfig.filter(config => config.name === providerName);
+      if (selectedOAuthProvider.length > 0) {
+        return {
+          "type": "oauth",
+          "config": selectedOAuthProvider[0]
+        };
       }
       try {
-        const params = new URLSearchParams();
-        params.append('redirect_uri', window.location.origin);
-        params.append('code_verifier', authParams.codeVerifier);
-        params.append('code', code);
-        if (authParams.hasClientSecret === true) {
-          params.append('identity_provider_name', authParams.name);
+        const response = await axios.get(`${server}/auth/providers`, { params: { name: providerName } });
+        if (response.data.length === 0) {
+          return null;
+        }
+        const providerConfig = response.data[0];
+        if (providerConfig.oauth2 != null || providerConfig.oidc != null) {
+          return {
+            "type": "oauth",
+            "config": providerConfig
+          };
+        }
+        if (providerConfig.is_ldap_identity_provider === true) {
+          return {
+            "type": "ldap",
+            "config": providerConfig
+          };
+        }
+      } catch (err) {
+        setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${providerName}. Error message: ${getResponseError(err)}.`);
+        return false;
+      }
+      setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists.");
+      return false;
+    }
+    clearRegisterErrors();
+    setShowRegistrationSuccessAlert(false);
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("The password does not match.");
+      return;
+    }
+    setIsSubmitting(true);
+
+    let providerInfo;
+
+    providerInfo = await getIdentityProviderInfo(invitationCodeIdentityProvider);
+    if (providerInfo === false) {
+      setIsSubmitting(false);
+      return;
+    }
+    if (providerInfo.type === "oauth" && invitationTokenHasSub !== true && OAuthToken == null) {
+      sessionStorage.setItem("registrationData", JSON.stringify({
+        username,
+        invitationCode,
+        invitationCodeIdentityProvider
+      }));
+      setOAuthLoginConfig(providerInfo.config);
+      return;
+    }
+    const registrationForm = new FormData();
+    registrationForm.append("username", username);
+    registrationForm.append("invitation_code", invitationCode);
+    if (OAuthToken?.jwt != null) {
+      registrationForm.append("identification_token", OAuthToken?.jwt);
+    }
+    if (providerInfo.type === "gams_engine") {
+      registrationForm.append("password", password);
+    }
+    try {
+      await axios.post(`${server}/users/`, registrationForm);
+      if (providerInfo.type === "gams_engine") {
+        await handleLogin();
+      } else if (providerInfo.type === "ldap") {
+        setSelectedAuthProvider(invitationCodeIdentityProvider);
+        setRegister(false);
+        setShowRegistrationSuccessAlert(true);
+        setIsSubmitting(false);
+      } else {
+        if (invitationTokenHasSub === true) {
+          setOAuthLoginConfig(providerInfo.config);
         } else {
-          params.append('grant_type', 'authorization_code');
-          params.append('client_id', authParams.clientId);
+          loginUser(OAuthToken);
         }
-        const response = await axios.post(authParams.tokenEndpoint, params);
-        const jwt = response.data.access_token;
-        if (jwt == null) {
-          setLoginErrorMsg('Internal error while retrieving authentication token from OAuth provider.');
-          setIsSubmitting(false);
-          return;
-        }
-        let refreshTokenData = null;
-        if (response.data.refresh_token != null) {
-          refreshTokenData = {
-            clientId: authParams.clientId,
-            refreshTokenEndpoint: authParams.tokenEndpoint,
-            refreshToken: response.data.refresh_token
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      if (err.response == null || err.response.status !== 400) {
+        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+      } else {
+        setLoginErrorMsg(err.response.data.message);
+        if (err.response.data.hasOwnProperty('errors')) {
+          if (err.response.data.errors.hasOwnProperty('username')) {
+            setUsernameError(err.response.data.errors.username);
+          }
+          if (err.response.data.errors.hasOwnProperty('password')) {
+            setPasswordError(err.response.data.errors.password);
           }
         }
-        loginUser(jwt, true, refreshTokenData);
-      } catch (err) {
-        setLoginErrorMsg(`Problems retrieving authentication token from OAuth provider. Error message: ${getResponseError(err)}.`);
-        setIsSubmitting(false);
       }
     }
+  };
 
+  useEffect(() => {
     const fetchAuthProviders = async (selectedProvider) => {
       let response;
       try {
@@ -153,14 +272,14 @@ const LoginForm = ({ showRegistrationForm }) => {
         setLoginErrorMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
         return;
       }
-      const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null);
+      const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null || config.oidc != null);
       const LDAPConfigTmp = response.data.filter(config => config.is_ldap_identity_provider === true);
 
       if (selectedProvider != null) {
         let selectedProviderFound = false;
         const selectedOAuthProvider = OAuthConfigTmp.filter(config => config.name === selectedProvider);
         if (selectedOAuthProvider.length > 0) {
-          initiateOAuthLogin(selectedOAuthProvider[0]);
+          setOAuthLoginConfig(selectedOAuthProvider[0]);
           return;
         }
         if (LDAPConfigTmp.findIndex(config => config.name === selectedProvider) !== -1) {
@@ -176,8 +295,8 @@ const LoginForm = ({ showRegistrationForm }) => {
           }
           if (response.data.length > 0) {
             const providerConfig = response.data[0];
-            if (providerConfig.oauth2 != null) {
-              initiateOAuthLogin(providerConfig);
+            if (providerConfig.oauth2 != null || providerConfig.oidc != null) {
+              setOAuthLoginConfig(providerConfig);
               return;
             }
             if (providerConfig.is_ldap_identity_provider) {
@@ -192,30 +311,12 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
     let selectedProvider = null;
 
-    if (document.location.search.includes('state=')) {
-      setIsSubmitting(true);
-      const searchParams = new URLSearchParams(document.location.search);
-      const authParams = JSON.parse(sessionStorage.getItem('authParams'));
-      sessionStorage.removeItem('authParams');
-      if (authParams != null && authParams.state === searchParams.get('state')) {
-        if (document.location.search.includes('error=') &&
-          document.location.search.includes('error_description=')) {
-          const searchParams = new URLSearchParams(document.location.search);
-          setLoginErrorMsg(searchParams.get('error_description'));
-          setIsSubmitting(false);
-        } else {
-          const code = searchParams.get('code');
-          oauthLogin(authParams, code);
-        }
-      } else {
-        setIsSubmitting(false);
-      }
-    } else if (document.location.search.includes('provider=')) {
+    if (document.location.search.includes('provider=')) {
       const searchParams = new URLSearchParams(document.location.search);
       selectedProvider = searchParams.get('provider');
     }
     fetchAuthProviders(selectedProvider);
-  }, [server, setLogin, loginUser, initiateOAuthLogin]);
+  }, [server]);
 
   useEffect(() => {
     if (invitationCode.length !== 36) {
@@ -225,10 +326,12 @@ const LoginForm = ({ showRegistrationForm }) => {
       setIsValidInvitationCode(false);
       return;
     }
+    if (invitationCodeValidated === invitationCode) {
+      return;
+    }
     setLoginErrorMsg('');
     const fetchInvitationCodeMetadata = async () => {
       try {
-        setIsValidInvitationCode(false);
         const response = await axios.get(`${server}/users/invitation/${invitationCode}`);
         if (response.data.identity_provider == null) {
           setLoginErrorMsg('Invalid invitation code: Identity provider has been deleted.');
@@ -236,7 +339,10 @@ const LoginForm = ({ showRegistrationForm }) => {
         }
         setInvitationCodeIdentityProvider(response.data.identity_provider);
         const userSubject = response.data.identity_provider_user_subject;
-        if (userSubject != null) {
+        if (userSubject == null) {
+          setInvitationTokenHasSub(false);
+        } else {
+          setInvitationTokenHasSub(true);
           const usernameTmp = [];
           for (let i = 0; i < userSubject.length; i += 1) {
             const char = userSubject.charAt(i);
@@ -247,6 +353,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           }
           setUsername(usernameTmp.join(""));
         }
+        setInvitationCodeValidated(invitationCode);
         setIsValidInvitationCode(true);
       } catch (err) {
         if (err.response && err.response.status === 404) {
@@ -257,102 +364,73 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
     }
     fetchInvitationCodeMetadata();
-  }, [server, invitationCode]);
+  }, [server, invitationCode, invitationCodeValidated]);
 
-
-  const handleLogin = async () => {
-    setShowRegistrationSuccessAlert(false);
-    setIsSubmitting(true);
-    try {
-      let authResponse;
-      if (selectedAuthProvider === "standard") {
-        authResponse = await axios.post(`${server}/auth/login`,
-          {
-            username: username,
-            password: password,
-            expires_in: 604800
-          }
-        );
-      } else {
-        authResponse = await axios.post(`${server}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
-          {
-            username: username,
-            password: password,
-            expires_in: 604800
-          }
-        );
-      }
-      loginUser(authResponse.data.token);
-    } catch (err) {
-      if (err.response == null || err.response.status !== 401) {
-        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
-      } else {
-        setLoginErrorMsg("Invalid username and/or password");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-  const handleRegistration = async () => {
-    clearRegisterErrors();
-    setShowRegistrationSuccessAlert(false);
-    if (password !== confirmPassword) {
-      setConfirmPasswordError("The password does not match.");
+  useEffect(() => {
+    setLoginErrorMsg(OAuthErrorMsg);
+    if (OAuthErrorMsg === "") {
       return;
     }
-    setIsSubmitting(true);
-    try {
-      const registrationForm = new FormData();
-      registrationForm.append("username", username);
-      registrationForm.append("invitation_code", invitationCode);
-      if (invitationCodeIdentityProvider === "gams_engine") {
-        registrationForm.append("password", password);
-      }
-      await axios.post(`${server}/users/`, registrationForm);
-      if (invitationCodeIdentityProvider === "gams_engine") {
-        await handleLogin();
-      } else if (ldapConfig.findIndex(config => config.name === invitationCodeIdentityProvider) !== -1) {
-        setSelectedAuthProvider(invitationCodeIdentityProvider);
-        setRegister(false);
-        setShowRegistrationSuccessAlert(true);
-      } else {
-        const selectedOAuthProvider = OAuthConfig.filter(config => config.name === invitationCodeIdentityProvider);
-        if (selectedOAuthProvider.length > 0) {
-          await initiateOAuthLogin(selectedOAuthProvider[0]);
-          return;
-        }
+    setOAuthToken(null);
+    const registrationData = JSON.parse(sessionStorage.getItem("registrationData"));
+    if (registrationData != null) {
+      sessionStorage.removeItem("registrationData");
+      setInvitationCodeValidated(registrationData.invitationCode);
+      setInvitationCode(registrationData.invitationCode);
+      setIsValidInvitationCode(true);
+      setInvitationCodeIdentityProvider(registrationData.invitationCodeIdentityProvider);
+      setUsername(registrationData.username);
+      setInvitationTokenHasSub(true);
+      setRegister(true);
+    }
+    setIsOAuthProcessing(false);
+  }, [OAuthErrorMsg]);
+
+  useEffect(() => {
+    const registerAndLoginUser = async () => {
+      const registrationData = JSON.parse(sessionStorage.getItem("registrationData"));
+      if (registrationData != null) {
+        sessionStorage.removeItem("registrationData");
+        // need to complete registration first
+        const registrationForm = new FormData();
+        registrationForm.append("username", registrationData.username);
+        registrationForm.append("invitation_code", registrationData.invitationCode);
+        registrationForm.append("identification_token", OAuthToken.jwt);
         try {
-          const response = await axios.get(`${server}/auth/providers`, { params: { name: invitationCodeIdentityProvider } });
-          if (response.data.length > 0) {
-            const providerConfig = response.data[0];
-            if (providerConfig.oauth2 != null) {
-              await initiateOAuthLogin(providerConfig);
-              return;
+          await axios.post(`${server}/users/`, registrationForm);
+        } catch (err) {
+          setInvitationCodeValidated(registrationData.invitationCode);
+          setInvitationCode(registrationData.invitationCode);
+          setIsValidInvitationCode(true);
+          setInvitationCodeIdentityProvider(registrationData.invitationCodeIdentityProvider);
+          setUsername(registrationData.username);
+          setInvitationTokenHasSub(true);
+          setRegister(true);
+          if (err.response == null || err.response.status !== 400) {
+            setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+          } else {
+            setLoginErrorMsg(err.response.data.message);
+            if (err.response.data.hasOwnProperty('errors')) {
+              if (err.response.data.errors.hasOwnProperty('username')) {
+                setUsernameError(err.response.data.errors.username);
+              }
+              if (err.response.data.errors.hasOwnProperty('password')) {
+                setPasswordError(err.response.data.errors.password);
+              }
             }
           }
-          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists. You will not be able to log in.");
-        } catch (err) {
-          setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${invitationCodeIdentityProvider}. Error message: ${getResponseError(err)}.`);
+          setIsSubmitting(false);
+          setIsOAuthProcessing(false);
+          return;
         }
       }
-    } catch (err) {
-      if (err.response == null || err.response.status !== 400) {
-        setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
-      } else {
-        setLoginErrorMsg(err.response.data.message);
-        if (err.response.data.hasOwnProperty('errors')) {
-          if (err.response.data.errors.hasOwnProperty('username')) {
-            setUsernameError(err.response.data.errors.username);
-          }
-          if (err.response.data.errors.hasOwnProperty('password')) {
-            setPasswordError(err.response.data.errors.password);
-          }
-        }
-      }
-    } finally {
-      setIsSubmitting(false);
+      loginUser(OAuthToken);
     }
-  }
+    if (OAuthToken?.jwt == null) {
+      return;
+    }
+    registerAndLoginUser();
+  }, [server, OAuthToken, loginUser]);
 
   return (
     <div className="text-center d-flex h-100">
@@ -373,129 +451,123 @@ const LoginForm = ({ showRegistrationForm }) => {
           className="bg-dark p-4 mb-4 rounded w-100"
           alt="GAMS Logo"
         />
-        <h1 className="h3 mb-3 font-weight-normal">{register ? "Register" : "Please sign in"}</h1>
-        <div className="invalid-feedback" style={{ display: loginErrorMsg != null ? "block" : "none" }}>
-          {loginErrorMsg}
-        </div>
-        {showRegistrationSuccessAlert && <Alert variant="success">
-          Registration successful, you can log in now!
-        </Alert>}
-        <fieldset disabled={isSubmitting}>
-          {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
-            <div className="form-group">
-              <label htmlFor="inputServer" className="sr-only">
-                Server
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="inputServer"
-                placeholder="Server"
-                autoComplete="on"
-                value={server}
-                onChange={e => setServer(e.target.value)}
-                required
-              />
+        {isOAuthProcessing ?
+          <ClipLoader /> :
+          <>
+            <h1 className="h3 mb-3 font-weight-normal">{register ? "Register" : "Please sign in"}</h1>
+            <div className="invalid-feedback" style={{ display: loginErrorMsg != null ? "block" : "none" }}>
+              {loginErrorMsg}
             </div>
-          }
-          {register ? <div className="form-group">
-            <label htmlFor="inputInvitationCode" className="sr-only">
-              Invitation Code
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="inputInvitationCode"
-              placeholder="Invitation code"
-              value={invitationCode}
-              onChange={e => setInvitationCode(e.target.value)}
-              required
-            />
-          </div> :
-            (ldapConfig.length > 0 ?
-              <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
-                <Nav.Item>
-                  <Nav.Link eventKey="standard" title="Standard">Standard</Nav.Link>
-                </Nav.Item>
-                {ldapConfig.map(config =>
-                  <Nav.Item key={config.name}>
-                    <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
-                  </Nav.Item>
-                )}
-              </Nav> : <></>)}
-          {(!register || isValidInvitationCode) && <div className="form-group">
-            <label htmlFor="inputUsername" className="sr-only">
-              Username
-            </label>
-            <input
-              type="text"
-              className={"form-control" + (usernameError ? " is-invalid" : "")}
-              id="username"
-              placeholder="Username"
-              autoComplete="username"
-              name="username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              required
-            />
-            <div className="invalid-feedback"> {usernameError} </div>
-          </div>}
-          {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) && <div className="form-group">
-            <label htmlFor="inputPassword" className="sr-only">
-              Password
-            </label>
-            <input
-              type="password"
-              className={"form-control" + (passwordError ? " is-invalid" : "")}
-              id="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              name="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
-            <div className="invalid-feedback"> {passwordError} </div>
-          </div>}
-          {register && invitationCodeIdentityProvider === "gams_engine" && <div className="form-group">
-            <label htmlFor="confirmPassword" className="sr-only">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              className={"form-control" + (confirmPasswordError ? " is-invalid" : "")}
-              id="confirmPassword"
-              placeholder="Confirm Password"
-              autoComplete="current-password"
-              name="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              required
-            />
-            <div className="invalid-feedback"> {confirmPasswordError} </div>
-          </div>}
-        </fieldset>
-        <SubmitButton isSubmitting={isSubmitting}>
-          {register ? "Register" : "Login"}
-        </SubmitButton>
-        {register ? <></> : OAuthConfig.map((config, idx) => {
-          return <div key={`oauth_button_${idx}`} className="mt-2">
-            <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary btn-block'
-              onClick={() => initiateOAuthLogin(config)}>
-              {config.label}
-            </button>
-          </div>
-        })}
-        <div className="mt-2">
-          <small>
-            <Link to={register ? "/login" : "/register"} onClick={() => {
-              clearRegisterErrors();
-              setRegister(current => !current);
-            }}>{register ? "Login" : "Register"}</Link>
-          </small>
-        </div>
+            {showRegistrationSuccessAlert && <Alert variant="success">
+              Registration successful, you can log in now!
+            </Alert>}
+            <fieldset disabled={isSubmitting}>
+              {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
+                <div className="form-group">
+                  <label htmlFor="inputServer" className="sr-only">
+                    Server
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="inputServer"
+                    placeholder="Server"
+                    autoComplete="on"
+                    value={server}
+                    onChange={e => setServer(e.target.value)}
+                    required
+                  />
+                </div>
+              }
+              {register ? <div className="form-group">
+                <label htmlFor="inputInvitationCode" className="sr-only">
+                  Invitation Code
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="inputInvitationCode"
+                  placeholder="Invitation code"
+                  value={invitationCode}
+                  onChange={e => setInvitationCode(e.target.value)}
+                  required
+                />
+              </div> :
+                (ldapConfig.length > 0 ?
+                  <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
+                    <Nav.Item>
+                      <Nav.Link eventKey="gams_engine" title="Standard">Standard</Nav.Link>
+                    </Nav.Item>
+                    {ldapConfig.map(config =>
+                      <Nav.Item key={config.name}>
+                        <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
+                      </Nav.Item>
+                    )}
+                  </Nav> : <></>)}
+              {(!register || isValidInvitationCode) && <div className="form-group">
+                <label htmlFor="inputUsername" className="sr-only">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  className={"form-control" + (usernameError ? " is-invalid" : "")}
+                  id="username"
+                  placeholder="Username"
+                  autoComplete="username"
+                  name="username"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  required
+                />
+                <div className="invalid-feedback"> {usernameError} </div>
+              </div>}
+              {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) &&
+                <ShowHidePasswordInput
+                  value={password}
+                  setValue={setPassword}
+                  id="inputPassword"
+                  label="Password"
+                  invalidFeedback={passwordError}
+                  usePlaceholder={true}
+                  required={true} />}
+              {register && invitationCodeIdentityProvider === "gams_engine" &&
+                <ShowHidePasswordInput
+                  value={confirmPassword}
+                  setValue={setConfirmPassword}
+                  id="confirmPassword"
+                  label="Confirm Password"
+                  invalidFeedback={confirmPasswordError}
+                  usePlaceholder={true}
+                  required={true} />}
+            </fieldset>
+            <SubmitButton isSubmitting={isSubmitting}>
+              {register ? "Register" : "Login"}
+            </SubmitButton>
+            {register ? <></> : OAuthConfig.map((config, idx) => {
+              return <div key={`oauth_button_${idx}`} className="mt-2">
+                <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary btn-block'
+                  onClick={() => setOAuthLoginConfig(config)}>
+                  {config.label}
+                </button>
+              </div>
+            })}
+            <div className="mt-2">
+              <small>
+                <Link to={register ? "/login" : "/register"} onClick={() => {
+                  clearRegisterErrors();
+                  setRegister(current => !current);
+                }}>{register ? "Login" : "Register"}</Link>
+              </small>
+            </div>
+          </>
+        }
         {login ? <Navigate replace to="/" /> : ""}
       </form>
+      <OAuth2Login
+        server={server}
+        loginConfig={OAuthLoginConfig}
+        setAuthToken={setOAuthToken}
+        setErrorMsg={setOAuthErrorMsg} />
     </div>
   );
 };

@@ -28,6 +28,7 @@ const UserInvitationForm = () => {
     const [quotas, setQuotas] = useState(null);
 
     const [availableIdentityProviders, setAvailableIdentityProviders] = useState([{ value: "gams_engine", label: "gams_engine" }]);
+    const [ldapIdentityProviders, setLdapIdentityProviders] = useState([]);
     const [selectedIdentityProvidersAllowed, setSelectedIdentityProvidersAllowed] = useState({ value: "gams_engine", label: "gams_engine" });
     const [identityProvider, setIdentityProvider] = useState({ value: "gams_engine", label: "gams_engine" });
     const [identityProviderSubject, setIdentityProviderSubject] = useState("");
@@ -58,6 +59,7 @@ const UserInvitationForm = () => {
                     .get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`)
                     .then(res => {
                         const availableIdentityProvidersTmp = res.data.map(provider => ({ value: provider.name, label: provider.name }));
+                        setLdapIdentityProviders(res.data.filter(provider => provider.is_ldap_identity_provider === true).map(provider => provider.name));
                         setAvailableIdentityProviders(availableIdentityProvidersTmp);
                         setSelectedIdentityProvidersAllowed(availableIdentityProvidersTmp);
                     })
@@ -163,10 +165,12 @@ const UserInvitationForm = () => {
                 invitationSubmissionForm.append("invitable_identity_providers", provider.value);
             });
         }
-        if (identityProvider == null || identityProvider.value === "gams_engine") {
+        if (identityProvider == null) {
             invitationSubmissionForm.append("identity_provider_name", "gams_engine");
         } else {
             invitationSubmissionForm.append("identity_provider_name", identityProvider.value);
+        }
+        if (ldapIdentityProviders.includes(identityProvider)) {
             invitationSubmissionForm.append("identity_provider_user_subject", identityProviderSubject);
         }
         axios
@@ -345,15 +349,15 @@ const UserInvitationForm = () => {
                                         options={availableIdentityProviders}
                                     />
                                 </div>}
-                                {availableIdentityProviders.length > 1 && identityProvider.value !== "gams_engine" &&
+                                {ldapIdentityProviders.includes(identityProvider.value) &&
                                     <div className="form-group">
                                         <label htmlFor="identityProviderSubject" className="sr-only">
-                                            Identity provider subject
+                                            LDAP login name
                                         </label>
                                         <input
                                             type="text"
                                             className={"form-control" + (formErrors.identity_provider_user_subject ? " is-invalid" : "")}
-                                            placeholder="Identity provider subject"
+                                            placeholder="LDAP login name"
                                             name="identityProviderSubject"
                                             value={identityProviderSubject}
                                             onChange={e => setIdentityProviderSubject(e.target.value)}

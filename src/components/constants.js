@@ -55,4 +55,5 @@ const GAMSRcMap = {
     "126": "Driver error: internal error: cannot load option handling library",
     "5000": "Driver error: internal error: cannot load option handling library"
 }
-export { GAMSRcMap }
+const sessionTokenExpirationSeconds = 604800;
+export { GAMSRcMap, sessionTokenExpirationSeconds }
