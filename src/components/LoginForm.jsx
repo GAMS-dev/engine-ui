@@ -531,7 +531,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                   id="inputPassword"
                   label="Password"
                   invalidFeedback={passwordError}
-                  autocomplete="current-password"
+                  autoComplete="current-password"
                   usePlaceholder={true}
                   required={true} />}
               {register && invitationCodeIdentityProvider === "gams_engine" &&

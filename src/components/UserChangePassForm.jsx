@@ -83,7 +83,7 @@ const UserChangePassForm = () => {
                             setValue={setNewPassword}
                             id="newPassword"
                             label="New password"
-                            autocomplete="new-password"
+                            autoComplete="new-password"
                             usePlaceholder={true}
                             required={true} />
                         <ShowHidePasswordInput
@@ -91,7 +91,7 @@ const UserChangePassForm = () => {
                             setValue={setNewPasswordConfirm}
                             id="newPasswordConfirm"
                             label="Confirm password"
-                            autocomplete="new-password"
+                            autoComplete="new-password"
                             usePlaceholder={true}
                             required={true} />
                     </fieldset>
