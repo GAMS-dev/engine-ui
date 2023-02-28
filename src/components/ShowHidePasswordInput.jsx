@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "react-feather";
 const ShowHidePasswordInput = ({ value, setValue,
     id, label, invalidFeedback,
     helpText, additionalClassesContainer,
-    usePlaceholder, required }) => {
+    usePlaceholder, required, autocomplete }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     return (
@@ -22,6 +22,7 @@ const ShowHidePasswordInput = ({ value, setValue,
                     value={value}
                     onChange={e => setValue(e.target.value)}
                     required={required === true}
+                    autocomplete={autocomplete == null ? "off" : autocomplete}
                     placeholder={usePlaceholder === true ? label : null}
                 />
                 <div className="input-group-addon" aria-hidden="true">
