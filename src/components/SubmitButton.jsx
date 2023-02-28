@@ -1,15 +1,15 @@
 import React from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 
-const SubmitButton = props => {
+const SubmitButton = ({ isSubmitting, className, isDisabled, onClick, children }) => {
 
   return (
-    <button type="submit" className={`btn ${props.className ? props.className : "btn-lg btn-primary btn-block"}`}
-      disabled={props.isSubmitting} onClick={props.onClick}>
-      {props.isSubmitting ?
+    <button type="submit" className={`btn ${className ? className : "btn-lg btn-primary btn-block"}`}
+      disabled={isSubmitting || isDisabled === true} onClick={onClick}>
+      {isSubmitting ?
         <ClipLoader size={20} />
         :
-        props.children
+        children
       }
     </button>
   );

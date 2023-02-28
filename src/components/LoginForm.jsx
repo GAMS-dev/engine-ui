@@ -196,6 +196,9 @@ const LoginForm = ({ showRegistrationForm }) => {
       setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists.");
       return false;
     }
+    if (!!!isValidInvitationCode) {
+      return;
+    }
     clearRegisterErrors();
     setShowRegistrationSuccessAlert(false);
     if (password !== confirmPassword) {
@@ -541,7 +544,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                   usePlaceholder={true}
                   required={true} />}
             </fieldset>
-            <SubmitButton isSubmitting={isSubmitting}>
+            <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !!!isValidInvitationCode}>
               {register ? "Register" : "Login"}
             </SubmitButton>
             {register ? <></> : OAuthConfig.map((config, idx) => {
