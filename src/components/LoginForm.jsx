@@ -153,7 +153,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     const getIdentityProviderInfo = async (providerName) => {
       if (providerName === "gams_engine") {
         return {
-          "type": "oauth",
+          "type": "gams_engine",
           "config": null
         };
       }
