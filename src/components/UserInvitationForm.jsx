@@ -165,10 +165,10 @@ const UserInvitationForm = () => {
                 invitationSubmissionForm.append("invitable_identity_providers", provider.value);
             });
         }
-        if (identityProvider == null) {
-            invitationSubmissionForm.append("identity_provider_name", "gams_engine");
-        } else {
+        if (availableIdentityProviders.length > 1) {
             invitationSubmissionForm.append("identity_provider_name", identityProvider.value);
+        } else {
+            invitationSubmissionForm.append("identity_provider_name", availableIdentityProviders[0].value);
         }
         if (ldapIdentityProviders.includes(identityProvider)) {
             invitationSubmissionForm.append("identity_provider_user_subject", identityProviderSubject);
