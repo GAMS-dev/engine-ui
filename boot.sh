@@ -17,6 +17,11 @@ then
     export ENGINE_HTTP_PORT=80
 fi
 
+if [ "$DISABLE_REQUEST_LIMIT" == "true" ]
+then
+   sed -i '/^limit_req/d' /etc/nginx/conf.d/default.conf
+fi
+
 if [ -n ${mount_url+x} ] && [ "$mount_url" != "" ] && [ "$mount_url" != "/" ] && [ "$mount_url" != "/engine" ]
 then
    ln -s /usr/share/nginx/engine /usr/share/nginx${mount_url}
