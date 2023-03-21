@@ -39,8 +39,6 @@ export const UserMenu = () => {
                         <span className="username-container">{username}</span>
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                        <QuotaWidget isVisible={dropdownExpanded} className="dropdown-item dropdown-item-static small pe-none"/>
-                        <Dropdown.Divider />
                         {instancesAvailable && <Link to='/default-instance' className="dropdown-item" role="button">
                             <small>Set default instance</small>
                         </Link>}
@@ -53,6 +51,8 @@ export const UserMenu = () => {
                         <Link to='/logout' className="dropdown-item" role="button">
                             <small>Sign Out</small>
                         </Link>
+                        <Dropdown.Divider />
+                        <QuotaWidget isVisible={dropdownExpanded} className="dropdown-item dropdown-item-static small pe-none" />
                     </Dropdown.Menu>
                 </Dropdown>
             </li>

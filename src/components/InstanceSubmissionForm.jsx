@@ -107,7 +107,7 @@ const InstanceSubmissionForm = () => {
                 const formErrorsTmp = {};
                 ['label', 'cpu_request', 'memory_request',
                     'multiplier', 'multiplier_idle', 'workspace_request', 'tolerations',
-                    'node_selectors'].forEach(key => {
+                    'node_selectors', 'gams_license'].forEach(key => {
                         if (err.response.data.errors.hasOwnProperty(key)) {
                             formErrorsTmp[key] = err.response.data.errors[key]
                         }
@@ -299,11 +299,15 @@ const InstanceSubmissionForm = () => {
                                             id="licenseBox"
                                             rows="6"
                                             cols="50"
-                                            className="form-control monospace no-resize"
+                                            className={"form-control monospace no-resize" + (formErrors.gams_license ? " is-invalid" : "")}
                                             value={GAMSLicense}
                                             style={{ fontSize: '8pt' }}
                                             onChange={e => setGAMSLicense(e.target.value)} >
-                                        </textarea> </div>
+                                        </textarea>
+                                        <div className="invalid-feedback">
+                                            {formErrors.gams_license ? formErrors.gams_license : ""}
+                                        </div>
+                                    </div>
                                     }
                                 </fieldset>
                             </div>

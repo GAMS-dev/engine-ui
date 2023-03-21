@@ -5,6 +5,7 @@ import { AlertContext } from "./Alert";
 import axios from "axios";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
+import ShowHidePasswordInput from "./ShowHidePasswordInput";
 
 const UserChangePassForm = () => {
     const [{ username, server }] = useContext(AuthContext);
@@ -77,34 +78,22 @@ const UserChangePassForm = () => {
                         {submissionErrorMsg}
                     </div>
                     <fieldset disabled={isSubmitting}>
-                        <div className="form-group">
-                            <label htmlFor="newPassword" className="sr-only">
-                                New password
-                            </label>
-                            <input
-                                type="password"
-                                className="form-control"
-                                id="newPassword"
-                                placeholder="New password"
-                                value={newPassword}
-                                onChange={e => setNewPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="newPasswordConfirm" className="sr-only">
-                                Confirm password
-                            </label>
-                            <input
-                                type="password"
-                                className="form-control"
-                                id="newPasswordConfirm"
-                                placeholder="Confirm password"
-                                value={newPasswordConfirm}
-                                onChange={e => setNewPasswordConfirm(e.target.value)}
-                                required
-                            />
-                        </div>
+                        <ShowHidePasswordInput
+                            value={newPassword}
+                            setValue={setNewPassword}
+                            id="newPassword"
+                            label="New password"
+                            autoComplete="new-password"
+                            usePlaceholder={true}
+                            required={true} />
+                        <ShowHidePasswordInput
+                            value={newPasswordConfirm}
+                            setValue={setNewPasswordConfirm}
+                            id="newPasswordConfirm"
+                            label="Confirm password"
+                            autoComplete="new-password"
+                            usePlaceholder={true}
+                            required={true} />
                     </fieldset>
                     <div className="mt-3">
                         <SubmitButton isSubmitting={isSubmitting}>

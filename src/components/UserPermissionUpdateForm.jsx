@@ -137,19 +137,19 @@ const UserUpdateForm = () => {
                 setSubmissionErrorMsg(`An error occurred while updating user roles. Error message: ${getResponseError(err)}.`);
                 return;
             }
-            if (newRole === "inviter" && selectedIdentityProvidersAllowed.length > 0) {
-                try {
-                    const invitersProvidersForm = new FormData();
-                    selectedIdentityProvidersAllowed.forEach(provider => {
-                        invitersProvidersForm.append("name", provider.value);
-                    });
-                    await axios.put(`${server}/users/inviters-providers/${encodeURIComponent(user)}`, invitersProvidersForm);
-                }
-                catch (err) {
-                    setIsSubmitting(false);
-                    setSubmissionErrorMsg(`An error occurred while updating available identity providers. Error message: ${getResponseError(err)}.`);
-                    return;
-                }
+        }
+        if (newRole === "inviter" && selectedIdentityProvidersAllowed.length > 0) {
+            try {
+                const invitersProvidersForm = new FormData();
+                selectedIdentityProvidersAllowed.forEach(provider => {
+                    invitersProvidersForm.append("name", provider.value);
+                });
+                await axios.put(`${server}/users/inviters-providers/${encodeURIComponent(user)}`, invitersProvidersForm);
+            }
+            catch (err) {
+                setIsSubmitting(false);
+                setSubmissionErrorMsg(`An error occurred while updating available identity providers. Error message: ${getResponseError(err)}.`);
+                return;
             }
         }
         if (newRole !== "admin") {

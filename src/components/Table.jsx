@@ -157,7 +157,7 @@ const Table = props => {
       currentFiltersTmp[colName] = filterText;
     } else {
       if (filterText.length > 0) {
-        currentFiltersTmp[colName] = filterText;
+        currentFiltersTmp[colName] = filterText.toLowerCase();
       } else {
         delete currentFiltersTmp[colName];
       }
@@ -166,7 +166,7 @@ const Table = props => {
       } else {
         newDataTmp = dataRaw
           .filter(dataTmp =>
-            Object.keys(currentFiltersTmp).every(colNameTmp => dataTmp[colNameTmp] && dataTmp[colNameTmp].includes(currentFiltersTmp[colNameTmp]))
+            Object.keys(currentFiltersTmp).every(colNameTmp => dataTmp[colNameTmp] && dataTmp[colNameTmp].toLowerCase().includes(currentFiltersTmp[colNameTmp]))
           );
       }
     }

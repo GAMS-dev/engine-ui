@@ -18,12 +18,14 @@ const UserQuotaUpdateForm = () => {
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [inheritQuotas, setInheritQuotas] = useState(true);
     const [quotas, setQuotas] = useState({});
     const [quotaData, setQuotaData] = useState({});
 
     const [userEdited, setUserEdited] = useState(false);
 
     useEffect(() => {
+        setInheritQuotas(true);
         const fetchRequiredData = async () => {
             try {
                 const res = await axios
@@ -37,6 +39,8 @@ const UserQuotaUpdateForm = () => {
                 const quotasUser = res.data.filter(el => el.username === username)[0];
                 setQuotaData(res.data);
                 if (quotasUser) {
+                    setInheritQuotas(quotasUser.parallel_quota == null &&
+                        quotasUser.disk_quota == null && quotasUser.volume_quota == null);
                     setQuotas({
                         parallel: quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota,
                         disk: quotasUser.disk_quota == null ? '' : quotasUser.disk_quota,
@@ -63,17 +67,17 @@ const UserQuotaUpdateForm = () => {
         let needUpdate = true;
         const quotasToDelete = [];
 
-        if (quotas.parallel != null) {
+        if (quotas.parallel != null && inheritQuotas !== true) {
             quotaUpdateParams["parallel_quota"] = quotas.parallel;
         } else {
             quotasToDelete.push("parallel_quota");
         }
-        if (quotas.volume != null) {
+        if (quotas.volume != null && inheritQuotas !== true) {
             quotaUpdateParams["volume_quota"] = quotas.volume;
         } else {
             quotasToDelete.push("volume_quota");
         }
-        if (quotas.disk != null) {
+        if (quotas.disk != null && inheritQuotas !== true) {
             quotaUpdateParams["disk_quota"] = quotas.disk;
         } else {
             quotasToDelete.push("disk_quota");
@@ -129,13 +133,19 @@ const UserQuotaUpdateForm = () => {
                             <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                                 {submissionErrorMsg}
                             </div>
-                            <fieldset disabled={isSubmitting}>
-                                <UserQuotaSelector
-                                    quotas={quotas}
-                                    quotaData={quotaData}
-                                    userToEdit={username}
-                                    setQuotas={setQuotas} />
-                            </fieldset>
+                            <div className="form-group form-check mt-3 mb-3">
+                                <input type="checkbox" className="form-check-input" checked={inheritQuotas} onChange={e => setInheritQuotas(e.target.checked)}
+                                    id="inheritQuotas" />
+                                <label className="form-check-label" htmlFor="inheritQuotas">Inherit quotas from inviter?</label>
+                            </div>
+                            {inheritQuotas !== true &&
+                                <fieldset disabled={isSubmitting}>
+                                    <UserQuotaSelector
+                                        quotas={quotas}
+                                        quotaData={quotaData}
+                                        userToEdit={username}
+                                        setQuotas={setQuotas} />
+                                </fieldset>}
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
                                     Update Quotas

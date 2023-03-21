@@ -9,6 +9,7 @@ import Button from "react-bootstrap/Button";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import { useEffect } from "react";
+import ShowHidePasswordInput from "./ShowHidePasswordInput";
 
 const UserUpdateIdentityProviderForm = () => {
     const [{ server, username }] = useContext(AuthContext);
@@ -137,40 +138,22 @@ const UserUpdateIdentityProviderForm = () => {
                         </div>}
                     {identityProvider.value === "gams_engine" ?
                         <>
-                            <div className="form-group">
-                                <label htmlFor="enginePassword" className="sr-only">
-                                    New password
-                                </label>
-                                <input
-                                    type="password"
-                                    className={"form-control" + (formErrors.password ? " is-invalid" : "")}
-                                    id="enginePassword"
-                                    placeholder="New password"
-                                    value={enginePassword}
-                                    onChange={e => setEnginePassword(e.target.value)}
-                                    required
-                                />
-                                <div className="invalid-feedback">
-                                    {formErrors.password ? formErrors.password : ""}
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="enginePasswordConfirm" className="sr-only">
-                                    Confirm password
-                                </label>
-                                <input
-                                    type="password"
-                                    className={"form-control" + (formErrors.password_confirm ? " is-invalid" : "")}
-                                    id="enginePasswordConfirm"
-                                    placeholder="Confirm password"
-                                    value={enginePasswordConfirm}
-                                    onChange={e => setEnginePasswordConfirm(e.target.value)}
-                                    required
-                                />
-                                <div className="invalid-feedback">
-                                    {formErrors.password_confirm ? formErrors.password_confirm : ""}
-                                </div>
-                            </div>
+                            <ShowHidePasswordInput
+                                value={enginePassword}
+                                setValue={setEnginePassword}
+                                id="newPasswordConfirm"
+                                label="New password"
+                                invalidFeedback={formErrors.password}
+                                usePlaceholder={true}
+                                required={true} />
+                            <ShowHidePasswordInput
+                                value={enginePasswordConfirm}
+                                setValue={setEnginePasswordConfirm}
+                                id="enginePasswordConfirm"
+                                label="Confirm password"
+                                invalidFeedback={formErrors.password_confirm}
+                                usePlaceholder={true}
+                                required={true} />
                         </> : <></>}
                 </fieldset>
                 <div className="mt-3">

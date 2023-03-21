@@ -128,7 +128,7 @@ const Layout = () => {
                 {(roles && roles.includes('admin')) &&
                   <Route exact path="/quotas/:namespace" element={<NamespaceQuotaUpdateForm />} />
                 }
-                <Route path="/users" element={<Users setLicenseExpiration={setLicenseExpiration} />} />
+                <Route path="/users" element={<Users />} />
                 {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
                   <Route path="/users/:user/permissions" element={<UserPermissionUpdateForm />} />
                 }
@@ -153,7 +153,7 @@ const Layout = () => {
                 }
                 <Route path="/auth-token" element={<CreateAuthTokenForm />} />
                 {roles && roles.includes('admin') &&
-                  <Route path="/administration/*" element={<AdministrationForm />} />
+                  <Route path="/administration/*" element={<AdministrationForm setLicenseExpiration={setLicenseExpiration} />} />
                 }
                 <Route path="/webhooks" element={<Webhooks webhookAccess={webhookAccess} setWebhookAccess={setWebhookAccess} />} />
                 <Route path="/webhooks/create" element={<WebhookSubmissionForm />} />

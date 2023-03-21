@@ -8,6 +8,7 @@ import DownloadLink from "./DownloadLink";
 import StreamEntryView from "./StreamEntryView";
 import SolveTraceEntryView from "./SolveTraceEntryView";
 import TerminateJobButton from "./TerminateJobButton";
+import { GAMSRcMap } from "./constants";
 import { isActiveJob, getResponseError } from "./util";
 import JobTimingInfoBar from "./JobTimingInfoBar";
 
@@ -108,7 +109,12 @@ const JobRespInfoTable = props => {
             <>
               <tr>
                 <th>Process Status</th>
-                <td>{job.process_status !== null ? job.process_status : "-"}</td>
+                <td>{job.process_status != null ?
+                  <span
+                    className={`badge ${job.process_status === 0 ? '' : 'badge-danger'}`}>
+                    {GAMSRcMap[job.process_status] != null ?
+                      `${GAMSRcMap[job.process_status]} (${job.process_status})` : job.process_status}
+                  </span> : "-"}</td>
               </tr>
               {jobStatus >= 10 && <tr>
                 <th>Text Entries</th>
@@ -143,7 +149,7 @@ const JobRespInfoTable = props => {
                     </span>}
                 </td>
               </tr>}
-              {isActiveJob(jobStatus) &&
+              {isActiveJob(jobStatus) && jobStatus !== 0 &&
                 <>
                   <tr>
                     <th>Stream Entries</th>
