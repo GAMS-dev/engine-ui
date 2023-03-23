@@ -174,7 +174,8 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         const response = await axios.get(`${server}/auth/providers`, { params: { name: providerName } });
         if (response.data.length === 0) {
-          return null;
+          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists.");
+          return false;
         }
         const providerConfig = response.data[0];
         if (providerConfig.oauth2 != null || providerConfig.oidc != null) {
@@ -193,18 +194,12 @@ const LoginForm = ({ showRegistrationForm }) => {
         setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${providerName}. Error message: ${getResponseError(err)}.`);
         return false;
       }
-      setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists.");
-      return false;
     }
-    if (!!!isValidInvitationCode) {
+    if (!isValidInvitationCode) {
       return;
     }
     clearRegisterErrors();
     setShowRegistrationSuccessAlert(false);
-    if (password !== confirmPassword) {
-      setConfirmPasswordError("The password does not match.");
-      return;
-    }
     setIsSubmitting(true);
 
     let providerInfo;
@@ -212,6 +207,10 @@ const LoginForm = ({ showRegistrationForm }) => {
     providerInfo = await getIdentityProviderInfo(invitationCodeIdentityProvider);
     if (providerInfo === false) {
       setIsSubmitting(false);
+      return;
+    }
+    if (providerInfo.type === "gams_engine" && password !== confirmPassword) {
+      setConfirmPasswordError("The password does not match.");
       return;
     }
     if (providerInfo.type === "oauth" && invitationTokenHasSub !== true && OAuthToken == null) {
@@ -544,7 +543,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                   usePlaceholder={true}
                   required={true} />}
             </fieldset>
-            <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !!!isValidInvitationCode}>
+            <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
               {register ? "Register" : "Login"}
             </SubmitButton>
             {register ? <></> : OAuthConfig.map((config, idx) => {

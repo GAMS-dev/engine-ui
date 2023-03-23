@@ -33,7 +33,7 @@ const CreateAuthTokenForm = () => {
         { value: "CLEANUP", label: "Cleanup" },
         { value: "USAGE", label: "Usage/Quotas/Instances" },
         { value: "LICENSES", label: "Licenses" }];
-        if (!!!isOAuthToken) {
+        if (!isOAuthToken) {
             availableScopesTmp.push({ value: "AUTH", label: "Authentication" });
         }
         setAvailableScopes(availableScopesTmp);

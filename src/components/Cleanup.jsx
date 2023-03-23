@@ -100,7 +100,7 @@ const Cleanup = () => {
                 }
             }
             catch (err) {
-                if (!!!axios.isCancel(err)) {
+                if (!axios.isCancel(err)) {
                     setAlertMsg(`Problems fetching volume quota. Error message: ${getResponseError(err)}`);
                 }
             }

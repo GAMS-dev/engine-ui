@@ -6,7 +6,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { Cpu, HardDrive } from "react-feather";
 
 
-const QuotaWidget = ({isVisible, className}) => {
+const QuotaWidget = ({ isVisible, className }) => {
     const [{ server, username }] = useContext(AuthContext);
 
     const [data, setData] = useState([]);
@@ -34,14 +34,14 @@ const QuotaWidget = ({isVisible, className}) => {
                     setData([{
                         key: 'volume',
                         title: 'Volume quota',
-                        icon: <Cpu size={14}/>,
+                        icon: <Cpu size={14} />,
                         text: `: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume) + quotaFormatted.unitVolume}\n`,
                         className: quotaRemaining.volume < 10000 ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
                         title: 'Disk quota',
-                        icon: <HardDrive size={14}/>,
+                        icon: <HardDrive size={14} />,
                         text: `: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.disk) + quotaFormatted.unitDisk}`,
                         className: quotaRemaining.disk < 100 ? 'text-danger' : ''
                     }]);
@@ -49,21 +49,21 @@ const QuotaWidget = ({isVisible, className}) => {
                     setData([{
                         key: 'volume',
                         title: 'Volume quota',
-                        icon: <Cpu size={14}/>,
+                        icon: <Cpu size={14} />,
                         text: ': unlimited\n',
                         val: ''
                     },
                     {
                         key: 'disk',
                         title: 'Disk quota',
-                        icon: <HardDrive size={14}/>,
+                        icon: <HardDrive size={14} />,
                         text: ': unlimited',
                         className: ''
                     }]);
                 }
             }
             catch (err) {
-                if (!!!axios.isCancel(err)) {
+                if (!axios.isCancel(err)) {
                     setData([`Problems fetching quota data. Error message: ${getResponseError(err)}`]);
                 }
             }
@@ -76,12 +76,12 @@ const QuotaWidget = ({isVisible, className}) => {
         }
     }, [server, username, isVisible])
 
-    return  (data ?
+    return (data ?
         <span className="pre-line">
-            <small className={`${className == null? '': className} pb-0`}>Quotas:</small>
+            <small className={`${className == null ? '' : className} pb-0`}>Quotas:</small>
             {data.map(quotaEl =>
                 <span key={quotaEl.key}
-                    className={`${className == null? '': className} ${quotaEl.className}`}
+                    className={`${className == null ? '' : className} ${quotaEl.className}`}
                     title={quotaEl.title}>
                     {quotaEl.icon}{quotaEl.text}
                 </span>)}

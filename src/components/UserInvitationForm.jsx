@@ -1,8 +1,10 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../AuthContext";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import axios from "axios";
 import Select from 'react-select';
-import { getResponseError } from "./util";
+import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
 import NamespacePermissionSelector from "./NamespacePermissionSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -37,6 +39,7 @@ const UserInvitationForm = () => {
     const [formErrors, setFormErrors] = useState("");
 
     const [invitationCode, setInvitationCode] = useState("");
+    const [showConfirmNoInstanceDialog, setShowConfirmNoInstanceDialog] = useState(false);
 
     useEffect(() => {
         const fetchRequiredData = async () => {
@@ -68,22 +71,8 @@ const UserInvitationForm = () => {
                     })
             ]
             try {
-                const userInstanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-                let availableInstancesTmp = userInstanceData.data.instances_available
-                    .filter(instance => instance.pool_cancelling !== true)
-                    .map(instance => ({
-                        "value": instance.label,
-                        "label": instance.label
-                    }));
-                if (availableInstancesTmp.length === 0) {
-                    const globalInstanceData = await axios.get(`${server}/usage/instances`);
-                    availableInstancesTmp = globalInstanceData.data
-                        .filter(instance => instance.pool_cancelling !== true)
-                        .map(instance => ({
-                            "value": instance.label,
-                            "label": instance.label
-                        }));
-                }
+                const instanceData = await getInstanceData(server, username);
+                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
                 if (availableInstancesTmp.length > 0) {
                     setAvailableInstances(availableInstancesTmp);
                     setSelectedInstancesAllowed([availableInstancesTmp[0]]);
@@ -107,12 +96,8 @@ const UserInvitationForm = () => {
         fetchRequiredData();
     }, [server, jwt, roles, username]);
 
-    const handleInvitationSubmission = () => {
+    const handleInvitationSubmission = (forceSubmission) => {
         setFormErrors("");
-        if (assignInstances && (selectedInstancesAllowed == null || selectedInstancesAllowed.length === 0)) {
-            setSubmissionErrorMsg("Please assign at least one instance that user is allowed to use.");
-            return;
-        }
         if (role === "inviter" && selectedIdentityProvidersAllowed.length === 0) {
             setSubmissionErrorMsg('Please select at least one identity provider that the user is allowed to invite with, or select the "User" role for the invitee.');
             return;
@@ -154,9 +139,16 @@ const UserInvitationForm = () => {
             }
             if (assignInstances) {
                 selectedInstancesAllowed.forEach(instance => {
-                    invitationSubmissionForm.append("labels", instance.label);
+                    invitationSubmissionForm.append("labels", instance.value);
                 });
-                invitationSubmissionForm.append("default_label", defaultInstance.value);
+                if (selectedInstancesAllowed.length > 0) {
+                    invitationSubmissionForm.append("default_label", defaultInstance.value);
+                } else if (forceSubmission !== true) {
+                    setShowConfirmNoInstanceDialog(true);
+                    return
+                }
+            } else {
+                invitationSubmissionForm.append("inherit_instances", true);
             }
         }
         if (assignLicense && license !== "") {
@@ -266,7 +258,7 @@ const UserInvitationForm = () => {
                                                         id="assignInstances" />
                                                     <label className="form-check-label" htmlFor="assignInstances">
                                                         {(availableInstances.length === 0 || (roles && roles.includes("admin"))) ?
-                                                            "Allowed to use raw resource requests" :
+                                                            "Allowed to use any instance/raw resource requests" :
                                                             "Inherit instances from you"}</label>
                                                 </div>
                                                 {assignInstances ?
@@ -290,20 +282,21 @@ const UserInvitationForm = () => {
                                                                 options={availableInstances}
                                                             />
                                                         </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="instancesDefault">
-                                                                Default Instance
-                                                            </label>
-                                                            <Select
-                                                                id="instancesDefault"
-                                                                isClearable={false}
-                                                                value={defaultInstance}
-                                                                isSearchable={true}
-                                                                onChange={selected => setDefaultInstance(selected)}
-                                                                options={selectedInstancesAllowed}
-                                                            />
+                                                        {selectedInstancesAllowed.length > 0 ?
+                                                            <div className="form-group">
+                                                                <label htmlFor="instancesDefault">
+                                                                    Default Instance
+                                                                </label>
+                                                                <Select
+                                                                    id="instancesDefault"
+                                                                    isClearable={false}
+                                                                    value={defaultInstance}
+                                                                    isSearchable={true}
+                                                                    onChange={selected => setDefaultInstance(selected)}
+                                                                    options={selectedInstancesAllowed}
+                                                                />
 
-                                                        </div>
+                                                            </div> : <></>}
                                                     </> : <></>}
                                             </>}
                                     </>
@@ -392,6 +385,25 @@ const UserInvitationForm = () => {
                         </div>}
                     </>
                 )}
+            <Modal show={showConfirmNoInstanceDialog} onHide={() => setShowConfirmNoInstanceDialog(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Please confirm</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>You are about to invite a user without instances. As a result, this user will not be able to solve any jobs until instances are assigned to him/her.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirmNoInstanceDialog(false)}>
+                        Cancel
+                    </Button>
+                    <Button onClick={() => {
+                        setShowConfirmNoInstanceDialog(false);
+                        handleInvitationSubmission(true);
+                    }}>
+                        Continue
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 }

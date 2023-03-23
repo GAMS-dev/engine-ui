@@ -21,6 +21,7 @@ const JobSubmissionForm = props => {
     const [serverInfo,] = useContext(ServerInfoContext);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [unableToSolve, setUnableToSolve] = useState(null);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [useRegisteredModel, setUseRegisteredModel] = useState(false);
     const [registeredModelName, setRegisteredModelName] = useState("");
@@ -72,6 +73,8 @@ const JobSubmissionForm = props => {
                     .map(ns => ns.name);
                 if (availableNsTmp.length === 0) {
                     setSubmissionErrorMsg("You do not have permissions to execute models.");
+                    setUnableToSolve(<><p><strong>You have no execute access to any namespace.</strong></p>
+                        <p>Ask your inviter to grant you permission to submit jobs and try again.</p></>);
                     setIsLoading(false);
                     return;
                 }
@@ -118,15 +121,20 @@ const JobSubmissionForm = props => {
                 const instanceData = await getInstanceData(server, username);
                 const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
                 setAvailableInstances(availableInstancesTmp);
-                let defaultInstance;
-                if (instanceData.default == null) {
-                    defaultInstance = availableInstancesTmp[0]
-                } else {
-                    defaultInstance = availableInstancesTmp.find(instance => instance.value === instanceData.default)
-                }
-                setInstance(defaultInstance);
                 setRawResourceRequestsAllowed(instanceData.rawResourceRequestsAllowed);
                 setUseRawRequests(instanceData.rawResourceRequestsAllowed && availableInstancesTmp.length === 0);
+                if (availableInstancesTmp.length === 0 && !instanceData.rawResourceRequestsAllowed) {
+                    setUnableToSolve(<><p><strong>You have no instances assigned to you.</strong></p>
+                        <p>Ask your inviter to give you access to instances.</p></>);
+                } else {
+                    let defaultInstance;
+                    if (instanceData.default == null) {
+                        defaultInstance = availableInstancesTmp[0]
+                    } else {
+                        defaultInstance = availableInstancesTmp.find(instance => instance.value === instanceData.default)
+                    }
+                    setInstance(defaultInstance);
+                }
                 setInstancesLoaded(true);
             }
             catch (err) {
@@ -306,7 +314,7 @@ const JobSubmissionForm = props => {
                 <h1 className="h2">Submit new {newHcJob && 'Hypercube '}Job</h1>
             </div>
             {isLoading ? <ClipLoader /> :
-                (availableNamespaces.length > 0 ?
+                (unableToSolve == null ?
                     <form
                         className="m-auto"
                         onSubmit={e => {
@@ -645,8 +653,7 @@ const JobSubmissionForm = props => {
                     </form>
                     :
                     <div className="alert alert-danger">
-                        <p><strong>You have no execute access to any namespace.</strong></p>
-                        <p>Ask an administrator to grant you permission to submit jobs and try again.</p>
+                        {unableToSolve}
                     </div>)
             }
         </div>

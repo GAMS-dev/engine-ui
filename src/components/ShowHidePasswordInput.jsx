@@ -27,7 +27,7 @@ const ShowHidePasswordInput = ({ value, setValue,
                 />
                 <div className="input-group-addon" aria-hidden="true">
                     <span className="input-group-text" style={{ "cursor": "pointer" }}
-                        onClick={() => setIsVisible(visible => !!!visible)}>
+                        onClick={() => setIsVisible(visible => !visible)}>
                         {isVisible ?
                             <Eye /> :
                             <EyeOff />}

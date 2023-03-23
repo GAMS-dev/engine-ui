@@ -91,29 +91,14 @@ const formatFileSize = (fileSize) => {
 
 const getInstanceData = async (server, username) => {
     const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-    let defaultInstance = null;
-    if (instanceData.data.default_instance != null) {
-        defaultInstance = instanceData.data.default_instance.label;
+    const availableInstancesTmp = instanceData.data.instances_available
+        .sort((a, b) => ('' + a.label).localeCompare(b.label));
+    return {
+        instances: availableInstancesTmp, default: instanceData.data.default_instance?.label,
+        rawResourceRequestsAllowed: instanceData.data.instances_inherited_from == null,
+        inheritedFrom: instanceData.data.instances_inherited_from,
+        defaultInheritedFrom: instanceData.data.default_inherited_from
     }
-    if (instanceData.data && instanceData.data.instances_available.length > 0) {
-        const availableInstancesTmp = instanceData.data.instances_available
-            .sort((a, b) => ('' + a.label).localeCompare(b.label));
-        return {
-            instances: availableInstancesTmp, default: defaultInstance,
-            rawResourceRequestsAllowed: false
-        }
-    }
-    // User can use raw resource requests or use any instance
-    let availableInstancesTmp = await axios.get(`${server}/usage/instances`);
-    if (availableInstancesTmp.data && availableInstancesTmp.data.length > 0) {
-        availableInstancesTmp = availableInstancesTmp.data
-            .sort((a, b) => ('' + a.label).localeCompare(b.label));
-        return {
-            instances: availableInstancesTmp, default: defaultInstance,
-            rawResourceRequestsAllowed: true
-        }
-    }
-    return { instances: [], default: defaultInstance, rawResourceRequestsAllowed: true }
 }
 const formatInstancesSelectInput = (instances) => {
     const formatLabel = (instance) => (

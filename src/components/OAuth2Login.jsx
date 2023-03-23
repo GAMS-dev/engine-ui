@@ -106,7 +106,7 @@ const OAuth2Login = (props) => {
     }, [setAuthToken, setErrorMsg]);
 
     useEffect(() => {
-        if (!!!document.location.search.includes('state=')) {
+        if (!document.location.search.includes('state=')) {
             return;
         }
         const searchParams = new URLSearchParams(document.location.search);

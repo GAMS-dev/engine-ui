@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { User } from "react-feather";
@@ -6,33 +5,33 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { ServerInfoContext } from "../ServerInfoContext";
 import QuotaWidget from "./QuotaWidget";
+import { getInstanceData } from "./util";
 
 
 export const UserMenu = () => {
-    const [{ username }] = useContext(AuthContext);
+    const [{ server, username }] = useContext(AuthContext);
     const [serverInfo] = useContext(ServerInfoContext);
-    const [{ server }] = useContext(AuthContext);
+    const [instanceDataFetched, setInstanceDataFetched] = useState(false);
     const [instancesAvailable, setInstancesAvailable] = useState(false);
     const [dropdownExpanded, setDropdownExpanded] = useState(false);
     useEffect(() => {
         const fetchInstanceData = async () => {
-            const userInstances = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
-            if (userInstances.data && userInstances.data.instances_available.length > 0) {
-                setInstancesAvailable(true);
-                return;
-            }
-            const globalInstances = await axios.get(`${server}/usage/instances`);
-            setInstancesAvailable(globalInstances.data && globalInstances.data.length > 0);
+            const userInstances = await getInstanceData(server, username);
+            setInstancesAvailable(userInstances.instances.length > 0);
+            setInstanceDataFetched(true);
+        }
+        if (dropdownExpanded !== true || instanceDataFetched) {
+            return;
         }
         if (serverInfo.in_kubernetes === true) {
             fetchInstanceData();
         }
-    }, [serverInfo, server, username, setInstancesAvailable])
+    }, [serverInfo, server, username, instanceDataFetched, dropdownExpanded])
     return (
         <>
             <li className="nav-item">
                 <Dropdown show={dropdownExpanded}
-                    onToggle={() => setDropdownExpanded(current => !!!current)}
+                    onToggle={() => setDropdownExpanded(current => !current)}
                     className="d-inline">
                     <Dropdown.Toggle variant="link">
                         <User className="feather" size={12} />
