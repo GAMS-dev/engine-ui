@@ -320,19 +320,20 @@ const UserInvitationForm = () => {
                                         </textarea> </div>
                                     }
                                 </div>}
-                                {role === "inviter" && <div className="form-group">
-                                    <label htmlFor="identityProvidersAllowed">
-                                        Identity providers user is allowed to invite with
-                                    </label>
-                                    <Select
-                                        id="identityProvidersAllowed"
-                                        value={selectedIdentityProvidersAllowed}
-                                        isMulti={true}
-                                        isSearchable={true}
-                                        onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
-                                        options={availableIdentityProviders}
-                                    />
-                                </div>}
+                                {role === "inviter" && availableIdentityProviders.length > 1 &&
+                                    <div className="form-group">
+                                        <label htmlFor="identityProvidersAllowed">
+                                            Identity providers user is allowed to invite with
+                                        </label>
+                                        <Select
+                                            id="identityProvidersAllowed"
+                                            value={selectedIdentityProvidersAllowed}
+                                            isMulti={true}
+                                            isSearchable={true}
+                                            onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
+                                            options={availableIdentityProviders}
+                                        />
+                                    </div>}
                                 {availableIdentityProviders.length > 1 && <div className="form-group">
                                     <label htmlFor="identityProvider">
                                         Identity provider
