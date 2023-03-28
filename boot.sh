@@ -19,7 +19,8 @@ fi
 
 if [ "$DISABLE_REQUEST_LIMIT" == "true" ]
 then
-   sed -i '/^limit_req/d' /etc/nginx/conf.d/default.conf
+    echo "DISABLE_REQUEST_LIMIT is set to true, disabling request limiting"
+    sed -i '/^limit_req/d' /etc/nginx/conf.d/default.conf
 fi
 
 if [ -n ${mount_url+x} ] && [ "$mount_url" != "" ] && [ "$mount_url" != "/" ] && [ "$mount_url" != "/engine" ]
