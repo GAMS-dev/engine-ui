@@ -213,7 +213,7 @@ const UserUpdateForm = () => {
                                             <option key="admin" value="admin">Admin</option>}
                                     </select>
                                 </div>
-                                {newRole === "inviter" && availableIdentityProviders.length > 0 &&
+                                {newRole === "inviter" && availableIdentityProviders.length > 1 &&
                                     (IDPLoading ? <ClipLoader /> : <div className="form-group">
                                         <label htmlFor="identityProvidersAllowed">
                                             Identity providers user is allowed to invite with
