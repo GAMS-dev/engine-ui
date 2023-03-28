@@ -33,9 +33,9 @@ const ShowHidePasswordInput = ({ value, setValue,
                             <EyeOff />}
                     </span>
                 </div>
-            </div>
-            <div className="invalid-feedback">
-                {invalidFeedback ? invalidFeedback : ""}
+                <div className="invalid-feedback">
+                    {invalidFeedback ? invalidFeedback : ""}
+                </div>
             </div>
             {helpText ?
                 <small id={`${id}Help`} className="form-text text-muted">

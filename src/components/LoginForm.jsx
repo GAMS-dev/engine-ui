@@ -211,6 +211,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
     if (providerInfo.type === "gams_engine" && password !== confirmPassword) {
       setConfirmPasswordError("The password does not match.");
+      setIsSubmitting(false);
       return;
     }
     if (providerInfo.type === "oauth" && invitationTokenHasSub !== true && OAuthToken == null) {
