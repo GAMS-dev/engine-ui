@@ -622,7 +622,7 @@ const JobSubmissionForm = props => {
                                             }
                                             <div className="form-group">
                                                 <label htmlFor="jobDeps" className="sr-only">
-                                                    Job Dependencies
+                                                    Job Dependencies (comma-separated list of tokens, optional)
                                                 </label>
                                                 <input
                                                     type="text"
