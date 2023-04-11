@@ -326,6 +326,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       if (invitationCode.length !== 0) {
         setLoginErrorMsg('Invalid invitation code.');
       }
+      setInvitationCodeValidated(invitationCode);
       setIsValidInvitationCode(false);
       return;
     }
@@ -534,7 +535,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                   autoComplete="current-password"
                   usePlaceholder={true}
                   required={true} />}
-              {register && invitationCodeIdentityProvider === "gams_engine" &&
+              {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
                 <ShowHidePasswordInput
                   value={confirmPassword}
                   setValue={setConfirmPassword}
