@@ -59,7 +59,7 @@ const Users = () => {
       field: "created",
       column: "Created",
       sorter: "datetime",
-      displayer: e => <TimeDisplay time={e} />
+      displayer: e => e == null ? "-" : <TimeDisplay time={e} />
     },
     {
       field: "id,username,roles",
