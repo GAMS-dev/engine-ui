@@ -117,4 +117,15 @@ const formatInstancesSelectInput = (instances) => {
         }))
         .sort((a, b) => ('' + a.label).localeCompare(b.label))
 }
-export { zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays, formatFileSize, getInstanceData, formatInstancesSelectInput }
+const getEventsString = (events, parameterized_events) => {
+    let eventsStr = events == null ? '' : events.join(',');
+    if (parameterized_events?.length > 0) {
+        eventsStr += (eventsStr === '' ? '' : ',') +
+            parameterized_events.map(el => `${el.event}=${el.parameters.join(',')}`).join(',')
+    }
+    return eventsStr;
+}
+export {
+    zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays,
+    formatFileSize, getInstanceData, formatInstancesSelectInput, getEventsString
+}

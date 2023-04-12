@@ -6,7 +6,7 @@ import { AlertContext } from "./Alert";
 import axios from "axios";
 import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
-import { getResponseError } from "./util";
+import { getEventsString, getResponseError } from "./util";
 import WebhooksActionsButtonGroup from "./WebhooksActionsButtonGroup";
 import { Button, Modal } from "react-bootstrap";
 import SubmitButton from "./SubmitButton";
@@ -42,10 +42,13 @@ const Webhooks = props => {
             }
         },
         {
-            field: "events",
+            field: "events,parameterized_events",
             column: "Events",
             sorter: "alphabetical-array",
-            displayer: args => args ? args.join(",") : ""
+            displayer: (events, parameterized_events) => {
+                let eventsStr = getEventsString(events, parameterized_events);
+                return <div className="table-cell-overflow" title={eventsStr}>{eventsStr}</div>;
+            }
         },
         {
             field: "created_at",
@@ -60,12 +63,12 @@ const Webhooks = props => {
             displayer: e => e === true ? 1 : 0
         },
         {
-            field: "id,url,events",
+            field: "id,url,events,parameterized_events",
             column: "Actions",
-            displayer: (id, url, events) => <WebhooksActionsButtonGroup
+            displayer: (id, url, events, parameterized_events) => <WebhooksActionsButtonGroup
                 id={id}
                 url={url}
-                events={events ? events.join(",") : ""}
+                events={getEventsString(events, parameterized_events)}
                 server={server}
                 setRefresh={setRefresh} />
         }

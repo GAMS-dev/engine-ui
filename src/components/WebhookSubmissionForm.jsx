@@ -6,6 +6,7 @@ import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
+import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
 
 const WebhookSubmissionForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
@@ -22,7 +23,9 @@ const WebhookSubmissionForm = () => {
     const [secret, setSecret] = useState("");
     const [recursive, setRecursive] = useState(false);
     const [contentType, setContentType] = useState(allContentTypes[0]);
-    const [events, setEvents] = useState(allEvents[0]);
+    const [events, setEvents] = useState([allEvents[0]]);
+    const [parameterizedEvents, setParameterizedEvents] = useState([]);
+    const [parameterizedEventsValid, setParameterizedEventsValid] = useState(true);
     const [insecureSsl, setInsecureSsl] = useState(false);
     const [showInsecureSslCheckbox, setShowInsecureSslCheckbox] = useState(false);
     const [webhookCreated, setWebhookCreated] = useState(false);
@@ -32,8 +35,11 @@ const WebhookSubmissionForm = () => {
         if (urlValid !== true) {
             return;
         }
-        if (events.length < 1) {
-            setFormErrors({ events: 'At least one event must be selected' });
+        if (!parameterizedEventsValid) {
+            return;
+        }
+        if (events.length < 1 && parameterizedEvents.length < 1) {
+            setFormErrors({ events: 'At least one event (non-parameterized and/or parameterized) must be selected' });
             return;
         }
         setFormErrors({});
@@ -45,13 +51,12 @@ const WebhookSubmissionForm = () => {
             webhookSubmissionForm.append("recursive", recursive);
             webhookSubmissionForm.append("content_type", contentType.value);
             webhookSubmissionForm.append("insecure_ssl", insecureSsl);
-            if (Array.isArray(events)) {
-                for (let i = 0; i < events.length; i++) {
-                    webhookSubmissionForm.append("events", events[i].value);
-                }
-            } else {
-                webhookSubmissionForm.append("events", events.value);
+            for (let i = 0; i < events.length; i++) {
+                webhookSubmissionForm.append("events", events[i].value);
             }
+            parameterizedEvents.forEach(parameterizedEvent => {
+                webhookSubmissionForm.append("parameterized_events", parameterizedEvent);
+            })
 
             await axios.post(`${server}/users/webhooks`, webhookSubmissionForm);
             setAlertMsg('success:Webhook created successfully');
@@ -60,7 +65,7 @@ const WebhookSubmissionForm = () => {
         catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 const formErrorsTmp = {};
-                ['url', 'secret', 'events'].forEach(key => {
+                ['url', 'secret', 'events', 'parameterized_events'].forEach(key => {
                     if (err.response.data.errors.hasOwnProperty(key)) {
                         formErrorsTmp[key] = err.response.data.errors[key]
                     }
@@ -144,7 +149,7 @@ const WebhookSubmissionForm = () => {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-md-6 col-12">
+                    <div className="col-12">
                         <fieldset disabled={isSubmitting}>
                             <div className="form-group">
                                 <label htmlFor="cpuReq">
@@ -191,6 +196,12 @@ const WebhookSubmissionForm = () => {
                                     options={allEvents}
                                 />
                             </div>
+                            <ParameterizedWebhookEventsSelector
+                                parameterizedEvents={parameterizedEvents}
+                                setParameterizedEvents={setParameterizedEvents}
+                                setIsValid={setParameterizedEventsValid}
+                                isSubmitting={isSubmitting}
+                                validationErrors={formErrors.parameterized_events} />
                             <div className="form-group">
                                 <label htmlFor="contentType">
                                     Content type
@@ -225,7 +236,7 @@ const WebhookSubmissionForm = () => {
                     </div>
                 </div>
                 <div className="mt-3">
-                    <SubmitButton isSubmitting={isSubmitting}>
+                    <SubmitButton isSubmitting={isSubmitting} isDisabled={!parameterizedEventsValid}>
                         Add Webhook
                     </SubmitButton>
                 </div>
