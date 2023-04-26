@@ -227,6 +227,7 @@ const InstanceSubmissionForm = () => {
                                             type="number"
                                             className={"form-control" + (formErrors.multiplier ? " is-invalid" : "")}
                                             id="multiplier"
+                                            min="0"
                                             step="any"
                                             value={multiplier}
                                             required
@@ -244,6 +245,7 @@ const InstanceSubmissionForm = () => {
                                             type="number"
                                             className={"form-control" + (formErrors.multiplier_idle ? " is-invalid" : "")}
                                             id="multiplier_idle"
+                                            min="0"
                                             step="any"
                                             value={multiplierIdle}
                                             required
