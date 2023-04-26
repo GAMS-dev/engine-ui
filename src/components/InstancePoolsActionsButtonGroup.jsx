@@ -10,7 +10,7 @@ import { useEffect } from "react";
 
 const InstancePoolsActionsButtonGroup = props => {
     const { label, server, setRefresh, isPool,
-        poolSize, poolSizeCurrent, poolIsCanceling, instancePoolsEnabled } = props;
+        poolSize, poolSizeCurrent, poolIsCanceling, instancePoolsEnabled, hasPoolWritePerm } = props;
     const [, setAlertMsg] = useContext(AlertContext);
 
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -77,11 +77,12 @@ const InstancePoolsActionsButtonGroup = props => {
                     <small className="mr-3">Shutting down...</small> :
                     poolSizeCurrent !== poolSize ?
                         <small className="mr-3">Scaling {poolSizeCurrent < poolSize ? 'up' : 'down'}...</small> :
-                        instancePoolsEnabled ? <button className="btn btn-sm btn-outline-info" onClick={() => setShowScalePoolDialog(true)}>Change Size</button> : <></> :
+                        (instancePoolsEnabled && hasPoolWritePerm) ?
+                            <button className="btn btn-sm btn-outline-info" onClick={() => setShowScalePoolDialog(true)}>Change Size</button> : <></> :
                 <Link to={`instances/update/${label}`} className="btn btn-sm btn-outline-info">
                     Update
                 </Link>}
-            {!isPool || !poolIsCanceling ?
+            {!isPool || (!poolIsCanceling && hasPoolWritePerm) ?
                 <button className="btn btn-sm btn-outline-danger" onClick={() => setShowConfirmDialog(true)}>Delete</button> :
                 <></>}
             <Modal show={showScalePoolDialog} onHide={() => setShowScalePoolDialog(false)}>

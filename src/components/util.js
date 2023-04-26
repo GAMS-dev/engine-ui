@@ -90,30 +90,42 @@ const formatFileSize = (fileSize) => {
 }
 
 const getInstanceData = async (server, username) => {
-    const instanceData = await axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
+    const instancePoolDataPromise = axios.get(`${server}/usage/pools/${encodeURIComponent(username)}`);
+    const instanceDataPromise = axios.get(`${server}/usage/instances/${encodeURIComponent(username)}`);
+    const defaultInstanceDataPromise = axios.get(`${server}/usage/instances/${encodeURIComponent(username)}/default`);
+    const defaultInstanceData = await defaultInstanceDataPromise;
+    const instanceData = await instanceDataPromise;
+    const instancePoolData = await instancePoolDataPromise;
     const availableInstancesTmp = instanceData.data.instances_available
+        .concat(instancePoolData.data.instance_pools_available.map(
+            el => {
+                const newEl = el;
+                newEl['is_pool'] = true;
+                return newEl;
+            }
+        ))
         .sort((a, b) => ('' + a.label).localeCompare(b.label));
     return {
-        instances: availableInstancesTmp, default: instanceData.data.default_instance?.label,
+        instances: availableInstancesTmp, default: defaultInstanceData.data.default_instance?.label,
         rawResourceRequestsAllowed: instanceData.data.instances_inherited_from == null,
         inheritedFrom: instanceData.data.instances_inherited_from,
-        defaultInheritedFrom: instanceData.data.default_inherited_from
+        defaultInheritedFrom: defaultInstanceData.data.default_inherited_from
     }
 }
 const formatInstancesSelectInput = (instances) => {
-    const formatLabel = (instance) => (
-        `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)`
+    const formatLabel = (label, instance) => (
+        `${label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)`
     )
     return instances
-        .filter(instance => instance.pool_cancelling !== true)
+        .filter(instance => instance.cancelling !== true)
         .map(instance => ({
             value: instance.label,
             label: instance.is_pool === true ? (
                 <>
                     <Layers size={12} />
-                    <span style={{ paddingLeft: "5px" }}>{formatLabel(instance)}</span>
+                    <span style={{ paddingLeft: "5px" }}>{formatLabel(instance.label, instance.instance)}</span>
                 </>
-            ) : formatLabel(instance)
+            ) : formatLabel(instance.label, instance)
         }))
         .sort((a, b) => ('' + a.label).localeCompare(b.label))
 }

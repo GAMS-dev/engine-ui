@@ -35,6 +35,14 @@ const Sidebar = props => {
               <span className="nav-link-text">Users</span>
             </Link>
           </li>
+          {props.instancesVisible === true &&
+            <li className="nav-item">
+              <Link to="/pools" className={`nav-link nav-block${pathname.startsWith("/pools") ? " active" : ""}`}>
+                <Server className="feather" />
+                <span className="nav-link-text">Pools</span>
+              </Link>
+            </li>
+          }
           {props.webhooksVisible === true && <li className="nav-item">
             <Link to="/webhooks" className={`nav-link nav-block${pathname.startsWith("/webhooks") ? " active" : ""}`}>
               <ExternalLink className="feather" />
@@ -47,14 +55,6 @@ const Sidebar = props => {
               <span className="nav-link-text">Cleanup</span>
             </Link>
           </li>
-          {props.instancesVisible === true &&
-            <li className="nav-item">
-              <Link to="/pools" className={`nav-link nav-block${pathname.startsWith("/pools") ? " active" : ""}`}>
-                <Server className="feather" />
-                <span className="nav-link-text">Pools</span>
-              </Link>
-            </li>
-          }
           {roles && roles.find(role => role === "admin") !== undefined &&
             <li className="nav-item">
               <Link to="/administration" className={`nav-link nav-block${pathname.startsWith("/administration") ? " active" : ""}`}>

@@ -5,24 +5,25 @@ import { Layers, RefreshCw } from "react-feather";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import Table from "./Table";
-import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
+import { formatInstancesSelectInput, getResponseError } from "./util";
 import InstancePoolsActionsButtonGroup from "./InstancePoolsActionsButtonGroup";
 import axios from "axios";
 import SubmitButton from "./SubmitButton";
 
 const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
+    const [{ jwt, server, username, roles }] = useContext(AuthContext);
     const [isLoading, setIsLoading] = useState(true);
     const [refresh, setRefresh] = useState(0);
-    const [instances, setInstances] = useState([]);
+    const [userInvitees, setUserInvitees] = useState([username]);
+    const [instancePools, setInstancesPools] = useState([]);
     const [showInstancePoolAccessModal, setShowInstancePoolAccessModal] = useState(false);
     const [poolAccessIsSubmitting, setPoolAccessIsSubmitting] = useState(false);
     const [poolAccessSubmissionError, setPoolAccessSubmissionError] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server, username, roles }] = useContext(AuthContext);
 
     const instancePoolsEnabled = instancePoolAccess === "ENABLED" ||
-        (['INVITER_ONLY', 'ADMIN_ONLY'].includes(instancePoolAccess) && (roles && roles.includes('admin'))) ||
-        (instancePoolAccess === 'INVITER_ONLY' && (roles && roles.includes('inviter')));
+        (['INVITER_ONLY', 'ADMIN_ONLY'].includes(instancePoolAccess) && roles?.includes('admin') === true) ||
+        (instancePoolAccess === 'INVITER_ONLY' && roles?.includes('inviter') === true);
 
     const [displayFieldsPools] = useState([
         {
@@ -32,37 +33,50 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
             displayer: String
         },
         {
-            field: "pool_instance,cpu_request,memory_request,multiplier",
-            column: "Instance",
+            field: "owner",
+            column: "Owner",
             sorter: "alphabetical",
-            displayer: (instance, cpu, memory, multiplier) =>
-                formatInstancesSelectInput([{ 'label': instance, 'cpu_request': cpu, 'memory_request': memory, 'multiplier': multiplier }])[0].label
+            displayer: user => user.deleted ?
+                <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
         },
         {
-            field: "pool_size",
+            field: "instance",
+            column: "Instance",
+            sorter: "alphabetical",
+            displayer: (instance) =>
+                formatInstancesSelectInput([{
+                    'label': instance.label,
+                    'cpu_request': instance.cpu_request,
+                    'memory_request': instance.memory_request,
+                    'multiplier': instance.multiplier
+                }])[0].label
+        },
+        {
+            field: "size",
             column: "Size",
             sorter: "numerical",
             displayer: Number
         },
         {
-            field: "pool_size_active",
+            field: "size_active",
             column: "Active Workers",
             sorter: "numerical",
             displayer: Number
         },
         {
-            field: "pool_size_busy",
+            field: "size_busy",
             column: "Busy Workers",
             sorter: "numerical",
             displayer: Number
         },
         {
-            field: "id,label,pool_size,pool_size_active,pool_cancelling",
+            field: "id,label,owner,size,size_active,cancelling",
             column: "Actions",
-            displayer: (_, label, size, currentSize, isCanceling) => <InstancePoolsActionsButtonGroup
+            displayer: (_, label, owner, size, currentSize, isCanceling) => <InstancePoolsActionsButtonGroup
                 server={server}
                 label={label}
                 isPool={true}
+                hasPoolWritePerm={roles?.includes('admin') === true || userInvitees.includes(owner.username)}
                 poolSize={size}
                 poolSizeCurrent={currentSize}
                 poolIsCanceling={isCanceling}
@@ -75,8 +89,14 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
         const fetchInstances = async () => {
             setIsLoading(true);
             try {
-                const instanceData = await getInstanceData(server, username);
-                setInstances(instanceData.instances.filter(instance => instance.is_pool === true));
+                const instancePoolData = await axios.get(`${server}/usage/pools/${username}`);
+                if (roles?.includes('inviter') === true) {
+                    const userInvitees = await axios.get(`${server}/users/`);
+                    setUserInvitees(userInvitees.data.filter(user => user.deleted === false).map(user => user.username));
+                } else {
+                    setUserInvitees([username]);
+                }
+                setInstancesPools(instancePoolData.data.instance_pools_available);
             }
             catch (err) {
                 setAlertMsg(`An error occurred fetching instances. Error message: ${getResponseError(err)}.`);
@@ -142,7 +162,7 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
                 </div>
             </div>
             {instancePoolAccess === "DISABLED" ? <p className="text-center">Instance pools disabled</p> : <Table
-                data={instances}
+                data={instancePools}
                 noDataMsg="No Instance Pools Found"
                 isLoading={isLoading}
                 displayFields={displayFieldsPools}
