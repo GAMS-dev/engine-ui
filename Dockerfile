@@ -11,6 +11,8 @@ ARG PUBLIC_URL=GGGGHHHHIIIIJJJJ
 RUN npm run build
 
 FROM nginx:1.23-alpine-slim
+RUN apk update && \
+    apk upgrade --available
 COPY --from=builder /app/build /usr/share/nginx/engine
 COPY boot.sh /docker-entrypoint.d/30-fix-ui-vars.sh
 RUN chmod +x /docker-entrypoint.d/30-fix-ui-vars.sh
