@@ -193,34 +193,35 @@ const Cleanup = () => {
             setIsSubmitting(false);
             return;
         }
-        const httpReqHeaders = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        };
-        axios
-            .delete(
-                `${server}/cleanup/results`,
-                {
-                    data: tokensToRemove.map(el =>
-                        `${el.type === "hypercube_result" ? "hypercube_token" : "token"}=${el.token}`).join("&"),
-                    headers: httpReqHeaders
-                }
-            )
-            .then(() => {
-                setRefresh(refreshCnt => ({
-                    refresh: refreshCnt + 1
-                }));
-                setIsSubmitting(false);
-
-                if (showDeleteConfirmDialog) {
-                    setShowDeleteConfirmDialog(false);
-                } else {
-                    setShowHousekeepingDialog(false);
-                }
-            })
-            .catch(err => {
+        for (let i = 0; i < Math.ceil(tokensToRemove.length / 1000); i += 1) {
+            // send batches of 1000
+            try {
+                const tokensToRemoveTmp = tokensToRemove.splice(0, 1000).map(el =>
+                    `${el.type === "hypercube_result" ? "hypercube_token" : "token"}=${el.token}`).join("&");
+                await axios.delete(`${server}/cleanup/results`,
+                    {
+                        data: tokensToRemoveTmp,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }
+                );
+            } catch (err) {
                 setSubmissionErrorMsg(`Problems deleting dataset. Error message: ${getResponseError(err)}`);
                 setIsSubmitting(false);
-            });
+                return;
+            }
+        }
+        setRefresh(refreshCnt => ({
+            refresh: refreshCnt + 1
+        }));
+        setIsSubmitting(false);
+
+        if (showDeleteConfirmDialog) {
+            setShowDeleteConfirmDialog(false);
+        } else {
+            setShowHousekeepingDialog(false);
+        }
     }
 
     return (
