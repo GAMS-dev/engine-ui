@@ -27,6 +27,8 @@ const UserInstanceUpdateForm = () => {
     const [userHasNoDefaultAssigned, setUserHasNoDefaultAssigned] = useState(false);
     const [defaultInheritedFrom, setDefaultInheritedFrom] = useState("");
     const [inviterHasInstancesAssigned, setInviterHasInstancesAssigned] = useState(false);
+    const [currentInstanceLabelsUser, setCurrentInstanceLabelsUser] = useState([]);
+    const [deletePools, setDeletePools] = useState(false);
 
     const [userEdited, setUserEdited] = useState(false);
     const [userToEditIsAdmin, setUserToEditIsAdmin] = useState(false);
@@ -57,6 +59,7 @@ const UserInstanceUpdateForm = () => {
                 setUserToEditIsAdmin(userToEditIsAdminTmp);
 
                 const instanceDataUser = await getInstanceData(server, userToEdit);
+                setCurrentInstanceLabelsUser(instanceDataUser.instances.filter(el => el.is_pool !== true).map(el => el.label));
                 const instanceDataInviter = inviterNameTmp == null ? instanceDataUser : await getInstanceData(server, inviterNameTmp);
 
                 const inviterHasInstancesAssignedTmp = instanceDataInviter.rawResourceRequestsAllowed === false;
@@ -121,7 +124,8 @@ const UserInstanceUpdateForm = () => {
         }
         try {
             const requestData = {};
-            if (!inheritDefault || !inheritInstances || (inheritInstances && !inviterHasInstancesAssigned)) {
+            if (selectedInstancesAllowed.length > 0 &&
+                (!inheritDefault || !inheritInstances || (inheritInstances && !inviterHasInstancesAssigned))) {
                 const defaultLabel = defaultInstance.value;
                 if (!defaultLabel) {
                     setIsSubmitting(false);
@@ -133,6 +137,7 @@ const UserInstanceUpdateForm = () => {
             if (!userToEditIsAdmin && !inheritInstances) {
                 requestData['labels'] = selectedInstancesAllowed
                     .map(instance => instance.value);
+                requestData['delete_pools'] = deletePools === true;
             }
             if (Object.keys(requestData).length > 0) {
                 if (userToEditIsAdmin || inheritInstances) {
@@ -189,27 +194,41 @@ const UserInstanceUpdateForm = () => {
                                                     (instancesInheritedFrom === username ? "you" : instancesInheritedFrom)}` : "Allowed to use raw resource requests"}</label>
                                         </div>
                                         {!inheritInstances &&
-                                            <div className="form-group">
-                                                <label htmlFor="instancesAllowed">
-                                                    Instances user is allowed to use
-                                                </label>
-                                                <Select
-                                                    id="instancesAllowed"
-                                                    value={selectedInstancesAllowed}
-                                                    isMulti={true}
-                                                    isSearchable={true}
-                                                    closeMenuOnSelect={false}
-                                                    blurInputOnSelect={false}
-                                                    onChange={selected => {
-                                                        setSelectedInstancesAllowed(selected);
-                                                        if (defaultInstance == null ||
-                                                            !selected.map(el => el.value).includes(selected.value)) {
-                                                            setDefaultInstance(selected[0]);
-                                                        }
-                                                    }}
-                                                    options={instancesAllowed}
-                                                />
-                                            </div>}
+                                            <>
+                                                <div className="form-group">
+                                                    <label htmlFor="instancesAllowed">
+                                                        Instances user is allowed to use
+                                                    </label>
+                                                    <Select
+                                                        id="instancesAllowed"
+                                                        value={selectedInstancesAllowed}
+                                                        isMulti={true}
+                                                        isSearchable={true}
+                                                        closeMenuOnSelect={false}
+                                                        blurInputOnSelect={false}
+                                                        onChange={selected => {
+                                                            setSelectedInstancesAllowed(selected);
+                                                            if (defaultInstance == null ||
+                                                                !selected.map(el => el.value).includes(selected.value)) {
+                                                                setDefaultInstance(selected[0]);
+                                                            }
+                                                        }}
+                                                        options={instancesAllowed}
+                                                    />
+                                                </div>
+                                                {currentInstanceLabelsUser.length > 0 &&
+                                                    selectedInstancesAllowed.filter(instance => currentInstanceLabelsUser.includes(instance.value)).length < currentInstanceLabelsUser.length ?
+                                                    <div className="form-check mt-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="form-check-input"
+                                                            checked={deletePools}
+                                                            onChange={e => setDeletePools(e.target.checked)}
+                                                            id="deletePools"
+                                                        />
+                                                        <label className="form-check-label" htmlFor="deletePools">Delete all pools associated with an instance that the user is no longer allowed to use?</label>
+                                                    </div> : <></>}
+                                            </>}
                                     </>}
                                 {(selectedInstancesAllowed.length > 0 || inheritInstances) &&
                                     <>
