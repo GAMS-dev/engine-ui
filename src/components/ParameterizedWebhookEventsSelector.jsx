@@ -58,6 +58,7 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                                 const newEvents = [...parameterizedEvents];
                                 newEvents.splice(idx, 1);
                                 setParameterizedEvents(newEvents);
+                                setIsValid(true);
                             }}>
                             <span aria-hidden="true">&times;</span>
                         </button>
