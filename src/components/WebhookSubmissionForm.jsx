@@ -13,8 +13,12 @@ const WebhookSubmissionForm = () => {
     const [{ server, roles }] = useContext(AuthContext);
 
     const allContentTypes = [{ value: 'json', label: 'JSON' }, { value: 'form', label: 'Form' }];
-    const allEvents = [{ value: 'ALL', label: 'All events' }, { value: 'JOB_FINISHED', label: 'Job finished' },
-    { value: 'HC_JOB_FINISHED', label: 'Hypercube job finished' }];
+    const allEvents = [{ value: 'ALL', label: 'All events' },
+    { value: 'JOB_FINISHED', label: 'Job finished' },
+    { value: 'HC_JOB_FINISHED', label: 'Hypercube job finished' },
+    { value: 'JOB_OUT_OF_RESOURCES', label: 'Job out of resources' },
+    { value: 'HC_JOB_OUT_OF_RESOURCES', label: 'Hypercube job out of resources' }
+    ];
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [formErrors, setFormErrors] = useState("");
