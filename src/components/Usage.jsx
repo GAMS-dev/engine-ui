@@ -133,11 +133,6 @@ const Usage = () => {
                 }
             })
             .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("Problems fetching usage information.");
-                    setIsLoading(false);
-                    return;
-                }
                 const dataDisaggregatedTmp = res.data.job_usage.concat(res.data.hypercube_job_usage);
                 let aggregatedUsageData = Object.values(dataDisaggregatedTmp.reduce((a, c) => {
                     if ("job_count" in c) {
@@ -196,7 +191,10 @@ const Usage = () => {
                             solveTime = 0;
                             queueTime = (new Date(c.finished) - new Date(c.submitted)) / 1000;
                         } else if (c.times[c.times.length - 1].finish == null) {
-                            solveTime = NaN;
+                            solveTime = (
+                                new Date(c.finished) -
+                                new Date(c.times[c.times.length - 1].start)
+                            ) / 1000;
                             queueTime = (new Date(c.times[0].start) - new Date(c.submitted)) / 1000;
                         } else {
                             solveTime = (
