@@ -51,7 +51,9 @@ const WebhookSubmissionForm = () => {
         try {
             const webhookSubmissionForm = new FormData();
             webhookSubmissionForm.append("url", url);
-            webhookSubmissionForm.append("secret", secret);
+            if (secret?.length > 0) {
+                webhookSubmissionForm.append("secret", secret);
+            }
             webhookSubmissionForm.append("recursive", recursive);
             webhookSubmissionForm.append("content_type", contentType.value);
             webhookSubmissionForm.append("insecure_ssl", insecureSsl);
