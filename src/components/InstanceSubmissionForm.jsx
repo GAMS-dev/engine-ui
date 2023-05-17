@@ -239,7 +239,7 @@ const InstanceSubmissionForm = () => {
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="multiplier_idle">
-                                            Multiplier (applied when worker is idle, only relevant for instance pools)
+                                            Idle Multiplier (applied when worker in instance pool is idle)
                                         </label>
                                         <input
                                             type="number"
