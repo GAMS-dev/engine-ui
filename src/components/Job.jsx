@@ -121,6 +121,7 @@ const Job = () => {
                 if (!axios.isCancel(err) && err.response && err.response.status !== 403) {
                   setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`);
                 }
+                setJob(jobData);
                 setIsLoading(false);
               });
           }
