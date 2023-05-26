@@ -97,15 +97,12 @@ const AuthProviderForm = () => {
                 setShowRemoveAuthProviderModal(false);
                 setSelectedAuthProvider('__+add_new');
                 setIsLoading(true);
-                const responseLdapPromise = axios.get(`${server}/auth/ldap-providers`);
-                const responseOauthPromise = axios.get(`${server}/auth/oauth2-providers`);
-                const responseOidcPromise = axios.get(`${server}/auth/oidc-providers`);
-                const responseConfigPromise = axios.get(`${server}/configuration`);
-                const response = await axios.get(`${server}/auth/providers/all`);
-                const responseLdap = await responseLdapPromise;
-                const responseOidc = await responseOidcPromise;
-                const responseOAuth = await responseOauthPromise;
-                const responseConfig = await responseConfigPromise;
+                const [response, responseLdap, responseOidc, responseOAuth, responseConfig] = await Promise.all([
+                    axios.get(`${server}/auth/providers/all`),
+                    axios.get(`${server}/auth/ldap-providers`),
+                    axios.get(`${server}/auth/oidc-providers`),
+                    axios.get(`${server}/auth/oauth2-providers`),
+                    axios.get(`${server}/configuration`)]);
                 try {
                     setExpectedConfigHostname(new URL(server).href);
                 } catch (_) {
