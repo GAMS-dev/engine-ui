@@ -19,7 +19,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
     const [isLoading, setIsLoading] = useState(false);
     const [nsId, setNsId] = useState(0);
     const [modifiedFlag, setModifiedFlag] = useState(false);
-    const [selectedNamespace, setSelectedNamespace] = useState(namespacePermissions ?
+    const [selectedNamespace, setSelectedNamespace] = useState(namespacePermissions != null && namespacePermissions.length > 0 ?
         namespacePermissions.sort((a, b) => ('' + a.name).localeCompare(b.name))[0].name : '');
     const [readAccess, setReadAccess] = useState(undefined);
     const [writeAccess, setWriteAccess] = useState(undefined);
