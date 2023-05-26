@@ -510,7 +510,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                     )}
                   </Nav> : <></>)}
               {(!register || isValidInvitationCode) && <div className="form-group">
-                <label htmlFor="inputUsername" className="sr-only">
+                <label htmlFor="username" className="sr-only">
                   Username
                 </label>
                 <input
