@@ -191,7 +191,7 @@ const UserInstanceUpdateForm = () => {
                                             <label className="form-check-label" htmlFor="inheritInstances">{inviterHasInstancesAssigned ?
                                                 `Inherit instances from ${instancesInheritedFrom == null || instancesInheritedFrom === userToEdit ?
                                                     (inviterName === username ? "you" : inviterName) :
-                                                    (instancesInheritedFrom === username ? "you" : instancesInheritedFrom)}` : "Allowed to use raw resource requests"}</label>
+                                                    (instancesInheritedFrom === username ? "you" : instancesInheritedFrom)}` : "Allowed to use any instance/raw resource requests"}</label>
                                         </div>
                                         {!inheritInstances &&
                                             <>
