@@ -118,70 +118,51 @@ const Users = () => {
       });
   }
   useEffect(() => {
-    setIsLoading(true);
-    axios
-      .get(`${server}/users/`, {
-        params: roles.length ? null : { username: username },
-        headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted" }
-      })
-      .then(res => {
-        if (res.status !== 200) {
-          setAlertMsg("Problems fetching user information.");
-          setIsLoading(false);
-          return;
-        }
-        if (!roles.length) {
-          setUsers(res.data
-            .filter(user => user.deleted === false)
-            .map(user => {
-              const newUserInfo = user;
-              newUserInfo.id = newUserInfo.username;
-              newUserInfo.created = newUserInfo.invitation_time;
-              return newUserInfo;
-            })
-            .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
-          setIsLoading(false);
-          return;
-        }
-        axios
-          .get(`${server}/users/invitation`, {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const queryParamsUsersQuery = roles?.length ? {} : { username: username };
+      queryParamsUsersQuery['filter'] = 'deleted=false';
+      const queryParamsInvitationsQuery = roles?.length ? {} : { everyone: roles?.includes("admin") };
+      queryParamsInvitationsQuery['filter'] = 'used=false';
+
+      try {
+        const queries = [
+          axios.get(`${server}/users/`, {
+            params: queryParamsUsersQuery,
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted" }
+          })];
+        if (roles?.length > 0) {
+          queries.push(axios.get(`${server}/users/invitation`, {
             headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" },
-            params: { "everyone": roles && roles.includes("admin") }
-          })
-          .then(resInv => {
-            if (resInv.status !== 200) {
-              setAlertMsg("Problems fetching invitation information.");
-              setIsLoading(false);
-              return;
-            }
-            setUsers(resInv.data
-              .filter(invitation => invitation.used === false)
-              .map(invitation => {
-                const newInvitation = invitation;
-                newInvitation.id = newInvitation.token;
-                newInvitation.username = "";
-                return newInvitation;
-              })
-              .concat(res.data
-                .filter(user => user.deleted === false)
-                .map(user => {
-                  const newUserInfo = user;
-                  newUserInfo.id = newUserInfo.username;
-                  newUserInfo.created = newUserInfo.invitation_time;
-                  return newUserInfo;
-                }))
-              .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
-            setIsLoading(false);
-          })
-          .catch(err => {
-            setAlertMsg(`Problems fetching invitation information. Error message: ${getResponseError(err)}`);
-            setIsLoading(false);
+            params: queryParamsInvitationsQuery
+          }))
+        }
+        const reponses = await Promise.all(queries);
+        let userDataTmp = reponses[0].data
+          .map(user => {
+            const newUserInfo = user;
+            newUserInfo.id = newUserInfo.username;
+            newUserInfo.created = newUserInfo.invitation_time;
+            return newUserInfo;
           });
-      })
-      .catch(err => {
+        if (roles?.length > 0) {
+          userDataTmp = userDataTmp.concat(reponses[1].data
+            .map(invitation => {
+              const newInvitation = invitation;
+              newInvitation.id = newInvitation.token;
+              newInvitation.username = "";
+              return newInvitation;
+            }));
+        }
+        setUsers(userDataTmp
+          .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
+      } catch (err) {
         setAlertMsg(`Problems fetching user information. Error message: ${getResponseError(err)}`);
+      } finally {
         setIsLoading(false);
-      });
+      }
+    }
+    fetchData();
   }, [jwt, server, username, roles, refresh, displayFields, setAlertMsg]);
 
 
