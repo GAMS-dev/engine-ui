@@ -64,6 +64,7 @@ const AuthProviderForm = () => {
     const [jwksUri, setJwksUri] = useState("");
     const [responseTypesSupported, setResponseTypesSupported] = useState("");
     const [grantTypesSupported, setGrantTypesSupported] = useState("");
+    const [tokenAuthMethodsSupported, setTokenAuthMethodsSupported] = useState("");
     const [requestScopeREADONLY, setRequestScopeREADONLY] = useState("READONLY");
     const [requestScopeCONFIGURATION, setRequestScopeCONFIGURATION] = useState("CONFIGURATION");
     const [requestScopeNAMESPACES, setRequestScopeNAMESPACES] = useState("NAMESPACES");
@@ -74,7 +75,7 @@ const AuthProviderForm = () => {
     const [requestScopeLICENSES, setRequestScopeLICENSES] = useState("LICENSES");
     const [requestScopeUSAGE, setRequestScopeUSAGE] = useState("USAGE");
     const [requestScopeAUTH, setRequestScopeAUTH] = useState("AUTH");
-    const [extraClientIds, setExtraClietIds] = useState("");
+    const [extraClientIds, setExtraClientIds] = useState("");
     const [oidcScopes, setOidcScopes] = useState("openid,profile,email");
 
     const [ldapHost, setLdapHost] = useState("");
@@ -188,6 +189,7 @@ const AuthProviderForm = () => {
             setOauthAudience(currentConfigHostname);
             setResponseTypesSupported('');
             setGrantTypesSupported('');
+            setTokenAuthMethodsSupported('');
             setRequestScopeREADONLY('READONLY');
             setRequestScopeCONFIGURATION('CONFIGURATION');
             setRequestScopeNAMESPACES('NAMESPACES');
@@ -208,7 +210,7 @@ const AuthProviderForm = () => {
             setLdapActiveDirectory(false);
             setLdapBase('');
             setLdapUserFilter('');
-            setExtraClietIds('');
+            setExtraClientIds('');
             setOidcScopes('openid,profile,email');
         } else {
             const providerConfig = authProviders.filter(config => config.name === selectedAuthProvider);
@@ -238,11 +240,12 @@ const AuthProviderForm = () => {
                 setEndSessionEndpoint(oAuthProviderConfig.end_session_endpoint == null ? '' : oAuthProviderConfig.end_session_endpoint);
                 setDeviceAuthorizationEndpoint(oAuthProviderConfig.device_authorization_endpoint == null ? '' : oAuthProviderConfig.device_authorization_endpoint);
                 setJwksUri(oAuthProviderConfig.jwks_uri);
+                setTokenAuthMethodsSupported(oAuthProviderConfig.token_endpoint_auth_methods_supported.join(","));
                 if (providerConfig[0].oidc != null) {
-                    setExtraClietIds(oAuthProviderConfig.extra_client_ids == null ? '' : oAuthProviderConfig.extra_client_ids.join(","));
+                    setExtraClientIds(oAuthProviderConfig.extra_client_ids == null ? '' : oAuthProviderConfig.extra_client_ids.join(","));
                     setOidcScopes(oAuthProviderConfig.scopes.join(","));
                 } else {
-                    setExtraClietIds('');
+                    setExtraClientIds('');
                     setOidcScopes('');
                     setResponseTypesSupported(oAuthProviderConfig.response_types_supported.join(","));
                     setGrantTypesSupported(oAuthProviderConfig.grant_types_supported.join(","));
@@ -341,6 +344,9 @@ const AuthProviderForm = () => {
                 if (deviceAuthorizationEndpoint !== "") {
                     authProviderForm.append("device_authorization_endpoint", deviceAuthorizationEndpoint);
                 }
+                tokenAuthMethodsSupported.split(",").forEach(authMethodSupported => {
+                    authProviderForm.append("token_endpoint_auth_methods_supported", authMethodSupported);
+                });
             }
             if (providerType === 'oauth2') {
                 authURI = `${server}/auth/oauth2-providers`;
@@ -838,7 +844,7 @@ const AuthProviderForm = () => {
                                                 id="extraClientIDs"
                                                 autoComplete="on"
                                                 value={extraClientIds}
-                                                onChange={e => setExtraClietIds(e.target.value)}
+                                                onChange={e => setExtraClientIds(e.target.value)}
                                             />
                                             <div className="invalid-feedback">
                                                 {formErrors.extra_client_ids ? formErrors.extra_client_ids : ""}
@@ -940,6 +946,22 @@ const AuthProviderForm = () => {
                                         />
                                         <div className="invalid-feedback">
                                             {formErrors.end_session_endpoint ? formErrors.end_session_endpoint : ""}
+                                        </div>
+                                    </div>
+                                    <div className="form-group mt-3 mb-3">
+                                        <label htmlFor="tokenAuthMethodsSupported">
+                                            List of client authentication methods that provider's token endpoint supports (comma-separated)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className={"form-control" + (formErrors.token_endpoint_auth_methods_supported ? " is-invalid" : "")}
+                                            id="tokenAuthMethodsSupported"
+                                            autoComplete="on"
+                                            value={tokenAuthMethodsSupported}
+                                            onChange={e => setTokenAuthMethodsSupported(e.target.value)}
+                                        />
+                                        <div className="invalid-feedback">
+                                            {formErrors.token_endpoint_auth_methods_supported ? formErrors.token_endpoint_auth_methods_supported : ""}
                                         </div>
                                     </div>
                                 </> : <></>}
