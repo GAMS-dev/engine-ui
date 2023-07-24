@@ -23,6 +23,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     let CommentPool = Array(PoolLabels.length).fill('This is the idle pool time. ');
     let FailsPool = Array(PoolLabels.length).fill(0);
     let isIdlePool =  Array(PoolLabels.length).fill(true);
+    let tokenPool =  Array(PoolLabels.length).fill('');
 
     // check if workers failed, for this collect all worker_id's for each pool
     // if there are multiple entries for the same id, only keep the last one 
@@ -107,7 +108,9 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     let times = dataJobUsage.map(row => row['times']);
 
     let users = dataJobUsage.map(row => row['username']);
-    
+
+    let token = dataJobUsage.map(row => row['token']);
+
     // used to later only take the instances for jobs that are in the timeframe
     let includedItems = Array(dataJobUsage.length).fill(false);
 
@@ -120,6 +123,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     let hypercubeMultipliers = [];
     let hypercubeTimes = [];
     let hypercubeUsers = [];
+    let hypercubeToken = [];
     let isHypercube = Array(dataJobUsage.length).fill(false);
 
     // go over every hypercube in the data
@@ -128,6 +132,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
         let currentInstance = hypercube['labels']['instance'];
         let currentMultiplier = hypercube['labels']['multiplier'];
         let currentUser = hypercube['username'];
+        let currentToken = hypercube['token']
         // go over every job of each hypercube to collect the times 
         // and append the instances/multipliers/time list, 
         // to later just concatenate this with the other job list
@@ -137,6 +142,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
             hypercubeMultipliers.push(currentMultiplier);
             hypercubeTimes.push(job['times']);
             hypercubeUsers.push(currentUser);
+            hypercubeToken.push(currentToken);
             isHypercube.push(true);
         });
     });
@@ -154,6 +160,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     fails = fails.concat(hypercubeFails);
     users = users.concat(hypercubeUsers);
     isIdle = isIdle.concat(hypercubeIsIdle);
+    token = token.concat(hypercubeToken);
 
     // will also report the corresponding given pool_label
     // is None for jobs not run on a pool
@@ -268,6 +275,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     users = users.concat(poolOwners);
     isIdle = isIdle.concat(isIdlePool);
     isHypercube = isHypercube.concat(Array(PoolLabels.length).fill(false))
+    token = token.concat(tokenPool);
 
     // only take the elements corresponding to jobs/pools in the timeframe
     instances = instances.filter((_, i) => includedItems[i]);
@@ -279,6 +287,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     users = users.filter((_, i) => includedItems[i]);
     isIdle = isIdle.filter((_, i) => includedItems[i]);
     isHypercube = isHypercube.filter((_, i) => includedItems[i]);
+    token = token.filter((_, i) => includedItems[i]);
 
     const calcTimes = {
         'users': users,
@@ -289,7 +298,8 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
         'comments': comments,
         'fails': fails,
         'is_idle': isIdle,
-        'is_hypercube': isHypercube
+        'is_hypercube': isHypercube,
+        'token': token
         }
     
           // split into jobs and idle pool time
@@ -301,7 +311,8 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     'times': [],
     'comments': [],
     'fails': [],
-    'is_hypercube': []
+    'is_hypercube': [],
+    'token': []
     }
 
   let calcTimesPools = {
@@ -312,7 +323,8 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     'times': [],
     'comments': [],
     'fails': [],
-    'is_hypercube': []
+    'is_hypercube': [],
+    'token': []
     }
 
   calcTimes.is_idle.forEach(function (elem, i) {
@@ -325,6 +337,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
       calcTimesJobs.comments.push(calcTimes.comments[i])
       calcTimesJobs.fails.push(calcTimes.fails[i])
       calcTimesJobs.is_hypercube.push(calcTimes.is_hypercube[i])
+      calcTimesJobs.token.push(calcTimes.token[i])
     }
     else {
       calcTimesPools.users.push(calcTimes.users[i])
@@ -335,6 +348,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
       calcTimesPools.comments.push(calcTimes.comments[i])
       calcTimesPools.fails.push(calcTimes.fails[i])
       calcTimesPools.is_hypercube.push(calcTimes.is_hypercube[i])
+      calcTimesPools.token.push(calcTimes.token[i])
     }
   })
 
@@ -345,16 +359,18 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
 
   calcTimesJobs['instances'].forEach(function (elem, i) {
     ungroupedDataJobs.push({ uniqueId: uniqueId[i], user: calcTimesJobs.users[i], instances: elem, 
-      pool_labels: calcTimesJobs.pool_labels[i], multipliers: calcTimesJobs.multipliers[i].toString(), times: calcTimesJobs.times[i], 
-      comments: calcTimesJobs.comments[i], fails: calcTimesJobs.fails[i], jobs: '1', is_hypercube: calcTimesJobs.is_hypercube[i]})
+      pool_labels: calcTimesJobs.pool_labels[i], multipliers: calcTimesJobs.multipliers[i].toString(), 
+      times: calcTimesJobs.times[i], comments: calcTimesJobs.comments[i], fails: calcTimesJobs.fails[i], 
+      jobs: '1', is_hypercube: calcTimesJobs.is_hypercube[i], token: calcTimesJobs.token[i]})
   });
 
 
 
   calcTimesPools['instances'].forEach(function (elem, i) {
     ungroupedDataPools.push({ unique_id: uniqueId[i], user: calcTimesPools.users[i], instances: elem, 
-      pool_labels: calcTimesPools.pool_labels[i], multipliers: calcTimesPools.multipliers[i].toString(), times: calcTimesPools.times[i], 
-      comments: calcTimesPools.comments[i], fails: calcTimesPools.fails[i], jobs: '1', is_hypercube: calcTimesPools.is_hypercube[i]})
+      pool_labels: calcTimesPools.pool_labels[i], multipliers: calcTimesPools.multipliers[i].toString(), 
+      times: calcTimesPools.times[i], comments: calcTimesPools.comments[i], fails: calcTimesPools.fails[i], 
+      jobs: '1', is_hypercube: calcTimesPools.is_hypercube[i], token: calcTimesPools.token[i]})
   });
 
   const result = {
