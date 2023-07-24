@@ -35,6 +35,13 @@ useEffect(() => {
 
 
  const [metric, setMetric] = useState('mults')
+ useEffect(() => {
+  if (metric === 'mults') {
+    setTotalUsage(totalUsage * 3600)
+  } else if (metric === 'multh') {
+    setTotalUsage(totalUsage / 3600)
+  }
+ }, [metric])
 
  const displayFieldUngrouped = [
     // {
@@ -119,7 +126,7 @@ useEffect(() => {
       const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['token,is_hypercube'].includes(el.field))
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
-      setTotalUsage(sumTmp)
+      setTotalUsage(metric === 'mults'? sumTmp: sumTmp/3600)
       setDisplayFieldsJobs(displayFieldUngrouped)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'username') {
@@ -127,7 +134,7 @@ useEffect(() => {
       const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['instances', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByUser(ungroupedDataJobs))
       setTableDataPools(GroupByUser(ungroupedDataPools))
-      setTotalUsage(sumTmp)
+      setTotalUsage(metric === 'mults'? sumTmp: sumTmp/3600)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if  (selectedAggregateType === 'instance') {
@@ -135,7 +142,7 @@ useEffect(() => {
       const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['user', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByInstance(ungroupedDataJobs))
       setTableDataPools(GroupByInstance(ungroupedDataPools))
-      setTotalUsage(sumTmp)
+      setTotalUsage(metric === 'mults'? sumTmp: sumTmp/3600)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'pool_label') {
@@ -145,7 +152,7 @@ useEffect(() => {
       setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
       sumTmp = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
-      setTotalUsage(sumTmp)
+      setTotalUsage(metric === 'mults'? sumTmp: sumTmp/3600)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     }
