@@ -373,6 +373,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
       jobs: '1', is_hypercube: calcTimesPools.is_hypercube[i], token: calcTimesPools.token[i]})
   });
 
+
   const result = {
     'data_jobs': ungroupedDataJobs,
     'data_pools': ungroupedDataPools

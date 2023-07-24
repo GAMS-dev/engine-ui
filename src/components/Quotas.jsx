@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import computeTimes from './CalculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select'; 
+import {Link} from "react-router-dom";
+
 
 
 const Quotas = ({testData, calcStartDate, calcEndTime}) => {
@@ -32,9 +34,7 @@ useEffect(() => {
  }, [testData, calcStartDate, calcEndTime])
 
 
-//   const dataTmp = computeTimes(testData, calcStartDate, calcEndTime)
-//   ungroupedDataJobs = dataTmp.data_jobs
-//   ungroupedDataPools = dataTmp.data_pools
+ const [metric, setMetric] = useState('mults')
 
  const displayFieldUngrouped = [
     // {
@@ -48,6 +48,18 @@ useEffect(() => {
       column: "User",
       sorter: "alphabetical",
       displayer: String
+    },
+    {
+      field: "instances",
+      column: "Instance",
+      sorter: "alphabetical",
+      displayer: String
+    },
+    {
+      field: "pool_labels",
+      column: "Pool Label",
+      sorter: "alphabetical",
+      displayer: (pool_label) => pool_label == null? '-': pool_label
     },
     {
         field: "times",
@@ -68,108 +80,30 @@ useEffect(() => {
         displayer: String
       },
     {
-      field: "instances",
-      column: "Instance",
-      sorter: "alphabetical",
-      displayer: String
-    },
-    {
-      field: "pool_labels",
-      column: "Pool Label",
-      sorter: "alphabetical",
-      displayer: (pool_label) => pool_label == null? '-': pool_label
-    },
-    {
       field: "multipliers",
       column: "Multiplier",
       sorter: "alphabetical",
       displayer: String
+    },
+    {
+        field: "token,is_hypercube",
+        column: "Job token",
+        displayer: (name, job_count) => <>
+            {job_count === true ? <Link to={`/jobs/hc:${name}`}>{name}
+                <sup>
+                    <span className="badge badge-pill badge-primary ml-1">HC</span>
+                </sup></Link> :
+                <Link to={`/jobs/${name}`}>{name}</Link>}
+        </>
     }
   ]
 
-  const displayFieldUser = [
-    {
-      field: "user",
-      column: "User",
-      sorter: "alphabetical",
-      displayer: String
-    },
-    {
-      field: "times",
-      column: "Solve Time",
-      sorter: "numerical",
-      displayer: formatTime
-    },
-    {
-      field: "fails",
-      column: "Number Fails",
-      sorter: "numerical",
-      displayer: Number
-    },
-    {
-      field: "jobs",
-      column: "Number Jobs",
-      sorter: "alphabetical",
-      displayer: String
-    }
-  ]
 
-  const displayFieldInstance = [
-    {
-      field: "instances",
-      column: "Instances",
-      sorter: "alphabetical",
-      displayer: String
-    },
-    {
-      field: "times",
-      column: "Solve Time",
-      sorter: "numerical",
-      displayer: formatTime
-    },
-    {
-      field: "fails",
-      column: "Number Fails",
-      sorter: "numerical",
-      displayer: Number
-    },
-    {
-      field: "jobs",
-      column: "Number Jobs",
-      sorter: "alphabetical",
-      displayer: String
-    }
-  ]
-
-  const displayFieldPoolLabel = [
-    {
-      field: "pool_labels",
-      column: "Pool Labels",
-      sorter: "alphabetical",
-      displayer: String
-    },
-    {
-      field: "times",
-      column: "Solve Time",
-      sorter: "numerical",
-      displayer: formatTime
-    },
-    {
-      field: "fails",
-      column: "Number Fails",
-      sorter: "numerical",
-      displayer: Number
-    },
-    {
-      field: "jobs",
-      column: "Number Jobs",
-      sorter: "alphabetical",
-      displayer: String
-    }
-  ]
-  const [displayFieldsDisaggregated, setDisplayFieldsDisaggregated] = useState(displayFieldUngrouped);
+  const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldUngrouped);
+  const [displayFieldsPools, setDisplayFieldsPools] = useState(displayFieldUngrouped);
 
   const availableAggregateTypes = [{value: '_', label: '_'}, {value: "username", label: 'User'}, {value: "instance", label: 'Instance'}, {value: "pool_label", label: 'Pool_label'}]
+  const availableMetrics = [{value: 'mults', label: 'mults'}, {value: 'multh', label: 'multh'}]
 
   const [selectedAggregateType, setSelectedAggregateType] = useState('_')
   const [totalUsage, setTotalUsage] = useState(0);
@@ -182,38 +116,38 @@ useEffect(() => {
 
   useEffect(()=> {
     if (selectedAggregateType === '_') {
-      // don't display null for pool_lable
-      // only needed in the unfilterd case, because the others don't show pool_label
-      console.log(ungroupedDataJobs)
-      console.log('2222')
-    //   let ungroupedDataJobsTmp = ungroupedDataJobs
-    //   ungroupedDataJobsTmp.forEach(function (elem, i) {
-    //     if (elem.pool_labels == null) {
-    //         ungroupedDataJobsTmp[i].pool_labels = '-'
-    //     }
-    //   })
+      const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['token,is_hypercube'].includes(el.field))
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
       setTotalUsage(sumTmp)
-      console.log(ungroupedDataJobs)
-      setDisplayFieldsDisaggregated(displayFieldUngrouped)
+      setDisplayFieldsJobs(displayFieldUngrouped)
+      setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'username') {
+      const displayFieldsTmpJob = displayFieldUngrouped.filter(el => !['instances', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['instances', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByUser(ungroupedDataJobs))
       setTableDataPools(GroupByUser(ungroupedDataPools))
       setTotalUsage(sumTmp)
-      setDisplayFieldsDisaggregated(displayFieldUser)
+      setDisplayFieldsJobs(displayFieldsTmpJob)
+      setDisplayFieldsPools(displayFieldsTmpPool)
     } else if  (selectedAggregateType === 'instance') {
+      const displayFieldsTmpJob = displayFieldUngrouped.filter(el => !['user', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['user', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByInstance(ungroupedDataJobs))
       setTableDataPools(GroupByInstance(ungroupedDataPools))
       setTotalUsage(sumTmp)
-      setDisplayFieldsDisaggregated(displayFieldInstance)
+      setDisplayFieldsJobs(displayFieldsTmpJob)
+      setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'pool_label') {
+      const displayFieldsTmpJob = displayFieldUngrouped.filter(el => !['instances', 'user', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldUngrouped.filter(el => !['instances', 'user', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByPoolLabel(ungroupedDataJobs))
       setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
       sumTmp = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
       setTotalUsage(sumTmp)
-      setDisplayFieldsDisaggregated(displayFieldPoolLabel)
+      setDisplayFieldsJobs(displayFieldsTmpJob)
+      setDisplayFieldsPools(displayFieldsTmpPool)
     }
     
   }, [selectedAggregateType, ungroupedDataJobs, ungroupedDataPools])
@@ -233,11 +167,24 @@ useEffect(() => {
               options={availableAggregateTypes}
           />
       </div>
-      <h2 class="text-center">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} mults </h2>
+      <div className="form-group mt-3 mb-3">
+          <label htmlFor="aggregateDropdown">
+              Metric
+          </label>
+          <Select
+              id="aggregateDropdown"
+              isClearable={false}
+              value={availableMetrics.filter(type => type.value === metric)[0]}
+              isSearchable={true}
+              onChange={selected => setMetric(selected.value)}
+              options={availableMetrics}
+          />
+      </div>
+      <h2 className="text-right">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {metric} </h2>
       <h3>Jobs</h3>
       <Table data={tableDataJobs}
         noDataMsg="No Usage data found"
-        displayFields={displayFieldsDisaggregated}
+        displayFields={displayFieldsJobs}
         sortedAsc={false}
         isLoading={false}
         sortedCol="helper_col"
@@ -245,7 +192,7 @@ useEffect(() => {
       <h3>Idle Pool Times</h3>
       <Table data={tableDataPools}
         noDataMsg="No Usage data found"
-        displayFields={displayFieldsDisaggregated}
+        displayFields={displayFieldsPools}
         sortedAsc={false}
         isLoading={false}
         sortedCol="helper_col"
