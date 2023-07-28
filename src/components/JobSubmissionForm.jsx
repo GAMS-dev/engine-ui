@@ -531,7 +531,7 @@ const JobSubmissionForm = props => {
                                         <div className="form-group">
                                             <FileDropZone
                                                 label="Drop Hypercube description file here"
-                                                onDrop={updateHcFile} multiple={false} accept={["application/JSON"]} />
+                                                onDrop={updateHcFile} multiple={false} />
                                         </div>}
                                 </fieldset>
                             </div>
