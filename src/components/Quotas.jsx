@@ -163,6 +163,20 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     }
   ])
 
+  function swaptDisplayFieldPool(field) {
+    let fieldTmp = [...field];
+
+    const idx1 = fieldTmp.findIndex(item => item.field === 'pool_labels');
+    const idx2 = fieldTmp.findIndex(item => item.field === 'instances');
+
+
+    const tmp = fieldTmp[idx1];
+    fieldTmp[idx1] = fieldTmp[idx2];
+    fieldTmp[idx2] = tmp;
+  
+    return fieldTmp
+  }
+
 
   const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldUngrouped.current);
   const [displayFieldsPools, setDisplayFieldsPools] = useState(displayFieldUngrouped.current);
@@ -182,7 +196,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   useEffect(() => {
     if (selectedAggregateType === '_') {
       const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['jobs'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['jobs', 'token,is_hypercube'].includes(el.field))
+      let displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['jobs', 'token,is_hypercube'].includes(el.field))
+      displayFieldsTmpPool = swaptDisplayFieldPool(displayFieldsTmpPool)
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
