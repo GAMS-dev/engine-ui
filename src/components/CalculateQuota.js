@@ -1,4 +1,4 @@
-function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
+function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput, quotaUnit) {
     const calcstartTime = calcstartTimeInput
     const calcEndTime = calcEndTimeInput
 
@@ -358,19 +358,29 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
   let ungroupedDataPools = []
 
   calcTimesJobs['instances'].forEach(function (elem, i) {
+    let cost = calcTimesJobs.times[i] * calcTimesJobs.multipliers[i]
+    if (quotaUnit === 'multh') {
+        cost = cost / 3600
+    }
     ungroupedDataJobs.push({ uniqueId: uniqueId[i], user: calcTimesJobs.users[i], instances: elem, 
       pool_labels: calcTimesJobs.pool_labels[i], multipliers: calcTimesJobs.multipliers[i].toString(), 
       times: calcTimesJobs.times[i], comments: calcTimesJobs.comments[i], fails: calcTimesJobs.fails[i], 
-      jobs: '1', is_hypercube: calcTimesJobs.is_hypercube[i], token: calcTimesJobs.token[i]})
+      jobs: '1', is_hypercube: calcTimesJobs.is_hypercube[i], token: calcTimesJobs.token[i],
+      cost: cost})
   });
 
 
 
   calcTimesPools['instances'].forEach(function (elem, i) {
+    let cost = calcTimesPools.times[i] * calcTimesPools.multipliers[i]
+    if (quotaUnit === 'multh') {
+        cost = cost / 3600
+    }
     ungroupedDataPools.push({ unique_id: uniqueId[i], user: calcTimesPools.users[i], instances: elem, 
       pool_labels: calcTimesPools.pool_labels[i], multipliers: calcTimesPools.multipliers[i].toString(), 
       times: calcTimesPools.times[i], comments: calcTimesPools.comments[i], fails: calcTimesPools.fails[i], 
-      jobs: '1', is_hypercube: calcTimesPools.is_hypercube[i], token: calcTimesPools.token[i]})
+      jobs: '1', is_hypercube: calcTimesPools.is_hypercube[i], token: calcTimesPools.token[i],
+      cost: cost})
   });
 
 

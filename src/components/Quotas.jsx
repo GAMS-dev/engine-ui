@@ -30,15 +30,15 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   //   const calcStartDate = new Date("2021-01-04T17:10:15.000000+00:00");
   //   const calcEndTime = new Date("2023-03-31T17:10:15.000000+00:00");
 
-  const dataTmp = computeTimes(testData, calcStartDate, calcEndTime)
+  const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState(dataTmp.data_jobs);
   const [ungroupedDataPools, setUngroupedDataPools] = useState(dataTmp.data_pools);
 
   useEffect(() => {
-    const dataTmp = computeTimes(testData, calcStartDate, calcEndTime)
+    const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
     setUngroupedDataJobs(dataTmp.data_jobs)
     setUngroupedDataPools(dataTmp.data_pools)
-  }, [testData, calcStartDate, calcEndTime])
+  }, [testData, calcStartDate, calcEndTime, quotaUnit])
 
 
   function getChartData(label, ungroupedData) {
@@ -154,6 +154,12 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       column: "Multiplier",
       sorter: "alphabetical",
       displayer: String
+    },
+    {
+      field: "cost",
+      column: quotaUnit,
+      sorter: "numerical",
+      displayer: (cost) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(cost)//(cost) => cost.toFixed(2)
     }
   ])
 
@@ -254,7 +260,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
           options={availableAggregateTypes}
         />
       </div>
-      <h2 className="text-right">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaUnit === 'mults' ? totalUsage: totalUsage /3600)} {quotaUnit} </h2>
+      <h2 className="text-right">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaUnit === 'mults' ? totalUsage: totalUsage / 3600)} {quotaUnit} </h2>
       {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
         {truncateWarning}
       </div>}
@@ -317,13 +323,15 @@ function GroupByUser(ungroupedData) {
   let setOfAllUsers = [...new Set(allUsers)];
 
   let jobsPerUser = Array(setOfAllUsers.length).fill(0);
-  let FailsPerUser = Array(setOfAllUsers.length).fill(0);
-  let TimesPerUser = Array(setOfAllUsers.length).fill(0);
+  let failsPerUser = Array(setOfAllUsers.length).fill(0);
+  let timesPerUser = Array(setOfAllUsers.length).fill(0);
+  let costPerUser = Array(setOfAllUsers.length).fill(0);
 
   allUsers.forEach(function (user, i) {
     jobsPerUser[setOfAllUsers.indexOf(user)] += 1
-    FailsPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].fails
-    TimesPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].times
+    failsPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].fails
+    timesPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].times
+    costPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].cost
   });
 
   let groupedUserData = []
@@ -332,8 +340,8 @@ function GroupByUser(ungroupedData) {
   setOfAllUsers.forEach(function (elem, i) {
     groupedUserData.push({
       unique_id: ungroupedData[i].unique_id, user: elem,
-      times: TimesPerUser[i], fails: FailsPerUser[i], jobs: jobsPerUser[i]
-    })
+      times: timesPerUser[i], fails: failsPerUser[i], jobs: jobsPerUser[i],
+      cost: costPerUser[i]})
   });
 
   return groupedUserData
@@ -348,11 +356,13 @@ function GroupByInstance(ungroupedData) {
   let jobsPerInstances = Array(setOfAllInstances.length).fill(0);
   let failsPerInstances = Array(setOfAllInstances.length).fill(0);
   let timesPerInstances = Array(setOfAllInstances.length).fill(0);
+  let costPerInstances = Array(setOfAllInstances.length).fill(0);
 
-  allInstances.forEach(function (user, i) {
-    jobsPerInstances[setOfAllInstances.indexOf(user)] += 1
-    failsPerInstances[setOfAllInstances.indexOf(user)] += ungroupedData[i].fails
-    timesPerInstances[setOfAllInstances.indexOf(user)] += ungroupedData[i].times
+  allInstances.forEach(function (instance, i) {
+    jobsPerInstances[setOfAllInstances.indexOf(instance)] += 1
+    failsPerInstances[setOfAllInstances.indexOf(instance)] += ungroupedData[i].fails
+    timesPerInstances[setOfAllInstances.indexOf(instance)] += ungroupedData[i].times
+    costPerInstances[setOfAllInstances.indexOf(instance)] += ungroupedData[i].cost
   });
 
   let groupedInstanceData = []
@@ -361,8 +371,8 @@ function GroupByInstance(ungroupedData) {
   setOfAllInstances.forEach(function (elem, i) {
     groupedInstanceData.push({
       unique_id: ungroupedData[i].unique_id, instances: elem,
-      times: timesPerInstances[i], fails: failsPerInstances[i], jobs: jobsPerInstances[i]
-    })
+      times: timesPerInstances[i], fails: failsPerInstances[i], jobs: jobsPerInstances[i],
+      cost: costPerInstances[i]})
   });
 
   return groupedInstanceData
@@ -378,11 +388,13 @@ function GroupByPoolLabel(ungroupedData) {
   let jobsPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
   let failsPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
   let timesPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
+  let costPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
 
-  allPoolLabel.forEach(function (user, i) {
-    jobsPerPoolLabel[setOfAllPoolLabel.indexOf(user)] += 1
-    failsPerPoolLabel[setOfAllPoolLabel.indexOf(user)] += ungroupedData[i].fails
-    timesPerPoolLabel[setOfAllPoolLabel.indexOf(user)] += ungroupedData[i].times
+  allPoolLabel.forEach(function (label, i) {
+    jobsPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += 1
+    failsPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += ungroupedData[i].fails
+    timesPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += ungroupedData[i].times
+    costPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += ungroupedData[i].cost
   });
 
   let groupedInstanceData = []
@@ -392,8 +404,8 @@ function GroupByPoolLabel(ungroupedData) {
     groupedInstanceData.push({
       unique_id: ungroupedData[i].unique_id,
       pool_labels: elem, times: timesPerPoolLabel[i],
-      fails: failsPerPoolLabel[i], jobs: jobsPerPoolLabel[i]
-    })
+      fails: failsPerPoolLabel[i], jobs: jobsPerPoolLabel[i],
+      cost: costPerPoolLabel[i]})
   });
 
   return groupedInstanceData
