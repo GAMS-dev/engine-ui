@@ -10,7 +10,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput) {
     // first extract all the pool infos, to later check if an individual job was part of a pool
     let PoolLabels = dataPoolUsage.map(pool => pool['label']);
     let poolInstances = dataPoolUsage.map(pool => pool['instance']['label']);
-    let poolOwners = dataPoolUsage.map(pool => pool['owner']);
+    let poolOwners = dataPoolUsage.map(pool => pool['owner']['username']);
 
     // only need the idle multiplier from the pools
     // for the jobs use the multiplier from the jop instance
