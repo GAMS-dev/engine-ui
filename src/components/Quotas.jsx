@@ -44,34 +44,34 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   function getChartData(label, ungroupedData) {
     let groupedData = []
     let labels = []
-    let times = []
+    let cost = []
     if (label === 'usernames') {
       groupedData = GroupByUser(ungroupedData);
       labels = groupedData.map(elem => elem.user);
-      times = groupedData.map(elem => elem.times);
+      cost = groupedData.map(elem => elem.cost);
     } else if (label === 'instances') {
       groupedData = GroupByInstance(ungroupedData);
       labels = groupedData.map(elem => elem.instances);
-      times = groupedData.map(elem => elem.times);
+      cost = groupedData.map(elem => elem.cost);
     } else if (label === 'pool_labels') {
       groupedData = GroupByPoolLabel(ungroupedData);
       labels = groupedData.map(elem => elem.pool_labels);
-      times = groupedData.map(elem => elem.times);
+      cost = groupedData.map(elem => elem.cost);
     }
 
     const cutOff = 20;
     if (labels.length > cutOff) {
       setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed. `)
-      const labelTimePairs = labels.map((label, index) => ({ label, time: times[index] }));
+      const labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
 
       // Sort the array of objects based on decreasing time
-      labelTimePairs.sort((a, b) => b.time - a.time);
+      labelTimePairs.sort((a, b) => b.cost - a.cost);
 
       // Extract the sorted labels and times separately
       labels = labelTimePairs.map(pair => pair.label);
-      times = labelTimePairs.map(pair => pair.time);
+      cost = labelTimePairs.map(pair => pair.cost);
       labels = labels.slice(0,cutOff);
-      times = times.slice(0,cutOff)
+      cost = cost.slice(0,cutOff)
     }
 
     return {
@@ -79,7 +79,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       datasets: [
         {
           label: '# of Votes',
-          data: times,
+          data: cost,
           backgroundColor: ["rgba(31,120,180,0.2)", "rgba(51,160,44,0.2)",
             "rgba(227,26,28,0.2)", "rgba(255,127,0,0.2)",
             "rgba(106,61,154,0.2)", "rgba(177,89,40,0.2)",
