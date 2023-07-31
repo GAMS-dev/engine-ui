@@ -133,7 +133,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     },
     {
       field: "fails",
-      column: "Number Fails",
+      column: "Number Crashes",
       sorter: "numerical",
       displayer: Number
     },
@@ -201,8 +201,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'instance') {
-      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['user', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['user', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['user, unique_id', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['user, unique_id', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByInstance(ungroupedDataJobs))
       setTableDataPools(GroupByInstance(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
@@ -211,8 +211,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'pool_label') {
-      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['instances', 'user', 'multipliers', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['instances', 'user', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['instances', 'user, unique_id', 'multipliers', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['instances', 'user, unique_id', 'multipliers', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(GroupByPoolLabel(ungroupedDataJobs))
       setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
       let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
