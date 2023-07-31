@@ -363,7 +363,7 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput, quotaUn
         cost = cost / 3600
     }
     ungroupedDataJobs.push({ uniqueId: uniqueId[i], user: calcTimesJobs.users[i], instances: elem, 
-      pool_labels: calcTimesJobs.pool_labels[i], multipliers: calcTimesJobs.multipliers[i].toString(), 
+      pool_labels: calcTimesJobs.pool_labels[i], multipliers: calcTimesJobs.multipliers[i], 
       times: calcTimesJobs.times[i], comments: calcTimesJobs.comments[i], fails: calcTimesJobs.fails[i], 
       jobs: '1', is_hypercube: calcTimesJobs.is_hypercube[i], token: calcTimesJobs.token[i],
       cost: cost})
@@ -377,16 +377,27 @@ function getComputationTimes(data, calcstartTimeInput, calcEndTimeInput, quotaUn
         cost = cost / 3600
     }
     ungroupedDataPools.push({ unique_id: uniqueId[i], user: calcTimesPools.users[i], instances: elem, 
-      pool_labels: calcTimesPools.pool_labels[i], multipliers: calcTimesPools.multipliers[i].toString(), 
+      pool_labels: calcTimesPools.pool_labels[i], multipliers: calcTimesPools.multipliers[i], 
       times: calcTimesPools.times[i], comments: calcTimesPools.comments[i], fails: calcTimesPools.fails[i], 
       jobs: '1', is_hypercube: calcTimesPools.is_hypercube[i], token: calcTimesPools.token[i],
       cost: cost})
   });
 
+  let numberUsers = [...new Set(calcTimesPools.users.concat(calcTimesJobs.users))].length;
+  let numberInstances = [...new Set(calcTimesPools.instances.concat(calcTimesJobs.instances))].length;
+
+  let allPools = [...new Set(calcTimesPools.pool_labels.concat(calcTimesJobs.pool_labels))]
+  allPools = allPools.filter(elem => elem !== null)
+
+  let numberPools = allPools.length;
+
 
   const result = {
     'data_jobs': ungroupedDataJobs,
-    'data_pools': ungroupedDataPools
+    'data_pools': ungroupedDataPools,
+    'num_users': numberUsers,
+    'num_instances': numberInstances,
+    'num_pools': numberPools
   }
 
     return (

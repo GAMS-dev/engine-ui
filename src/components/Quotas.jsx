@@ -15,8 +15,7 @@ import { Link } from "react-router-dom";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 
-
-const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
+const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit}) => {
   /*
     const data = test_data['test_hypercube_with_pool_and_job'];
     const calcStartDate = "2021-08-03T17:10:15.000000+00:00";
@@ -33,11 +32,25 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState(dataTmp.data_jobs);
   const [ungroupedDataPools, setUngroupedDataPools] = useState(dataTmp.data_pools);
+  const [numUser, setNumUser] = useState(dataTmp.num_users);
+  const [numInstances, setNumInstances] = useState(dataTmp.num_instances);
+  const [numPools, setNumPools] = useState(dataTmp.num_pools);
+  const [numCharts, setNumCharts] = useState(dataTmp.num_pools);
 
   useEffect(() => {
     const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
     setUngroupedDataJobs(dataTmp.data_jobs)
     setUngroupedDataPools(dataTmp.data_pools)
+    setNumUser(dataTmp.num_users)
+    setNumInstances(dataTmp.num_instances)
+    setNumPools(dataTmp.num_pools)
+
+    let tmp = 0;
+    tmp = (dataTmp.num_users > 1) ? tmp +=1: tmp;
+    tmp = (dataTmp.num_instances > 1) ? tmp +=1: tmp;
+    tmp = (dataTmp.num_pools > 1) ? tmp +=1: tmp;
+
+    setNumCharts(tmp)
   }, [testData, calcStartDate, calcEndTime, quotaUnit])
 
 
@@ -59,17 +72,18 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       cost = groupedData.map(elem => elem.cost);
     }
 
+    const labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
+
+    // Sort the array of objects based on decreasing time
+    labelTimePairs.sort((a, b) => b.cost - a.cost);
+
+    // Extract the sorted labels and times separately
+    labels = labelTimePairs.map(pair => pair.label);
+    cost = labelTimePairs.map(pair => pair.cost);
+
     const cutOff = 20;
     if (labels.length > cutOff) {
       setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed. `)
-      const labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
-
-      // Sort the array of objects based on decreasing time
-      labelTimePairs.sort((a, b) => b.cost - a.cost);
-
-      // Extract the sorted labels and times separately
-      labels = labelTimePairs.map(pair => pair.label);
-      cost = labelTimePairs.map(pair => pair.cost);
       labels = labels.slice(0,cutOff);
       cost = cost.slice(0,cutOff)
     }
@@ -152,14 +166,14 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     {
       field: "multipliers",
       column: "Multiplier",
-      sorter: "alphabetical",
-      displayer: String
+      sorter: "numerical",
+      displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
     },
     {
       field: "cost",
       column: quotaUnit,
       sorter: "numerical",
-      displayer: (cost) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(cost)//(cost) => cost.toFixed(2)
+      displayer: (cost) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(cost)
     }
   ])
 
@@ -242,24 +256,25 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
 
   useEffect(() => {
     setTruncateWarning('')
-    let chartDataTmp = getChartData('usernames', ungroupedDataJobs)
-    if (chartDataTmp.labels.length === 0) {
-      chartDataTmp = { labels: ['-'], datasets: [{label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"]}]}
+    let chartDataTmp = {};
+    if (numUser > 1) {
+      chartDataTmp = getChartData('usernames', ungroupedDataJobs.concat(ungroupedDataPools))
+      setUserChartData(chartDataTmp)
     }
-    setUserChartData(chartDataTmp)
-    chartDataTmp = getChartData('instances', ungroupedDataJobs)
-    if (chartDataTmp.labels.length === 0) {
-      chartDataTmp = { labels: ['-'], datasets: [{label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"]}]}
-    }
-    setInstanceChartData(chartDataTmp)
-    chartDataTmp = getChartData('pool_labels', ungroupedDataJobs.concat(ungroupedDataPools))
-    if (chartDataTmp.labels.length === 0) {
-      chartDataTmp = { labels: ['-'], datasets: [{label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"]}]}
-    }
-    setPoolLabelChartData(chartDataTmp)
 
-  }, [ungroupedDataJobs, ungroupedDataPools])
+    if (numInstances > 1) {
+      chartDataTmp = getChartData('instances', ungroupedDataJobs.concat(ungroupedDataPools))
+      setInstanceChartData(chartDataTmp)
+    }
 
+    if (numPools > 1) {
+      chartDataTmp = getChartData('pool_labels', ungroupedDataJobs.concat(ungroupedDataPools))
+      setPoolLabelChartData(chartDataTmp)
+    }
+ 
+  }, [ungroupedDataJobs, ungroupedDataPools, numUser, numInstances, numPools])
+
+  console.log(numCharts)
   return (
     <div className="App">
       <div className="form-group mt-3 mb-3">
@@ -280,23 +295,35 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
         {truncateWarning}
       </div>}
       <div className='row'>
-        <div className='col-xl-6 col-12'>
-          <div className='row'>
-            <div className='col-md-4 col-sm-6 col-12'>
+        {(numCharts > 0) ? (
+        <div className={'col-xl-'+ ((numCharts === 3)? '12':'3') + ' col-lg-3 col-md-12 col-12'}>
+        <div className='row'>
+          {(numUser > 1) ? (
+            <div className={'col-xl-' + ((numCharts === 3)? '4':'12') +
+                            ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
               <h3>Users</h3>
               <Pie data={userChartData} />
             </div>
-            <div className='col-md-4 col-sm-6 col-12'>
+          ) :null}
+          {(numInstances > 1) ? (
+            <div className={'col-xl-' + ((numCharts === 3)? '4':'12') +
+                            ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
               <h3>Instances</h3>
               <Pie data={instanceChartData} />
             </div>
-            <div className='col-md-4 col-sm-6 col-12'>
-              <h3>Pools (With Idle)</h3>
+          ) :null}
+          {(numPools > 1) ? (
+            <div className={'col-xl-' + ((numCharts === 3)? '4':'12') +
+                            ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+              <h3>Pool *</h3>
               <Pie data={poolLabelChartData} />
             </div>
-          </div>
+          ) :null}
         </div>
-        <div className='col-xl-6 col-12'>
+      </div>
+        ): null}
+        <div className={'col-xl-'+ ((numCharts === 3)? '12': ((numCharts > 0)?'9': '12')) + 
+                        ' col-lg-' + (((numCharts > 0)?'9': '12')) + ' col-md-12 col-12'}>
           <h3>Jobs</h3>
           <Table data={tableDataJobs}
             noDataMsg="No Usage data found"
@@ -311,6 +338,10 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
             idFieldName={'unique_id'} />
         </div>
       </div>
+      {(numPools > 1) ? (
+        <div>* includes Idle Times</div>
+      ) :null}
+
     </div>
   );
 }
