@@ -109,6 +109,17 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       displayer: (user, _) => user
     },
     {
+      field: "token,is_hypercube",
+      column: "Job token",
+      displayer: (name, job_count) => <>
+        {job_count === true ? <Link to={`/jobs/hc:${name}`}>{name}
+          <sup>
+            <span className="badge badge-pill badge-primary ml-1">HC</span>
+          </sup></Link> :
+          <Link to={`/jobs/${name}`}>{name}</Link>}
+      </>
+    },
+    {
       field: "instances",
       column: "Instance",
       sorter: "alphabetical",
@@ -119,12 +130,6 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       column: "Pool Label",
       sorter: "alphabetical",
       displayer: (pool_label) => pool_label == null ? '-' : pool_label
-    },
-    {
-      field: "times",
-      column: "Solve Time",
-      sorter: "numerical",
-      displayer: formatTime
     },
     {
       field: "fails",
@@ -139,21 +144,16 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       displayer: String
     },
     {
+      field: "times",
+      column: "Solve Time",
+      sorter: "numerical",
+      displayer: formatTime
+    },
+    {
       field: "multipliers",
       column: "Multiplier",
       sorter: "alphabetical",
       displayer: String
-    },
-    {
-      field: "token,is_hypercube",
-      column: "Job token",
-      displayer: (name, job_count) => <>
-        {job_count === true ? <Link to={`/jobs/hc:${name}`}>{name}
-          <sup>
-            <span className="badge badge-pill badge-primary ml-1">HC</span>
-          </sup></Link> :
-          <Link to={`/jobs/${name}`}>{name}</Link>}
-      </>
     }
   ])
 
@@ -175,13 +175,14 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
 
   useEffect(() => {
     if (selectedAggregateType === '_') {
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['jobs'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['jobs', 'token,is_hypercube'].includes(el.field))
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multipliers, 0)    
       setTotalUsage(sumTmp)
-      setDisplayFieldsJobs(displayFieldUngrouped.current)
+      setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'username') {
       const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['instances', 'pool_labels', 'multipliers', 'token,is_hypercube'].includes(el.field))
