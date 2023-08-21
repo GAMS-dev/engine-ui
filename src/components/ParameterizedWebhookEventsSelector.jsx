@@ -39,7 +39,6 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                         <input
                             type="number"
                             min="0"
-                            max="10000"
                             className={"form-control" + (isNaN(eventParameter) ? " is-invalid" : "")}
                             placeholder={"Event trigger (in seconds)"}
                             value={isNaN(eventParameter) ? '' : eventParameter}
