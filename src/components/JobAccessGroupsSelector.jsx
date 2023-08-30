@@ -43,7 +43,7 @@ const JobAccessGroupsSelector = props => {
     }, [jwt, server, userGroupsLoaded, namespace, groupWhitelist, onChange, setAlertMsg, isInitialized]);
 
     return (userGroupsLoaded === namespace ?
-        <div className="form-group">
+        <div className="mb-3">
             {availableUserGroups.length === 0 ?
                 (props.hideIfNoGroupsAvailable === true ? <></> : "No groups available") :
                 <>

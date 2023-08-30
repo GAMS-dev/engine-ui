@@ -41,7 +41,7 @@ const Cleanup = () => {
             displayer: (name, type) => <>
                 {type === "hypercube_result" ? <Link to={`/jobs/hc:${name}`}>{name}
                     <sup>
-                        <span className="badge badge-pill badge-primary ml-1">HC</span>
+                        <span className="badge rounded-pill bg-primary ms-1">HC</span>
                     </sup></Link> :
                     <Link to={`/jobs/${name}`}>{name}</Link>}
             </>
@@ -229,10 +229,10 @@ const Cleanup = () => {
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">Cleanup</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
-                    <div className="btn-group mr-2">
+                    <div className="btn-group me-2">
                         <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowHousekeepingDialog(true)}>
                             Run Housekeeping
-                            <Send width="12px" className="ml-2" />
+                            <Send width="12px" className="ms-2" />
                         </button>
                         <button
                             type="button"
@@ -242,7 +242,7 @@ const Cleanup = () => {
                             }}
                         >
                             Refresh
-                            <RefreshCw width="12px" className="ml-2" />
+                            <RefreshCw width="12px" className="ms-2" />
                         </button>
                     </div>
                 </div>
@@ -279,7 +279,7 @@ const Cleanup = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="deleteDataThreshold">
                                     Delete all data older than ... days
                                 </label>

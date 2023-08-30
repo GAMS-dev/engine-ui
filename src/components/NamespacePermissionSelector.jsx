@@ -101,7 +101,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                     background: '#f8f9fa',
                     padding: '10px'
                 } : {}}>
-                    <div className="form-group mt-3 mb-3">
+                    <div className="mt-3 mb-3">
                         <label htmlFor="toggleIncludeExclude">
                             {`Namespace${modifiedFlag ? " (*)" : ""}`}
                         </label>
@@ -141,7 +141,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                         <label className="form-check-label" htmlFor="cbExecuteAccess">Execute</label>
                     </div>
                     {includeGroups === true && availableGroups.length ?
-                        <div className="form-group mt-3">
+                        <div className="mb-3 mt-3">
                             <label htmlFor="nsGroups">
                                 User Groups
                             </label>

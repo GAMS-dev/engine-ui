@@ -72,10 +72,10 @@ const AddUserGroupModal = props => {
                         {submissionErrorMsg}
                     </div>
                     <fieldset disabled={isSubmitting}>
-                        <div className="form-group">
-                            <label htmlFor="groupLabel" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="groupLabel" className="visually-hidden">
                                 Group Label
-                        </label>
+                            </label>
                             <input
                                 type="text"
                                 className={"form-control" + (labelError ? " is-invalid" : "")}
@@ -92,10 +92,10 @@ const AddUserGroupModal = props => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseDialog}>
                         Cancel
-                </Button>
+                    </Button>
                     <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
                         Add Group
-                </SubmitButton>
+                    </SubmitButton>
                 </Modal.Footer>
             </form>
         </Modal>

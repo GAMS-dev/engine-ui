@@ -195,7 +195,7 @@ const UserInstanceUpdateForm = () => {
                                         </div>
                                         {!inheritInstances &&
                                             <>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="instancesAllowed">
                                                         Instances user is allowed to use
                                                     </label>
@@ -242,7 +242,7 @@ const UserInstanceUpdateForm = () => {
                                                     (inviterName === username ? "you" : inviterName) :
                                                     (defaultInheritedFrom === username ? "you" : defaultInheritedFrom)}`}</label>
                                         </div>}
-                                        {(!inheritDefault || !inheritInstances || (inheritInstances && !inviterHasInstancesAssigned)) && <div className="form-group">
+                                        {(!inheritDefault || !inheritInstances || (inheritInstances && !inviterHasInstancesAssigned)) && <div className="mb-3">
                                             <label htmlFor="instancesDefault">
                                                 Default Instance
                                             </label>

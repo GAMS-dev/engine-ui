@@ -338,7 +338,7 @@ const JobSubmissionForm = props => {
                                             <div style={{
                                                 display: !useRawRequests ? "block" : "none"
                                             }}>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="instance">
                                                         Select Instance
                                                     </label>
@@ -355,7 +355,7 @@ const JobSubmissionForm = props => {
                                             <div style={{
                                                 display: useRawRequests ? "block" : "none"
                                             }}>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="cpuReq">
                                                         Required CPU Units (vCPU/Core, Hyperthread)
                                                     </label>
@@ -383,7 +383,7 @@ const JobSubmissionForm = props => {
                                                         }}
                                                     />
                                                 </div>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="memReq">
                                                         Required Memory Units (MiB)
                                                     </label>
@@ -410,7 +410,7 @@ const JobSubmissionForm = props => {
                                                         }}
                                                     />
                                                 </div>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="wsReq">
                                                         Required Workspace Size (MiB)
                                                     </label>
@@ -437,7 +437,7 @@ const JobSubmissionForm = props => {
                                                         }}
                                                     />
                                                 </div>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="tolerations">
                                                         Tolerations (comma-separated)
                                                     </label>
@@ -450,7 +450,7 @@ const JobSubmissionForm = props => {
                                                         onChange={e => setTolerations(e.target.value)}
                                                     />
                                                 </div>
-                                                <div className="form-group">
+                                                <div className="mb-3">
                                                     <label htmlFor="nodeSelectors">
                                                         Node Selectors (comma-separated)
                                                     </label>
@@ -465,7 +465,7 @@ const JobSubmissionForm = props => {
                                                 </div>
                                             </div>
                                         </div>}
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="namespace">
                                             Select a Namespace
                                         </label>
@@ -485,7 +485,7 @@ const JobSubmissionForm = props => {
                                         <label className="form-check-label" htmlFor="useRegisteredModel">Use a Registered Model?</label>
                                     </div>
                                     {useRegisteredModel && registeredModels.length !== 0 ?
-                                        <div className="form-group">
+                                        <div className="mb-3">
                                             <label htmlFor="registeredModelName">
                                                 Select a Model
                                             </label>
@@ -500,13 +500,13 @@ const JobSubmissionForm = props => {
                                             />
                                         </div> :
                                         <React.Fragment>
-                                            <div className="form-group">
+                                            <div className="mb-3">
                                                 <FileDropZone
                                                     label="Drop static model files here"
                                                     onDrop={updateModelFiles} />
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="modelName" className="sr-only">
+                                            <div className="mb-3">
+                                                <label htmlFor="modelName" className="visually-hidden">
                                                     Name of the Main File
                                                 </label>
                                                 <input
@@ -522,13 +522,13 @@ const JobSubmissionForm = props => {
                                             </div>
                                         </React.Fragment>
                                     }
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <FileDropZone
                                             label="Drop data files here (optional)"
                                             onDrop={updateDataFiles} />
                                     </div>
                                     {newHcJob &&
-                                        <div className="form-group">
+                                        <div className="mb-3">
                                             <FileDropZone
                                                 label="Drop Hypercube description file here"
                                                 onDrop={updateHcFile} multiple={false} />
@@ -546,8 +546,8 @@ const JobSubmissionForm = props => {
                                     </Button>
                                     <Collapse in={openAdvancedOptions}>
                                         <div>
-                                            <div className="form-group">
-                                                <label htmlFor="clArgs" className="sr-only">
+                                            <div className="mb-3">
+                                                <label htmlFor="clArgs" className="visually-hidden">
                                                     Command Line Arguments (comma-separated, optional)
                                                 </label>
                                                 <input
@@ -560,8 +560,8 @@ const JobSubmissionForm = props => {
                                                     onChange={e => setClArgs(e.target.value)}
                                                 />
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="jobTag" className="sr-only">
+                                            <div className="mb-3">
+                                                <label htmlFor="jobTag" className="visually-hidden">
                                                     Job tag (human-readable identifier, optional)
                                                 </label>
                                                 <input
@@ -574,8 +574,8 @@ const JobSubmissionForm = props => {
                                                     onChange={e => setJobTag(e.target.value)}
                                                 />
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="logFileName" className="sr-only">
+                                            <div className="mb-3">
+                                                <label htmlFor="logFileName" className="visually-hidden">
                                                     Log Filename
                                                 </label>
                                                 <input
@@ -590,8 +590,8 @@ const JobSubmissionForm = props => {
                                             </div>
                                             {!newHcJob &&
                                                 <>
-                                                    <div className="form-group">
-                                                        <label htmlFor="textEntries" className="sr-only">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="textEntries" className="visually-hidden">
                                                             Text Entries (comma-separated)
                                                         </label>
                                                         <input
@@ -604,8 +604,8 @@ const JobSubmissionForm = props => {
                                                             onChange={e => setTextEntries(e.target.value)}
                                                         />
                                                     </div>
-                                                    <div className="form-group">
-                                                        <label htmlFor="streamEntries" className="sr-only">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="streamEntries" className="visually-hidden">
                                                             Stream Entries (comma-separated)
                                                         </label>
                                                         <input
@@ -620,8 +620,8 @@ const JobSubmissionForm = props => {
                                                     </div>
                                                 </>
                                             }
-                                            <div className="form-group">
-                                                <label htmlFor="jobDeps" className="sr-only">
+                                            <div className="mb-3">
+                                                <label htmlFor="jobDeps" className="visually-hidden">
                                                     Job Dependencies (comma-separated list of tokens, optional)
                                                 </label>
                                                 <input

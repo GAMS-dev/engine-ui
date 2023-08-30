@@ -178,12 +178,12 @@ const Models = () => {
         <h1 className="h2">Namespaces</h1>
       </div>
       <div className="row">
-        <div className="col-md-4 col-12 mt-1 font-weight-bold">
+        <div className="col-md-4 col-12 mt-1 fw-bold">
           Namespace
         </div>
         <div className="col-md-8 col-12 mt-1 order-2 order-md-1">
-          <div className="btn-toolbar mb-2 mb-md-0 float-right">
-            <div className="btn-group mr-2">
+          <div className="btn-toolbar mb-2 mb-md-0 float-end">
+            <div className="btn-group me-2">
               {roles && roles.includes("admin") &&
                 <>
                   <button
@@ -194,13 +194,13 @@ const Models = () => {
                     }}
                   >
                     Add Namespace
-                    <Folder width="12px" className="ml-2" />
+                    <Folder width="12px" className="ms-2" />
                   </button>
                   {(namespace && namespace.name) &&
                     <Link to={`/quotas/${namespace.name}`}>
                       <button type="button" className="btn btn-sm btn-outline-primary">
                         Edit Quota
-                        <Save width="12px" className="ml-2" />
+                        <Save width="12px" className="ms-2" />
                       </button>
                     </Link>}
                 </>
@@ -215,12 +215,12 @@ const Models = () => {
                     }}
                   >
                     Add Group
-                    <Users width="12px" className="ml-2" />
+                    <Users width="12px" className="ms-2" />
                   </button>
                   <Link to={`/models/${encodeURIComponent(namespace.name)}/new`}>
                     <button type="button" className="btn btn-sm btn-outline-primary">
                       Add Model
-                      <Send width="12px" className="ml-2" />
+                      <Send width="12px" className="ms-2" />
                     </button>
                   </Link>
                 </>
@@ -233,7 +233,7 @@ const Models = () => {
                 }}
               >
                 Refresh
-                <RefreshCw width="12px" className="ml-2" />
+                <RefreshCw width="12px" className="ms-2" />
               </button>
             </div>
           </div>
@@ -249,7 +249,7 @@ const Models = () => {
               >
                 {ns.name}
                 {(ns.name === namespace.name && roles.find(role => role === "admin") !== undefined) &&
-                  <span className="float-right">
+                  <span className="float-end">
                     <button
                       type="button"
                       className="btn btn-sm btn-danger"
@@ -334,7 +334,7 @@ const Models = () => {
                     column: "Created By",
                     sorter: "alphabetical",
                     displayer: user => user.deleted ?
-                      <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
+                      <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
 
                   },
                   {
@@ -375,7 +375,7 @@ const Models = () => {
                         <>
                           {user}
                           <sup>
-                            <span className="badge badge-pill badge-primary ml-1">me</span>
+                            <span className="badge rounded-pill bg-primary ms-1">me</span>
                           </sup>
                         </> : user
                   },

@@ -162,7 +162,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setQue
     return <div className="job-timings-info-wrapper">
         {timingData == null ?
             (hasError ?
-                <span className="badge badge-danger">
+                <span className="badge bg-danger">
                     Problems fetching timing data.
                 </span> :
                 <ClipLoader />) :

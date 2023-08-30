@@ -63,8 +63,8 @@ const AddNamespaceModal = props => {
                         {submissionErrorMsg}
                     </div>
                     <fieldset disabled={isSubmitting}>
-                        <div className="form-group">
-                            <label htmlFor="namespaceName" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="namespaceName" className="visually-hidden">
                                 Namespace Name
                             </label>
                             <input

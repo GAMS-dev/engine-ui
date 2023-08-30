@@ -123,7 +123,7 @@ const JobReqInfoTable = props => {
 
   return <>
     <table className="table table-sm table-fixed">
-      <thead className="thead-dark">
+      <thead className="table-dark">
         <tr>
           <th colSpan="2" className="text-center">
             Request
@@ -137,7 +137,7 @@ const JobReqInfoTable = props => {
             <small>
               {job.token}
               {isHcJob && <sup>
-                <span className="badge badge-pill badge-primary ml-1">HC</span>
+                <span className="badge rounded-pill bg-primary ms-1">HC</span>
               </sup>}
             </small>
           </td>
@@ -165,7 +165,7 @@ const JobReqInfoTable = props => {
         <tr>
           <th>Submitted by</th>
           <td>
-            {job.user.deleted ? <span className="badge badge-pill badge-secondary ml-1">deleted</span>
+            {job.user.deleted ? <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
               : job.user.username}
           </td>
         </tr>
@@ -181,17 +181,18 @@ const JobReqInfoTable = props => {
         </tr>
         <tr>
           <th>Access groups
-            <button className="btn btn-sm ml-1" onClick={() => setShowEditAccessGroupsDialog(true)}>
+            <button className="btn btn-sm ms-1" onClick={() => setShowEditAccessGroupsDialog(true)}>
               <Edit3 size={18} />
             </button></th>
           <td>
             {job.access_groups == null || job.access_groups.length === 0 ? "-" :
               job.access_groups.map(group =>
-                (<Link key={group} className="badge badge-secondary mr-1" to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}>{group}</Link>))}
+              (<Link key={group} className="badge bg-secondary me-1"
+                to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}>{group}</Link>))}
           </td>
         </tr>
       </tbody>
-      <thead className="thead-light">
+      <thead className="table-light">
         <tr>
           <th colSpan="2" className="text-center">
             Model Information
@@ -207,7 +208,7 @@ const JobReqInfoTable = props => {
               <span>
                 {job.model} &nbsp;
                 <span
-                  className="badge badge-secondary"
+                  className="badge bg-secondary"
                   title="Temporary models are provided with the job, they cannot be downloaded"
                 >
                   Temporary
@@ -217,10 +218,10 @@ const JobReqInfoTable = props => {
               <DownloadLink
                 url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/models/${encodeURIComponent(job.model)}`}
                 filename={`${job.model}.zip`}
-                className="badge badge-secondary">
+                className="badge bg-secondary">
                 {job.model}
               </DownloadLink> :
-              <span className="badge badge-secondary"
+              <span className="badge bg-secondary"
                 title="The model used for this job no longer exists or was updated after submission">
                 {job.model}
               </span>
@@ -232,7 +233,7 @@ const JobReqInfoTable = props => {
           <td>{job.is_data_provided ? "Yes" : "No"}</td>
         </tr>
       </tbody>
-      <thead className="thead-light">
+      <thead className="table-light">
         <tr>
           <th colSpan="2" className="text-center">
             GAMS Call Related
@@ -253,7 +254,7 @@ const JobReqInfoTable = props => {
           <th>Arguments</th>
           <td>
             {job.arguments.map(c => (
-              <span key={c} className="badge badge-secondary m-1">
+              <span key={c} className="badge bg-secondary m-1">
                 {c}
               </span>
             ))}
@@ -261,7 +262,7 @@ const JobReqInfoTable = props => {
           </td>
         </tr>
       </tbody>
-      <thead className="thead-light">
+      <thead className="table-light">
         <tr>
           <th colSpan="2" className="text-center">
             Result Related
@@ -279,7 +280,7 @@ const JobReqInfoTable = props => {
               <th>Text Entries</th>
               <td>
                 {job.text_entries.length > 0 ? job.text_entries.map(c => (
-                  <span key={c.entry_name} className="badge badge-secondary m-1">
+                  <span key={c.entry_name} className="badge bg-secondary m-1">
                     {c.entry_name}
                   </span>
                 )) : "-"}
@@ -289,7 +290,7 @@ const JobReqInfoTable = props => {
               <th>Stream Entries</th>
               <td>
                 {job.stream_entries.length > 0 ? job.stream_entries.map(c => (
-                  <span key={c} className="badge badge-secondary m-1">
+                  <span key={c} className="badge bg-secondary m-1">
                     {c}
                   </span>
                 )) : "-"}
@@ -302,43 +303,43 @@ const JobReqInfoTable = props => {
             <td>{
               jobLabels.map(el => {
                 if (el[0] === "cpu_request") {
-                  return <span key="cpu_request" className="badge badge-secondary m-1" title="CPU Request">
+                  return <span key="cpu_request" className="badge bg-secondary m-1" title="CPU Request">
                     {formatLabel(el)}
                   </span>
                 } else if (el[0] === "memory_request") {
-                  return <span key="memory_request" className="badge badge-secondary m-1" title="Memory Request">
+                  return <span key="memory_request" className="badge bg-secondary m-1" title="Memory Request">
                     {formatLabel(el)}
                   </span>
                 } else if (el[0] === "workspace_request") {
-                  return <span key="workspace_request" className="badge badge-secondary m-1" title="Workspace Request">
+                  return <span key="workspace_request" className="badge bg-secondary m-1" title="Workspace Request">
                     {formatLabel(el)}
                   </span>
                 } else if (el[0] === "resource_warning") {
                   if (el[1] === "none") {
                     return <span key="resource_warning"></span>
                   } else {
-                    return <span key="resource_warning" className="badge badge-danger m-1" title="Resource Warning">
+                    return <span key="resource_warning" className="badge bg-danger m-1" title="Resource Warning">
                       {`Out of ${el[1].replaceAll('_', ' ')}`}
                     </span>
                   }
                 } else if (el[0] === "instance") {
-                  return <span key="instance" className="badge badge-info m-1" title={el[2]}>
+                  return <span key="instance" className="badge bg-info m-1" title={el[2]}>
                     {el[1]}
                   </span>
                 } else if (el[0] === "multiplier") {
-                  return <span key="multiplier" className="badge badge-secondary m-1" title="Multiplier">
+                  return <span key="multiplier" className="badge bg-secondary m-1" title="Multiplier">
                     {`${el[1]}x`}
                   </span>
                 } else if (Array.isArray(el[1])) {
                   return el[1].map((arrayEl, arrayIdx) => {
                     return <span key={el[0] + arrayIdx}
-                      className={`badge badge-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
+                      className={`badge bg-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
                       title={el[0] === 'tolerations' ? "Toleration" : "Node Selector"}>
                       {`${arrayEl.key}=${arrayEl.value}`}
                     </span>
                   });
                 }
-                return <span key={el[0]} className="badge badge-secondary m-1">
+                return <span key={el[0]} className="badge bg-secondary m-1">
                   {el[1]}
                 </span>
               }) || "-"}</td>
@@ -349,7 +350,7 @@ const JobReqInfoTable = props => {
             {(!job.dep_tokens || job.dep_tokens.length === 0) ?
               "-" :
               job.dep_tokens.map(t => (
-                <span key={t} title={t} className="badge badge-secondary m-1">
+                <span key={t} title={t} className="badge bg-secondary m-1">
                   <small>
                     <Link to={"/jobs/" + t} style={{ color: "#fff" }}>{t.split('-')[0]}</Link>
                   </small>

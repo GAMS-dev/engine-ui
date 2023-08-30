@@ -80,7 +80,7 @@ const Jobs = () => {
       column: "Username",
       sorter: "alphabetical-object",
       displayer: user => user.deleted ?
-        <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
+        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
     }].concat(displayFieldsDefault) :
     displayFieldsDefault);
 
@@ -169,17 +169,17 @@ const Jobs = () => {
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">Jobs</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
-          <div className="btn-group mr-2">
+          <div className="btn-group me-2">
             <Link to="/new-job">
               <button type="button" className="btn btn-sm btn-outline-primary h-100">
                 New Job
-                <Send width="12px" className="ml-2" />
+                <Send width="12px" className="ms-2" />
               </button>
             </Link>
             <Link to="/new-hc-job">
               <button type="button" className="btn btn-sm btn-outline-primary h-100">
                 New Hypercube Job
-                <Layers width="12px" className="ml-2" />
+                <Layers width="12px" className="ms-2" />
               </button>
             </Link>
             <button
@@ -211,7 +211,7 @@ const Jobs = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ml-2" />
+              <RefreshCw width="12px" className="ms-2" />
             </button>
           </div>
         </div>

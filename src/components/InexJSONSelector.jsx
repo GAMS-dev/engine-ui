@@ -41,7 +41,7 @@ export const InexJSONSelector = props => {
             </div>
             {filterResults && (
                 <React.Fragment>
-                    <div className="form-group mt-3 mb-3">
+                    <div className="mt-3 mb-3">
                         <label htmlFor="toggleIncludeExclude">
                             Include or exclude files from results archive?
                         </label>
@@ -61,8 +61,8 @@ export const InexJSONSelector = props => {
                         />
                     </div>
                     {toggleIncludeExclude.value === "include" ?
-                        <div className="form-group">
-                            <label htmlFor="includeFiles" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="includeFiles" className="visually-hidden">
                                 Files to include in results (optional, comma-separated)
                             </label>
                             <input
@@ -75,8 +75,8 @@ export const InexJSONSelector = props => {
                                 onChange={e => setIncludeFiles(e.target.value)}
                             />
                         </div> :
-                        <div className="form-group">
-                            <label htmlFor="excludeFiles" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="excludeFiles" className="visually-hidden">
                                 Files to exclude from results (optional, comma-separated)
                             </label>
                             <input

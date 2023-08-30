@@ -3,7 +3,9 @@ import moment from "moment";
 import { ArrowUp, ArrowDown } from "react-feather";
 import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
-import { FormControl, Button, InputGroup } from "react-bootstrap";
+import InputGroup from 'react-bootstrap/InputGroup';
+import Button from 'react-bootstrap/Button';
+import { FormControl, OverlayTrigger, Popover } from "react-bootstrap";
 import OverlayFilter from "./OverlayFilter";
 
 const Table = props => {
@@ -180,7 +182,7 @@ const Table = props => {
   return (
     <>
       <table className="table summary-table table-striped">
-        <thead className="thead-dark">
+        <thead className="table-dark">
           <tr>
             {displayFields.map(e => {
               const colKey = e.field.split(",")[0];
@@ -233,7 +235,7 @@ const Table = props => {
             <Pagination.Next disabled={currentPage === (noPages - 1)} onClick={gotoNextPage} />
             <Pagination.Last disabled={currentPage === (noPages - 1)} onClick={gotoLastPage} />
             {noRows > rowsPerPage * 4 &&
-              <InputGroup className="ml-3" style={{ width: '150px' }}>
+              <InputGroup className="ms-3" style={{ width: '150px' }}>
                 <FormControl
                   placeholder="Page"
                   aria-label="Page"
@@ -254,9 +256,7 @@ const Table = props => {
                     setInvalidPageNumber(false);
                   }}
                 />
-                <InputGroup.Append>
-                  <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
-                </InputGroup.Append>
+                <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
               </InputGroup>}
           </Pagination></>}
     </>

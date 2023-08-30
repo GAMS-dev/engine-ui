@@ -140,10 +140,12 @@ const LicenseUpdateForm = () => {
                                 Update License
                             </SubmitButton>
                             {registeredLicense !== "" &&
-                                <button type="submit" className={`btn btn-lg btn-danger btn-block`}
-                                    disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
-                                    {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
-                                </button>}
+                                <div className="d-grid gap-2">
+                                    <button type="submit" className={`btn btn-lg btn-danger`}
+                                        disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
+                                        {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
+                                    </button>
+                                </div>}
                         </div>
                         {userEdited && <Navigate to="/users" />}
                     </form>

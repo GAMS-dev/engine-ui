@@ -34,12 +34,12 @@ const Users = () => {
       field: "username,id",
       column: "User",
       sorter: "alphabetical",
-      displayer: (user, id) => user === "" ? <span className="badge badge-pill badge-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
+      displayer: (user, id) => user === "" ? <span className="badge rounded-pill bg-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
         (user === username ?
           <>
             {user}
             <sup>
-              <span className="badge badge-pill badge-primary ml-1">me</span>
+              <span className="badge rounded-pill bg-primary ms-1">me</span>
             </sup>
           </> : user)
     },
@@ -171,12 +171,12 @@ const Users = () => {
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">Users</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
-          <div className="btn-group mr-2">
+          <div className="btn-group me-2">
             {roles.length ?
               <Link to="/new-user">
                 <button type="button" className="btn btn-sm btn-outline-primary">
                   Invite User
-                  <Send width="12px" className="ml-2" />
+                  <Send width="12px" className="ms-2" />
                 </button>
               </Link> : <></>}
             <button
@@ -187,7 +187,7 @@ const Users = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ml-2" />
+              <RefreshCw width="12px" className="ms-2" />
             </button>
           </div>
         </div>

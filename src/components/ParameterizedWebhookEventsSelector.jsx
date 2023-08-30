@@ -52,7 +52,7 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                         />
                     </div>
                     <div className="col-1">
-                        <button type="button" className="close" aria-label="Close"
+                        <button type="button" className="btn-close" aria-label="Close"
                             onClick={_ => {
                                 const newEvents = [...parameterizedEvents];
                                 newEvents.splice(idx, 1);

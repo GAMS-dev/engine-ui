@@ -1,8 +1,6 @@
-$theme-colors: (
-  "primary": #f39619,
-  "secondary": #494d55,
-  "info": #17a2b8
-);
+$primary: #f39619;
+$secondary: #494d55;
+$info: #17a2b8;
 
 $border-color: #adb5bd;
 $border-radius: 0;
@@ -46,6 +44,10 @@ body {
   padding: 77px 0 0;
 }
 
+.sidebar-container {
+  padding: 0;
+}
+
 .sidebar-sticky {
   position: -webkit-sticky;
   position: sticky;
@@ -61,7 +63,7 @@ body {
 }
 
 .nav-link {
-  color: theme-color("primary");
+  color: $primary;
 }
 
 .sidebar .nav-link,
@@ -94,12 +96,23 @@ body {
   color: #6c757d;
 }
 
+.dropdown-item-error {
+  cursor: default;
+  color: $primary;
+  white-space: unset;
+}
+
+.dropdown-item-error:hover {
+  background-color: unset;
+  color: $primary;
+}
+
 .nav-item .btn {
   padding-left: 1rem;
 }
 
 .sidebar .nav-link.active {
-  color: theme-color("primary");
+  color: $primary;
 }
 
 .sidebar .nav-link .feather {
@@ -287,7 +300,7 @@ body {
 }
 
 .text-error {
-  color: theme-color("primary");
+  color: $primary;
 }
 
 .summary-table {
@@ -358,17 +371,17 @@ body {
 }
 
 .job-timings-info-queued {
-  background-color: theme-color("primary");
+  background-color: $primary;
 }
 
 .job-timings-info-running {
-  background-color: theme-color("secondary");
+  background-color: $secondary;
   color: white;
   border-right: 1px solid white;
 }
 
 .job-timings-info-finalizing {
-  background-color: theme-color("info");
+  background-color: $info;
   color: white;
 }
 

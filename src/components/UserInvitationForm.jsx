@@ -220,7 +220,7 @@ const UserInvitationForm = () => {
                             </div>
                             <fieldset disabled={isSubmitting}>
                                 {roles.length > 0 &&
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="roleSelector">
                                             Select a role to be assigned to the invitee
                                         </label>
@@ -240,7 +240,7 @@ const UserInvitationForm = () => {
                                             includeGroups={true}
                                             highlight={true}
                                         />
-                                        <div className="form-group form-check mt-3 mb-3">
+                                        <div className="form-check mt-3 mb-3">
                                             <input type="checkbox" className="form-check-input" checked={assignQuotas} onChange={e => setAssignQuotas(e.target.checked)}
                                                 id="assignQuotas" />
                                             <label className="form-check-label" htmlFor="assignQuotas">Assign Quotas?</label>
@@ -252,7 +252,7 @@ const UserInvitationForm = () => {
                                         }
                                         {serverInfo.in_kubernetes === true && availableInstances.length > 0 &&
                                             <>
-                                                <div className="form-group form-check mt-3 mb-3">
+                                                <div className="form-check mt-3 mb-3">
                                                     <input type="checkbox" className="form-check-input"
                                                         checked={assignInstances !== true} onChange={e => setAssignInstances(!e.target.checked)}
                                                         id="assignInstances" />
@@ -263,7 +263,7 @@ const UserInvitationForm = () => {
                                                 </div>
                                                 {assignInstances ?
                                                     <>
-                                                        <div className="form-group">
+                                                        <div className="mb-3">
                                                             <label htmlFor="instancesAllowed">
                                                                 Instances user is allowed to use
                                                             </label>
@@ -283,7 +283,7 @@ const UserInvitationForm = () => {
                                                             />
                                                         </div>
                                                         {selectedInstancesAllowed.length > 0 ?
-                                                            <div className="form-group">
+                                                            <div className="mb-3">
                                                                 <label htmlFor="instancesDefault">
                                                                     Default Instance
                                                                 </label>
@@ -301,7 +301,7 @@ const UserInvitationForm = () => {
                                             </>}
                                     </>
                                 }
-                                {roles && roles.includes('admin') && <div className="form-group form-check mt-3 mb-3">
+                                {roles && roles.includes('admin') && <div className="form-check mt-3 mb-3">
                                     <input type="checkbox" className="form-check-input"
                                         checked={assignLicense !== false} onChange={e => setAssignLicense(e.target.checked)}
                                         id="assignLicense" />
@@ -321,7 +321,7 @@ const UserInvitationForm = () => {
                                     }
                                 </div>}
                                 {role === "inviter" && availableIdentityProviders.length > 1 &&
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="identityProvidersAllowed">
                                             Identity providers user is allowed to invite with
                                         </label>
@@ -334,7 +334,7 @@ const UserInvitationForm = () => {
                                             options={availableIdentityProviders}
                                         />
                                     </div>}
-                                {availableIdentityProviders.length > 1 && <div className="form-group">
+                                {availableIdentityProviders.length > 1 && <div className="mb-3">
                                     <label htmlFor="identityProvider">
                                         Identity provider
                                     </label>
@@ -347,8 +347,8 @@ const UserInvitationForm = () => {
                                     />
                                 </div>}
                                 {ldapIdentityProviders.includes(identityProvider.value) &&
-                                    <div className="form-group">
-                                        <label htmlFor="identityProviderSubject" className="sr-only">
+                                    <div className="mb-3">
+                                        <label htmlFor="identityProviderSubject" className="visually-hidden">
                                             LDAP login name
                                         </label>
                                         <input

@@ -142,12 +142,12 @@ const GroupMembers = () => {
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">{`User Group: ${label}`}</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
-                    <div className="btn-group mr-2">
+                    <div className="btn-group me-2">
                         {isInviter &&
                             <button type="button" className="btn btn-sm btn-outline-primary"
                                 onClick={() => setShowAddMemberDialog(true)}>
                                 Add Member
-                                <Users width="12px" className="ml-2" />
+                                <Users width="12px" className="ms-2" />
                             </button>}
                         <button
                             type="button"
@@ -157,7 +157,7 @@ const GroupMembers = () => {
                             }}
                         >
                             Refresh
-                            <RefreshCw width="12px" className="ml-2" />
+                            <RefreshCw width="12px" className="ms-2" />
                         </button>
                     </div>
                 </div>
@@ -183,7 +183,7 @@ const GroupMembers = () => {
                     column: "Added By",
                     sorter: "alphabetical",
                     displayer: user => user.deleted ?
-                        <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
+                        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
 
                 },
                 {
@@ -220,8 +220,8 @@ const GroupMembers = () => {
                         <ClipLoader /> :
                         (usersToAdd && usersToAdd.length ?
                             <fieldset disabled={isSubmitting}>
-                                <div className="form-group">
-                                    <label htmlFor="userToAdd" className="sr-only">
+                                <div className="mb-3">
+                                    <label htmlFor="userToAdd" className="visually-hidden">
                                         Username
                                     </label>
                                     <Select

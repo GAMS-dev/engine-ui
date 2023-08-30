@@ -99,7 +99,7 @@ const InstancePoolSubmissionForm = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="poolLabel">
                                     Pool Label
                                 </label>
@@ -116,7 +116,7 @@ const InstancePoolSubmissionForm = () => {
                                     {formErrors.label ? formErrors.label : ""}
                                 </div>
                             </div>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="instanceReq">
                                     Instance
                                 </label>
@@ -132,7 +132,7 @@ const InstancePoolSubmissionForm = () => {
                                     {formErrors.instance ? formErrors.instance : ""}
                                 </div>
                             </div>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="sizeReq">
                                     Size
                                 </label>

@@ -98,7 +98,7 @@ const Usage = () => {
             displayer: (name, job_count) => <>
                 {job_count != null ? <Link to={`/jobs/hc:${name}`}>{name}
                     <sup>
-                        <span className="badge badge-pill badge-primary ml-1">HC</span>
+                        <span className="badge rounded-pill bg-primary ms-1">HC</span>
                     </sup></Link> :
                     <Link to={`/jobs/${name}`}>{name}</Link>}
             </>
@@ -366,7 +366,7 @@ const Usage = () => {
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">{`Usage of user: ${username}`}</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
-                    <div className="btn-group mr-2">
+                    <div className="btn-group me-2">
                         <button
                             type="button"
                             className="btn btn-sm btn-outline-secondary"
@@ -375,7 +375,7 @@ const Usage = () => {
                             }}
                         >
                             Refresh
-                            <RefreshCw width="12px" className="ml-2" />
+                            <RefreshCw width="12px" className="ms-2" />
                         </button>
                     </div>
                 </div>
@@ -388,7 +388,7 @@ const Usage = () => {
                             <input
                                 name="showinvitees"
                                 type="checkbox"
-                                className="ml-2"
+                                className="ms-2"
                                 checked={recursive}
                                 onChange={e => {
                                     setRecursive(e.target.checked)
@@ -401,7 +401,7 @@ const Usage = () => {
                         <input
                             name="showAggregated"
                             type="checkbox"
-                            className="ml-2"
+                            className="ms-2"
                             checked={!aggregated}
                             onChange={e => {
                                 setAggregated(!e.target.checked)
@@ -436,7 +436,7 @@ const Usage = () => {
                                     Total Time:
                                 </div>
                                 <div className="col-8">
-                                    <TimeDiffDisplay time={totalTime} classNames="badge badge-secondary" />
+                                    <TimeDiffDisplay time={totalTime} classNames="badge bg-secondary" />
                                 </div>
                             </div>
                         </small>
@@ -448,7 +448,7 @@ const Usage = () => {
                                     Total Solve Time:
                                 </div>
                                 <div className="col-8">
-                                    <TimeDiffDisplay time={totalSolveTime} classNames="badge badge-secondary" />
+                                    <TimeDiffDisplay time={totalSolveTime} classNames="badge bg-secondary" />
                                 </div>
                             </div>
                         </small>

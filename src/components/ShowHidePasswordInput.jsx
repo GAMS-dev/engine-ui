@@ -8,8 +8,8 @@ const ShowHidePasswordInput = ({ value, setValue,
     const [isVisible, setIsVisible] = useState(false);
 
     return (
-        <div className={`form-group${additionalClassesContainer != null ? ` ${additionalClassesContainer}` : ''}`}>
-            <label htmlFor={id} className={usePlaceholder === true ? "sr-only" : ""}>
+        <div className={`mb-3${additionalClassesContainer != null ? ` ${additionalClassesContainer}` : ''}`}>
+            <label htmlFor={id} className={usePlaceholder === true ? "visually-hidden" : ""}>
                 {label}
             </label>
             <div className="input-group">

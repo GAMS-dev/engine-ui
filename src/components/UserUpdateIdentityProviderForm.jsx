@@ -109,7 +109,7 @@ const UserUpdateIdentityProviderForm = () => {
                     {submissionErrorMsg}
                 </div>
                 <fieldset disabled={isSubmitting}>
-                    {availableIdentityProviders.length > 1 && <div className="form-group">
+                    {availableIdentityProviders.length > 1 && <div className="mb-3">
                         <label htmlFor="identityProvider">
                             Identity provider
                         </label>
@@ -122,8 +122,8 @@ const UserUpdateIdentityProviderForm = () => {
                         />
                     </div>}
                     {["", "gams_engine"].includes(identityProvider.value) ? <></> :
-                        <div className="form-group">
-                            <label htmlFor="identityProviderSubject" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="identityProviderSubject" className="visually-hidden">
                                 Identity provider subject
                             </label>
                             <input

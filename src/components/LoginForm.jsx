@@ -459,7 +459,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         {isOAuthProcessing ?
           <ClipLoader /> :
           <>
-            <h1 className="h3 mb-3 font-weight-normal">{register ? "Register" : "Please sign in"}</h1>
+            <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>
             <div className="invalid-feedback" style={{ display: loginErrorMsg != null ? "block" : "none" }}>
               {loginErrorMsg}
             </div>
@@ -468,8 +468,8 @@ const LoginForm = ({ showRegistrationForm }) => {
             </Alert>}
             <fieldset disabled={isSubmitting}>
               {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
-                <div className="form-group">
-                  <label htmlFor="inputServer" className="sr-only">
+                <div className="mb-3">
+                  <label htmlFor="inputServer" className="visually-hidden">
                     Server
                   </label>
                   <input
@@ -484,8 +484,8 @@ const LoginForm = ({ showRegistrationForm }) => {
                   />
                 </div>
               }
-              {register ? <div className="form-group">
-                <label htmlFor="inputInvitationCode" className="sr-only">
+              {register ? <div className="mb-3">
+                <label htmlFor="inputInvitationCode" className="visually-hidden">
                   Invitation Code
                 </label>
                 <input
@@ -509,8 +509,8 @@ const LoginForm = ({ showRegistrationForm }) => {
                       </Nav.Item>
                     )}
                   </Nav> : <></>)}
-              {(!register || isValidInvitationCode) && <div className="form-group">
-                <label htmlFor="username" className="sr-only">
+              {(!register || isValidInvitationCode) && <div className="mb-3">
+                <label htmlFor="username" className="visually-hidden">
                   Username
                 </label>
                 <input
@@ -550,8 +550,8 @@ const LoginForm = ({ showRegistrationForm }) => {
               {register ? "Register" : "Login"}
             </SubmitButton>
             {register ? <></> : OAuthConfig.map((config, idx) => {
-              return <div key={`oauth_button_${idx}`} className="mt-2">
-                <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary btn-block'
+              return <div key={`oauth_button_${idx}`} className="d-grid gap-2">
+                <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
                   onClick={() => setOAuthLoginConfig(config)}>
                   {config.label}
                 </button>

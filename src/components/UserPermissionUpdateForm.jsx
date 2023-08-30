@@ -202,7 +202,7 @@ const UserUpdateForm = () => {
                                 {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
-                                <div className="form-group">
+                                <div className="mb-3">
                                     <label htmlFor="roleSelector">
                                         {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
                                     </label>
@@ -214,7 +214,7 @@ const UserUpdateForm = () => {
                                     </select>
                                 </div>
                                 {newRole === "inviter" && availableIdentityProviders.length > 1 &&
-                                    (IDPLoading ? <ClipLoader /> : <div className="form-group">
+                                    (IDPLoading ? <ClipLoader /> : <div className="mb-3">
                                         <label htmlFor="identityProvidersAllowed">
                                             Identity providers user is allowed to invite with
                                         </label>

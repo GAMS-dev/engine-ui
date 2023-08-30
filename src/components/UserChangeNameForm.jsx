@@ -76,8 +76,8 @@ const UserChangeNameForm = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
-                                <label htmlFor="modelName" className="sr-only">
+                            <div className="mb-3">
+                                <label htmlFor="modelName" className="visually-hidden">
                                     New Username
                                 </label>
                                 <input
