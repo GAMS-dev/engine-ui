@@ -99,7 +99,7 @@ export const InexJSONSelector = props => {
                         checked={globbingEnabled}
                         onChange={e => setGlobbingEnabled(e.target.checked)}
                         id="globbingEnabled" />
-                    <label className="form-check-label" htmlFor="globbingEnabled">{"Is globbing enabled?"}</label>
+                    <label className="form-check-label" htmlFor="globbingEnabled">Enable globbing (<kbd>*</kbd>/<kbd>?</kbd> wildcard characters)?</label>
                 </div>
                 </React.Fragment>)
             }
