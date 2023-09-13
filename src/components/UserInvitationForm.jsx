@@ -224,7 +224,7 @@ const UserInvitationForm = () => {
                                         <label htmlFor="roleSelector">
                                             Select a role to be assigned to the invitee
                                         </label>
-                                        <select id="roleSelector" className="form-control" value={role} onChange={updateRole}>
+                                        <select id="roleSelector" className="form-control form-select" value={role} onChange={updateRole}>
                                             <option key="user" value="user">User</option>
                                             <option key="inviter" value="inviter">Inviter</option>
                                             {roles && roles.includes('admin') &&

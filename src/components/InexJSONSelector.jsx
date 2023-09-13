@@ -10,24 +10,27 @@ export const InexJSONSelector = props => {
         { value: "include", label: "include" });
     const [includeFiles, setIncludeFiles] = useState(inexObject && inexObject.type === "include" ? inexObject.files.join(",") : "");
     const [excludeFiles, setExcludeFiles] = useState(inexObject && inexObject.type === "exclude" ? inexObject.files.join(",") : "");
+    const [globbingEnabled, setGlobbingEnabled] = useState(inexObject ? inexObject.globbing_enabled : true);
 
     useEffect(() => {
         if (filterResults) {
             if (toggleIncludeExclude.value === "include") {
                 onChangeHandler(JSON.stringify({
                     type: "include",
-                    files: includeFiles.split(",").map(el => el.trim())
+                    files: includeFiles.split(",").map(el => el.trim()),
+                    globbing_enabled: globbingEnabled
                 }));
             } else {
                 onChangeHandler(JSON.stringify({
                     type: "exclude",
-                    files: excludeFiles.split(",").map(el => el.trim())
+                    files: excludeFiles.split(",").map(el => el.trim()),
+                    globbing_enabled: globbingEnabled
                 }));
             }
         } else {
             onChangeHandler("");
         }
-    }, [filterResults, toggleIncludeExclude, includeFiles, excludeFiles, onChangeHandler]);
+    }, [filterResults, toggleIncludeExclude, includeFiles, excludeFiles, onChangeHandler, globbingEnabled]);
 
     return (
         <React.Fragment>
@@ -90,6 +93,14 @@ export const InexJSONSelector = props => {
                             />
                         </div>
                     }
+                <div className="form-check">
+                    <input type="checkbox"
+                        className="form-check-input"
+                        checked={globbingEnabled}
+                        onChange={e => setGlobbingEnabled(e.target.checked)}
+                        id="globbingEnabled" />
+                    <label className="form-check-label" htmlFor="globbingEnabled">Enable globbing (<kbd>*</kbd>/<kbd>?</kbd> wildcard characters)?</label>
+                </div>
                 </React.Fragment>)
             }
         </React.Fragment>

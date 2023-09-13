@@ -70,19 +70,19 @@ const Usage = () => {
             field: "queuetime",
             column: "Time in Queue",
             sorter: "numerical",
-            displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
+            displayer: e => <TimeDiffDisplay time={e} classNames="badge text-dark" />
         },
         {
             field: "solvetime",
             column: "Solve Time",
             sorter: "numerical",
-            displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
+            displayer: e => <TimeDiffDisplay time={e} classNames="badge text-dark" />
         },
         {
             field: "totaltime",
             column: "Total Time",
             sorter: "numerical",
-            displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
+            displayer: e => <TimeDiffDisplay time={e} classNames="badge text-dark" />
         }
     ]);
     const [displayFieldsDisaggregated] = useState([
