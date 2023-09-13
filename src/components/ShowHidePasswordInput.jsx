@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "react-feather";
 const ShowHidePasswordInput = ({ value, setValue,
     id, label, invalidFeedback,
     helpText, additionalClassesContainer,
-    usePlaceholder, required, autoComplete }) => {
+    usePlaceholder, required, autoComplete, additionalAddons }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     return (
@@ -25,14 +25,13 @@ const ShowHidePasswordInput = ({ value, setValue,
                     autoComplete={autoComplete == null ? "off" : autoComplete}
                     placeholder={usePlaceholder === true ? label : null}
                 />
-                <div className="input-group-addon" aria-hidden="true">
                     <span className="input-group-text" style={{ "cursor": "pointer" }}
                         onClick={() => setIsVisible(visible => !visible)}>
                         {isVisible ?
                             <Eye /> :
                             <EyeOff />}
                     </span>
-                </div>
+                    {additionalAddons}
                 <div className="invalid-feedback">
                     {invalidFeedback ? invalidFeedback : ""}
                 </div>
