@@ -111,7 +111,7 @@ const JobRespInfoTable = props => {
                 <th>Process Status</th>
                 <td>{job.process_status != null ?
                   <span
-                    className={`badge ${job.process_status === 0 ? '' : 'bg-danger'}`}>
+                    className={`badge ${job.process_status === 0 ? 'text-dark' : 'bg-danger'}`}>
                     {GAMSRcMap[job.process_status] != null ?
                       `${GAMSRcMap[job.process_status]} (${job.process_status})` : job.process_status}
                   </span> : "-"}</td>
@@ -122,7 +122,7 @@ const JobRespInfoTable = props => {
                   {job.text_entries && job.text_entries.length > 0 ?
                     <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
                       <select
-                        className="form-control form-control-sm"
+                        className="form-control form-control-sm form-select"
                         name="text-entry"
                         id="text-entry"
                         value={textEntry}
@@ -156,7 +156,7 @@ const JobRespInfoTable = props => {
                     <td>
                       <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
                         <select
-                          className="form-control form-control-sm"
+                          className="form-control form-control-sm form-select"
                           name="stream-entry"
                           id="stream-entry"
                           value={streamEntry}
@@ -194,7 +194,7 @@ const JobRespInfoTable = props => {
                   <td>
                     <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
                       <select
-                        className="form-control form-control-sm"
+                        className="form-control form-control-sm form-select"
                         name="solve-trace"
                         id="solve-trace"
                         value={solveTraceEntry}

@@ -80,7 +80,7 @@ const TextEntryView = props => {
           <select
             name="text_entry_sel"
             id="text_entry_sel"
-            className="form-control"
+            className="form-control form-select"
             onChange={e => setEntryIndex(e.target.selectedIndex)}
           >
             {textEntries.map(e => (
