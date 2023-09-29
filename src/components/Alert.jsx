@@ -23,8 +23,7 @@ export const Alert = () => {
 
   return (
     <div className={`alert alert-${alertType} alert-absolute alert-dismissible`} role="alert" style={{ display: alertMsg === "" && "none" }}>
-      <button type="button" className="btn-close" aria-label="Close" onClick={() => setAlertMsg("")}>
-        <span aria-hidden="true">&times;</span>
+      <button type="button" className="btn-close" aria-label="Close" data-bs-dismiss="alert" onClick={() => setAlertMsg("")}>
       </button>
       <strong>{alertMsg.startsWith('success:') ? alertMsg.substring(8) : alertMsg}</strong>
     </div>

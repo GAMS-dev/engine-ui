@@ -148,6 +148,7 @@ const JobReqInfoTable = props => {
             <input
               type="text"
               className="table-form-control"
+              id="jobTag"
               value={tmpJobTag}
               disabled={jobTagUpdating}
               onBlur={() => {

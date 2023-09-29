@@ -105,7 +105,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                         <label htmlFor="toggleIncludeExclude">
                             {`Namespace${modifiedFlag ? " (*)" : ""}`}
                         </label>
-                        <select id="namespace" className="form-control"
+                        <select id="namespace" className="form-control form-select"
                             value={selectedNamespace}
                             onChange={updateSelectedNamespace}
                             disabled={isLoading}>

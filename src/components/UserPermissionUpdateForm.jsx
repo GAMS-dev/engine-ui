@@ -206,7 +206,7 @@ const UserUpdateForm = () => {
                                     <label htmlFor="roleSelector">
                                         {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
                                     </label>
-                                    <select id="roleSelector" className="form-control" value={newRole} onChange={updateNewRole}>
+                                    <select id="roleSelector" className="form-control form-select" value={newRole} onChange={updateNewRole}>
                                         <option key="user" value="user">User</option>
                                         <option key="inviter" value="inviter">Inviter</option>
                                         {(roles.find(role => role === "admin") !== undefined) &&
