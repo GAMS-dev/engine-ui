@@ -152,7 +152,7 @@ const Table = props => {
     }
     gotoFirstPage();
     let newDataTmp = null;
-    if (currentFiltersTmp[colName] == null || currentFiltersTmp[colName].length < filterText.length) {
+    if (currentFiltersTmp[colName] == null || filterText.startsWith(currentFiltersTmp[colName])) {
       const filterTextLower = filterText.toLowerCase();
       newDataTmp = data
         .filter(dataTmp => dataTmp[colName] && dataTmp[colName].toLowerCase().includes(filterTextLower));
