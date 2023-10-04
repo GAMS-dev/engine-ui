@@ -546,17 +546,17 @@ const LoginForm = ({ showRegistrationForm }) => {
                   usePlaceholder={true}
                   required={true} />}
             </fieldset>
-            <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
-              {register ? "Register" : "Login"}
-            </SubmitButton>
-            {register ? <></> : OAuthConfig.map((config, idx) => {
-              return <div key={`oauth_button_${idx}`} className="d-grid gap-2">
-                <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
+            <div className="d-grid gap-2">
+              <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
+                {register ? "Register" : "Login"}
+              </SubmitButton>
+              {register ? <></> : OAuthConfig.map((config, idx) => {
+                return <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
                   onClick={() => setOAuthLoginConfig(config)}>
                   {config.label}
                 </button>
-              </div>
-            })}
+              })}
+            </div>
             <div className="mt-2">
               <small>
                 <Link to={register ? "/login" : "/register"} onClick={() => {
