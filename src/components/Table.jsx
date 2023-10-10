@@ -5,7 +5,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import Pagination from 'react-bootstrap/Pagination';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
-import { FormControl, OverlayTrigger, Popover } from "react-bootstrap";
+import { FormControl} from "react-bootstrap";
 import OverlayFilter from "./OverlayFilter";
 
 const Table = props => {
