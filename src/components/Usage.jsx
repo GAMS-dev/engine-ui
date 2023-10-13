@@ -11,10 +11,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Table from "./Table";
+import { Tab, Tabs } from "react-bootstrap";
 import { getResponseError, mergeSortedArrays } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
 import Select from 'react-select';
+import { testData } from './data.jsx';
+import Quotas from "./Quotas";
 
 ChartJS.register(
     LinearScale,
@@ -43,6 +46,7 @@ const Usage = () => {
     const [totalSolveTime, setTotalSolveTime] = useState(0);
     const [refresh, setRefresh] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [tabSelected, setTabSelected] = useState("usage");
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
@@ -120,21 +124,23 @@ const Usage = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        axios
-            .get(`${server}/usage/`, {
-                params: {
-                    recursive: isInviter ? recursive : false,
-                    username: username,
-                    from_datetime: startDate,
-                    to_datetime: endDate
-                },
-                headers: {
-                    "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}}"
-                }
-            })
-            .then(res => {
-                const dataDisaggregatedTmp = res.data.job_usage.concat(res.data.hypercube_job_usage);
+        // axios
+        //     .get(`${server}/usage/`, {
+        //         params: {
+        //             recursive: isInviter ? recursive : false,
+        //             username: username,
+        //             from_datetime: startDate,
+        //             to_datetime: endDate
+        //         },
+        //         headers: {
+        //             "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}}"
+        //         }
+        //     })
+        //     .then(res => {
+                const dataDisaggregatedTmp = testData.job_usage.concat(testData.hypercube_job_usage);
+                console.log(dataDisaggregatedTmp)
                 let aggregatedUsageData = Object.values(dataDisaggregatedTmp.reduce((a, c) => {
+                    console.log(c)
                     if ("job_count" in c) {
                         // is Hypercube job
                         const isFinished = c.finished != null || c.completed === c.job_count;
@@ -353,17 +359,17 @@ const Usage = () => {
                     return a + c.totaltime;
                 }, 0));
                 setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems fetching usage information. Error message: ${getResponseError(err)}`);
-                setIsLoading(false);
-            });
+            // })
+            // .catch(err => {
+            //     setAlertMsg(`Problems fetching usage information. Error message: ${getResponseError(err)}`);
+            //     setIsLoading(false);
+            // });
     }, [jwt, server, refresh, displayFields, setAlertMsg,
         username, recursive, startDate, endDate, isInviter]);
 
     return (
-        <div>
-            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <>
+        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">{`Usage of user: ${username}`}</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
                     <div className="btn-group me-2">
@@ -380,7 +386,33 @@ const Usage = () => {
                     </div>
                 </div>
             </div>
+            
             <div className="row">
+                <div className="col-sm-6 col-12 mb-4">
+                    <div className="row">
+                        <div className="col-4">From:</div>
+                        <div className="col-8">
+                            <DatePicker selected={startDate} onChange={date => setStartDate(date)} />
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-12 mb-4">
+                    <div className="row">
+                        <div className="col-4">To:</div>
+                        <div className="col-8">
+                            <DatePicker selected={endDate} onChange={date => setEndDate(date)} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <Tabs
+              activeKey={tabSelected}
+              onSelect={(k) => {
+                setTabSelected(k)
+              }}>
+              <Tab eventKey="usage" title="Usage">
+              <div>
+              <div className="row">
                 {isInviter &&
                     <div className="col-sm-6 mb-4">
                         <label>
@@ -407,24 +439,6 @@ const Usage = () => {
                                 setAggregated(!e.target.checked)
                             }} />
                     </label>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-sm-6 col-12 mb-4">
-                    <div className="row">
-                        <div className="col-4">From:</div>
-                        <div className="col-8">
-                            <DatePicker selected={startDate} onChange={date => setStartDate(date)} />
-                        </div>
-                    </div>
-                </div>
-                <div className="col-sm-6 col-12 mb-4">
-                    <div className="row">
-                        <div className="col-4">To:</div>
-                        <div className="col-8">
-                            <DatePicker selected={endDate} onChange={date => setEndDate(date)} />
-                        </div>
-                    </div>
                 </div>
             </div>
             {data.length > 1 &&
@@ -528,6 +542,12 @@ const Usage = () => {
                 sortedCol="username"
                 idFieldName={aggregated ? "username" : "token"} />
         </div>
+              </Tab>
+              <Tab eventKey="quotas" title="Quotas">
+                        <Quotas testData={testData} calcStartDate={startDate} calcEndTime={endDate}/>
+              </Tab>
+        </Tabs>
+        </>
     );
 };
 
