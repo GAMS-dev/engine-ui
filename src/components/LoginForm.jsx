@@ -325,6 +325,7 @@ const LoginForm = ({ showRegistrationForm }) => {
 
   useEffect(() => {
     const fetchPasswordPolicy = async () => {
+      setLoginErrorMsg('')
       try {
         const policyResponse = await axios.get(`${server}/auth/password-policy`);
         const  passwordPolicy = policyResponse?.data
