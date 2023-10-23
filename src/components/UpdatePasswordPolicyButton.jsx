@@ -104,7 +104,6 @@ const UpdatePasswordPolicyButton = () => {
                                 checked={includeCapital}
                                 onChange={e => setIncludeCapital(e.target.checked)}
                                 id="includeCapital"
-                                aria-describedby="includeCapitalHelp"
                             />
                             <label className="form-check-label" htmlFor="includeCapital">Include at least one capital letter?</label>
                         </div>
@@ -115,7 +114,6 @@ const UpdatePasswordPolicyButton = () => {
                                 checked={includeLowercase}
                                 onChange={e => setIncludeLowercase(e.target.checked)}
                                 id="includeLowercase"
-                                aria-describedby="includeLowercaseHelp"
                             />
                             <label className="form-check-label" htmlFor="includeLowercase">Include at least one lowercase letter?</label>
                         </div>
@@ -126,7 +124,6 @@ const UpdatePasswordPolicyButton = () => {
                                 checked={includeNumber}
                                 onChange={e => setIncludeNumber(e.target.checked)}
                                 id="includeNumber"
-                                aria-describedby="includeNumberHelp"
                             />
                             <label className="form-check-label" htmlFor="includeNumber">Include at least one number?</label>
                         </div>
@@ -137,7 +134,6 @@ const UpdatePasswordPolicyButton = () => {
                                 checked={includeSpecialChar}
                                 onChange={e => setIncludeSpecialChar(e.target.checked)}
                                 id="includeSpecialChar"
-                                aria-describedby="includeSpecialCharHelp"
                             />
                             <label className="form-check-label" htmlFor="includeSpecialChar">Include at least one special character?</label>
                         </div>
@@ -148,7 +144,6 @@ const UpdatePasswordPolicyButton = () => {
                                 checked={notInPopular}
                                 onChange={e => setNotInPopular(e.target.checked)}
                                 id="notInPopular"
-                                aria-describedby="notInPopularHelp"
                             />
                             <label className="form-check-label" htmlFor="notInPopular">Check if the password is commonly used?</label>
                         </div>
