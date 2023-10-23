@@ -328,39 +328,32 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         const policyResponse = await axios.get(`${server}/auth/password-policy`);
         const  passwordPolicy = policyResponse?.data
-        let passwordPolicyStringTMP = `The minimum password length is ${passwordPolicy.min_password_length}.`
+        let passwordPolicyStringTmp = `The minimum password length is ${passwordPolicy.min_password_length}.`
         let mustInclude = []
-        console.log(policyResponse?.data)
-        console.log(`policy: ${Object.keys(passwordPolicy)}`)
-        console.log(passwordPolicy.not_in_popular_passwords)
         passwordPolicy.must_include_capital && mustInclude.push('capital letter')
         passwordPolicy.must_include_lowercase && mustInclude.push('lowercase letter')
         passwordPolicy.must_include_number && mustInclude.push('number')
         passwordPolicy.must_include_special_char && mustInclude.push('special character')
-        console.log(mustInclude)
-        console.log(mustInclude.length)
 
         if (mustInclude.length === 1) {
-          passwordPolicyStringTMP = passwordPolicyStringTMP.concat(` Must contain at least one ${mustInclude[0]}.`)
-          console.log(passwordPolicyStringTMP)
+          passwordPolicyStringTmp += ` Must contain at least one ${mustInclude[0]}.`
         } else if (mustInclude.length > 1) {
-          passwordPolicyStringTMP = passwordPolicyStringTMP.concat(` Must contain at least one `)
+          passwordPolicyStringTmp += ' Must contain at least one '
           mustInclude.forEach((elem, i) => {
             if (i < mustInclude.length - 2) {
-              passwordPolicyStringTMP = passwordPolicyStringTMP.concat(`${elem}, `)
+              passwordPolicyStringTMP += `${elem}, `
             } else if (i < mustInclude.length - 1) {
-              passwordPolicyStringTMP = passwordPolicyStringTMP.concat(`${elem} `)
+              passwordPolicyStringTmp += `${elem} `
             } else {
-              passwordPolicyStringTMP = passwordPolicyStringTMP.concat(`and ${elem}.`)
+              passwordPolicyStringTmp = `and ${elem}.`
             }
           })
         }
 
         if (passwordPolicy.not_in_popular_passwords) {
-          passwordPolicyStringTMP = passwordPolicyStringTMP.concat(' It is checked against commonly used passwords.')
+          passwordPolicyStringTmp = ' It is checked against commonly used passwords.'
         }
 
-        console.log(passwordPolicyStringTMP)
         setPasswordPolicyHelper(passwordPolicyStringTMP)
 
       } catch (err) {

@@ -25,7 +25,7 @@ const AdministrationForm = ({ setLicenseExpiration }) => {
                         <LicUpdateButton type="engine" setLicenseExpiration={setLicenseExpiration} />
                         <LicUpdateButton type="system" />
                     </div>
-                    <div className="btn-group mr-2">
+                    <div className="mr-2">
                         <UpdatePasswordPolicyButton/>
                     </div>
                 </div>

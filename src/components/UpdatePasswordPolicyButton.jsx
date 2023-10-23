@@ -44,11 +44,6 @@ const UpdatePasswordPolicyButton = () => {
     const updatePasswordPolicy = async () => {
         setSubmissionErrorMsg("")
         setIsSubmitting(true)
-        console.log(includeCapital)
-        console.log(minPasswordLength)
-        console.log(includeLowercase)
-        console.log(includeNumber)
-        console.log(includeSpecialChar)
 
         try {
             await axios.put(`${server}/auth/password-policy`, 
@@ -59,7 +54,6 @@ const UpdatePasswordPolicyButton = () => {
              'must_include_special_char': includeSpecialChar,
              'not_in_popular_passwords': notInPopular})
         } catch (err) {
-            console.log(err)
             setSubmissionErrorMsg("")
         }  finally {
             setIsSubmitting(false)
@@ -90,7 +84,7 @@ const UpdatePasswordPolicyButton = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                        <div className="form-outline  mt-3">
+                        <div className="form-outline mt-3">
                             <label class="form-label" for="typeNumber">Minimum password length:</label>
                             <input
                                 required
