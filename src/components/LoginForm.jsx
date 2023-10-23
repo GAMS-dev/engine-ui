@@ -331,7 +331,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         const  passwordPolicy = policyResponse?.data
         let passwordPolicyStringTmp = `The minimum password length is ${passwordPolicy.min_password_length}.`
         let mustInclude = []
-        passwordPolicy.must_include_capital && mustInclude.push('capital letter')
+        passwordPolicy.must_include_uppercase && mustInclude.push('uppercase letter')
         passwordPolicy.must_include_lowercase && mustInclude.push('lowercase letter')
         passwordPolicy.must_include_number && mustInclude.push('number')
         passwordPolicy.must_include_special_char && mustInclude.push('special character')
@@ -342,7 +342,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           passwordPolicyStringTmp += ' Must contain at least one '
           mustInclude.forEach((elem, i) => {
             if (i < mustInclude.length - 2) {
-              passwordPolicyStringTMP += `${elem}, `
+              passwordPolicyStringTmp += `${elem}, `
             } else if (i < mustInclude.length - 1) {
               passwordPolicyStringTmp += `${elem} `
             } else {
@@ -355,7 +355,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           passwordPolicyStringTmp = ' It is checked against commonly used passwords.'
         }
 
-        setPasswordPolicyHelper(passwordPolicyStringTMP)
+        setPasswordPolicyHelper(passwordPolicyStringTmp)
 
       } catch (err) {
         setLoginErrorMsg(`Problems retrieving password policy. Error message: ${getResponseError(err)}.`);

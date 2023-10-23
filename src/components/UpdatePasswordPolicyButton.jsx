@@ -17,7 +17,7 @@ const UpdatePasswordPolicyButton = () => {
     const [isSubmitting, setIsSubmitting] = useState("");
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [minPasswordLength, setMinPasswordLength] = useState(10);
-    const [includeCapital, setIncludeCapital] = useState(false);
+    const [includeUppercase, setIncludeUppercase] = useState(false);
     const [includeLowercase, setIncludeLowercase] = useState(false);
     const [includeNumber, setIncludeNumber] = useState(false);
     const [includeSpecialChar, setIncludeSpecialChar] = useState(false);
@@ -29,18 +29,18 @@ const UpdatePasswordPolicyButton = () => {
             return
         }
         const fetchCurrentPolicy = async () => {
-            setLoginErrorMsg('')
+            setSubmissionErrorMsg('')
             try {
                 await axios.get(`${server}/auth/password-policy`).then(resp => {
                     setMinPasswordLength(resp.data.min_password_length)
-                    setIncludeCapital(resp.data.must_include_capital)
+                    setIncludeUppercase(resp.data.must_include_uppercase )
                     setIncludeLowercase(resp.data.must_include_lowercase)
                     setIncludeNumber(resp.data.must_include_number)
                     setIncludeSpecialChar(resp.data.must_include_special_char)
                     setNotInPopular(resp.data.not_in_popular_passwords)
                 });
             } catch (err) {
-                setLoginErrorMsg(`Problems retrieving password policy. Error message: ${getResponseError(err)}.`);
+                setSubmissionErrorMsg(`Problems retrieving password policy. Error message: ${getResponseError(err)}.`);
                 return;
             }
         }
@@ -54,20 +54,18 @@ const UpdatePasswordPolicyButton = () => {
         try {
             await axios.put(`${server}/auth/password-policy`, 
             {'min_password_length': minPasswordLength,
-             'must_include_capital': includeCapital,
+             'must_include_uppercase': includeUppercase,
              'must_include_lowercase': includeLowercase,
              'must_include_number': includeNumber,
              'must_include_special_char': includeSpecialChar,
              'not_in_popular_passwords': notInPopular})
+             setShowDialog(false);
+             setAlertMsg("success:Password policy updated successfully!");
         } catch (err) {
-            // TODO 
-            console.log(err)
-
-            setSubmissionErrorMsg("")
+            setSubmissionErrorMsg(`Couldn't set new password policy. Error message: ${getResponseError(err)}.`);
+            return;
         }  finally {
             setIsSubmitting(false)
-            setShowDialog(false);
-            setAlertMsg("success:Password policy updated successfully!");
         }
     }
 
@@ -110,11 +108,11 @@ const UpdatePasswordPolicyButton = () => {
                                 <input
                                     type="checkbox"
                                     className="form-check-input"
-                                    checked={includeCapital}
-                                    onChange={e => setIncludeCapital(e.target.checked)}
-                                    id="includeCapital"
+                                    checked={includeUppercase}
+                                    onChange={e => setIncludeUppercase(e.target.checked)}
+                                    id="includeUppercase"
                                 />
-                                <label className="form-check-label" htmlFor="includeCapital">Include at least one capital letter?</label>
+                                <label className="form-check-label" htmlFor="includeUppercase">Include at least one uppercase letter?</label>
                             </div>
                             <div className="form-check mt-3">
                                 <input
