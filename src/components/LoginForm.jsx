@@ -7,11 +7,12 @@ import { Navigate, Link } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
 import { useEffect } from "react";
-import { Nav } from "react-bootstrap";
+import { Nav, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Alert from 'react-bootstrap/Alert';
 import OAuth2Login from "./OAuth2Login";
 import { ClipLoader } from "react-spinners";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
+import { Info } from "react-feather";
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
 
@@ -29,6 +30,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [invitationCodeValidated, setInvitationCodeValidated] = useState("");
   const [invitationCodeIdentityProvider, setInvitationCodeIdentityProvider] = useState("");
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
+  const [passwordPolicyHelper, setPasswordPolicyHelper] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state='));
   const [register, setRegister] = useState(showRegistrationForm === "true");
@@ -322,6 +324,48 @@ const LoginForm = ({ showRegistrationForm }) => {
   }, [server]);
 
   useEffect(() => {
+    const fetchPasswordPolicy = async () => {
+      setLoginErrorMsg('')
+      try {
+        const policyResponse = await axios.get(`${server}/auth/password-policy`);
+        const  passwordPolicy = policyResponse?.data
+        let passwordPolicyStringTmp = `The minimum password length is ${passwordPolicy.min_password_length}.`
+        let mustInclude = []
+        passwordPolicy.must_include_uppercase && mustInclude.push('uppercase letter')
+        passwordPolicy.must_include_lowercase && mustInclude.push('lowercase letter')
+        passwordPolicy.must_include_number && mustInclude.push('number')
+        passwordPolicy.must_include_special_char && mustInclude.push('special character')
+
+        if (mustInclude.length === 1) {
+          passwordPolicyStringTmp += ` Must contain at least one ${mustInclude[0]}.`
+        } else if (mustInclude.length > 1) {
+          passwordPolicyStringTmp += ' Must contain at least one '
+          mustInclude.forEach((elem, i) => {
+            if (i < mustInclude.length - 2) {
+              passwordPolicyStringTmp += `${elem}, `
+            } else if (i < mustInclude.length - 1) {
+              passwordPolicyStringTmp += `${elem} `
+            } else {
+              passwordPolicyStringTmp = `and ${elem}.`
+            }
+          })
+        }
+
+        if (passwordPolicy.not_in_popular_passwords) {
+          passwordPolicyStringTmp = ' It is checked against commonly used passwords.'
+        }
+
+        setPasswordPolicyHelper(passwordPolicyStringTmp)
+
+      } catch (err) {
+        setLoginErrorMsg(`Problems retrieving password policy. Error message: ${getResponseError(err)}.`);
+        return;
+      }
+    }
+    fetchPasswordPolicy();
+  }, [server])
+
+  useEffect(() => {
     if (invitationCode.length !== 36) {
       if (invitationCode.length !== 0) {
         setLoginErrorMsg('Invalid invitation code.');
@@ -535,7 +579,14 @@ const LoginForm = ({ showRegistrationForm }) => {
                   invalidFeedback={passwordError}
                   autoComplete="current-password"
                   usePlaceholder={true}
-                  required={true} />}
+                  required={true}
+                  additionalAddons={
+                    register? <OverlayTrigger placement="bottom" 
+                                overlay={<Tooltip id="tooltip">
+                                          {passwordPolicyHelper}
+                                        </Tooltip>}>
+                                <span className="input-group-text"><Info/></span>
+                              </OverlayTrigger>: null} />}
               {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
                 <ShowHidePasswordInput
                   value={confirmPassword}

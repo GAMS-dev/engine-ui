@@ -6,6 +6,7 @@ import InstanceSubmissionForm from "./InstanceSubmissionForm";
 import AuthProviderForm from "./AuthProviderForm.jsx";
 import { ServerInfoContext } from "../ServerInfoContext";
 import LicUpdateButton from "./LicenseUpdateButton";
+import UpdatePasswordPolicyButton from "./UpdatePasswordPolicyButton";
 
 const AdministrationForm = ({ setLicenseExpiration }) => {
     const [serverInfo] = useContext(ServerInfoContext);
@@ -23,6 +24,9 @@ const AdministrationForm = ({ setLicenseExpiration }) => {
                     <div className="btn-group me-2">
                         <LicUpdateButton type="engine" setLicenseExpiration={setLicenseExpiration} />
                         <LicUpdateButton type="system" />
+                    </div>
+                    <div className="mr-2">
+                        <UpdatePasswordPolicyButton/>
                     </div>
                 </div>
             </div>
