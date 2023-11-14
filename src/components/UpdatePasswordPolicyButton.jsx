@@ -12,7 +12,7 @@ const UpdatePasswordPolicyButton = () => {
 
     const [{ server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    
+
     const [showDialog, setShowDialog] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState("");
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -52,7 +52,7 @@ const UpdatePasswordPolicyButton = () => {
         setIsSubmitting(true)
 
         try {
-            await axios.put(`${server}/auth/password-policy`, 
+            await axios.put(`${server}/auth/password-policy`,
             {'min_password_length': minPasswordLength,
              'must_include_uppercase': includeUppercase,
              'must_include_lowercase': includeLowercase,
@@ -95,13 +95,13 @@ const UpdatePasswordPolicyButton = () => {
                                 <label class="form-label" for="minPasswordLength">Minimum password length:</label>
                                 <input
                                     required
-                                    min="8" 
-                                    max="70" 
+                                    min="8"
+                                    max="70"
                                     step="1"
                                     type="number"
                                     value={minPasswordLength}
-                                    onChange={e => setMinPasswordLength(e.target.valueAsNumber)} 
-                                    id="minPasswordLength" 
+                                    onChange={e => setMinPasswordLength(e.target.valueAsNumber)}
+                                    id="minPasswordLength"
                                     className="form-control" />
                             </div>
                             <div className="form-check mt-3">

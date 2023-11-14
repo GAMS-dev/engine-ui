@@ -581,7 +581,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                   usePlaceholder={true}
                   required={true}
                   additionalAddons={
-                    register? <OverlayTrigger placement="bottom" 
+                    register? <OverlayTrigger placement="bottom"
                                 overlay={<Tooltip id="tooltip">
                                           {passwordPolicyHelper}
                                         </Tooltip>}>
