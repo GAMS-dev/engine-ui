@@ -1,0 +1,45 @@
+default:
+  tags:
+    - linux
+
+stages:
+  - prepare
+  - lint
+
+
+build_build_image:
+  services:
+    - docker:24-dind
+  image: docker:24-cli
+  stage: prepare
+  before_script:
+    # this is to be able to pull and push images
+    - mkdir -p $HOME/.docker
+    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+  script:
+    - cd .ci
+    - docker build -t $CI_REGISTRY_IMAGE/buildimage:latest .
+    - docker push $CI_REGISTRY_IMAGE/buildimage:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "push"'
+      when: never
+    - changes:
+      - .ci/Dockerfile
+
+
+lint:
+  image: $CI_REGISTRY_IMAGE/buildimage:latest
+  stage: lint
+  before_script:
+    - npm install
+  script:
+    - pre-commit run --all-files
+    - npm run lint
+  variables:
+    PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
+  cache:
+    - key:
+        files:
+          - package-lock.json
+      paths:
+        - node_modules/

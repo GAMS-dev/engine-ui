@@ -59,7 +59,7 @@ const UserUpdateIdentityProviderForm = () => {
         if (identityProvider.value === "gams_engine" && enginePassword !== enginePasswordConfirm) {
             setSubmissionErrorMsg('Problems trying to update the identity provider.');
             setFormErrors({
-                password_confirm: "The passwords you entered do not match"
+                password_confirm: "The passwords you entered do not match" // pragma: allowlist secret
             });
             return;
         }
