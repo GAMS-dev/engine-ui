@@ -1,71 +1,52 @@
-function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput) {
+function getComputationTimes_(data, calcStartTimeInput, calcEndTimeInput, quotaUnit) {
     const calcStartTime = calcStartTimeInput
     const calcEndTime = calcEndTimeInput
 
     // extract the three different job types
-    const dataJobUsage = data['job_usage'] == null ? [] : data['job_usage'];
-    const dataPoolUsage = data['pool_usage'] == null ? [] : data['pool_usage'];
-    const dataHypercube = data['hypercube_job_usage'] == null ? [] : data['hypercube_job_usage'];
+    const dataJobUsage = data['job_usage'] == null ? [] : JSON.parse(JSON.stringify(data['job_usage']));
+    const dataPoolUsage = data['pool_usage'] == null ? [] : JSON.parse(JSON.stringify(data['pool_usage']));
+    const dataHypercube = data['hypercube_job_usage'] == null ? [] : JSON.parse(JSON.stringify(data['hypercube_job_usage']));
 
     // first extract all the pool infos, to later check if an individual job was part of a pool
-    let poolLabels = dataPoolUsage.map(pool => pool['label']);
-    let poolInstances = dataPoolUsage.map(pool => pool['instance']['label']);
-    let poolOwners = dataPoolUsage.map(pool => pool['owner']);
-
     // only need the idle multiplier from the pools
     // for the jobs use the multiplier from the jop instance
-    let poolMultipliersIdle = dataPoolUsage.map(pool => pool['instance']['multiplier_idle']);
-
-    // contains for every pool a list of the times of every worker
-    // each element of the individual lists is a dictionary
-    let poolTimes = dataPoolUsage.map(pool => pool['times']);
-
-    let commentPool = Array(poolLabels.length).fill('This is the idle pool time. ');
-    let failsPool = Array(poolLabels.length).fill(0);
-    let isIdlePool = Array(poolLabels.length).fill(true);
-
-    // check if workers failed, for this collect all worker_id's for each pool
-    // if there are multiple entries for the same id, only keep the last one 
-    // the number of fails is saved as a comment and as an actual number, 
-    // to later easily compute the total number of fails
-    poolTimes.forEach(function (pool, i) {
-        // extract the worker_id for each timeframe
-        let workers = pool.map(time => time['worker_id']);
-        const workersWithoutDuplicates = [...new Set(workers)];
-        workersWithoutDuplicates.forEach(function (worker) {
-            // need to save count for the comment, because it changes after the duplicates are deleted
-            const count = workers.filter(el => el === worker).length;
-            // if a worker failed set the start time of the last occurence of this worker to the first start time
-            if (count > 1) {
-                // get indices of the same worker
-                let indices = [];
-                for (let idx = 0; idx < workers.length; idx++) {
-                    if (workers[idx] === worker) {
-                        indices.push(idx);
-                    }
-                }
-                // change the start time of the current worker to the start of it's first occurence
-                poolTimes[i][indices[indices.length - 1]].start = poolTimes[i][indices[0]].start;
-                // Now remove all other occurences from poolTimes
-                indices = indices.slice(0, -1);
-                // remove all elements in poolTimes and pool_workers
-                poolTimes[i] = poolTimes[i].filter(function (time, idx) {
-                    return !indices.includes(idx);
-                });
-                workers = workers.filter(function (worker_id, idx) {
-                    return !indices.includes(idx);
-                });
-
-                commentPool[i] = commentPool[i].concat(`${worker} failed ${count - 1} times. `);
-                failsPool[i] = count - 1
-            }
-        });
+    let dataPoolUsageNEW = dataPoolUsage.map(pool => {
+        return {
+            pool_label: pool['label'],
+            instance: pool['instance']['label'],
+            user: pool['owner'],
+            multiplier: pool['instance']['multiplier_idle'],
+            times: pool['times'],
+            fails: 0,
+            included: false,
+            created_at: new Date(pool['created_at']),
+            deleted_at: pool['deleted_at'] == null ? calcEndTime : new Date(pool['deleted_at'])
+        }
     });
 
-    // compute the whole time workers existed on the pool (and didn't fail because those workers are already removed)
-    poolTimes.forEach(function (pool, i) {
-        let totalWorkerTime = 0;
-        pool.forEach(function (times) {
+    // check if workers failed, if so keep the first start time and set the finish time 
+    // to the last occurence of that particular worker
+    // simultaneously keep track of the number of fails
+    dataPoolUsageNEW = dataPoolUsageNEW.map((pool) => {
+        const workerTimes = {};
+        pool['times'].map((workerStats) => {
+            // if a worker_id has already been added to workerTimes, update finish time
+            if (workerTimes.hasOwnProperty(workerStats['worker_id'])) {
+                workerTimes[workerStats['worker_id']]['finish'] = workerStats['finish'];
+                pool.fails += 1;
+            } else {
+                workerTimes[workerStats['worker_id']] = workerStats;
+            }
+            // no return, because times gets overwritten at the end, otherwise it would produce duplicates
+        });
+        pool['times'] = Object.values(workerTimes);
+        return pool;
+    });
+
+    // compute the whole time workers existed on the pool 
+    // (and didn't fail because those workers are already removed)
+    dataPoolUsageNEW = dataPoolUsageNEW.map((pool, i) => {
+        pool['times'] = pool['times'].reduce(function (accumulator, times) {
             let startTime = new Date(times['start']);
             let finishTime = calcEndTime;
             // check if the worker is still running
@@ -74,292 +55,181 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput) {
             }
             else if (dataPoolUsage[i]['deleted_at'] != null) {
                 finishTime = new Date(dataPoolUsage[i]['deleted_at']);
-                commentPool[i] = commentPool[i].concat('There is no finish time, but the job was finished!!');
+                console.log('There is no finish time, but the job was finished!!');
             }
             else {
                 finishTime = calcEndTime;
-                commentPool[i] = commentPool[i].concat(`A worker on ${poolLabels[i]} is still running. `);
+                console.log(`A worker on ${pool['pool_label']} is still running. `);
             }
             // only include the parts of the worker times that are in the given timeframe
             if (startTime >= calcStartTime && finishTime <= calcEndTime) {
-                totalWorkerTime += finishTime - startTime;
-            } else if (calcStartTime <= finishTime && finishTime <= calcEndTime) {
-                totalWorkerTime += finishTime - calcStartTime;
-            } else if (calcStartTime <= startTime && startTime <= calcEndTime) {
-                totalWorkerTime += calcEndTime - startTime;
-            } else if (startTime <= calcStartTime && calcEndTime <= finishTime) {
-                totalWorkerTime += calcEndTime - calcStartTime;
+                return accumulator + (finishTime - startTime);
             }
-        });
+            if (calcStartTime <= finishTime && finishTime <= calcEndTime) {
+                return accumulator + (finishTime - calcStartTime);
+            }
+            if (calcStartTime <= startTime && startTime <= calcEndTime) {
+                return accumulator + (calcEndTime - startTime);
+            }
+            if (startTime <= calcStartTime && calcEndTime <= finishTime) {
+                return accumulator + (calcEndTime - calcStartTime);
+            }
+            return accumulator;
+        }, 0);
+        return pool
+    })
 
-        // if no worker of the pool was in the timeframe the timedelta is zero!
-        poolTimes[i] = totalWorkerTime
+    // if a pool now has no time, it wasn't active during the timeframe
+    dataPoolUsageNEW = dataPoolUsageNEW.filter((pool) => pool['times'] !== 0)
+
+    // extract the necessary job data
+    let dataJobUsageNEW = dataJobUsage.map(job => {
+        return {
+            instance: job['labels']['instance'],
+            user: job['username'],
+            multiplier: job['labels']['multiplier'],
+            times: job['times'],
+            fails: 0,
+            pool_label: null,
+            included: false,
+            start_time: new Date(job['submitted']),
+            token: job['token'],
+            is_hypercube: false
+        }
     });
 
-    // only needed to later exclude pools, that didn't had a worker in the timeframe
-    // if timedelta = 0 this will return False, else set to True 
-    let includedPools = poolTimes.map(item => Boolean(item));
-
-    // collect the instances and the corresponding multipliers
-    let instances = dataJobUsage.map(row => row['labels']['instance']);
-
-    let multipliers = dataJobUsage.map(row => row['labels']['multiplier']);
-    let times = dataJobUsage.map(row => row['times']);
-
-    let users = dataJobUsage.map(row => row['username']);
-
-    // used to later only take the instances for jobs that are in the timeframe
-    let includedItems = Array(dataJobUsage.length).fill(false);
-
-    let comments = Array(dataJobUsage.length).fill('');
-    let fails = Array(dataJobUsage.length).fill(0);
-    let isIdle = Array(dataJobUsage.length).fill(false);
-
-    // extract the hypercube informations an add them to the job list
-    let hypercubeInstances = [];
-    let hypercubeMultipliers = [];
-    let hypercubeTimes = [];
-    let hypercubeUsers = [];
-
-    // go over every hypercube in the data
-    dataHypercube.forEach(function (hypercube) {
+    // Use map to transform each hypercube into an array of job objects
+    // flatten it so its no loner ordered by hypercubes 
+    // this way it can just be conbined with the job list (depth one always is enough here)
+    let dataHypercubeNEW = dataHypercube.flatMap(function (hypercube) {
         // save the label and  mutliplier of the current hypercupe to add them to the job list
         let currentInstance = hypercube['labels']['instance'];
         let currentMultiplier = hypercube['labels']['multiplier'];
         let currentUser = hypercube['username'];
-        // go over every job of each hypercube to collect the times 
-        // and append the instances/multipliers/time list, 
-        // to later just concatenate this with the other job list
-        // this way also the check if its a pool job will be performed
-        hypercube['jobs'].forEach(function (job) {
-            hypercubeInstances.push(currentInstance);
-            hypercubeMultipliers.push(currentMultiplier);
-            hypercubeTimes.push(job['times']);
-            hypercubeUsers.push(currentUser);
+        let currentStartTime = hypercube['submitted']
+        let currentToken = hypercube['token']
+
+        // Map each job to a new object containing the relevant information
+        return hypercube['jobs'].map(function (job) {
+            return {
+                instance: currentInstance,
+                user: currentUser,
+                multiplier: currentMultiplier,
+                times: job['times'],
+                fails: 0,
+                pool_label: null,
+                included: false,
+                start_time: new Date(currentStartTime),
+                token: currentToken,
+                is_hypercube: true
+            };
         });
     });
 
-    const hypercubeIncludedItems = Array(hypercubeInstances.length).fill(false);
-    const hypercubeComments = Array(hypercubeInstances.length).fill('This job was part of a hypercube. ');
-    const hypercubeFails = Array(hypercubeInstances.length).fill(0);
-    const hypercubeIsIdle = Array(hypercubeInstances.length).fill(false);
-
-    instances = instances.concat(hypercubeInstances);
-    multipliers = multipliers.concat(hypercubeMultipliers);
-    times = times.concat(hypercubeTimes);
-    includedItems = includedItems.concat(hypercubeIncludedItems);
-    comments = comments.concat(hypercubeComments);
-    fails = fails.concat(hypercubeFails);
-    users = users.concat(hypercubeUsers);
-    isIdle = isIdle.concat(hypercubeIsIdle);
-
-    // will also report the corresponding given pool_label
-    // is None for jobs not run on a pool
-    const jobPoolLabels = Array(instances.length).fill(null);
-
-    // needed to later check to which pool a pool_job corresponds
-    let jobStartTimes = dataJobUsage.map(job => new Date(job['submitted']));
-    const jobHypercubeStartTimes = dataHypercube.map(job => new Date(job['submitted']));
-    jobStartTimes = jobStartTimes.concat(jobHypercubeStartTimes);
+    dataJobUsageNEW = dataJobUsageNEW.concat(dataHypercubeNEW)
 
     // check which jobs are in the timeframe and compute their run time
-    times.forEach(function (time, i) {
-        if (time.length !== 0) {
+    dataJobUsageNEW = dataJobUsageNEW.map((job, i) => {
+        if (job['times'].length !== 0) {
+            job['fails'] += job['times'].length - 1;
             // always take the last element, so it also works if the job crashed before
-            let startTime = new Date(time[time.length - 1]['start']);
+            let startTime = new Date(job['times'][job['times'].length - 1]['start']);
             // check if the job is still running
             let finishTime = calcEndTime;
-            if (time[time.length - 1]['finish']) {
-                finishTime = new Date(time[time.length - 1]['finish']);
+            if (job['times'][job['times'].length - 1]['finish']) {
+                finishTime = new Date(job['times'][job['times'].length - 1]['finish']);
             }
             else if (dataJobUsage[i]['finished'] != null) {
                 finishTime = new Date(dataJobUsage[i]['finished'])
-                comments[i] = comments[i].concat('There is no finish time, but the job was finished!!')
+                console.log('There is no finish time, but the job was finished!!')
             }
             else {
                 finishTime = calcEndTime;
-                comments[i] = comments[i].concat('The job is still running. ');
+                console.log('The job is still running. ');
             }
+
             // check if the whole job was run in the timeframe
             if (startTime >= calcStartTime && finishTime <= calcEndTime) {
-                times[i] = finishTime - startTime;
-                includedItems[i] = true;
+                job['included'] = true;
+                job['times'] = finishTime - startTime;
             }
             // or if it finished during the timeframe
             else if (calcStartTime <= finishTime && finishTime <= calcEndTime) {
-                times[i] = finishTime - calcStartTime;
-                includedItems[i] = true;
-                comments[i] += 'Finished in the given timeframe, but started earlier. ';
+                job['included'] = true;
+                job['times'] = finishTime - calcStartTime;
             }
             // or finally if it started during the timeframe
             else if (calcStartTime <= startTime && startTime <= calcEndTime) {
-                times[i] = calcEndTime - startTime;
-                includedItems[i] = true;
-                comments[i] += 'Started in the given timeframe, but is not finished yet. ';
+                job['included'] = true;
+                job['times'] = calcEndTime - startTime;
             }
             // or if it ran over the whole timeframe
             else if (startTime <= calcStartTime && calcEndTime <= finishTime) {
-                times[i] = calcEndTime - calcStartTime;
-                includedItems[i] = true;
-                comments[i] += 'Job ran longer than the timeframe. ';
+                job['included'] = true;
+                job['times'] = calcEndTime - calcStartTime;
             }
-            // no else case needed! All other times get discarded
             // add debugg option:
             // if debug=True this case should not happen, because no job outside of the timeframe
             // should be in the json object
             else {
                 console.error('Found job outside of the timeframe, even though this should not happen!');
-            }
-
-            fails[i] = time.length - 1;
-            if (time.length > 1) {
-                comments[i] = comments[i].concat(`The job failed ${time.length - 1} times. `);
+                job['times'] = 0
             }
         }
+        return job
     });
 
-    // get existing times for the pools
-    const poolCreated = dataPoolUsage.map(pool => new Date(pool['created_at']));
-    const poolDeleted = dataPoolUsage.map(pool => pool['deleted_at']);
-
-    poolDeleted.forEach(function (time, i) {
-        if (time == null) {
-            poolDeleted[i] = calcEndTime;
-        }
-        else {
-            poolDeleted[i] = new Date(poolDeleted[i]);
-        }
-    });
-
-    // substract the jobs corresponding to a pool from the poolTimes to get the idle time
-    times.forEach(function (time, i) {
-        if (includedItems[i]) {
-            if (poolLabels.includes(instances[i])) {
-                // get indices of the pool_label
-                let indices = [];
-                for (let idx = 0; idx < poolLabels.length; idx++) {
-                    if (instances[i] === poolLabels[idx]) {
-                        indices.push(idx);
-                    }
-                }
-                indices.forEach(function (index) {
-                    // find the corresponding pool, if no pool fits the job is processed as a normal job
-                    if (poolCreated[index] <= jobStartTimes[i] && jobStartTimes[i] <= poolDeleted[index]) {
-                        poolTimes[index] -= times[i];
-                        comments[i] += 'This job ran on a pool. ';
-                        jobPoolLabels[i] = instances[i];
-                        instances[i] = poolInstances[index];
-                    }
-                });
+    // substract the jobs corresponding to a pool (depends on label and timing)
+    // so that the totalWorkerTime is substracted by the actual run time
+    // and only the idle time is left
+    dataJobUsageNEW = dataJobUsageNEW.map((job) => {
+        if (job['included']) {
+            // find the corresponding pool, if no pool fits the job is processed as a normal job
+            const index = dataPoolUsageNEW.findIndex(pool => pool['pool_label'] === job['instance'] &&
+                (pool['created_at'] <= job['start_time'] && job['start_time'] <= pool['deleted_at']))
+            if (index !== -1) {
+                dataPoolUsageNEW[index]['times'] -= job['times'];
+                job['pool_label'] = job['instance'];
+                job['instance'] = dataPoolUsageNEW[index]['instance']
             }
         }
+        return job
     });
 
-    // add the pool times at the end of the data
-    instances = instances.concat(poolInstances);
-    poolInstances = jobPoolLabels.concat(poolLabels);
-    multipliers = multipliers.concat(poolMultipliersIdle);
-    times = times.concat(poolTimes);
-    comments = comments.concat(commentPool);
-    fails = fails.concat(failsPool);
-    includedItems = includedItems.concat(includedPools);
-    users = users.concat(poolOwners);
-    isIdle = isIdle.concat(isIdlePool);
+    // pools are already filtered
+    dataJobUsageNEW = dataJobUsageNEW.filter((job) => job['included'])
 
-    // only take the elements corresponding to jobs/pools in the timeframe
-    instances = instances.filter((_, i) => includedItems[i]);
-    poolInstances = poolInstances.filter((_, i) => includedItems[i]);
-    multipliers = multipliers.filter((_, i) => includedItems[i]);
-    times = times.filter((_, i) => includedItems[i]);
-    comments = comments.filter((_, i) => includedItems[i]);
-    fails = fails.filter((_, i) => includedItems[i]);
-    users = users.filter((_, i) => includedItems[i]);
-    isIdle = isIdle.filter((_, i) => includedItems[i]);
-
-    const calcTimes = {
-        'users': users,
-        'instances': instances,
-        'pool_labels': poolInstances,
-        'multipliers': multipliers,
-        'times': times,
-        'comments': comments,
-        'fails': fails,
-        'is_idle': isIdle
-    }
-
-    // split into jobs and idle pool time
-    let calcTimesJobs = {
-        'users': [],
-        'instances': [],
-        'pool_labels': [],
-        'multipliers': [],
-        'times': [],
-        'comments': [],
-        'fails': []
-    }
-
-    let calcTimesPools = {
-        'users': [],
-        'instances': [],
-        'pool_labels': [],
-        'multipliers': [],
-        'times': [],
-        'comments': [],
-        'fails': []
-    }
-
-    calcTimes.is_idle.forEach(function (elem, i) {
-        if (!elem) {
-            calcTimesJobs.users.push(calcTimes.users[i])
-            calcTimesJobs.instances.push(calcTimes.instances[i])
-            calcTimesJobs.pool_labels.push(calcTimes.pool_labels[i])
-            calcTimesJobs.multipliers.push(calcTimes.multipliers[i])
-            calcTimesJobs.times.push(calcTimes.times[i])
-            calcTimesJobs.comments.push(calcTimes.comments[i])
-            calcTimesJobs.fails.push(calcTimes.fails[i])
-        }
-        else {
-            calcTimesPools.users.push(calcTimes.users[i])
-            calcTimesPools.instances.push(calcTimes.instances[i])
-            calcTimesPools.pool_labels.push(calcTimes.pool_labels[i])
-            calcTimesPools.multipliers.push(calcTimes.multipliers[i])
-            calcTimesPools.times.push(calcTimes.times[i])
-            calcTimesPools.comments.push(calcTimes.comments[i])
-            calcTimesPools.fails.push(calcTimes.fails[i])
-        }
+    dataJobUsageNEW = dataJobUsageNEW.map((job, i) => {
+        job['unique_id'] = `el_${i}`;
+        job['jobs'] = '1';
+        job['cost'] = (job['times'] * job['multiplier']) / 1000;
+        if (quotaUnit === 'multh') job['cost'] = job['cost'] / 3600;
+        return job
     })
 
-    const uniqueId = Array.from(Array(calcTimes.instances.length).keys()).map(el => `el_${el}`);
+    dataPoolUsageNEW = dataPoolUsageNEW.map((pool, i) => {
+        pool['unique_id'] = `el_${i}`;
+        pool['jobs'] = '1';
+        pool['cost'] = pool['times'] * pool['multiplier'] / 1000;
+        if (quotaUnit === 'multh') pool['cost'] = pool['cost'] / 3600;
+        return pool
+    })
 
-    let ungroupedDataJobs = []
-    let ungroupedDataPools = []
+    const numberUsers = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.user))].length;
+    const numberInstances = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.instance))].length;
 
-    calcTimesJobs['instances'].forEach(function (elem, i) {
-        ungroupedDataJobs.push({
-            uniqueId: uniqueId[i], user: calcTimesJobs.users[i], instances: elem,
-            pool_labels: calcTimesJobs.pool_labels[i], multipliers: calcTimesJobs.multipliers[i].toString(), times: calcTimesJobs.times[i],
-            comments: calcTimesJobs.comments[i], fails: calcTimesJobs.fails[i], jobs: '1'
-        })
-    });
-
-
-
-    calcTimesPools['instances'].forEach(function (elem, i) {
-        ungroupedDataPools.push({
-            unique_id: uniqueId[i], user: calcTimesPools.users[i], instances: elem,
-            pool_labels: calcTimesPools.pool_labels[i], multipliers: calcTimesPools.multipliers[i].toString(), times: calcTimesPools.times[i],
-            comments: calcTimesPools.comments[i], fails: calcTimesPools.fails[i], jobs: '1'
-        })
-    });
+    let numberPools = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.pool_label))]
+    numberPools = numberPools.filter(elem => elem !== null).length
 
     const result = {
-        'data_jobs': ungroupedDataJobs,
-        'data_pools': ungroupedDataPools
+        'data_jobs': dataJobUsageNEW,
+        'data_pools': dataPoolUsageNEW,
+        'num_users': numberUsers,
+        'num_instances': numberInstances,
+        'num_pools': numberPools
     }
 
-    return (
-        result
-    )
+    return (result)
 }
 
 export default getComputationTimes
