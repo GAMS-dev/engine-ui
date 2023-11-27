@@ -1,19 +1,15 @@
 // not here, no default set
-import { testData } from './data.jsx';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, ArcElement, Legend, Tooltip } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 // can rename, because it takes the default export
-import computeTimes from './CalculateQuota_new.js'
+import computeTimes from './calculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select';
 import { Link } from "react-router-dom";
 
-
-
 ChartJS.register(ArcElement, Tooltip, Legend);
-
 
 const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   /*
@@ -30,6 +26,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   //   const calcEndTime = new Date("2023-03-31T17:10:15.000000+00:00");
 
   const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
+
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState(dataTmp.data_jobs);
   const [ungroupedDataPools, setUngroupedDataPools] = useState(dataTmp.data_pools);
   const [numUser, setNumUser] = useState(dataTmp.num_users);
@@ -37,6 +34,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   const [numPools, setNumPools] = useState(dataTmp.num_pools);
   const [numCharts, setNumCharts] = useState(dataTmp.num_pools);
 
+  // if testData, calcStartDate, calcEndTime, quotaUnit changes:
   useEffect(() => {
     const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
     setUngroupedDataJobs(dataTmp.data_jobs)
@@ -82,6 +80,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     cost = labelTimePairs.map(pair => pair.cost);
 
     const cutOff = 20;
+
     if (labels.length > cutOff) {
       setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed. `)
       labels = labels.slice(0, cutOff);
@@ -109,15 +108,9 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     }
   }
 
-  const displayFieldUngrouped = useRef([
-    // {
-    //   field: "unique_id",
-    //   column: "id",
-    //   sorter: "alphabetical",
-    //   displayer: String
-    // },
+  const displayFieldJobsUngrouped = useRef([
     {
-      field: "user, unique_id",
+      field: "user",
       column: "User",
       sorter: "alphabetical",
       displayer: (user, _) => user
@@ -149,7 +142,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       field: "fails",
       column: "Number Crashes",
       sorter: "numerical",
-      displayer: Number
+      displayer: (fails) => fails
     },
     {
       field: "jobs",
@@ -177,25 +170,62 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     }
   ])
 
-  function swaptDisplayFieldPool(field) {
-    let fieldTmp = [...field];
+    const displayFieldPoolsUngrouped = useRef([
+    {
+      field: "user",
+      column: "User",
+      sorter: "alphabetical",
+      displayer: (user, _) => user
+    },
+    {
+      field: "pool_label",
+      column: "Pool Label",
+      sorter: "alphabetical",
+      displayer: (pool_label) => pool_label == null ? '-' : pool_label
+    },
+    {
+      field: "instance",
+      column: "Instance",
+      sorter: "alphabetical",
+      displayer: String
+    },
+    {
+      field: "fails",
+      column: "Number Crashes",
+      sorter: "numerical",
+      displayer: (fails) => fails
+    },
+    {
+      field: "jobs",
+      column: "Number Pools",
+      sorter: "alphabetical",
+      displayer: String
+    },
+    {
+      field: "times",
+      column: "Solve Time",
+      sorter: "numerical",
+      displayer: formatTime
+    },
+    {
+      field: "multiplier",
+      column: "Multiplier",
+      sorter: "numerical",
+      displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
+    },
+    {
+      field: "cost",
+      column: quotaUnit,
+      sorter: "numerical",
+      displayer: (cost) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(cost)
+    }
+  ])
 
-    const idx1 = fieldTmp.findIndex(item => item.field === 'pool_label');
-    const idx2 = fieldTmp.findIndex(item => item.field === 'instance');
 
+  const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldJobsUngrouped.current);
+  const [displayFieldsPools, setDisplayFieldsPools] = useState(displayFieldPoolsUngrouped.current);
 
-    const tmp = fieldTmp[idx1];
-    fieldTmp[idx1] = fieldTmp[idx2];
-    fieldTmp[idx2] = tmp;
-
-    return fieldTmp
-  }
-
-
-  const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldUngrouped.current);
-  const [displayFieldsPools, setDisplayFieldsPools] = useState(displayFieldUngrouped.current);
-
-  const availableAggregateTypes = [{ value: '_', label: '_' }, { value: "username", label: 'User' }, { value: "instance", label: 'Instance' }, { value: "pool_label", label: 'Pool_label' }]
+  const availableAggregateTypes = [{ value: '_', label: '_' }, { value: "username", label: 'User' }, { value: "instance", label: 'Instance' }, { value: "pool_label", label: 'Pool Label' }]
 
   const [selectedAggregateType, setSelectedAggregateType] = useState('_')
   const [totalUsage, setTotalUsage] = useState(0);
@@ -209,9 +239,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
 
   useEffect(() => {
     if (selectedAggregateType === '_') {
-      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['jobs'].includes(el.field))
-      let displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['jobs', 'token,is_hypercube'].includes(el.field))
-      displayFieldsTmpPool = swaptDisplayFieldPool(displayFieldsTmpPool)
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['jobs'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['jobs'].includes(el.field))
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
@@ -220,8 +249,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'username') {
-      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier'].includes(el.field))
       setTableDataJobs(GroupByUser(ungroupedDataJobs))
       setTableDataPools(GroupByUser(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
@@ -230,8 +259,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'instance') {
-      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['user, unique_id', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['user, unique_id', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier'].includes(el.field))
       setTableDataJobs(GroupByInstance(ungroupedDataJobs))
       setTableDataPools(GroupByInstance(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
@@ -240,8 +269,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'pool_label') {
-      const displayFieldsTmpJob = displayFieldUngrouped.current.filter(el => !['instance', 'user, unique_id', 'multiplier', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldUngrouped.current.filter(el => !['instance', 'user, unique_id', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'user', 'multiplier'].includes(el.field))
       setTableDataJobs(GroupByPoolLabel(ungroupedDataJobs))
       setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
       let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
@@ -250,9 +279,8 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     }
-
-
-  }, [quotaUnit, selectedAggregateType, ungroupedDataJobs, ungroupedDataPools, displayFieldUngrouped])
+    
+  }, [quotaUnit, selectedAggregateType, ungroupedDataJobs, ungroupedDataPools, displayFieldJobsUngrouped, displayFieldPoolsUngrouped, totalUsage])
 
   useEffect(() => {
     setTruncateWarning('')
@@ -328,7 +356,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
             noDataMsg="No Usage data found"
             displayFields={displayFieldsJobs}
             isLoading={false}
-            idFieldName={'token'} />
+            idFieldName={'unique_id'} />
           <h3>Idle Pool Times</h3>
           <Table data={tableDataPools}
             noDataMsg="No Usage data found"
@@ -367,27 +395,30 @@ function GroupByUser(ungroupedData) {
 
   let setOfAllUsers = [...new Set(allUsers)];
 
-  let jobsPerUser = Array(setOfAllUsers.length).fill(0);
-  let failsPerUser = Array(setOfAllUsers.length).fill(0);
-  let timesPerUser = Array(setOfAllUsers.length).fill(0);
-  let costPerUser = Array(setOfAllUsers.length).fill(0);
+  let groupedUserData = setOfAllUsers.map(user => {
+    let userJobs = ungroupedData.filter(elem => elem.user === user)
+    userJobs = userJobs.reduce((acc) => acc + 1, 0);
 
-  allUsers.forEach(function (user, i) {
-    jobsPerUser[setOfAllUsers.indexOf(user)] += 1
-    failsPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].fails
-    timesPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].times
-    costPerUser[setOfAllUsers.indexOf(user)] += ungroupedData[i].cost
-  });
+    let userFails = ungroupedData.filter(elem => elem.user === user)
+    userFails = userFails.reduce((acc, elem) => acc + elem.fails, 0);
 
-  let groupedUserData = []
+    let userTimes = ungroupedData.filter(elem => elem.user === user)
+    userTimes = userTimes.reduce((acc, elem) => acc + elem.times, 0);
 
-  // when grouped by user: 'user', 'pool_label' and 'multiplier' can't be shown anymore
-  setOfAllUsers.forEach(function (elem, i) {
-    groupedUserData.push({
-      unique_id: ungroupedData[i].unique_id, user: elem,
-      times: timesPerUser[i], fails: failsPerUser[i], jobs: jobsPerUser[i],
-      cost: costPerUser[i]
-    })
+    let userCost = ungroupedData.filter(elem => elem.user === user)
+    userCost = userCost.reduce((acc, elem) => acc + elem.cost, 0);
+
+    // Find the first matching element to get 'unique_id'
+    let firstMatchingElem = ungroupedData.find(elem => elem.user === user);
+
+    return {
+      unique_id: firstMatchingElem.unique_id,
+      user: user,
+      times: userTimes,
+      fails: userFails,
+      jobs: userJobs,
+      cost: userCost
+    };
   });
 
   return groupedUserData
@@ -399,27 +430,30 @@ function GroupByInstance(ungroupedData) {
 
   let setOfAllInstances = [...new Set(allInstances)];
 
-  let jobsPerInstances = Array(setOfAllInstances.length).fill(0);
-  let failsPerInstances = Array(setOfAllInstances.length).fill(0);
-  let timesPerInstances = Array(setOfAllInstances.length).fill(0);
-  let costPerInstances = Array(setOfAllInstances.length).fill(0);
+  let groupedInstanceData = setOfAllInstances.map(instance => {
+    let instanceJobs = ungroupedData.filter(elem => elem.instance === instance)
+    instanceJobs = instanceJobs.reduce((acc) => acc + 1, 0);
 
-  allInstances.forEach(function (instance, i) {
-    jobsPerInstances[setOfAllInstances.indexOf(instance)] += 1
-    failsPerInstances[setOfAllInstances.indexOf(instance)] += ungroupedData[i].fails
-    timesPerInstances[setOfAllInstances.indexOf(instance)] += ungroupedData[i].times
-    costPerInstances[setOfAllInstances.indexOf(instance)] += ungroupedData[i].cost
-  });
+    let instanceFails = ungroupedData.filter(elem => elem.instance === instance)
+    instanceFails = instanceFails.reduce((acc, elem) => acc + elem.fails, 0);
 
-  let groupedInstanceData = []
+    let instanceTimes = ungroupedData.filter(elem => elem.instance === instance)
+    instanceTimes = instanceTimes.reduce((acc, elem) => acc + elem.times, 0);
 
-  // when grouped by user: 'user', 'pool_label' and 'multiplier' can't be shown anymore
-  setOfAllInstances.forEach(function (elem, i) {
-    groupedInstanceData.push({
-      unique_id: ungroupedData[i].unique_id, instance: elem,
-      times: timesPerInstances[i], fails: failsPerInstances[i], jobs: jobsPerInstances[i],
-      cost: costPerInstances[i]
-    })
+    let instanceCost = ungroupedData.filter(elem => elem.instance === instance)
+    instanceCost = instanceCost.reduce((acc, elem) => acc + elem.cost, 0);
+
+    // Find the first matching element to get 'unique_id'
+    let firstMatchingElem = ungroupedData.find(elem => elem.instance === instance);
+
+    return {
+      unique_id: firstMatchingElem.unique_id,
+      instance: instance,
+      times: instanceTimes,
+      fails: instanceFails,
+      jobs: instanceJobs,
+      cost: instanceCost
+    };
   });
 
   return groupedInstanceData
@@ -430,33 +464,35 @@ function GroupByPoolLabel(ungroupedData) {
   let allPoolLabel = ungroupedData.map(elem => elem.pool_label);
   allPoolLabel = allPoolLabel.filter(elem => elem !== null)
 
-  let setOfAllPoolLabel = [...new Set(allPoolLabel)];
+  let setOfAllPoolLabels = [...new Set(allPoolLabel)];
 
-  let jobsPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
-  let failsPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
-  let timesPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
-  let costPerPoolLabel = Array(setOfAllPoolLabel.length).fill(0);
+  let groupedPoolData = setOfAllPoolLabels.map(pool_label => {
+    let poolJobs = ungroupedData.filter(elem => elem.pool_label === pool_label)
+    poolJobs = poolJobs.reduce((acc) => acc + 1, 0);
 
-  allPoolLabel.forEach(function (label, i) {
-    jobsPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += 1
-    failsPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += ungroupedData[i].fails
-    timesPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += ungroupedData[i].times
-    costPerPoolLabel[setOfAllPoolLabel.indexOf(label)] += ungroupedData[i].cost
+    let poolFails = ungroupedData.filter(elem => elem.pool_label === pool_label)
+    poolFails = poolFails.reduce((acc, elem) => acc + elem.fails, 0);
+
+    let poolTimes = ungroupedData.filter(elem => elem.pool_label === pool_label)
+    poolTimes = poolTimes.reduce((acc, elem) => acc + elem.times, 0);
+
+    let poolCost = ungroupedData.filter(elem => elem.pool_label === pool_label)
+    poolCost = poolCost.reduce((acc, elem) => acc + elem.cost, 0);
+
+    // Find the first matching element to get 'unique_id'
+    let firstMatchingElem = ungroupedData.find(elem => elem.pool_label === pool_label);
+
+    return {
+      unique_id: firstMatchingElem.unique_id,
+      pool_label: pool_label,
+      times: poolTimes,
+      fails: poolFails,
+      jobs: poolJobs,
+      cost: poolCost
+    };
   });
 
-  let groupedInstanceData = []
-
-  // when grouped by user: 'user', 'pool_label' and 'multiplier' can't be shown anymore
-  setOfAllPoolLabel.forEach(function (elem, i) {
-    groupedInstanceData.push({
-      unique_id: ungroupedData[i].unique_id,
-      pool_label: elem, times: timesPerPoolLabel[i],
-      fails: failsPerPoolLabel[i], jobs: jobsPerPoolLabel[i],
-      cost: costPerPoolLabel[i]
-    })
-  });
-
-  return groupedInstanceData
+  return groupedPoolData
 }
 
 export default Quotas;

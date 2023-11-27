@@ -1,4 +1,6 @@
-function getComputationTimes_(data, calcStartTimeInput, calcEndTimeInput, quotaUnit) {
+function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUnit) {
+    const debug = false
+
     const calcStartTime = calcStartTimeInput
     const calcEndTime = calcEndTimeInput
 
@@ -55,11 +57,11 @@ function getComputationTimes_(data, calcStartTimeInput, calcEndTimeInput, quotaU
             }
             else if (dataPoolUsage[i]['deleted_at'] != null) {
                 finishTime = new Date(dataPoolUsage[i]['deleted_at']);
-                console.log('There is no finish time, but the job was finished!!');
+                if (debug) console.log('There is no finish time, but the job was finished!!');
             }
             else {
                 finishTime = calcEndTime;
-                console.log(`A worker on ${pool['pool_label']} is still running. `);
+                if (debug) console.log(`A worker on ${pool['pool_label']} is still running. `);
             }
             // only include the parts of the worker times that are in the given timeframe
             if (startTime >= calcStartTime && finishTime <= calcEndTime) {
@@ -141,11 +143,11 @@ function getComputationTimes_(data, calcStartTimeInput, calcEndTimeInput, quotaU
             }
             else if (dataJobUsage[i]['finished'] != null) {
                 finishTime = new Date(dataJobUsage[i]['finished'])
-                console.log('There is no finish time, but the job was finished!!')
+                if (debug) console.log('There is no finish time, but the job was finished!!')
             }
             else {
                 finishTime = calcEndTime;
-                console.log('The job is still running. ');
+                if (debug) console.log('The job is still running. ');
             }
 
             // check if the whole job was run in the timeframe
@@ -172,7 +174,7 @@ function getComputationTimes_(data, calcStartTimeInput, calcEndTimeInput, quotaU
             // if debug=True this case should not happen, because no job outside of the timeframe
             // should be in the json object
             else {
-                console.error('Found job outside of the timeframe, even though this should not happen!');
+                if (debug) console.error('Found job outside of the timeframe, even though this should not happen!');
                 job['times'] = 0
             }
         }
