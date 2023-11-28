@@ -21,6 +21,7 @@ const Jobs = () => {
   const [currentPageJobs, setCurrentPageJobs] = useState(1);
   const [sortedColJobs, setSortedColJobs] = useState("submitted_at");
   const [sortAscJobs, setSortAscJobs] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [jobData, setJobData] = useState([]);
   const [totalHcJobs, setTotalHcJobs] = useState(0);
   const [currentPageHcJobs, setCurrentPageHcJobs] = useState(1);
@@ -99,7 +100,7 @@ const Jobs = () => {
         .get(server + `/jobs/`, {
           params: {
             everyone: true,
-            per_page: 10,
+            per_page: rowsPerPage,
             page: currentPageJobs,
             order_by: sortedColJobs,
             order_asc: sortAscJobs,
@@ -121,7 +122,7 @@ const Jobs = () => {
         .get(server + `/hypercube/`, {
           params: {
             everyone: true,
-            per_page: 10,
+            per_page: rowsPerPage,
             page: currentPageHcJobs,
             order_by: sortedColHcJobs,
             order_asc: sortAscHcJobs,
@@ -141,7 +142,7 @@ const Jobs = () => {
     }
   }, [jwt, server, isInviter, filterActive, refresh, setAlertMsg,
     currentPageJobs, currentPageHcJobs, sortedColJobs, sortedColHcJobs, sortAscJobs,
-    sortAscHcJobs, tabSelected, displayFieldKeys]);
+    sortAscHcJobs, rowsPerPage, tabSelected, displayFieldKeys]);
 
   //fetch status codes
   useEffect(() => {
@@ -232,8 +233,9 @@ const Jobs = () => {
             sortedCol={sortedColJobs}
             total={totalJobs}
             sortedAsc={sortAscJobs}
+            rowsPerPage={rowsPerPage}
             resetPageNumber={resetPageNumber}
-            onChange={(currentPage, sortedCol, sortAsc) => {
+            onChange={(currentPage, sortedCol, sortAsc, rowsPerPage) => {
               if (resetPageNumber === true) {
                 setResetPageNumber(false);
                 if (currentPage !== 0) {
@@ -244,6 +246,7 @@ const Jobs = () => {
               setCurrentPageJobs(currentPage + 1)
               setSortedColJobs(sortedCol)
               setSortAscJobs(sortAsc)
+              setRowsPerPage(rowsPerPage)
             }}
           />
         </Tab>
@@ -257,8 +260,9 @@ const Jobs = () => {
             sortedCol={sortedColHcJobs}
             total={totalHcJobs}
             sortedAsc={sortAscHcJobs}
+            rowsPerPage={rowsPerPage}
             resetPageNumber={resetPageNumber}
-            onChange={(currentPage, sortedCol, sortAsc) => {
+            onChange={(currentPage, sortedCol, sortAsc, rowsPerPage) => {
               if (resetPageNumber === true) {
                 setResetPageNumber(false);
                 if (currentPage !== 0) {
@@ -269,6 +273,7 @@ const Jobs = () => {
               setCurrentPageHcJobs(currentPage + 1)
               setSortedColHcJobs(sortedCol)
               setSortAscHcJobs(sortAsc)
+              setRowsPerPage(rowsPerPage)
             }}
           />
         </Tab>

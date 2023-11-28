@@ -29,6 +29,7 @@ const Cleanup = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortedCol, setSortedCol] = useState("upload_date");
     const [sortAsc, setSortAsc] = useState(false);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -116,7 +117,7 @@ const Cleanup = () => {
         axios
             .get(`${server}/cleanup/results`, {
                 params: {
-                    per_page: 10, page: currentPage,
+                    per_page: rowsPerPage, page: currentPage,
                     order_by: sortedCol, order_asc: sortAsc
                 },
                 headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
@@ -141,7 +142,7 @@ const Cleanup = () => {
                 setAlertMsg(`Problems fetching cleanup information. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
-    }, [jwt, server, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
+    }, [jwt, server, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc, rowsPerPage]);
 
     const handleCloseDeleteConfirmDialog = () => {
         setSubmissionErrorMsg("");
@@ -254,11 +255,13 @@ const Cleanup = () => {
                 noDataMsg="No Datasets found"
                 displayFields={displayFields}
                 sortedAsc={sortAsc}
+                rowsPerPage={rowsPerPage}
                 total={total}
-                onChange={(currentPage, sortedCol, sortAsc) => {
+                onChange={(currentPage, sortedCol, sortAsc, rowsPerPage) => {
                     setCurrentPage(currentPage + 1)
                     setSortedCol(sortedCol)
                     setSortAsc(sortAsc)
+                    setRowsPerPage(rowsPerPage)
                 }}
                 isLoading={isLoading}
                 sortedCol={sortedCol}
