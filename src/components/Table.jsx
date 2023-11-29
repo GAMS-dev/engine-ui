@@ -221,69 +221,72 @@ const Table = props => {
           }
         </tbody>
       </table>
-      <small>{currentPage*rowsPerPage+1}-{Math.min((currentPage+1)*rowsPerPage, noRows)} of {noRows}</small>
-      <Pagination>
-        <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
-        <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
-        {[...Array(noPages).keys()].map(i => {
-          const pageDistance = (i === 0 || i === (noPages - 1)) ? 0 :
-            Math.abs(currentPage - i);
-          if (pageDistance === 2) {
-            return <Pagination.Ellipsis key={'pe_' + i} disabled={true} />
-          } else if (pageDistance > 1) {
-            return undefined
-          }
-          return <Pagination.Item key={'p_' + i} active={currentPage === i} onClick={updateCurrentPage}>
-            {++i}
-          </Pagination.Item>
-        })}
-        <Pagination.Next disabled={currentPage === (noPages - 1)} onClick={gotoNextPage} />
-        <Pagination.Last disabled={currentPage === (noPages - 1)} onClick={gotoLastPage} />
-        {noRows > rowsPerPage * 4 &&
-          <InputGroup className="ms-3" style={{ width: '150px' }}>
-            <FormControl
-              placeholder="Page"
-              aria-label="Page"
-              aria-describedby="basic-addon2"
-              isInvalid={invalidPageNumber}
-              onKeyPress={(e) => {
-                if (e.code === "Enter") {
-                  changeToPage();
-                }
-              }}
-              onChange={(e) => {
-                const page = parseInt(e.target.value);
-                if (isNaN(page) || page < 1 || page > noPages) {
-                  setInvalidPageNumber(true);
-                  return;
-                }
-                setGoToPage(page);
-                setInvalidPageNumber(false);
-              }}
-            />
-            <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
-          </InputGroup>}
-          <li>
-          <Form.Group controlId={`table${getRandomInt(100000)}_rpp`} className="d-flex ms-3 text-nowrap pt-1">
-            <Form.Label>Rows per page</Form.Label>
-            <Form.Select
-              size="sm"
-              className="ms-1"
-              onChange={e => {
-                const newNoRows = parseInt(e.target.value, 10);
-                setRowsPerPage(newNoRows)
-                setNoPages(Math.ceil(noRows / newNoRows))
-              }}
-              value={rowsPerPage.toString()}>
-              {noRowsPerPageOptions.map((rpp, idx) =>
-                      <option
-                        key={`rpp_${idx}`}
-                        value={rpp.name}>
-                      {rpp.label}</option>)}
-            </Form.Select>
-          </Form.Group>
-        </li>
-      </Pagination>
+      {noRows > 0 &&
+        <>
+          <small>{currentPage*rowsPerPage+1}-{Math.min((currentPage+1)*rowsPerPage, noRows)} of {noRows}</small>
+          <Pagination>
+            <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
+            <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
+            {[...Array(noPages).keys()].map(i => {
+              const pageDistance = (i === 0 || i === (noPages - 1)) ? 0 :
+                Math.abs(currentPage - i);
+              if (pageDistance === 2) {
+                return <Pagination.Ellipsis key={'pe_' + i} disabled={true} />
+              } else if (pageDistance > 1) {
+                return undefined
+              }
+              return <Pagination.Item key={'p_' + i} active={currentPage === i} onClick={updateCurrentPage}>
+                {++i}
+              </Pagination.Item>
+            })}
+            <Pagination.Next disabled={currentPage === (noPages - 1)} onClick={gotoNextPage} />
+            <Pagination.Last disabled={currentPage === (noPages - 1)} onClick={gotoLastPage} />
+            {noRows > rowsPerPage * 4 &&
+              <InputGroup className="ms-3" style={{ width: '150px' }}>
+                <FormControl
+                  placeholder="Page"
+                  aria-label="Page"
+                  aria-describedby="basic-addon2"
+                  isInvalid={invalidPageNumber}
+                  onKeyPress={(e) => {
+                    if (e.code === "Enter") {
+                      changeToPage();
+                    }
+                  }}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value);
+                    if (isNaN(page) || page < 1 || page > noPages) {
+                      setInvalidPageNumber(true);
+                      return;
+                    }
+                    setGoToPage(page);
+                    setInvalidPageNumber(false);
+                  }}
+                />
+                <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
+              </InputGroup>}
+              <li>
+              <Form.Group controlId={`table${getRandomInt(100000)}_rpp`} className="d-flex ms-3 text-nowrap pt-1">
+                <Form.Label>Rows per page</Form.Label>
+                <Form.Select
+                  size="sm"
+                  className="ms-1"
+                  onChange={e => {
+                    const newNoRows = parseInt(e.target.value, 10);
+                    setRowsPerPage(newNoRows)
+                    setNoPages(Math.ceil(noRows / newNoRows))
+                  }}
+                  value={rowsPerPage.toString()}>
+                  {noRowsPerPageOptions.map((rpp, idx) =>
+                          <option
+                            key={`rpp_${idx}`}
+                            value={rpp.name}>
+                          {rpp.label}</option>)}
+                </Form.Select>
+              </Form.Group>
+            </li>
+          </Pagination>
+        </>}
     </>
   );
 };
