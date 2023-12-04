@@ -51,6 +51,7 @@ const Usage = () => {
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [showParallelQuota, setShowParallelQuota] = useState(true);
     const [displayFields] = useState([
         {
             field: "username",
@@ -290,7 +291,7 @@ const Usage = () => {
             if (!(dataDisaggregatedTmp[i].username in chartEvents)) {
                 chartEvents[dataDisaggregatedTmp[i].username] = [];
             }
-            const multiplier = (dataDisaggregatedTmp[i].labels != null && dataDisaggregatedTmp[i].labels.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
+            const multiplier = (showParallelQuota && dataDisaggregatedTmp[i].labels?.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
             if ('times' in dataDisaggregatedTmp[i]) {
                 // normal job
                 chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier));
@@ -365,7 +366,7 @@ const Usage = () => {
         //     setIsLoading(false);
         // });
     }, [jwt, server, refresh, displayFields, setAlertMsg,
-        username, recursive, startDate, endDate, isInviter]);
+        username, recursive, startDate, endDate, isInviter, showParallelQuota]);
 
     return (
         <>
@@ -427,7 +428,7 @@ const Usage = () => {
                                             }} />
                                     </label>
                                 </div>}
-                            <div className="col-sm-6 mb-4">
+                            <div className="col-sm-4 mb-4">
                                 <label>
                                     Show disaggregated data?
                                     <input
@@ -438,6 +439,22 @@ const Usage = () => {
                                         onChange={e => {
                                             setAggregated(!e.target.checked)
                                         }} />
+                                </label>
+                            </div>
+                            <div className="col-sm-4 mb-4">
+                                <input className="form-check-input" type="radio" id="flexRadioDefault1" 
+                                    checked={showParallelQuota === true}
+                                    onChange={e => setShowParallelQuota(true)} />
+                                <label className="form-check-label" for="flexRadioDefault1">
+                                    Jobs weighted with multiplier
+                                </label>
+                            </div>
+                            <div className="col-sm-4 mb-4">
+                                <input className="form-check-input" type="radio" id="flexRadioDefault2" 
+                                    checked={showParallelQuota !== true}
+                                    onChange={e => setShowParallelQuota(false)}/>
+                                <label className="form-check-label" for="flexRadioDefault2">
+                                    Parallel job view
                                 </label>
                             </div>
                         </div>
@@ -528,7 +545,7 @@ const Usage = () => {
                                             y: {
                                                 title: {
                                                     display: true,
-                                                    text: 'Weighted parallel jobs'
+                                                    text: showParallelQuota ? 'Weighted parallel jobs' : 'Number of parallel jobs'
                                                 }
                                             }
                                         }
