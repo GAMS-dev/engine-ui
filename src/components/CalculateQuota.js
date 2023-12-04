@@ -5,9 +5,9 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
     const calcEndTime = calcEndTimeInput
 
     // extract the three different job types
-    const dataJobUsage = data['job_usage'] == null ? [] : JSON.parse(JSON.stringify(data['job_usage']));
-    const dataPoolUsage = data['pool_usage'] == null ? [] : JSON.parse(JSON.stringify(data['pool_usage']));
-    const dataHypercube = data['hypercube_job_usage'] == null ? [] : JSON.parse(JSON.stringify(data['hypercube_job_usage']));
+    const dataJobUsage = data['job_usage'] == null ? [] : data['job_usage']; 
+    const dataPoolUsage = data['pool_usage'] == null ? [] : data['pool_usage']; 
+    const dataHypercube = data['hypercube_job_usage'] == null ? [] : data['hypercube_job_usage']; 
 
     // first extract all the pool infos, to later check if an individual job was part of a pool
     // only need the idle multiplier from the pools
