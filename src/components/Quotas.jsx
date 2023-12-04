@@ -11,21 +11,9 @@ import { Link } from "react-router-dom";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
-  /*
-    const data = test_data['test_hypercube_with_pool_and_job'];
-    const calcStartDate = "2021-08-03T17:10:15.000000+00:00";
-    const calcEndTime = "2021-08-05T17:10:15.000000+00:00";
-  
-    let test_tableData = [{ unique_id: 'test', instance: 'bla', pool_label: 'jaja', multiplier: 1, times: 17263716, comments: 'test123', fails: 0 }];
-  */
+const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
 
-  // const data = test_data['real_test_data'];
-  //   const data = testData
-  //   const calcStartDate = new Date("2021-01-04T17:10:15.000000+00:00");
-  //   const calcEndTime = new Date("2023-03-31T17:10:15.000000+00:00");
-
-  const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
+  const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
 
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState(dataTmp.data_jobs);
   const [ungroupedDataPools, setUngroupedDataPools] = useState(dataTmp.data_pools);
@@ -34,9 +22,9 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
   const [numPools, setNumPools] = useState(dataTmp.num_pools);
   const [numCharts, setNumCharts] = useState(dataTmp.num_pools);
 
-  // if testData, calcStartDate, calcEndTime, quotaUnit changes:
+  // if data, calcStartDate, calcEndTime, quotaUnit changes:
   useEffect(() => {
-    const dataTmp = computeTimes(testData, calcStartDate, calcEndTime, quotaUnit)
+    const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
     setUngroupedDataJobs(dataTmp.data_jobs)
     setUngroupedDataPools(dataTmp.data_pools)
     setNumUser(dataTmp.num_users)
@@ -49,7 +37,7 @@ const Quotas = ({ testData, calcStartDate, calcEndTime, quotaUnit }) => {
     tmp = (dataTmp.num_pools > 1) ? tmp += 1 : tmp;
 
     setNumCharts(tmp)
-  }, [testData, calcStartDate, calcEndTime, quotaUnit])
+  }, [data, calcStartDate, calcEndTime, quotaUnit])
 
 
   function getChartData(label, ungroupedData) {
