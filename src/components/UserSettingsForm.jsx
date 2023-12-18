@@ -17,7 +17,6 @@ const UserSettingsForm = () => {
     const [selectedMulitplierUnit, setSelectedMulitplierUnit] = useState(userSettings.mulitplierUnit)
     const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }]
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
         setUserSettings({
@@ -31,8 +30,7 @@ const UserSettingsForm = () => {
     }, [selectedMulitplierUnit, selectedTablePageLength, setUserSettings])
 
     return (
-
-        <fieldset disabled={isSubmitting}>
+        <form>
             <div className="form-group mt-3 mb-3 ">
                 <label htmlFor="selectMulitplierUnit">
                     Select multiplier unit
@@ -59,7 +57,7 @@ const UserSettingsForm = () => {
                     options={availableTablePageLengths}
                 />
             </div>
-        </fieldset>
+        </form>
 
     )
 }
