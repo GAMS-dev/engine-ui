@@ -1,0 +1,67 @@
+import React, { useContext, useEffect, useState } from "react";
+import Select from "react-select";
+import { UserSettingsContext } from "./UserSettingsContext";
+
+
+// TODO change useEffect to only change on Submit
+// and than also change it in the local storage
+// get default values from the local storage
+
+
+
+const UserSettingsForm = () => {
+
+    const [userSettings, setUserSettings] = useContext(UserSettingsContext)
+
+    const availableMulitplierUnits = [{ value: "mults", label: "mults" }, { value: "multh", label: "multh" }]
+    const [selectedMulitplierUnit, setSelectedMulitplierUnit] = useState(userSettings.mulitplierUnit)
+    const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }]
+    const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    useEffect(() => {
+        setUserSettings({
+            mulitplierUnit: selectedMulitplierUnit,
+            tablePageLength: selectedTablePageLength
+        })
+        localStorage.setItem('userSettings', JSON.stringify({
+            mulitplierUnit: selectedMulitplierUnit,
+            tablePageLength: selectedTablePageLength
+        }))
+    }, [selectedMulitplierUnit, selectedTablePageLength, setUserSettings])
+
+    return (
+
+        <fieldset disabled={isSubmitting}>
+            <div className="form-group mt-3 mb-3 ">
+                <label htmlFor="selectMulitplierUnit">
+                    Select multiplier unit
+                </label>
+                <Select
+                    id="selectMulitplierUnit"
+                    isClearable={false}
+                    value={availableMulitplierUnits.filter(type => type.value === selectedMulitplierUnit)[0]}
+                    isSearchable={true}
+                    onChange={selected => setSelectedMulitplierUnit(selected.value)}
+                    options={availableMulitplierUnits}
+                />
+            </div>
+            <div className="form-group mt-3 mb-3 ">
+                <label htmlFor="tablePageLength">
+                    Select table page length
+                </label>
+                <Select
+                    id="tablePageLength"
+                    isClearable={false}
+                    value={availableTablePageLengths.filter(type => type.value === selectedTablePageLength)[0]}
+                    isSearchable={true}
+                    onChange={selected => setSelectedTablePageLength(selected.value)}
+                    options={availableTablePageLengths}
+                />
+            </div>
+        </fieldset>
+
+    )
+}
+
+export default UserSettingsForm;
