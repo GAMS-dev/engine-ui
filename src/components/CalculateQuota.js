@@ -67,16 +67,20 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
             if (startTime >= calcStartTime && finishTime <= calcEndTime) {
                 return accumulator + (finishTime - startTime);
             }
-            if (calcStartTime <= finishTime && finishTime <= calcEndTime) {
+            // both can't be inside anymore, so check which one is outside, or if both are outside
+            else if (calcStartTime <= finishTime && finishTime <= calcEndTime) {
                 return accumulator + (finishTime - calcStartTime);
             }
-            if (calcStartTime <= startTime && startTime <= calcEndTime) {
+            else if (calcStartTime <= startTime && startTime <= calcEndTime) {
                 return accumulator + (calcEndTime - startTime);
             }
-            if (startTime <= calcStartTime && calcEndTime <= finishTime) {
+            else if (startTime <= calcStartTime && calcEndTime <= finishTime) {
                 return accumulator + (calcEndTime - calcStartTime);
             }
-            return accumulator;
+            // else case not needed, if the worker is completly outside the timeframe it's not counted
+            // else {
+            //     return accumulator
+            // }
         }, 0);
         return pool
     })

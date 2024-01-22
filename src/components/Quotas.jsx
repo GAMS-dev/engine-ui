@@ -67,10 +67,10 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     labels = labelTimePairs.map(pair => pair.label);
     cost = labelTimePairs.map(pair => pair.cost);
 
-    const cutOff = 20;
+    const cutOff = 10;
 
     if (labels.length > cutOff) {
-      setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed. `)
+      setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed in the chart. `)
       labels = labels.slice(0, cutOff);
       cost = cost.slice(0, cutOff)
     }
@@ -158,7 +158,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     }
   ])
 
-    const displayFieldPoolsUngrouped = useRef([
+  const displayFieldPoolsUngrouped = useRef([
     {
       field: "user",
       column: "User",
@@ -231,8 +231,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['jobs'].includes(el.field))
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
-      let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
-      sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
+      let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
+      sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
@@ -241,8 +241,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier'].includes(el.field))
       setTableDataJobs(GroupByUser(ungroupedDataJobs))
       setTableDataPools(GroupByUser(ungroupedDataPools))
-      let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
-      sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
+      let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
+      sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
@@ -251,8 +251,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier'].includes(el.field))
       setTableDataJobs(GroupByInstance(ungroupedDataJobs))
       setTableDataPools(GroupByInstance(ungroupedDataPools))
-      let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
-      sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
+      let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
+      sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
@@ -261,13 +261,13 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'user', 'multiplier'].includes(el.field))
       setTableDataJobs(GroupByPoolLabel(ungroupedDataJobs))
       setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
-      let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
-      sumTmp2 += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.times * currentValue.multiplier, 0)
+      let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
+      sumTmp2 += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp2)
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     }
-    
+
   }, [quotaUnit, selectedAggregateType, ungroupedDataJobs, ungroupedDataPools, displayFieldJobsUngrouped, displayFieldPoolsUngrouped, totalUsage])
 
   useEffect(() => {
@@ -304,8 +304,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
           onChange={selected => setSelectedAggregateType(selected.value)}
           options={availableAggregateTypes}
         />
-      </div>
-      <h2 className="text-right">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaUnit === 'mults' ? totalUsage : totalUsage / 3600)} {quotaUnit} </h2>
+      </div> 
+      <h2 className="text-right">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
       {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
         {truncateWarning}
       </div>}
@@ -340,17 +340,21 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
         <div className={'col-xl-' + ((numCharts === 3) ? '12' : ((numCharts > 0) ? '9' : '12')) +
           ' col-lg-' + (((numCharts > 0) ? '9' : '12')) + ' col-md-12 col-12'}>
           <h3>Jobs</h3>
-          <Table data={tableDataJobs}
-            noDataMsg="No Usage data found"
-            displayFields={displayFieldsJobs}
-            isLoading={false}
-            idFieldName={'unique_id'} />
+          <div data-testid="tableJobs" >
+            <Table data={tableDataJobs}
+              noDataMsg="No Usage data found"
+              displayFields={displayFieldsJobs}
+              isLoading={false}
+              idFieldName={'unique_id'} />
+          </div>
           <h3>Idle Pool Times</h3>
-          <Table data={tableDataPools}
-            noDataMsg="No Usage data found"
-            displayFields={displayFieldsPools}
-            isLoading={false}
-            idFieldName={'unique_id'} />
+          <div data-testid="tableIdlePool" >
+            <Table data={tableDataPools}
+              noDataMsg="No Usage data found"
+              displayFields={displayFieldsPools}
+              isLoading={false}
+              idFieldName={'unique_id'} />
+          </div>
         </div>
       </div>
       {(numPools > 1) ? (

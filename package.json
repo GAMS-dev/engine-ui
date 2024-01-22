@@ -9,8 +9,10 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
+    "canvas": "^2.11.2",
     "eslint-plugin-no-unsanitized": "^4.0.1",
     "react-scripts": "^5.0.1",
+    "react-select-event": "^5.5.1",
     "sass": "^1.54.9"
   },
   "dependencies": {
@@ -32,13 +34,15 @@
     "react-feather": "^2.0.10",
     "react-router-dom": "^6.4.0",
     "react-select": "^5.4.0",
-    "react-spinners": "^0.13.4"
+    "react-spinners": "^0.13.4",
+    "user-event": "^4.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:coverage": "react-scripts test --env=jsdom --watchAll=false --coverage"
   },
   "eslintConfig": {
     "extends": [
