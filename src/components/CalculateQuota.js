@@ -45,7 +45,7 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
         return pool;
     });
 
-    // compute the whole time workers existed on the pool 
+    // compute the whole time workers existed on the pool
     // (and didn't fail because those workers are already removed)
     dataPoolUsageNEW = dataPoolUsageNEW.map((pool, i) => {
         pool['times'] = pool['times'].reduce(function (accumulator, times) {
