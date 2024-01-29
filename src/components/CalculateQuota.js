@@ -31,7 +31,7 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
     // simultaneously keep track of the number of fails
     dataPoolUsageNEW = dataPoolUsageNEW.map((pool) => {
         const workerTimes = {};
-        pool['times'].map((workerStats) => {
+        pool['times'].forEach((workerStats) => {
             // if a worker_id has already been added to workerTimes, update finish time
             if (workerTimes.hasOwnProperty(workerStats['worker_id'])) {
                 workerTimes[workerStats['worker_id']]['finish'] = workerStats['finish'];
@@ -77,10 +77,7 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
             else if (startTime <= calcStartTime && calcEndTime <= finishTime) {
                 return accumulator + (calcEndTime - calcStartTime);
             }
-            // else case not needed, if the worker is completly outside the timeframe it's not counted
-            // else {
-            //     return accumulator
-            // }
+            return accumulator
         }, 0);
         return pool
     })
