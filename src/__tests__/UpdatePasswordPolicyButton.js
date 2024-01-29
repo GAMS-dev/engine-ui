@@ -1,19 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { within } from '@testing-library/dom'
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 import { AuthContext } from '../AuthContext';
 import UpdatePasswordPolicyButton from '../components/UpdatePasswordPolicyButton';
 import axios from 'axios';
 
 jest.mock('axios');
-
-const RouterWrapper = ({ children }) => (
-    <MemoryRouter>
-        {children}
-    </MemoryRouter>
-);
 
 window.ResizeObserver = function () {
     return {

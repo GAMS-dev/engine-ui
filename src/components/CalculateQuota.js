@@ -102,7 +102,7 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
     });
 
     // Use map to transform each hypercube into an array of job objects
-    // flatten it so its no loner ordered by hypercubes 
+    // flatten it so its no loner ordered by hypercubes
     // this way it can just be conbined with the job list (depth one always is enough here)
     let dataHypercubeNEW = dataHypercube.flatMap(function (hypercube) {
         // save the label and  mutliplier of the current hypercupe to add them to the job list
