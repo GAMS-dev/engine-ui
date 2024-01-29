@@ -42,6 +42,7 @@ const OAuth2Login = (props) => {
                 codeVerifier: pkceParams.codeVerifier,
                 name: config.name,
                 hasClientSecret: oauthConfig.has_web_ui_client_secret,
+                nativeClientParams: config.nativeClientParams,
                 state
             }));
             window.location.replace(`${oauthConfig.authorization_endpoint}?${queryParams.join('&')} `);
@@ -101,7 +102,8 @@ const OAuth2Login = (props) => {
             jwt: jwt,
             isOAuthToken: true,
             isIdToken: authParams.isOidc,
-            refreshTokenData: refreshTokenData
+            refreshTokenData: refreshTokenData,
+            nativeClientParams: authParams.nativeClientParams,
         });
     }, [setAuthToken, setErrorMsg]);
 

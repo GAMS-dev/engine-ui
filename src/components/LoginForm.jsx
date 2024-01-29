@@ -13,8 +13,10 @@ import OAuth2Login from "./OAuth2Login";
 import { ClipLoader } from "react-spinners";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
 import { Info } from "react-feather";
+import { encryptRSA } from "./oauth";
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
+const VALID_NATIVE_CLIENT_IDS = ["com.gams.miro"]
 
 const LoginForm = ({ showRegistrationForm }) => {
   const [username, setUsername] = useState("");
@@ -32,7 +34,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [passwordPolicyHelper, setPasswordPolicyHelper] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state='));
+  const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state=') || document.location.search.includes('native_client_id'));
   const [register, setRegister] = useState(showRegistrationForm === "true");
   const [showRegistrationSuccessAlert, setShowRegistrationSuccessAlert] = useState(false);
 
@@ -44,6 +46,9 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [OAuthLoginConfig, setOAuthLoginConfig] = useState(null);
   const [OAuthToken, setOAuthToken] = useState(null);
   const [OAuthErrorMsg, setOAuthErrorMsg] = useState("");
+  const [redirectToRoot, setRedirectToRoot] = useState(false);
+  const [isNativeClientLogin, setIsNativeClientLogin] = useState(false);
+  const [ncRedirectUri, setNcRedirectUri] = useState("");
 
   const [login, setLogin] = useContext(AuthContext);
 
@@ -59,6 +64,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       return;
     }
     let jwt = token.jwt;
+    setIsNativeClientLogin(token?.nativeClientParams != null);
     if (token?.isIdToken === true) {
       try {
         const oidcLoginResponse = await axios.post(`${server}/auth/oidc-providers/login`, {
@@ -83,6 +89,18 @@ const LoginForm = ({ showRegistrationForm }) => {
         return;
       }
     }
+    if (token?.nativeClientParams != null) {
+      try {
+        const encryptedJWT = await encryptRSA(token.nativeClientParams.public_key_b64, jwt);
+        setIsSubmitting(false);
+        setIsOAuthProcessing(false);
+        setNcRedirectUri(`${token.nativeClientParams.id}:${token.nativeClientParams.redirect_uri}?jwt=${encryptedJWT.data}&aes_key=${encryptedJWT.aes_key}&aes_iv=${encryptedJWT.aes_iv}`);
+      } catch (err) {
+        console.error(err)
+        setLoginErrorMsg('Failed to encrypt JWT token')
+      }
+      return;
+    }
     try {
       const reponse = await axios.get(`${server}/users/`, {
         params: {
@@ -102,6 +120,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           isOAuthToken: token?.isOAuthToken,
           refreshTokenData: token?.refreshTokenData
         });
+        setRedirectToRoot(true);
       } else {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
       }
@@ -269,7 +288,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   };
 
   useEffect(() => {
-    const fetchAuthProviders = async (selectedProvider) => {
+    const fetchAuthProviders = async (selectedProvider, nativeClientParams) => {
       let response;
       try {
         response = await axios.get(`${server}/auth/providers`);
@@ -284,7 +303,9 @@ const LoginForm = ({ showRegistrationForm }) => {
         let selectedProviderFound = false;
         const selectedOAuthProvider = OAuthConfigTmp.filter(config => config.name === selectedProvider);
         if (selectedOAuthProvider.length > 0) {
-          setOAuthLoginConfig(selectedOAuthProvider[0]);
+          const selectedProviderTmp = selectedOAuthProvider[0];
+          selectedProviderTmp.nativeClientParams = nativeClientParams;
+          setOAuthLoginConfig(selectedProviderTmp);
           return;
         }
         if (LDAPConfigTmp.findIndex(config => config.name === selectedProvider) !== -1) {
@@ -301,6 +322,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           if (response.data.length > 0) {
             const providerConfig = response.data[0];
             if (providerConfig.oauth2 != null || providerConfig.oidc != null) {
+              providerConfig.nativeClientParams = nativeClientParams;
               setOAuthLoginConfig(providerConfig);
               return;
             }
@@ -314,21 +336,49 @@ const LoginForm = ({ showRegistrationForm }) => {
       setOAuthConfig(OAuthConfigTmp);
       setLDAPConfig(LDAPConfigTmp);
     }
-    let selectedProvider = null;
+    const searchParams = new URLSearchParams(document.location.search);
+    const selectedProvider = searchParams.get('provider');
+    const native_client_id = searchParams.get('nc_id');
+    setIsNativeClientLogin(native_client_id != null);
 
-    if (document.location.search.includes('provider=')) {
-      const searchParams = new URLSearchParams(document.location.search);
-      selectedProvider = searchParams.get('provider');
+    let nativeClientParams;
+
+    if (native_client_id != null) {
+      setIsOAuthProcessing(true);
+      if (!VALID_NATIVE_CLIENT_IDS.includes(native_client_id)) {
+        console.error(`Invalid native client id: ${native_client_id}`)
+        setRedirectToRoot(true);
+        return;
+      }
+      const ncRedirectUri = searchParams.get('nc_redirect_uri');
+      if (!/^[a-z0-9/]+$/i.test(ncRedirectUri)) {
+        console.error(`Invalid native client redirect URI: ${ncRedirectUri}`)
+        setRedirectToRoot(true);
+        return;
+      }
+      nativeClientParams = {
+        'id': native_client_id,
+        'redirect_uri': ncRedirectUri,
+        'public_key_b64': searchParams.get('nc_public_key')
+      }
+      if (Object.values(nativeClientParams).findIndex(val => val == null) !== -1) {
+        console.error('Missing native client parameters')
+        setRedirectToRoot(true);
+        return;
+      }
+    } else if (login) {
+      //setRedirectToRoot(true);
+      return;
     }
-    fetchAuthProviders(selectedProvider);
-  }, [server]);
+    fetchAuthProviders(selectedProvider, nativeClientParams);
+  }, [server, login]);
 
   useEffect(() => {
     const fetchPasswordPolicy = async () => {
       setLoginErrorMsg('')
       try {
         const policyResponse = await axios.get(`${server}/auth/password-policy`);
-        const  passwordPolicy = policyResponse?.data
+        const passwordPolicy = policyResponse?.data
         let passwordPolicyStringTmp = `The minimum password length is ${passwordPolicy.min_password_length}.`
         let mustInclude = []
         passwordPolicy.must_include_uppercase && mustInclude.push('uppercase letter')
@@ -503,122 +553,123 @@ const LoginForm = ({ showRegistrationForm }) => {
         {isOAuthProcessing ?
           <ClipLoader /> :
           <>
-            <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>
-            <div className="invalid-feedback" style={{ display: loginErrorMsg != null ? "block" : "none" }}>
+            {isNativeClientLogin ? (ncRedirectUri !== "" ?
+              <><Alert variant="success">
+                Authentication successful. You can now close this window.
+              </Alert>
+                {window.location.replace(ncRedirectUri)}
+              </> : <></>) : <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>}
+            <div className="invalid-feedback">
               {loginErrorMsg}
             </div>
             {showRegistrationSuccessAlert && <Alert variant="success">
               Registration successful, you can log in now!
             </Alert>}
-            <fieldset disabled={isSubmitting}>
-              {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
-                <div className="mb-3">
-                  <label htmlFor="inputServer" className="visually-hidden">
-                    Server
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="inputServer"
-                    placeholder="Server"
-                    autoComplete="on"
-                    value={server}
-                    onChange={e => setServer(e.target.value)}
-                    required
-                  />
+            {!isNativeClientLogin &&
+              <>
+                <fieldset disabled={isSubmitting}>
+                  {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
+                    <div className="mb-3">
+                      <label htmlFor="inputServer" className="visually-hidden">
+                        Server
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="inputServer"
+                        placeholder="Server"
+                        autoComplete="on"
+                        value={server}
+                        onChange={e => setServer(e.target.value)}
+                        required
+                      />
+                    </div>
+                  }
+                  {register ? <div className="mb-3">
+                    <label htmlFor="inputInvitationCode" className="visually-hidden">
+                      Invitation Code
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="inputInvitationCode"
+                      placeholder="Invitation code"
+                      value={invitationCode}
+                      onChange={e => setInvitationCode(e.target.value)}
+                      required
+                    />
+                  </div> :
+                    (ldapConfig.length > 0 ?
+                      <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
+                        <Nav.Item>
+                          <Nav.Link eventKey="gams_engine" title="Standard">Standard</Nav.Link>
+                        </Nav.Item>
+                        {ldapConfig.map(config =>
+                          <Nav.Item key={config.name}>
+                            <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
+                          </Nav.Item>
+                        )}
+                      </Nav> : <></>)}
+                  {(!register || isValidInvitationCode) && <div className="mb-3">
+                    <label htmlFor="username" className="visually-hidden">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      className={"form-control" + (usernameError ? " is-invalid" : "")}
+                      id="username"
+                      placeholder="Username"
+                      autoComplete="username"
+                      name="username"
+                      value={username}
+                      onChange={e => setUsername(e.target.value)}
+                      required
+                    />
+                    <div className="invalid-feedback"> {usernameError} </div>
+                  </div>}
+                  {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) &&
+                    <ShowHidePasswordInput
+                      value={password}
+                      setValue={setPassword}
+                      id="inputPassword"
+                      label="Password"
+                      invalidFeedback={passwordError}
+                      autoComplete="current-password"
+                      usePlaceholder={true}
+                      required={true} />}
+                  {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
+                    <ShowHidePasswordInput
+                      value={confirmPassword}
+                      setValue={setConfirmPassword}
+                      id="confirmPassword"
+                      label="Confirm Password"
+                      invalidFeedback={confirmPasswordError}
+                      usePlaceholder={true}
+                      required={true} />}
+                </fieldset>
+                <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
+                  {register ? "Register" : "Login"}
+                </SubmitButton>
+                {register ? <></> : OAuthConfig.map((config, idx) => {
+                  return <div key={`oauth_button_${idx}`} className="d-grid gap-2">
+                    <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
+                      onClick={() => setOAuthLoginConfig(config)}>
+                      {config.label}
+                    </button>
+                  </div>
+                })}
+                <div className="mt-2">
+                  <small>
+                    <Link to={register ? "/login" : "/register"} onClick={() => {
+                      clearRegisterErrors();
+                      setRegister(current => !current);
+                    }}>{register ? "Login" : "Register"}</Link>
+                  </small>
                 </div>
-              }
-              {register ? <div className="mb-3">
-                <label htmlFor="inputInvitationCode" className="visually-hidden">
-                  Invitation Code
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="inputInvitationCode"
-                  placeholder="Invitation code"
-                  value={invitationCode}
-                  onChange={e => setInvitationCode(e.target.value)}
-                  required
-                />
-              </div> :
-                (ldapConfig.length > 0 ?
-                  <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
-                    <Nav.Item>
-                      <Nav.Link eventKey="gams_engine" title="Standard">Standard</Nav.Link>
-                    </Nav.Item>
-                    {ldapConfig.map(config =>
-                      <Nav.Item key={config.name}>
-                        <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
-                      </Nav.Item>
-                    )}
-                  </Nav> : <></>)}
-              {(!register || isValidInvitationCode) && <div className="mb-3">
-                <label htmlFor="username" className="visually-hidden">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  className={"form-control" + (usernameError ? " is-invalid" : "")}
-                  id="username"
-                  placeholder="Username"
-                  autoComplete="username"
-                  name="username"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  required
-                />
-                <div className="invalid-feedback"> {usernameError} </div>
-              </div>}
-              {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) &&
-                <ShowHidePasswordInput
-                  value={password}
-                  setValue={setPassword}
-                  id="inputPassword"
-                  label="Password"
-                  invalidFeedback={passwordError}
-                  autoComplete="current-password"
-                  usePlaceholder={true}
-                  required={true}
-                  additionalAddons={
-                    register? <OverlayTrigger placement="bottom"
-                                overlay={<Tooltip id="tooltip">
-                                          {passwordPolicyHelper}
-                                        </Tooltip>}>
-                                <span className="input-group-text"><Info/></span>
-                              </OverlayTrigger>: null} />}
-              {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
-                <ShowHidePasswordInput
-                  value={confirmPassword}
-                  setValue={setConfirmPassword}
-                  id="confirmPassword"
-                  label="Confirm Password"
-                  invalidFeedback={confirmPasswordError}
-                  usePlaceholder={true}
-                  required={true} />}
-            </fieldset>
-            <div className="d-grid gap-2">
-              <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
-                {register ? "Register" : "Login"}
-              </SubmitButton>
-              {register ? <></> : OAuthConfig.map((config, idx) => {
-                return <button type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
-                  onClick={() => setOAuthLoginConfig(config)}>
-                  {config.label}
-                </button>
-              })}
-            </div>
-            <div className="mt-2">
-              <small>
-                <Link to={register ? "/login" : "/register"} onClick={() => {
-                  clearRegisterErrors();
-                  setRegister(current => !current);
-                }}>{register ? "Login" : "Register"}</Link>
-              </small>
-            </div>
+              </>}
           </>
         }
-        {login ? <Navigate replace to="/" /> : ""}
+        {redirectToRoot ? <Navigate replace to="/" /> : ""}
       </form>
       <OAuth2Login
         server={server}

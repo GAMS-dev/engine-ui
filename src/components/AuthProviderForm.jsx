@@ -1105,7 +1105,7 @@ const AuthProviderForm = () => {
                                         Password of the user who is used for binding
                                     </label>
                                     <input
-                                        type="text"
+                                        type="password"
                                         className={"form-control" + (formErrors.password ? " is-invalid" : "")}
                                         id="ldapPassword"
                                         autoComplete="on"
