@@ -636,7 +636,14 @@ const LoginForm = ({ showRegistrationForm }) => {
                       invalidFeedback={passwordError}
                       autoComplete="current-password"
                       usePlaceholder={true}
-                      required={true} />}
+                      required={true}
+                      additionalAddons={
+                        register ? <OverlayTrigger placement="bottom"
+                          overlay={<Tooltip id="tooltip">
+                            {passwordPolicyHelper}
+                          </Tooltip>}>
+                          <span className="input-group-text"><Info /></span>
+                        </OverlayTrigger> : null} />}
                   {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
                     <ShowHidePasswordInput
                       value={confirmPassword}
