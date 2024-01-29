@@ -51,7 +51,7 @@
     "eject": "react-scripts eject",
     "test:coverage": "react-scripts test --env=jsdom --watchAll=false --coverage",
     "test:ci": "npm run test -- --testResultsProcessor=\"jest-junit\" --watchAll=false --ci --coverage",
-    "lint": "node_modules/.bin/eslint src --ext=.js,.jsx --max-warnings 0"
+    "lint": "node_modules/.bin/eslint src --ext=\".js,.jsx\" --max-warnings 0"
   },
   "eslintConfig": {
     "extends": [
@@ -66,6 +66,7 @@
       "react/no-find-dom-node": "error",
       "react/jsx-no-script-url": "error",
       "react/jsx-no-target-blank": "error",
+      "react/no-unknown-property": "error",
       "no-unsanitized/method": "error",
       "no-unsanitized/property": "error"
     }
