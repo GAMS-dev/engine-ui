@@ -5,9 +5,9 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
     const calcEndTime = calcEndTimeInput
 
     // extract the three different job types
-    const dataJobUsage = data['job_usage'] == null ? [] : data['job_usage']; 
-    const dataPoolUsage = data['pool_usage'] == null ? [] : data['pool_usage']; 
-    const dataHypercube = data['hypercube_job_usage'] == null ? [] : data['hypercube_job_usage']; 
+    const dataJobUsage = data['job_usage'] == null ? [] : data['job_usage'];
+    const dataPoolUsage = data['pool_usage'] == null ? [] : data['pool_usage'];
+    const dataHypercube = data['hypercube_job_usage'] == null ? [] : data['hypercube_job_usage'];
 
     // first extract all the pool infos, to later check if an individual job was part of a pool
     // only need the idle multiplier from the pools
@@ -26,7 +26,7 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
         }
     });
 
-    // check if workers failed, if so keep the first start time and set the finish time 
+    // check if workers failed, if so keep the first start time and set the finish time
     // to the last occurence of that particular worker
     // simultaneously keep track of the number of fails
     dataPoolUsageNEW = dataPoolUsageNEW.map((pool) => {
