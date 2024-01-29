@@ -5,6 +5,7 @@ default:
 stages:
   - prepare
   - lint
+  - test
 
 
 build_build_image:
@@ -37,6 +38,28 @@ lint:
     - npm run lint
   variables:
     PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
+  cache:
+    - key:
+        files:
+          - package-lock.json
+      paths:
+        - node_modules/
+
+test:
+  image: $CI_REGISTRY_IMAGE/buildimage:latest
+  stage: test
+  before_script:
+    - npm install
+  script:
+    - npm run test:ci
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  artifacts:
+    paths:
+      - coverage/
+    when: always
+    reports:
+      junit:
+        - junit.xml
   cache:
     - key:
         files:
