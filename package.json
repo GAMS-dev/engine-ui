@@ -5,13 +5,18 @@
   "private": true,
   "homepage": ".",
   "proxy": "http://localhost:80",
+  "jest": { "transformIgnorePatterns": [ "node_modules/(?!axios|memoize|mimic-function)" ] },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.4.3",
-    "eslint-plugin-no-unsanitized": "^4.0.1",
+    "canvas": "^2.11.2",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@testing-library/jest-dom": "^6.2.0",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.2",
+    "eslint-plugin-no-unsanitized": "^4.0.2",
     "react-scripts": "^5.0.1",
-    "sass": "^1.54.9"
+    "react-select-event": "^5.5.1",
+    "sass": "^1.54.9",
+    "user-event": "^4.0.0"
   },
   "dependencies": {
     "axios": "^1.6.1",
@@ -21,7 +26,7 @@
     "chartjs-plugin-zoom": "^1.2.1",
     "date-fns": "^2.29.3",
     "jszip": "^3.10.1",
-    "mem": "^9.0.2",
+    "memoize": "^10.0.0",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
@@ -32,14 +37,14 @@
     "react-feather": "^2.0.10",
     "react-router-dom": "^6.4.0",
     "react-select": "^5.4.0",
-    "react-spinners": "^0.13.4",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "react-spinners": "^0.13.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "test:coverage": "react-scripts test --env=jsdom --watchAll=false --coverage",
     "lint": "node_modules/.bin/eslint src --ext=.js,.jsx --max-warnings 0"
   },
   "eslintConfig": {
