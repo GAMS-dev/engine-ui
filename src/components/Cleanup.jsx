@@ -29,6 +29,7 @@ const Cleanup = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortedCol, setSortedCol] = useState("upload_date");
     const [sortAsc, setSortAsc] = useState(false);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -41,7 +42,7 @@ const Cleanup = () => {
             displayer: (name, type) => <>
                 {type === "hypercube_result" ? <Link to={`/jobs/hc:${name}`}>{name}
                     <sup>
-                        <span className="badge badge-pill badge-primary ml-1">HC</span>
+                        <span className="badge rounded-pill bg-primary ms-1">HC</span>
                     </sup></Link> :
                     <Link to={`/jobs/${name}`}>{name}</Link>}
             </>
@@ -116,7 +117,7 @@ const Cleanup = () => {
         axios
             .get(`${server}/cleanup/results`, {
                 params: {
-                    per_page: 10, page: currentPage,
+                    per_page: rowsPerPage, page: currentPage,
                     order_by: sortedCol, order_asc: sortAsc
                 },
                 headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
@@ -141,7 +142,7 @@ const Cleanup = () => {
                 setAlertMsg(`Problems fetching cleanup information. Error message: ${getResponseError(err)}`);
                 setIsLoading(false);
             });
-    }, [jwt, server, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc]);
+    }, [jwt, server, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc, rowsPerPage]);
 
     const handleCloseDeleteConfirmDialog = () => {
         setSubmissionErrorMsg("");
@@ -229,10 +230,10 @@ const Cleanup = () => {
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">Cleanup</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
-                    <div className="btn-group mr-2">
+                    <div className="btn-group me-2">
                         <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowHousekeepingDialog(true)}>
                             Run Housekeeping
-                            <Send width="12px" className="ml-2" />
+                            <Send width="12px" className="ms-2" />
                         </button>
                         <button
                             type="button"
@@ -242,7 +243,7 @@ const Cleanup = () => {
                             }}
                         >
                             Refresh
-                            <RefreshCw width="12px" className="ml-2" />
+                            <RefreshCw width="12px" className="ms-2" />
                         </button>
                     </div>
                 </div>
@@ -254,11 +255,13 @@ const Cleanup = () => {
                 noDataMsg="No Datasets found"
                 displayFields={displayFields}
                 sortedAsc={sortAsc}
+                rowsPerPage={rowsPerPage}
                 total={total}
-                onChange={(currentPage, sortedCol, sortAsc) => {
+                onChange={(currentPage, sortedCol, sortAsc, rowsPerPage) => {
                     setCurrentPage(currentPage + 1)
                     setSortedCol(sortedCol)
                     setSortAsc(sortAsc)
+                    setRowsPerPage(rowsPerPage)
                 }}
                 isLoading={isLoading}
                 sortedCol={sortedCol}
@@ -279,7 +282,7 @@ const Cleanup = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="deleteDataThreshold">
                                     Delete all data older than ... days
                                 </label>

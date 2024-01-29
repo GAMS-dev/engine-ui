@@ -197,7 +197,7 @@ const LicUpdateButton = props => {
                             </Overlay>
                         </small> : <></>}
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor={settings.id}>
                                     {settings.desc}
                                 </label>

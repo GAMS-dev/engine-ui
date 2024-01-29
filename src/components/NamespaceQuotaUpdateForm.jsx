@@ -102,7 +102,7 @@ const NamespaceQuotaUpdateForm = () => {
                                 {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
-                                <div className="form-group">
+                                <div className="mb-3">
                                     <label htmlFor="quotaDisk">
                                         Disk Space Quota (in MB)
                                     </label>

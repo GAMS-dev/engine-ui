@@ -10,10 +10,10 @@ ARG REACT_APP_BASE_NAME=DDDDEEEEFFFF
 ARG PUBLIC_URL=GGGGHHHHIIIIJJJJ
 RUN npm run build
 
-FROM nginx:1.23-alpine-slim
+FROM nginx:1.25-alpine-slim
+COPY --from=builder /app/build /usr/share/nginx/engine
 RUN apk update && \
     apk upgrade --available
-COPY --from=builder /app/build /usr/share/nginx/engine
 COPY boot.sh /docker-entrypoint.d/30-fix-ui-vars.sh
 RUN chmod +x /docker-entrypoint.d/30-fix-ui-vars.sh
 COPY engine.conf /etc/nginx/templates/default.conf.template

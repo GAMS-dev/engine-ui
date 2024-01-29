@@ -305,7 +305,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
           options={availableAggregateTypes}
         />
       </div> 
-      <h2 className="text-right">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
+      <h2 className="text-end">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
       {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
         {truncateWarning}
       </div>}

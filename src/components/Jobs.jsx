@@ -21,6 +21,8 @@ const Jobs = () => {
   const [currentPageJobs, setCurrentPageJobs] = useState(1);
   const [sortedColJobs, setSortedColJobs] = useState("submitted_at");
   const [sortAscJobs, setSortAscJobs] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPageHc, setRowsPerPageHc] = useState(10);
   const [jobData, setJobData] = useState([]);
   const [totalHcJobs, setTotalHcJobs] = useState(0);
   const [currentPageHcJobs, setCurrentPageHcJobs] = useState(1);
@@ -80,7 +82,7 @@ const Jobs = () => {
       column: "Username",
       sorter: "alphabetical-object",
       displayer: user => user.deleted ?
-        <span className="badge badge-pill badge-secondary ml-1">deleted</span> : user.username
+        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
     }].concat(displayFieldsDefault) :
     displayFieldsDefault);
 
@@ -99,7 +101,7 @@ const Jobs = () => {
         .get(server + `/jobs/`, {
           params: {
             everyone: true,
-            per_page: 10,
+            per_page: rowsPerPage,
             page: currentPageJobs,
             order_by: sortedColJobs,
             order_asc: sortAscJobs,
@@ -121,7 +123,7 @@ const Jobs = () => {
         .get(server + `/hypercube/`, {
           params: {
             everyone: true,
-            per_page: 10,
+            per_page: rowsPerPageHc,
             page: currentPageHcJobs,
             order_by: sortedColHcJobs,
             order_asc: sortAscHcJobs,
@@ -141,7 +143,7 @@ const Jobs = () => {
     }
   }, [jwt, server, isInviter, filterActive, refresh, setAlertMsg,
     currentPageJobs, currentPageHcJobs, sortedColJobs, sortedColHcJobs, sortAscJobs,
-    sortAscHcJobs, tabSelected, displayFieldKeys]);
+    sortAscHcJobs, rowsPerPage, rowsPerPageHc, tabSelected, displayFieldKeys]);
 
   //fetch status codes
   useEffect(() => {
@@ -169,17 +171,17 @@ const Jobs = () => {
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">Jobs</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
-          <div className="btn-group mr-2">
+          <div className="btn-group me-2">
             <Link to="/new-job">
               <button type="button" className="btn btn-sm btn-outline-primary h-100">
                 New Job
-                <Send width="12px" className="ml-2" />
+                <Send width="12px" className="ms-2" />
               </button>
             </Link>
             <Link to="/new-hc-job">
               <button type="button" className="btn btn-sm btn-outline-primary h-100">
                 New Hypercube Job
-                <Layers width="12px" className="ml-2" />
+                <Layers width="12px" className="ms-2" />
               </button>
             </Link>
             <button
@@ -211,7 +213,7 @@ const Jobs = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ml-2" />
+              <RefreshCw width="12px" className="ms-2" />
             </button>
           </div>
         </div>
@@ -232,8 +234,9 @@ const Jobs = () => {
             sortedCol={sortedColJobs}
             total={totalJobs}
             sortedAsc={sortAscJobs}
+            rowsPerPage={rowsPerPage}
             resetPageNumber={resetPageNumber}
-            onChange={(currentPage, sortedCol, sortAsc) => {
+            onChange={(currentPage, sortedCol, sortAsc, rowsPerPage) => {
               if (resetPageNumber === true) {
                 setResetPageNumber(false);
                 if (currentPage !== 0) {
@@ -244,6 +247,7 @@ const Jobs = () => {
               setCurrentPageJobs(currentPage + 1)
               setSortedColJobs(sortedCol)
               setSortAscJobs(sortAsc)
+              setRowsPerPage(rowsPerPage)
             }}
           />
         </Tab>
@@ -257,8 +261,9 @@ const Jobs = () => {
             sortedCol={sortedColHcJobs}
             total={totalHcJobs}
             sortedAsc={sortAscHcJobs}
+            rowsPerPage={rowsPerPageHc}
             resetPageNumber={resetPageNumber}
-            onChange={(currentPage, sortedCol, sortAsc) => {
+            onChange={(currentPage, sortedCol, sortAsc, rowsPerPage) => {
               if (resetPageNumber === true) {
                 setResetPageNumber(false);
                 if (currentPage !== 0) {
@@ -269,6 +274,7 @@ const Jobs = () => {
               setCurrentPageHcJobs(currentPage + 1)
               setSortedColHcJobs(sortedCol)
               setSortAscHcJobs(sortAsc)
+              setRowsPerPageHc(rowsPerPage)
             }}
           />
         </Tab>

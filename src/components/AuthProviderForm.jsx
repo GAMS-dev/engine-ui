@@ -425,10 +425,10 @@ const AuthProviderForm = () => {
 
     return (<>
         {isLoading ? <ClipLoader /> : <div className="row">
-            <div className="col-md-4 col-12 mt-1 font-weight-bold">
+            <div className="col-md-4 col-12 mt-1 fw-bold">
             </div>
             <div className="col-md-8 col-12 mt-1 order-2 order-md-1">
-                <div className="btn-toolbar mb-2 mb-md-0 float-right">
+                <div className="btn-toolbar mb-2 mb-md-0 float-end">
                 </div>
             </div>
             <div className="namespace-list col-md-4 col-12 order-1 order-md-2 mt-1">
@@ -447,7 +447,7 @@ const AuthProviderForm = () => {
                             className={`list-group-item list-group-item-action${authProvider.name === selectedAuthProvider ? " active" : ""}`}
                         >
                             {authProvider.name}
-                            <span className="float-right">
+                            <span className="float-end">
                                 <button
                                     type="button"
                                     className="btn btn-sm btn-danger"
@@ -475,7 +475,7 @@ const AuthProviderForm = () => {
                         {submissionErrorMsg}
                     </div>
                     <fieldset disabled={isSubmitting}>
-                        <div className="form-group mt-3 mb-3">
+                        <div className="mt-3 mb-3">
                             <label htmlFor="providerName">
                                 Unique identifier of the provider
                             </label>
@@ -493,7 +493,7 @@ const AuthProviderForm = () => {
                                 {formErrors.name ? formErrors.name : ""}
                             </div>
                         </div>
-                        <div className="form-group mt-3 mb-3">
+                        <div className="mt-3 mb-3">
                             <label htmlFor="providerType">
                                 Provider type
                             </label>
@@ -507,7 +507,7 @@ const AuthProviderForm = () => {
                                 options={availableProviderTypes}
                             />
                         </div>
-                        <div className="form-group mt-3 mb-3">
+                        <div className="mt-3 mb-3">
                             <label htmlFor="providerLabel">
                                 {`Label (used for login ${['oidc', 'oauth2'].includes(providerType) ? 'button' : 'tab name'} in Engine UI)`}
                             </label>
@@ -540,7 +540,7 @@ const AuthProviderForm = () => {
                         </div>
                         {['oidc', 'oauth2'].includes(providerType) ?
                             <>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="issuerID">
                                         URL that the {providerType === 'oauth2' ? 'OAuth 2.0' : 'OpenID Connect'} provider asserts as its Issuer Identifier
                                     </label>
@@ -564,7 +564,7 @@ const AuthProviderForm = () => {
                                         Using the <i>HTTPS</i> scheme with no query or fragment component
                                     </small>
                                 </div>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="webuiClientId">
                                         Client ID to be used by the Engine UI
                                     </label>
@@ -589,7 +589,7 @@ const AuthProviderForm = () => {
                                     invalidFeedback={formErrors.web_ui_client_secret}
                                     helpText="If your identity provider does not support registering public clients without a secret, the Engine API is used as a proxy when retrieving the authorization token."
                                     additionalClassesContainer="mt-3 mb-3" />
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="deviceClientId">
                                         Client ID to be used by clients that do not have browser access (optional)
                                     </label>
@@ -619,7 +619,7 @@ const AuthProviderForm = () => {
                                     additionalClassesContainer="mt-3 mb-3" />
                                 {providerType === 'oauth2' ?
                                     <>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="oauthAudience">
                                                 Audience of the JWT tokens
                                             </label>
@@ -647,7 +647,7 @@ const AuthProviderForm = () => {
                                                 <b>Please do not change the audience unless your identity provider does not allow you to set the audience correctly!</b>
                                             </small>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeREADONLY">
                                                 Scope that the client should request from the OP to get 'READONLY' scope
                                             </label>
@@ -664,7 +664,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_READONLY ? formErrors.request_scope_READONLY : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeCONFIGURATION">
                                                 Scope that the client should request from the OP to get 'CONFIGURATION' scope
                                             </label>
@@ -681,7 +681,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_CONFIGURATION ? formErrors.request_scope_CONFIGURATION : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeNAMESPACES">
                                                 Scope that the client should request from the OP to get 'NAMESPACES' scope
                                             </label>
@@ -698,7 +698,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_NAMESPACES ? formErrors.request_scope_NAMESPACES : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeJOBS">
                                                 Scope that the client should request from the OP to get 'JOBS' scope
                                             </label>
@@ -715,7 +715,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_JOBS ? formErrors.request_scope_JOBS : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeUSERS">
                                                 Scope that the client should request from the OP to get 'USERS' scope
                                             </label>
@@ -732,7 +732,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_USERS ? formErrors.request_scope_USERS : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeHYPERCUBE">
                                                 Scope that the client should request from the OP to get 'HYPERCUBE' scope
                                             </label>
@@ -749,7 +749,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_HYPERCUBE ? formErrors.request_scope_HYPERCUBE : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeCLEANUP">
                                                 Scope that the client should request from the OP to get 'CLEANUP' scope
                                             </label>
@@ -766,7 +766,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_CLEANUP ? formErrors.request_scope_CLEANUP : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeLICENSES">
                                                 Scope that the client should request from the OP to get 'LICENSES' scope
                                             </label>
@@ -783,7 +783,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_LICENSES ? formErrors.request_scope_LICENSES : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeUSAGE">
                                                 Scope that the client should request from the OP to get 'USAGE' scope
                                             </label>
@@ -800,7 +800,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.request_scope_USAGE ? formErrors.request_scope_USAGE : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeAUTH">
                                                 Scope that the client should request from the OP to get 'AUTH' scope
                                             </label>
@@ -818,7 +818,7 @@ const AuthProviderForm = () => {
                                             </div>
                                         </div>
                                     </> : <>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="oidcScopes">
                                                 The scopes to request from the OP (optional, comma-separated)
                                             </label>
@@ -834,7 +834,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.scopes ? formErrors.scopes : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="extraClientIDs">
                                                 Additional client IDs from which the API accepts ID tokens (optional, comma-separated)
                                             </label>
@@ -851,7 +851,7 @@ const AuthProviderForm = () => {
                                             </div>
                                         </div>
                                     </>}
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="autoDiscoveryMode">
                                         Auto discovery endpoint
                                     </label>
@@ -865,7 +865,7 @@ const AuthProviderForm = () => {
                                     />
                                 </div>
                                 {autoDiscoveryMode.value === 'manual' ? <>
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="authorizationEndpoint">
                                             URL of the authorization endpoint
                                         </label>
@@ -882,7 +882,7 @@ const AuthProviderForm = () => {
                                             {formErrors.authorization_endpoint ? formErrors.authorization_endpoint : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="tokenEndpoint">
                                             URL of the token endpoint
                                         </label>
@@ -899,7 +899,7 @@ const AuthProviderForm = () => {
                                             {formErrors.token_endpoint ? formErrors.token_endpoint : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="deviceAuthorizationEndpoint">
                                             URL of the device authorization endpoint
                                         </label>
@@ -915,7 +915,7 @@ const AuthProviderForm = () => {
                                             {formErrors.device_authorization_endpoint ? formErrors.device_authorization_endpoint : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="jwksUri">
                                             URL of the JSON Web Key Set document
                                         </label>
@@ -932,7 +932,7 @@ const AuthProviderForm = () => {
                                             {formErrors.jwks_uri ? formErrors.jwks_uri : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="endSessionEndpoint">
                                             URL of the end session endpoint (optional)
                                         </label>
@@ -948,7 +948,7 @@ const AuthProviderForm = () => {
                                             {formErrors.end_session_endpoint ? formErrors.end_session_endpoint : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group mt-3 mb-3">
+                                    <div className="mt-3 mb-3">
                                         <label htmlFor="tokenAuthMethodsSupported">
                                             List of client authentication methods that provider's token endpoint supports (comma-separated)
                                         </label>
@@ -967,7 +967,7 @@ const AuthProviderForm = () => {
                                 </> : <></>}
                                 {autoDiscoveryMode.value === 'manual' && providerType === 'oauth2' ?
                                     <>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="responseTypesSupported">
                                                 List of response types that the provider supports (comma-separated)
                                             </label>
@@ -984,7 +984,7 @@ const AuthProviderForm = () => {
                                                 {formErrors.response_types_supported ? formErrors.response_types_supported : ""}
                                             </div>
                                         </div>
-                                        <div className="form-group mt-3 mb-3">
+                                        <div className="mt-3 mb-3">
                                             <label htmlFor="grantTypesSupported">
                                                 List of grant types that the provider supports (comma-separated)
                                             </label>
@@ -1002,7 +1002,7 @@ const AuthProviderForm = () => {
                                         </div>
                                     </> : <></>}
                             </> : <>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="ldapHost">
                                         Host of the LDAP server
                                     </label>
@@ -1023,7 +1023,7 @@ const AuthProviderForm = () => {
                                         Excluding protocol and port
                                     </small>
                                 </div>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="ldapPort">
                                         Port of the LDAP server
                                     </label>
@@ -1059,7 +1059,7 @@ const AuthProviderForm = () => {
                                         For AD, <code>NTLMv2</code> authentication is used
                                     </small>
                                 </div>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="ldapUid">
                                         LDAP attribute that is used as username
                                     </label>
@@ -1080,7 +1080,7 @@ const AuthProviderForm = () => {
                                         Examples: <code>sAMAccountName</code> for Active Directory, <code>uid</code> for OpenLDAP. This will be appended to <code>user_filter</code> with an <i>&</i> clause.
                                     </small>
                                 </div>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="ldapBindDN">
                                         Full distinguished name (DN) of the user who is used for binding
                                     </label>
@@ -1100,7 +1100,7 @@ const AuthProviderForm = () => {
                                         Example for OpenLDAP: <code>uid=admin,ou=users,dc=example,dc=org</code>. Example for Active Directory: <code>EXAMPLE\admin</code>.
                                     </small>
                                 </div>
-                                {ldapBindDN !== "" ? <div className="form-group mt-3 mb-3">
+                                {ldapBindDN !== "" ? <div className="mt-3 mb-3">
                                     <label htmlFor="ldapPassword">
                                         Password of the user who is used for binding
                                     </label>
@@ -1117,7 +1117,7 @@ const AuthProviderForm = () => {
                                         {formErrors.password ? formErrors.password : ""}
                                     </div>
                                 </div> : <></>}
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="ldapBase">
                                         DN of the base where users are located
                                     </label>
@@ -1138,7 +1138,7 @@ const AuthProviderForm = () => {
                                         Example for OpenLDAP: <code>ou=users,dc=example,dc=com</code>.
                                     </small>
                                 </div>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="ldapUserFilter">
                                         User filter (Format can be found in <i>RFC4515</i>)
                                     </label>
@@ -1159,7 +1159,7 @@ const AuthProviderForm = () => {
                                         Examples: <code>(objectClass=User)</code> or <code>(memberOf=cn=gams-engine,ou=groups,dc=example,dc=com)</code> or <code>&((objetClass=User),(employeeType=developer))</code>.
                                     </small>
                                 </div>
-                                <div className="form-group mt-3 mb-3">
+                                <div className="mt-3 mb-3">
                                     <label htmlFor="encryption">
                                         Encryption method
                                     </label>

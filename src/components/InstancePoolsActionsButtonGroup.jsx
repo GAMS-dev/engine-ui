@@ -74,11 +74,13 @@ const InstancePoolsActionsButtonGroup = props => {
         <>
             {isPool ?
                 poolIsCanceling ?
-                    <small className="mr-3">Shutting down...</small> :
-                    poolSizeCurrent !== poolSize ?
-                        <small className="mr-3">Scaling {poolSizeCurrent < poolSize ? 'up' : 'down'}...</small> :
-                        (instancePoolsEnabled && hasPoolWritePerm) ?
-                            <button className="btn btn-sm btn-outline-info" onClick={() => setShowScalePoolDialog(true)}>Change Size</button> : <></> :
+                    <small className="me-3">Shutting down...</small> :
+                    <>
+                        {poolSizeCurrent !== poolSize ?
+                            <small className="me-3">Scaling {poolSizeCurrent < poolSize ? 'up' : 'down'}...</small> :
+                            (instancePoolsEnabled && hasPoolWritePerm) ?
+                                <button className="btn btn-sm btn-outline-info" onClick={() => setShowScalePoolDialog(true)}>Change Size</button> : <></>}
+                    </> :
                 <Link to={`instances/update/${label}`} className="btn btn-sm btn-outline-info">
                     Update
                 </Link>}
@@ -101,7 +103,7 @@ const InstancePoolsActionsButtonGroup = props => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="newPoolSize">
                                     New Size
                                 </label>

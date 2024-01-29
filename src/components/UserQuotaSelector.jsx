@@ -129,7 +129,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     }, [quotaDataInternal, userToEdit, quotas, maxQuotas])
 
     return <>
-        <div className="form-group">
+        <div className="mb-3">
             <label htmlFor="quotaParallel">
                 Parallel Quota (weighted parallel jobs)
                 {isFinite(maxQuotas.parallel) && <Button
@@ -174,7 +174,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 </div>
             </div>
         </div>
-        <div className="form-group">
+        <div className="mb-3">
             <label htmlFor="quotaVolume">
                 Volume Quota (weighted job hours)
                 {isFinite(maxQuotas.volume) && <Button
@@ -220,7 +220,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 </div>
             </div>
         </div>
-        <div className="form-group">
+        <div className="mb-3">
             <label htmlFor="quotaDisk">
                 Disk Space Quota (in MB)
                 {isFinite(maxQuotas.disk) && <Button

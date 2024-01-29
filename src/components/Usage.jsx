@@ -75,19 +75,19 @@ const Usage = () => {
             field: "queuetime",
             column: "Time in Queue",
             sorter: "numerical",
-            displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
+            displayer: e => <TimeDiffDisplay time={e} classNames="badge text-dark" />
         },
         {
             field: "solvetime",
             column: "Solve Time",
             sorter: "numerical",
-            displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
+            displayer: e => <TimeDiffDisplay time={e} classNames="badge text-dark" />
         },
         {
             field: "totaltime",
             column: "Total Time",
             sorter: "numerical",
-            displayer: e => <TimeDiffDisplay time={e} classNames="badge" />
+            displayer: e => <TimeDiffDisplay time={e} classNames="badge text-dark" />
         }
     ]);
     const [displayFieldsDisaggregated] = useState([
@@ -103,7 +103,7 @@ const Usage = () => {
             displayer: (name, job_count) => <>
                 {job_count != null ? <Link to={`/jobs/hc:${name}`}>{name}
                     <sup>
-                        <span className="badge badge-pill badge-primary ml-1">HC</span>
+                        <span className="badge rounded-pill bg-primary ms-1">HC</span>
                     </sup></Link> :
                     <Link to={`/jobs/${name}`}>{name}</Link>}
             </>
@@ -374,7 +374,7 @@ const Usage = () => {
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">{`Usage of user: ${username}`}</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
-                    <div className="btn-group mr-2">
+                    <div className="btn-group me-2">
                         <button
                             type="button"
                             className="btn btn-sm btn-outline-secondary"
@@ -383,12 +383,11 @@ const Usage = () => {
                             }}
                         >
                             Refresh
-                            <RefreshCw width="12px" className="ml-2" />
+                            <RefreshCw width="12px" className="ms-2" />
                         </button>
                     </div>
                 </div>
             </div>
-
             <div className="row">
                 <div className="col-sm-6 col-12 mb-4">
                     <div className="row">
@@ -422,27 +421,27 @@ const Usage = () => {
                                         <input
                                             name="showinvitees"
                                             type="checkbox"
-                                            className="ml-2"
+                                            className="ms-2"
                                             checked={recursive}
                                             onChange={e => {
                                                 setRecursive(e.target.checked)
                                             }} />
                                     </label>
                                 </div>}
-                            <div className="col-sm-4 mb-4">
+                            <div className="col-sm-6 mb-4">
                                 <label>
                                     Show disaggregated data?
                                     <input
                                         name="showAggregated"
                                         type="checkbox"
-                                        className="ml-2"
+                                        className="ms-2"
                                         checked={!aggregated}
                                         onChange={e => {
                                             setAggregated(!e.target.checked)
                                         }} />
                                 </label>
                             </div>
-                            <div className="col-sm-4 mb-4">
+                            <div className="col-sm-6 mb-4">
                                 <input className="form-check-input" type="radio" id="flexRadioDefault1"
                                     checked={showParallelQuota === true}
                                     onChange={e => setShowParallelQuota(true)} />
@@ -450,7 +449,7 @@ const Usage = () => {
                                     Jobs weighted with multiplier
                                 </label>
                             </div>
-                            <div className="col-sm-4 mb-4">
+                            <div className="col-sm-6 mb-4">
                                 <input className="form-check-input" type="radio" id="flexRadioDefault2"
                                     checked={showParallelQuota !== true}
                                     onChange={e => setShowParallelQuota(false)} />
@@ -468,7 +467,7 @@ const Usage = () => {
                                                 Total Time:
                                             </div>
                                             <div className="col-8">
-                                                <TimeDiffDisplay time={totalTime} classNames="badge badge-secondary" />
+                                                <TimeDiffDisplay time={totalTime} classNames="badge bg-secondary" />
                                             </div>
                                         </div>
                                     </small>
@@ -480,7 +479,7 @@ const Usage = () => {
                                                 Total Solve Time:
                                             </div>
                                             <div className="col-8">
-                                                <TimeDiffDisplay time={totalSolveTime} classNames="badge badge-secondary" />
+                                                <TimeDiffDisplay time={totalSolveTime} classNames="badge bg-secondary" />
                                             </div>
                                         </div>
                                     </small>

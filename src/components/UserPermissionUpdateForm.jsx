@@ -202,11 +202,11 @@ const UserUpdateForm = () => {
                                 {submissionErrorMsg}
                             </div>
                             <fieldset disabled={isSubmitting}>
-                                <div className="form-group">
+                                <div className="mb-3">
                                     <label htmlFor="roleSelector">
                                         {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
                                     </label>
-                                    <select id="roleSelector" className="form-control" value={newRole} onChange={updateNewRole}>
+                                    <select id="roleSelector" className="form-control form-select" value={newRole} onChange={updateNewRole}>
                                         <option key="user" value="user">User</option>
                                         <option key="inviter" value="inviter">Inviter</option>
                                         {(roles.find(role => role === "admin") !== undefined) &&
@@ -214,7 +214,7 @@ const UserUpdateForm = () => {
                                     </select>
                                 </div>
                                 {newRole === "inviter" && availableIdentityProviders.length > 1 &&
-                                    (IDPLoading ? <ClipLoader /> : <div className="form-group">
+                                    (IDPLoading ? <ClipLoader /> : <div className="mb-3">
                                         <label htmlFor="identityProvidersAllowed">
                                             Identity providers user is allowed to invite with
                                         </label>

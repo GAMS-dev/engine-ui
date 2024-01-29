@@ -85,7 +85,7 @@ const DefaultInstanceForm = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="defaultInstance">
                                     Default instance
                                 </label>

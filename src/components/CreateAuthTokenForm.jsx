@@ -91,7 +91,7 @@ const CreateAuthTokenForm = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group mt-3 mb-3">
+                            <div className="mt-3 mb-3">
                                 <label htmlFor="ldapPort">
                                     Expiration date
                                 </label>
@@ -108,7 +108,7 @@ const CreateAuthTokenForm = () => {
                                     {formErrors.expires_in ? formErrors.expires_in : ""}
                                 </div>
                             </div>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="accessScopes">
                                     Access scopes
                                 </label>
@@ -128,7 +128,7 @@ const CreateAuthTokenForm = () => {
                                     {formErrors.scope ? formErrors.scope : ""}
                                 </div>
                             </div>
-                            <div className="form-group form-check mt-3 mb-3">
+                            <div className="form-check mt-3 mb-3">
                                 <input type="checkbox"
                                     className="form-check-input"
                                     checked={readonlyToken}

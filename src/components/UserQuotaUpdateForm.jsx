@@ -133,7 +133,7 @@ const UserQuotaUpdateForm = () => {
                             <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                                 {submissionErrorMsg}
                             </div>
-                            <div className="form-group form-check mt-3 mb-3">
+                            <div className="form-check mt-3 mb-3">
                                 <input type="checkbox" className="form-check-input" checked={inheritQuotas} onChange={e => setInheritQuotas(e.target.checked)}
                                     id="inheritQuotas" />
                                 <label className="form-check-label" htmlFor="inheritQuotas">Inherit quotas from inviter?</label>

@@ -248,13 +248,13 @@ const ModelSubmissionForm = () => {
                             {submissionErrorMsg}
                         </div>
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <FileDropZone
                                     label={modelname ? "Drop updated model files here" : "Drop model files here"}
                                     onDrop={updateModelFiles} />
                             </div>
-                            {!modelname && <div className="form-group">
-                                <label htmlFor="newModelName" className="sr-only">
+                            {!modelname && <div className="mb-3">
+                                <label htmlFor="newModelName" className="visually-hidden">
                                     Model Name
                                 </label>
                                 <input
@@ -268,8 +268,8 @@ const ModelSubmissionForm = () => {
                                     required
                                 />
                             </div>}
-                            <div className="form-group">
-                                <label htmlFor="runName" className="sr-only">
+                            <div className="mb-3">
+                                <label htmlFor="runName" className="visually-hidden">
                                     Name of the Main File
                                 </label>
                                 <input
@@ -282,8 +282,8 @@ const ModelSubmissionForm = () => {
                                     onChange={e => setRunName(e.target.value)}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="clArgs" className="sr-only">
+                            <div className="mb-3">
+                                <label htmlFor="clArgs" className="visually-hidden">
                                     Command Line Arguments (comma-separated)
                                 </label>
                                 <input
@@ -296,8 +296,8 @@ const ModelSubmissionForm = () => {
                                     onChange={e => setClArgs(e.target.value)}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="textEntries" className="sr-only">
+                            <div className="mb-3">
+                                <label htmlFor="textEntries" className="visually-hidden">
                                     Text Entries (comma-separated)
                                 </label>
                                 <input
@@ -310,8 +310,8 @@ const ModelSubmissionForm = () => {
                                     onChange={e => setTextEntries(e.target.value)}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="streamEntries" className="sr-only">
+                            <div className="mb-3">
+                                <label htmlFor="streamEntries" className="visually-hidden">
                                     Stream Entries (comma-separated)
                                 </label>
                                 <input
@@ -329,8 +329,8 @@ const ModelSubmissionForm = () => {
                                 inexObject={inexObject}
                                 onChangeHandler={e => setInexJSON(e)} />
                             {availableUserGroups.length > 0 &&
-                                <div className="form-group mt-3">
-                                    <label htmlFor="userGroups" className="sr-only">
+                                <div className="mb-3 mt-3">
+                                    <label htmlFor="userGroups" className="visually-hidden">
                                         User Groups
                                     </label>
                                     <Select

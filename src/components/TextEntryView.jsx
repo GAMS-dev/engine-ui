@@ -68,9 +68,9 @@ const TextEntryView = props => {
 
   return (
     <form action="">
-      <div className="form-group">
+      <div className="mb-3">
         <table className="table table-sm">
-          <thead className="thead-dark">
+          <thead className="table-dark">
             <tr>
               <th className="text-center">Text Entries</th>
             </tr>
@@ -80,7 +80,7 @@ const TextEntryView = props => {
           <select
             name="text_entry_sel"
             id="text_entry_sel"
-            className="form-control"
+            className="form-control form-select"
             onChange={e => setEntryIndex(e.target.selectedIndex)}
           >
             {textEntries.map(e => (
@@ -91,7 +91,7 @@ const TextEntryView = props => {
           </select>
         </div>
       </div>
-      <div className="form-group">
+      <div className="mb-3">
         <label htmlFor="exampleFormControlTextarea1">Value</label>
         {truncationFlag &&
           <div>

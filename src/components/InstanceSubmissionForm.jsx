@@ -145,7 +145,7 @@ const InstanceSubmissionForm = () => {
                         <div className="row">
                             <div className="col-md-6 col-12">
                                 <fieldset disabled={isSubmitting}>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="instanceLabel">
                                             Instance Label
                                         </label>
@@ -162,7 +162,7 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.label ? formErrors.label : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="cpuReq">
                                             CPU (vCPU)
                                         </label>
@@ -180,7 +180,7 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.cpu_request ? formErrors.cpu_request : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="memReq">
                                             Memory (in MiB)
                                         </label>
@@ -197,7 +197,7 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.memory_request ? formErrors.memory_request : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="wsReq">
                                             Workspace Size (MiB)
                                         </label>
@@ -219,7 +219,7 @@ const InstanceSubmissionForm = () => {
                             </div>
                             <div className="col-md-6 col-12">
                                 <fieldset disabled={isSubmitting}>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="multiplier">
                                             Multiplier
                                         </label>
@@ -237,7 +237,7 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.multiplier ? formErrors.multiplier : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="multiplier_idle">
                                             Idle Multiplier (applied when worker in instance pool is idle)
                                         </label>
@@ -255,7 +255,7 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.multiplier_idle ? formErrors.multiplier_idle : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="tolerations">
                                             Tolerations (comma-separated, optional)
                                         </label>
@@ -271,7 +271,7 @@ const InstanceSubmissionForm = () => {
                                             {formErrors.tolerations ? formErrors.tolerations : ""}
                                         </div>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="mb-3">
                                         <label htmlFor="nodeSelectors">
                                             Node Selectors (comma-separated, optional)
                                         </label>
@@ -293,7 +293,7 @@ const InstanceSubmissionForm = () => {
                                             id="assignLicense" />
                                         <label className="form-check-label" htmlFor="assignLicense">Attach GAMS license to the instance (takes precedence over user and system-wide licenses)?</label>
                                     </div>
-                                    {assignLicense && <div className="form-group">
+                                    {assignLicense && <div className="mb-3">
                                         <label htmlFor="licenseBox">
                                             GAMS License
                                         </label>

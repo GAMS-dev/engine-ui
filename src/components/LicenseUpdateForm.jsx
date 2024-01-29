@@ -135,12 +135,12 @@ const LicenseUpdateForm = () => {
                                 onChange={e => setLicense(e.target.value)} >
                             </textarea>
                         </fieldset>
-                        <div className="mt-3">
+                        <div className="mt-3 d-grid gap-2">
                             <SubmitButton isSubmitting={isSubmitting}>
                                 Update License
                             </SubmitButton>
                             {registeredLicense !== "" &&
-                                <button type="submit" className={`btn btn-lg btn-danger btn-block`}
+                                <button type="submit" className={`btn btn-lg btn-danger`}
                                     disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
                                     {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
                                 </button>}

@@ -1,6 +1,6 @@
 {
-  "short_name": "GAMS UI",
-  "name": "GAMS Engine UI",
+  "short_name": "GAMS Engine",
+  "name": "GAMS Engine",
   "icons": [
     {
       "src": "favicon.ico",

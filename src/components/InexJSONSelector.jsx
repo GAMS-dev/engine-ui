@@ -10,24 +10,27 @@ export const InexJSONSelector = props => {
         { value: "include", label: "include" });
     const [includeFiles, setIncludeFiles] = useState(inexObject && inexObject.type === "include" ? inexObject.files.join(",") : "");
     const [excludeFiles, setExcludeFiles] = useState(inexObject && inexObject.type === "exclude" ? inexObject.files.join(",") : "");
+    const [globbingEnabled, setGlobbingEnabled] = useState(inexObject ? inexObject.globbing_enabled : true);
 
     useEffect(() => {
         if (filterResults) {
             if (toggleIncludeExclude.value === "include") {
                 onChangeHandler(JSON.stringify({
                     type: "include",
-                    files: includeFiles.split(",").map(el => el.trim())
+                    files: includeFiles.split(",").map(el => el.trim()),
+                    globbing_enabled: globbingEnabled
                 }));
             } else {
                 onChangeHandler(JSON.stringify({
                     type: "exclude",
-                    files: excludeFiles.split(",").map(el => el.trim())
+                    files: excludeFiles.split(",").map(el => el.trim()),
+                    globbing_enabled: globbingEnabled
                 }));
             }
         } else {
             onChangeHandler("");
         }
-    }, [filterResults, toggleIncludeExclude, includeFiles, excludeFiles, onChangeHandler]);
+    }, [filterResults, toggleIncludeExclude, includeFiles, excludeFiles, onChangeHandler, globbingEnabled]);
 
     return (
         <React.Fragment>
@@ -41,7 +44,7 @@ export const InexJSONSelector = props => {
             </div>
             {filterResults && (
                 <React.Fragment>
-                    <div className="form-group mt-3 mb-3">
+                    <div className="mt-3 mb-3">
                         <label htmlFor="toggleIncludeExclude">
                             Include or exclude files from results archive?
                         </label>
@@ -61,8 +64,8 @@ export const InexJSONSelector = props => {
                         />
                     </div>
                     {toggleIncludeExclude.value === "include" ?
-                        <div className="form-group">
-                            <label htmlFor="includeFiles" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="includeFiles" className="visually-hidden">
                                 Files to include in results (optional, comma-separated)
                             </label>
                             <input
@@ -75,8 +78,8 @@ export const InexJSONSelector = props => {
                                 onChange={e => setIncludeFiles(e.target.value)}
                             />
                         </div> :
-                        <div className="form-group">
-                            <label htmlFor="excludeFiles" className="sr-only">
+                        <div className="mb-3">
+                            <label htmlFor="excludeFiles" className="visually-hidden">
                                 Files to exclude from results (optional, comma-separated)
                             </label>
                             <input
@@ -90,6 +93,14 @@ export const InexJSONSelector = props => {
                             />
                         </div>
                     }
+                <div className="form-check">
+                    <input type="checkbox"
+                        className="form-check-input"
+                        checked={globbingEnabled}
+                        onChange={e => setGlobbingEnabled(e.target.checked)}
+                        id="globbingEnabled" />
+                    <label className="form-check-label" htmlFor="globbingEnabled">Enable globbing (<kbd>*</kbd>/<kbd>?</kbd> wildcard characters)?</label>
+                </div>
                 </React.Fragment>)
             }
         </React.Fragment>

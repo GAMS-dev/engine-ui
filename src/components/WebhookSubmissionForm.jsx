@@ -103,7 +103,7 @@ const WebhookSubmissionForm = () => {
                 <div className="row">
                     <div className="col-md-6 col-12">
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="instanceLabel">
                                     Payload URL
                                 </label>
@@ -157,7 +157,7 @@ const WebhookSubmissionForm = () => {
                 <div className="row">
                     <div className="col-12">
                         <fieldset disabled={isSubmitting}>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="cpuReq">
                                     Secret token
                                 </label>
@@ -176,7 +176,7 @@ const WebhookSubmissionForm = () => {
                                     Used to authenticate payload of webhook via <i>HMAC-SHA256</i>. HMAC is sent in the HTTP header <code>X-ENGINE-HMAC</code>.
                                 </small>
                             </div>
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="events">
                                     Events for which webhook should be triggered
                                 </label>
@@ -208,7 +208,7 @@ const WebhookSubmissionForm = () => {
                                 setIsValid={setParameterizedEventsValid}
                                 isSubmitting={isSubmitting}
                                 validationErrors={formErrors.parameterized_events} />
-                            <div className="form-group">
+                            <div className="mb-3">
                                 <label htmlFor="contentType">
                                     Content type
                                 </label>

@@ -39,7 +39,6 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                         <input
                             type="number"
                             min="0"
-                            max="10000"
                             className={"form-control" + (isNaN(eventParameter) ? " is-invalid" : "")}
                             placeholder={"Event trigger (in seconds)"}
                             value={isNaN(eventParameter) ? '' : eventParameter}
@@ -53,7 +52,7 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                         />
                     </div>
                     <div className="col-1">
-                        <button type="button" className="close" aria-label="Close"
+                        <button type="button" className="btn-close" aria-label="Close"
                             onClick={_ => {
                                 const newEvents = [...parameterizedEvents];
                                 newEvents.splice(idx, 1);
