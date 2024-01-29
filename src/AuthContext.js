@@ -1,6 +1,6 @@
 import React, { useState, useLayoutEffect, createContext } from "react";
 import axios from "axios";
-import mem from "mem";
+import memoize from "memoize";
 
 export const AuthContext = createContext();
 
@@ -12,7 +12,7 @@ export const AuthProvider = props => {
 
   const [interceptor, setInterceptor] = useState(false);
 
-  const refreshToken = mem(async () => {
+  const refreshToken = memoize(async () => {
     try {
       const loginData = JSON.parse(localStorage.getItem("login"));
       const { refreshTokenData } = loginData;
