@@ -30,7 +30,7 @@ const Table = props => {
   const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage == null ? 10: props.rowsPerPage);
   const [noPages, setNoPages] = useState(Math.ceil(noRows / rowsPerPage));
 
-  const noRowsPerPageOptions = [{value: "10", label: "10"}, {value: "20", label: "20"}];
+  const noRowsPerPageOptions = [{value: "10", label: "10"}, {value: "20", label: "20"}, {value: "50", label: "50"}, {value: "100", label: "100"}];
 
   useEffect(() => {
     if (resetPageNumber === true) {
@@ -223,7 +223,7 @@ const Table = props => {
       </table>
       {noRows > 0 &&
         <>
-          <small>{currentPage*rowsPerPage+1}-{Math.min((currentPage+1)*rowsPerPage, noRows)} of {noRows}</small>
+          <small>{currentPage*rowsPerPage+1}-{Math.min((currentPage+1)*rowsPerPage, noRows)} of {noRows.toLocaleString()}</small>
           <Pagination>
             <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
             <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
