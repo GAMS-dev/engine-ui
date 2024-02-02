@@ -366,12 +366,9 @@ const LoginForm = ({ showRegistrationForm }) => {
         setRedirectToRoot(true);
         return;
       }
-    } else if (login) {
-      setRedirectToRoot(true);
-      return;
     }
     fetchAuthProviders(selectedProvider, nativeClientParams);
-  }, [server, login]);
+  }, [server]);
 
   useEffect(() => {
     const fetchPasswordPolicy = async () => {
@@ -558,7 +555,8 @@ const LoginForm = ({ showRegistrationForm }) => {
                 Authentication successful. You can now close this window.
               </Alert>
                 {window.location.replace(ncRedirectUri)}
-              </> : <></>) : <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>}
+              </> : <></>) : (login ? <Navigate replace to="/" />:
+              <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
             <div className="invalid-feedback">
               {loginErrorMsg}
             </div>
