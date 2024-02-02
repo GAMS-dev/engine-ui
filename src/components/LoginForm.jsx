@@ -338,15 +338,15 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
     const searchParams = new URLSearchParams(document.location.search);
     const selectedProvider = searchParams.get('provider');
-    const native_client_id = searchParams.get('nc_id');
-    setIsNativeClientLogin(native_client_id != null);
+    const nativeClientId = searchParams.get('nc_id');
+    setIsNativeClientLogin(nativeClientId != null);
 
     let nativeClientParams;
 
-    if (native_client_id != null) {
+    if (nativeClientId != null) {
       setIsOAuthProcessing(true);
-      if (!VALID_NATIVE_CLIENT_IDS.includes(native_client_id)) {
-        console.error(`Invalid native client id: ${native_client_id}`)
+      if (!VALID_NATIVE_CLIENT_IDS.includes(nativeClientId)) {
+        console.error(`Invalid native client id: ${nativeClientId}`)
         setRedirectToRoot(true);
         return;
       }
@@ -357,7 +357,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         return;
       }
       nativeClientParams = {
-        'id': native_client_id,
+        'id': nativeClientId,
         'redirect_uri': ncRedirectUri,
         'public_key_b64': searchParams.get('nc_public_key')
       }
@@ -367,7 +367,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         return;
       }
     } else if (login) {
-      //setRedirectToRoot(true);
+      setRedirectToRoot(true);
       return;
     }
     fetchAuthProviders(selectedProvider, nativeClientParams);
