@@ -34,7 +34,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [passwordPolicyHelper, setPasswordPolicyHelper] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state=') || document.location.search.includes('native_client_id'));
+  const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state=') || document.location.search.includes('nc_id='));
   const [register, setRegister] = useState(showRegistrationForm === "true");
   const [showRegistrationSuccessAlert, setShowRegistrationSuccessAlert] = useState(false);
 
