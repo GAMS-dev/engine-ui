@@ -95,7 +95,6 @@ describe('UserSettingsContext', () => {
             </UserSettingsProvider>, {
             wrapper: AuthProviderWrapper
         });
-        screen.debug()
         fireEvent.keyDown(document.getElementById('selectMulitplierUnit'), { key: 'ArrowDown' });
         await waitFor(() => screen.getByText('multh'));
         fireEvent.click(screen.getByText('multh'));
