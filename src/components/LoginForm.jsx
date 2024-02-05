@@ -557,7 +557,7 @@ const LoginForm = ({ showRegistrationForm }) => {
                 {window.location.replace(ncRedirectUri)}
               </> : <></>) : (login ? <Navigate replace to="/" />:
               <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
-            <div className="invalid-feedback">
+            <div className="invalid-feedback" style={{ display: loginErrorMsg? "block" : "none" }}>
               {loginErrorMsg}
             </div>
             {showRegistrationSuccessAlert && <Alert variant="success">
