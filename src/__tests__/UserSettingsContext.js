@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { within } from '@testing-library/dom'
 
 import { UserSettingsContext, UserSettingsProvider } from "../components/UserSettingsContext";
 import { AuthContext } from '../AuthContext';
@@ -21,18 +20,6 @@ const AuthProviderWrapper = ({ children }) => (
     </AuthContext.Provider>
 );
 
-const RouterWrapper = (options) => {
-    const mulitplierUnit = options?.mulitplierUnit == null ? 'mults' : options.mulitplierUnit;
-    const tablePageLength = options?.tablePageLength == null ? '10' : options.tablePageLength;
-
-    return ({ children }) => (
-        <MemoryRouter>
-            <UserSettingsProvider>
-                {children}
-            </UserSettingsProvider>
-        </MemoryRouter >)
-};
-
 const TestingComponent = () => {
     const [userSettings,] = useContext(UserSettingsContext)
     return (
@@ -48,8 +35,6 @@ testUserSettings['admin'] = {
     mulitplierUnit: 'multh',
     tablePageLength: '20'
 }
-
-
 
 describe('UserSettingsContext', () => {
     it('provides expected UserSettingsContext obj to child elements', () => {
