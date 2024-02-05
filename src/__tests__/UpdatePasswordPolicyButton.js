@@ -1,10 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { within } from '@testing-library/dom'
 import { AuthContext } from '../AuthContext';
 import UpdatePasswordPolicyButton from '../components/UpdatePasswordPolicyButton';
-import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 
 jest.mock('axios');
@@ -81,7 +79,7 @@ describe('test UpdatePasswordPolicyButton', () => {
     });
 
     it('can click every checkbox', async () => {
-        const result = render(<UpdatePasswordPolicyButton />, {
+        render(<UpdatePasswordPolicyButton />, {
             wrapper: AuthProviderWrapper
         });
 
