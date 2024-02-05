@@ -16,10 +16,6 @@ const UserSettingsForm = () => {
             mulitplierUnit: selectedMulitplierUnit,
             tablePageLength: selectedTablePageLength
         })
-        localStorage.setItem('userSettings', JSON.stringify({
-            mulitplierUnit: selectedMulitplierUnit,
-            tablePageLength: selectedTablePageLength
-        }))
     }, [selectedMulitplierUnit, selectedTablePageLength, setUserSettings])
 
     return (
