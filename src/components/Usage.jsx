@@ -561,7 +561,7 @@ const Usage = () => {
                     </div>
                 </Tab>
                 <Tab eventKey="quotas" title="Quotas">
-                    <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />
+                    <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} />
                 </Tab>
             </Tabs>
         </>

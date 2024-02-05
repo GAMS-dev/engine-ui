@@ -2,13 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import Select from "react-select";
 import { UserSettingsContext } from "./UserSettingsContext";
 
-
-// TODO change useEffect to only change on Submit
-// and than also change it in the local storage
-// get default values from the local storage
-
-
-
 const UserSettingsForm = () => {
 
     const [userSettings, setUserSettings] = useContext(UserSettingsContext)

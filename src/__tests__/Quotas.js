@@ -6,16 +6,25 @@ import '@testing-library/jest-dom'
 
 import Quotas from '../components/Quotas';
 import { testDatax } from '../utils/testData';
+import { UserSettingsContext } from "../components/UserSettingsContext";
 
 
 let startDate = new Date('2020-08-03T17:10:15.000000+00:00');
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00');
 
-const RouterWrapper = ({ children }) => (
+const RouterWrapper = (options) => {
+    const mulitplierUnit = options?.mulitplierUnit == null? 'mults': options.mulitplierUnit;
+
+    return ({children}) => (
     <MemoryRouter>
+        <UserSettingsContext.Provider value={[{
+            mulitplierUnit: mulitplierUnit,
+            tablePageLength: '10'
+        }]}>
         {children}
-    </MemoryRouter>
-);
+    </UserSettingsContext.Provider>
+    </MemoryRouter >)
+};
 
 window.ResizeObserver = function () {
     return {
@@ -30,14 +39,14 @@ describe('Quotas with single job', () => {
     const testData = testDatax.test_single_job
 
     it('renders Quotas component for single job', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
     });
 
     it('displays the jobs table correctly for a single job', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         const tableJobs = within(screen.getByTestId('tableJobs'));
@@ -55,8 +64,8 @@ describe('Quotas with single job', () => {
     });
 
     it('displays the pool table correctly for a single job (not on pool)', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         const tablePool = within(screen.getByTestId('tableIdlePool'));
@@ -64,8 +73,8 @@ describe('Quotas with single job', () => {
     });
 
     it('displays Total correctly and no charts are visible', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         expect(screen.getByText('Total: 259,200 mults', { selector: 'h2' })).toBeInTheDocument();
@@ -78,14 +87,14 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     const testData = testDatax.test_hypercube_with_pool_and_job
 
     it('renders Quotas component for multiple jobs', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
     });
 
     it('displays both charts and tables with usage data', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         expect(screen.getByText('Total: 220 mults', { selector: 'h2' })).toBeInTheDocument();
@@ -105,8 +114,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     });
 
     it('displays correct data in the tables', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         const tableJobs = within(screen.getByTestId('tableJobs'));
@@ -124,8 +133,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     });
 
     it('displays correct data in the tables if grouped by user', async () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
@@ -149,8 +158,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     });
 
     it('displays correct data in the tables if grouped by instance', async () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
@@ -174,8 +183,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     });
 
     it('displays correct data in the tables if grouped by pool label', async () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
@@ -199,8 +208,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     });
 
     it('changing aggregate multiple times works', async () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         let tableJobs = within(screen.getByTestId('tableJobs'));
@@ -250,8 +259,8 @@ describe('charts cut of correctly when to many parts are given', () => {
     const testData = testDatax.test_too_many_pool_labels
 
     it('displays only first 10 pool labels in chart', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper()
         });
 
         expect(screen.queryByText('Users', { selector: 'h3' })).toBeNull();
@@ -268,8 +277,8 @@ describe('test cases in calculateQuota', () => {
     const testData = testDatax.test_calc_quota_cases
 
     it('cases in calculateQuota work', () => {
-        render(<Quotas data={testData} calcStartDate={new Date('2021-08-03T17:10:15.000000+00:00')} calcEndTime={new Date('2021-08-05T17:10:15.000000+00:00')} quotaUnit='mults' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={new Date('2021-08-03T17:10:15.000000+00:00')} calcEndTime={new Date('2021-08-05T17:10:15.000000+00:00')} />, {
+            wrapper: RouterWrapper()
         });
         expect(screen.getAllByRole('img')).toHaveLength(3);
     })
@@ -279,8 +288,8 @@ describe('test multh also works', () => {
     const testData = testDatax.test_hypercube_with_pool_and_job
 
     it('multh with multiple jobs ', () => {
-        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='multh' />, {
-            wrapper: RouterWrapper
+        render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
+            wrapper: RouterWrapper({mulitplierUnit: 'multh'})
         });
 
         expect(screen.getByText('Total: 0.061 multh', { selector: 'h2' })).toBeInTheDocument();
