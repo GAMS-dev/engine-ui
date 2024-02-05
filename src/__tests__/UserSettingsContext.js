@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 
 import { UserSettingsContext, UserSettingsProvider } from "../components/UserSettingsContext";
