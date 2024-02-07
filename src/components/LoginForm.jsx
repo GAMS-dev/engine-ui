@@ -9,6 +9,8 @@ import { getResponseError } from "./util";
 import { useEffect } from "react";
 import { Nav, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import OAuth2Login from "./OAuth2Login";
 import { ClipLoader } from "react-spinners";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
@@ -16,7 +18,7 @@ import { Info } from "react-feather";
 import { encryptRSA } from "./oauth";
 
 const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
-const VALID_NATIVE_CLIENT_IDS = ["com.gams.miro"]
+const VALID_NATIVE_CLIENT_IDS = { "com.gams.miro": "GAMS MIRO" }
 
 const LoginForm = ({ showRegistrationForm }) => {
   const [username, setUsername] = useState("");
@@ -34,7 +36,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [passwordPolicyHelper, setPasswordPolicyHelper] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isOAuthProcessing, setIsOAuthProcessing] = useState(window.location.search.includes('state=') || window.location.search.includes('nc_id='));
+  const [isOAuthProcessing, setIsOAuthProcessing] = useState(window.location.search.includes('state='));
   const [register, setRegister] = useState(showRegistrationForm === "true");
   const [showRegistrationSuccessAlert, setShowRegistrationSuccessAlert] = useState(false);
 
@@ -49,6 +51,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [redirectToRoot, setRedirectToRoot] = useState(false);
   const [isNativeClientLogin, setIsNativeClientLogin] = useState(false);
   const [ncRedirectUri, setNcRedirectUri] = useState("");
+  const [nativeClientLoginConfirmed, setNativeClientLoginConfirmed] = useState(false);
 
   const [login, setLogin] = useContext(AuthContext);
 
@@ -348,16 +351,13 @@ const LoginForm = ({ showRegistrationForm }) => {
     let nativeClientParams;
 
     if (nativeClientId != null) {
-      setIsOAuthProcessing(true);
-      if (!VALID_NATIVE_CLIENT_IDS.includes(nativeClientId)) {
+      if (!VALID_NATIVE_CLIENT_IDS.hasOwnProperty(nativeClientId)) {
         setLoginErrorMsg(`Invalid native client id: ${nativeClientId}`)
-        setIsOAuthProcessing(false);
         return;
       }
       const ncRedirectUri = searchParams.get('nc_redirect_uri');
       if (!/^[a-z0-9/]+$/i.test(ncRedirectUri)) {
         setLoginErrorMsg(`Invalid native client redirect URI: ${ncRedirectUri}`)
-        setIsOAuthProcessing(false);
         return;
       }
       nativeClientParams = {
@@ -367,7 +367,6 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
       if (Object.values(nativeClientParams).findIndex(val => val == null) !== -1) {
         setLoginErrorMsg('Missing native client parameters')
-        setIsOAuthProcessing(false);
         return;
       }
     }
@@ -558,7 +557,24 @@ const LoginForm = ({ showRegistrationForm }) => {
                 Authentication successful. You can now close this window.
               </Alert>
                 {window.location.replace(ncRedirectUri)}
-              </> : <></>) : (login ? <Navigate replace to="/" /> :
+              </> : (loginErrorMsg ? <></> : <div
+                className="modal show"
+                style={{ display: 'block', position: 'initial' }}
+              >
+                <Modal.Dialog>
+                  <Modal.Header>
+                    <Modal.Title>Please Confirm</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <p>Please confirm that you are trying to log in with {VALID_NATIVE_CLIENT_IDS[OAuthLoginConfig?.nativeClientParams?.id]}.</p>
+                  </Modal.Body>
+
+                  <Modal.Footer>
+                    <Button variant="secondary" onClick={() => window.location.replace('/')}>Cancel</Button>
+                    <Button variant="primary" onClick={() => setNativeClientLoginConfirmed(true)}>Confirm</Button>
+                  </Modal.Footer>
+                </Modal.Dialog>
+              </div>)) : (login ? <Navigate replace to="/" /> :
                 <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
             <div className="invalid-feedback" style={{ display: loginErrorMsg ? "block" : "none" }}>
               {loginErrorMsg}
@@ -679,11 +695,12 @@ const LoginForm = ({ showRegistrationForm }) => {
         }
         {redirectToRoot ? <Navigate replace to="/" /> : ""}
       </form>
-      <OAuth2Login
-        server={server}
-        loginConfig={OAuthLoginConfig}
-        setAuthToken={setOAuthToken}
-        setErrorMsg={setOAuthErrorMsg} />
+      {OAuthLoginConfig?.nativeClientParams && nativeClientLoginConfirmed !== true ? <></> :
+        <OAuth2Login
+          server={server}
+          loginConfig={OAuthLoginConfig}
+          setAuthToken={setOAuthToken}
+          setErrorMsg={setOAuthErrorMsg} />}
     </div>
   );
 };

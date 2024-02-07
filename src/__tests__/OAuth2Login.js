@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TextEncoder, TextDecoder } from 'util';
 import '@testing-library/jest-dom'
@@ -49,7 +49,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         Object.defineProperty(window, "location", {
             value: {
-                search: '?nc_id=test1234',
+                search: '?nc_id=toString',
             },
             writable: true,
         });
@@ -58,7 +58,8 @@ describe('LoginForm with OAuth2 flow', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => {
-            expect(screen.getByText('Invalid native client id: test1234')).toBeInTheDocument();
+            expect(screen.getByText('Invalid native client id: toString')).toBeInTheDocument();
+            expect(screen.queryByText('Please confirm that you are trying to log in with', { exact: false })).not.toBeInTheDocument();
         })
     });
     it('prints error with missing nc parameters', async () => {
@@ -92,6 +93,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         await waitFor(() => {
             expect(screen.getByText('Missing native client parameters')).toBeInTheDocument();
+            expect(screen.queryByText('Please confirm that you are trying to log in with', { exact: false })).not.toBeInTheDocument();
         })
     });
     it('prints error with missing nc parameters', async () => {
@@ -125,6 +127,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         await waitFor(() => {
             expect(screen.getByText('Missing native client parameters')).toBeInTheDocument();
+            expect(screen.queryByText('Please confirm that you are trying to log in with', { exact: false })).not.toBeInTheDocument();
         })
     });
     it('OAuth2 redirect works with valid nc params', async () => {
@@ -177,6 +180,11 @@ describe('LoginForm with OAuth2 flow', () => {
             <LoginForm />, {
             wrapper: AuthProviderWrapper
         });
+        await waitFor(() => {
+            expect(screen.getByText('Please confirm that you are trying to log in with', { exact: false })).toBeInTheDocument();
+            expect(screen.getByText('GAMS MIRO', { exact: false })).toBeInTheDocument();
+        })
+        fireEvent.click(screen.getByText('Confirm'));
         await waitFor(() => {
             expect(window.location.replace).toBeCalledWith(expect.stringMatching(/https:\/\/accounts\.google\.com\/o\/oauth2\/v2\/auth\?response_type=code&client_id=testclientid&scope=email%20profile%20openid&state=[a-zA-Z0-9_\-\/]+&redirect_uri=http%3A%2F%2Flocalhost&code_challenge=[a-zA-Z0-9_\-\/]+&code_challenge_method=S256/))
             expect(window.sessionStorage.setItem).toBeCalledWith('authParams', expect.stringMatching(/nativeClientParams/))
