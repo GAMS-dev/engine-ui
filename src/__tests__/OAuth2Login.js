@@ -186,7 +186,7 @@ describe('LoginForm with OAuth2 flow', () => {
         })
         fireEvent.click(screen.getByText('Confirm'));
         await waitFor(() => {
-            expect(window.location.replace).toBeCalledWith(expect.stringMatching(/https:\/\/accounts\.google\.com\/o\/oauth2\/v2\/auth\?response_type=code&client_id=testclientid&scope=email%20profile%20openid&state=[a-zA-Z0-9_\-\/]+&redirect_uri=http%3A%2F%2Flocalhost&code_challenge=[a-zA-Z0-9_\-\/]+&code_challenge_method=S256/))
+            expect(window.location.replace).toBeCalledWith(expect.stringMatching(/https:\/\/accounts\.google\.com\/o\/oauth2\/v2\/auth\?response_type=code&client_id=testclientid&scope=email%20profile%20openid&state=[a-zA-Z0-9_\-/]+&redirect_uri=http%3A%2F%2Flocalhost&code_challenge=[a-zA-Z0-9_\-/]+&code_challenge_method=S256/))
             expect(window.sessionStorage.setItem).toBeCalledWith('authParams', expect.stringMatching(/nativeClientParams/))
         })
     });
