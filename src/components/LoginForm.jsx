@@ -34,7 +34,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [passwordPolicyHelper, setPasswordPolicyHelper] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isOAuthProcessing, setIsOAuthProcessing] = useState(document.location.search.includes('state=') || document.location.search.includes('nc_id='));
+  const [isOAuthProcessing, setIsOAuthProcessing] = useState(window.location.search.includes('state=') || window.location.search.includes('nc_id='));
   const [register, setRegister] = useState(showRegistrationForm === "true");
   const [showRegistrationSuccessAlert, setShowRegistrationSuccessAlert] = useState(false);
 
@@ -98,6 +98,8 @@ const LoginForm = ({ showRegistrationForm }) => {
       } catch (err) {
         console.error(err)
         setLoginErrorMsg('Failed to encrypt JWT token')
+        setIsSubmitting(false);
+        setIsOAuthProcessing(false);
       }
       return;
     }
@@ -123,6 +125,8 @@ const LoginForm = ({ showRegistrationForm }) => {
         setRedirectToRoot(true);
       } else {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
+        setIsSubmitting(false);
+        setIsOAuthProcessing(false);
       }
     } catch (err) {
       if (token?.isOAuthToken === true && err?.response?.status === 401) {
@@ -336,7 +340,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       setOAuthConfig(OAuthConfigTmp);
       setLDAPConfig(LDAPConfigTmp);
     }
-    const searchParams = new URLSearchParams(document.location.search);
+    const searchParams = new URLSearchParams(window.location.search);
     const selectedProvider = searchParams.get('provider');
     const nativeClientId = searchParams.get('nc_id');
     setIsNativeClientLogin(nativeClientId != null);
@@ -346,14 +350,14 @@ const LoginForm = ({ showRegistrationForm }) => {
     if (nativeClientId != null) {
       setIsOAuthProcessing(true);
       if (!VALID_NATIVE_CLIENT_IDS.includes(nativeClientId)) {
-        console.error(`Invalid native client id: ${nativeClientId}`)
-        setRedirectToRoot(true);
+        setLoginErrorMsg(`Invalid native client id: ${nativeClientId}`)
+        setIsOAuthProcessing(false);
         return;
       }
       const ncRedirectUri = searchParams.get('nc_redirect_uri');
       if (!/^[a-z0-9/]+$/i.test(ncRedirectUri)) {
-        console.error(`Invalid native client redirect URI: ${ncRedirectUri}`)
-        setRedirectToRoot(true);
+        setLoginErrorMsg(`Invalid native client redirect URI: ${ncRedirectUri}`)
+        setIsOAuthProcessing(false);
         return;
       }
       nativeClientParams = {
@@ -362,8 +366,8 @@ const LoginForm = ({ showRegistrationForm }) => {
         'public_key_b64': searchParams.get('nc_public_key')
       }
       if (Object.values(nativeClientParams).findIndex(val => val == null) !== -1) {
-        console.error('Missing native client parameters')
-        setRedirectToRoot(true);
+        setLoginErrorMsg('Missing native client parameters')
+        setIsOAuthProcessing(false);
         return;
       }
     }
@@ -372,7 +376,6 @@ const LoginForm = ({ showRegistrationForm }) => {
 
   useEffect(() => {
     const fetchPasswordPolicy = async () => {
-      setLoginErrorMsg('')
       try {
         const policyResponse = await axios.get(`${server}/auth/password-policy`);
         const passwordPolicy = policyResponse?.data
@@ -463,10 +466,10 @@ const LoginForm = ({ showRegistrationForm }) => {
   }, [server, invitationCode, invitationCodeValidated]);
 
   useEffect(() => {
-    setLoginErrorMsg(OAuthErrorMsg);
     if (OAuthErrorMsg === "") {
       return;
     }
+    setLoginErrorMsg(OAuthErrorMsg);
     setOAuthToken(null);
     const registrationData = JSON.parse(sessionStorage.getItem("registrationData"));
     if (registrationData != null) {
@@ -555,9 +558,9 @@ const LoginForm = ({ showRegistrationForm }) => {
                 Authentication successful. You can now close this window.
               </Alert>
                 {window.location.replace(ncRedirectUri)}
-              </> : <></>) : (login ? <Navigate replace to="/" />:
-              <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
-            <div className="invalid-feedback" style={{ display: loginErrorMsg? "block" : "none" }}>
+              </> : <></>) : (login ? <Navigate replace to="/" /> :
+                <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
+            <div className="invalid-feedback" style={{ display: loginErrorMsg ? "block" : "none" }}>
               {loginErrorMsg}
             </div>
             {showRegistrationSuccessAlert && <Alert variant="success">
@@ -658,9 +661,9 @@ const LoginForm = ({ showRegistrationForm }) => {
                   </SubmitButton>
                   {register ? <></> : OAuthConfig.map((config, idx) => {
                     return <button key={`oauth_button_${idx}`} type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
-                        onClick={() => setOAuthLoginConfig(config)}>
-                        {config.label}
-                      </button>
+                      onClick={() => setOAuthLoginConfig(config)}>
+                      {config.label}
+                    </button>
                   })}
                 </div>
                 <div className="mt-2">

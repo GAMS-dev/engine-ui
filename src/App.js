@@ -25,7 +25,7 @@ const App = () => {
             <Route path="/login" element={<LoginForm />} />
             <Route path="/register" element={<LoginForm showRegistrationForm="true" />} />
             <Route path="/logout" element={<LogOut />} />
-            <Route path="*" element={login && document.location.search.includes('state=') === false ? <Layout /> : <Navigate replace to={`/login${window.location.search}`} />} />
+            <Route path="*" element={login && window.location.search.includes('state=') === false ? <Layout /> : <Navigate replace to={`/login${window.location.search}`} />} />
           </Routes>
         </ServerInfoProvider>
       </Router>
