@@ -49,7 +49,7 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [OAuthToken, setOAuthToken] = useState(null);
   const [OAuthErrorMsg, setOAuthErrorMsg] = useState("");
   const [redirectToRoot, setRedirectToRoot] = useState(false);
-  const [isNativeClientLogin, setIsNativeClientLogin] = useState(false);
+  const [isNativeClientLogin, setIsNativeClientLogin] = useState(window.location.search.includes('nc_id='));
   const [ncRedirectUri, setNcRedirectUri] = useState("");
   const [nativeClientLoginConfirmed, setNativeClientLoginConfirmed] = useState(false);
 
