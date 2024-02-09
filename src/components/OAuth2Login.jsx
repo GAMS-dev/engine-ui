@@ -3,9 +3,7 @@ import { generateRandomString, generatePKCEParams } from "./oauth";
 import { getResponseError } from "./util";
 import axios from "axios";
 
-const OAuth2Login = (props) => {
-    const { server, loginConfig, setAuthToken, setErrorMsg } = props;
-
+const OAuth2Login = ({server, loginConfig, setAuthToken, setErrorMsg}) => {
     useEffect(() => {
         const initiateOAuthLogin = async (config) => {
             const state = generateRandomString(32);
@@ -42,6 +40,7 @@ const OAuth2Login = (props) => {
                 codeVerifier: pkceParams.codeVerifier,
                 name: config.name,
                 hasClientSecret: oauthConfig.has_web_ui_client_secret,
+                nativeClientParams: config.nativeClientParams,
                 state
             }));
             window.location.replace(`${oauthConfig.authorization_endpoint}?${queryParams.join('&')} `);
@@ -101,24 +100,25 @@ const OAuth2Login = (props) => {
             jwt: jwt,
             isOAuthToken: true,
             isIdToken: authParams.isOidc,
-            refreshTokenData: refreshTokenData
+            refreshTokenData: refreshTokenData,
+            nativeClientParams: authParams.nativeClientParams,
         });
     }, [setAuthToken, setErrorMsg]);
 
     useEffect(() => {
-        if (!document.location.search.includes('state=')) {
+        if (!window.location.search.includes('state=')) {
             return;
         }
-        const searchParams = new URLSearchParams(document.location.search);
+        const searchParams = new URLSearchParams(window.location.search);
         const authParams = JSON.parse(sessionStorage.getItem('authParams'));
         sessionStorage.removeItem('authParams');
         if (authParams?.state !== searchParams.get('state')) {
             setErrorMsg("OAuth2 error: Invalid state parameter.");
             return;
         }
-        if (document.location.search.includes('error=') &&
-            document.location.search.includes('error_description=')) {
-            const searchParams = new URLSearchParams(document.location.search);
+        if (window.location.search.includes('error=') &&
+        window.location.search.includes('error_description=')) {
+            const searchParams = new URLSearchParams(window.location.search);
             setErrorMsg(searchParams.get('error_description'));
             return;
         }

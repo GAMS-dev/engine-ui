@@ -1,8 +1,7 @@
-FROM node:15.7.0-alpine AS builder
+FROM node:lts AS builder
 WORKDIR /app
 RUN npm install react-scripts -g --silent
 COPY package*.json ./
-RUN apk add g++ make python
 RUN npm install
 COPY . .
 ARG REACT_APP_ENGINE_URL=AAAABBBBCCCC

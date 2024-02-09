@@ -92,7 +92,7 @@ const UpdatePasswordPolicyButton = () => {
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <div className="form-outline mt-3">
-                                <label class="form-label" for="minPasswordLength">Minimum password length:</label>
+                                <label className="form-label" htmlFor="minPasswordLength">Minimum password length:</label>
                                 <input
                                     required
                                     min="8"
