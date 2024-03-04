@@ -92,7 +92,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
         expect(screen.getByText('Users', { selector: 'h3' })).toBeInTheDocument();
         expect(screen.getByText('Instances', { selector: 'h3' })).toBeInTheDocument();
-        expect(screen.queryByText('Pool *', { selector: 'h3' })).toBeNull();
+        expect(screen.queryByText('Pools *', { selector: 'h3' })).toBeNull();
 
         // can't look for canvas, because its saved as the name inside the 'img' role
         expect(screen.getAllByRole('img')).toHaveLength(2);
@@ -256,7 +256,7 @@ describe('charts cut of correctly when to many parts are given', () => {
 
         expect(screen.queryByText('Users', { selector: 'h3' })).toBeNull();
         expect(screen.queryByText('Instances', { selector: 'h3' })).toBeNull();
-        expect(screen.getByText('Pool *', { selector: 'h3' })).toBeInTheDocument();
+        expect(screen.getByText('Pools *', { selector: 'h3' })).toBeInTheDocument();
 
         expect(screen.getAllByRole('img')).toHaveLength(1);
         expect(screen.getByText('Only the 10 most used pool_label displayed in the chart.')).toBeInTheDocument();
