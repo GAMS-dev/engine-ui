@@ -1,9 +1,7 @@
-// not here, no default set
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, ArcElement, Legend, Tooltip } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
-// can rename, because it takes the default export
 import computeTimes from './calculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select';
@@ -13,14 +11,12 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
 
-  const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
-
-  const [ungroupedDataJobs, setUngroupedDataJobs] = useState(dataTmp.data_jobs);
-  const [ungroupedDataPools, setUngroupedDataPools] = useState(dataTmp.data_pools);
-  const [numUser, setNumUser] = useState(dataTmp.num_users);
-  const [numInstances, setNumInstances] = useState(dataTmp.num_instances);
-  const [numPools, setNumPools] = useState(dataTmp.num_pools);
-  const [numCharts, setNumCharts] = useState(dataTmp.num_pools);
+  const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
+  const [ungroupedDataPools, setUngroupedDataPools] = useState([]);
+  const [numUser, setNumUser] = useState([]);
+  const [numInstances, setNumInstances] = useState(0);
+  const [numPools, setNumPools] = useState(0);
+  const [numCharts, setNumCharts] = useState(0);
 
   // if data, calcStartDate, calcEndTime, quotaUnit changes:
   useEffect(() => {
@@ -130,7 +126,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       field: "fails",
       column: "Number Crashes",
       sorter: "numerical",
-      displayer: (fails) => fails
+      displayer: Number
     },
     {
       field: "jobs",
@@ -181,7 +177,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       field: "fails",
       column: "Number Crashes",
       sorter: "numerical",
-      displayer: (fails) => fails
+      displayer: Number
     },
     {
       field: "jobs",
@@ -215,7 +211,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
 
   const availableAggregateTypes = [{ value: '_', label: '_' }, { value: "username", label: 'User' }, { value: "instance", label: 'Instance' }, { value: "pool_label", label: 'Pool Label' }]
 
-  const [selectedAggregateType, setSelectedAggregateType] = useState('_')
+  const [selectedAggregateType, setSelectedAggregateType] = useState(availableAggregateTypes[0].value)
   const [totalUsage, setTotalUsage] = useState(0);
   const [tableDataJobs, setTableDataJobs] = useState([])
   const [tableDataPools, setTableDataPools] = useState([])
@@ -223,7 +219,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
   const [instanceChartData, setInstanceChartData] = useState({ labels: ['-'], datasets: [{ label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"] }] })
   const [poolLabelChartData, setPoolLabelChartData] = useState({ labels: ['-'], datasets: [{ label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"] }] })
 
-  const [truncateWarning, setTruncateWarning] = useState([])
+  const [truncateWarning, setTruncateWarning] = useState("")
 
   useEffect(() => {
     if (selectedAggregateType === '_') {
@@ -299,7 +295,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
         <Select
           id="aggregateDropdown"
           isClearable={false}
-          value={availableAggregateTypes.filter(type => type.value === selectedAggregateType)[0]}
+          value={availableAggregateTypes.find(type => type.value === selectedAggregateType)}
           isSearchable={true}
           onChange={selected => setSelectedAggregateType(selected.value)}
           options={availableAggregateTypes}
@@ -330,7 +326,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
               {(numPools > 1) ? (
                 <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
                   ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                  <h3>Pool *</h3>
+                  <h3>Pools *</h3>
                   <Pie data={poolLabelChartData} />
                 </div>
               ) : null}
@@ -373,7 +369,6 @@ function formatTime(milliseconds) {
   const remainingMinutes = minutes % 60;
   const remainingSeconds = seconds % 60;
 
-  //const new_time = `${days} days, ${remainingHours}:${remainingMinutes}:${remainingSeconds}, ${remainingMilliseconds} milliseconds`;
   const new_time = `${hours}:${remainingMinutes}:${remainingSeconds}`;
 
   return (

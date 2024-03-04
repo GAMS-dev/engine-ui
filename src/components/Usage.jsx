@@ -140,9 +140,7 @@ const Usage = () => {
             .then(res => {
                 const dataDisaggregatedTmp = res.data.job_usage.concat(res.data.hypercube_job_usage);
                 setDataQuota(res.data)
-                console.log(dataDisaggregatedTmp)
                 let aggregatedUsageData = Object.values(dataDisaggregatedTmp.reduce((a, c) => {
-                    console.log(c)
                     if ("job_count" in c) {
                         // is Hypercube job
                         const isFinished = c.finished != null || c.completed === c.job_count;
@@ -412,7 +410,7 @@ const Usage = () => {
                     setTabSelected(k)
                 }}>
                 <Tab eventKey="usage" title="Usage">
-                    <div>
+                    <div className="mt-3">
                         <div className="row">
                             {isInviter &&
                                 <div className="col-sm-6 mb-4">

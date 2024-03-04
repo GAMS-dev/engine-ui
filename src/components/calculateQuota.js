@@ -218,8 +218,8 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
         return pool
     })
 
-    const numberUsers = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.user))].length;
-    const numberInstances = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.instance))].length;
+    const numberUsers = new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.user)).size;
+    const numberInstances = new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.instance)).size;
 
     let numberPools = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.pool_label))]
     numberPools = numberPools.filter(elem => elem !== null).length
