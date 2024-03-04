@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 
 import Quotas from '../components/Quotas';
-import { testDatax } from '../utils/testData';
+import { testDatax } from './utils/testData';
 
 
 let startDate = new Date('2020-08-03T17:10:15.000000+00:00');

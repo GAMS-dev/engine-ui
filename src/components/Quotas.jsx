@@ -27,12 +27,12 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     setNumInstances(dataTmp.num_instances)
     setNumPools(dataTmp.num_pools)
 
-    let tmp = 0;
-    tmp = (dataTmp.num_users > 1) ? tmp += 1 : tmp;
-    tmp = (dataTmp.num_instances > 1) ? tmp += 1 : tmp;
-    tmp = (dataTmp.num_pools > 1) ? tmp += 1 : tmp;
+    let numChartsTmp = 0;
+    numChartsTmp = (dataTmp.num_users > 1) ? numChartsTmp += 1 : numChartsTmp;
+    numChartsTmp = (dataTmp.num_instances > 1) ? numChartsTmp += 1 : numChartsTmp;
+    numChartsTmp = (dataTmp.num_pools > 1) ? numChartsTmp += 1 : numChartsTmp;
 
-    setNumCharts(tmp)
+    setNumCharts(numChartsTmp)
   }, [data, calcStartDate, calcEndTime, quotaUnit])
 
 
@@ -41,35 +41,33 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     let labels = []
     let cost = []
     if (label === 'usernames') {
-      groupedData = GroupByUser(ungroupedData);
+      groupedData = groupByUser(ungroupedData);
       labels = groupedData.map(elem => elem.user);
       cost = groupedData.map(elem => elem.cost);
     } else if (label === 'instance') {
-      groupedData = GroupByInstance(ungroupedData);
+      groupedData = groupByInstance(ungroupedData);
       labels = groupedData.map(elem => elem.instance);
       cost = groupedData.map(elem => elem.cost);
     } else if (label === 'pool_label') {
-      groupedData = GroupByPoolLabel(ungroupedData);
+      groupedData = groupByPoolLabel(ungroupedData);
       labels = groupedData.map(elem => elem.pool_label);
       cost = groupedData.map(elem => elem.cost);
     }
 
-    const labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
+    let labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
 
     // Sort the array of objects based on decreasing time
     labelTimePairs.sort((a, b) => b.cost - a.cost);
 
+    const cutOff = 10;
+    if (labelTimePairs.length > cutOff) {
+      setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed in the chart. `)
+      labelTimePairs = labelTimePairs.slice(0, cutOff);
+    }
+
     // Extract the sorted labels and times separately
     labels = labelTimePairs.map(pair => pair.label);
     cost = labelTimePairs.map(pair => pair.cost);
-
-    const cutOff = 10;
-
-    if (labels.length > cutOff) {
-      setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed in the chart. `)
-      labels = labels.slice(0, cutOff);
-      cost = cost.slice(0, cutOff)
-    }
 
     return {
       labels: labels,
@@ -97,7 +95,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: (user, _) => user
+      displayer: String
     },
     {
       field: "token,is_hypercube",
@@ -159,7 +157,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: (user, _) => user
+      displayer: String
     },
     {
       field: "pool_label",
@@ -235,8 +233,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     } else if (selectedAggregateType === 'username') {
       const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier'].includes(el.field))
-      setTableDataJobs(GroupByUser(ungroupedDataJobs))
-      setTableDataPools(GroupByUser(ungroupedDataPools))
+      setTableDataJobs(groupByUser(ungroupedDataJobs))
+      setTableDataPools(groupByUser(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
@@ -245,8 +243,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     } else if (selectedAggregateType === 'instance') {
       const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier'].includes(el.field))
-      setTableDataJobs(GroupByInstance(ungroupedDataJobs))
-      setTableDataPools(GroupByInstance(ungroupedDataPools))
+      setTableDataJobs(groupByInstance(ungroupedDataJobs))
+      setTableDataPools(groupByInstance(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
@@ -255,8 +253,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
     } else if (selectedAggregateType === 'pool_label') {
       const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(el.field))
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'user', 'multiplier'].includes(el.field))
-      setTableDataJobs(GroupByPoolLabel(ungroupedDataJobs))
-      setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
+      setTableDataJobs(groupByPoolLabel(ungroupedDataJobs))
+      setTableDataPools(groupByPoolLabel(ungroupedDataPools))
       let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       sumTmp2 += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp2)
@@ -376,7 +374,7 @@ function formatTime(milliseconds) {
   );
 }
 
-function GroupByUser(ungroupedData) {
+function groupByUser(ungroupedData) {
 
   let allUsers = ungroupedData.map(elem => elem.user);
 
@@ -411,7 +409,7 @@ function GroupByUser(ungroupedData) {
   return groupedUserData
 }
 
-function GroupByInstance(ungroupedData) {
+function groupByInstance(ungroupedData) {
 
   let allInstances = ungroupedData.map(elem => elem.instance);
 
@@ -446,7 +444,7 @@ function GroupByInstance(ungroupedData) {
   return groupedInstanceData
 }
 
-function GroupByPoolLabel(ungroupedData) {
+function groupByPoolLabel(ungroupedData) {
 
   let allPoolLabel = ungroupedData.map(elem => elem.pool_label);
   allPoolLabel = allPoolLabel.filter(elem => elem !== null)
