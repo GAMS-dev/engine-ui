@@ -165,7 +165,7 @@ const UserInvitationForm = () => {
         } else {
             invitationSubmissionForm.append("identity_provider_name", availableIdentityProviders[0].value);
         }
-        if (ldapIdentityProviders.includes(identityProvider)) {
+        if (ldapIdentityProviders.includes(identityProvider.value)) {
             invitationSubmissionForm.append("identity_provider_user_subject", identityProviderSubject);
         }
         axios
