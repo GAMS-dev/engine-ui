@@ -219,7 +219,7 @@ const UserUpdateForm = () => {
                                             Identity providers user is allowed to invite with
                                         </label>
                                         <Select
-                                            id="identityProvidersAllowed"
+                                            inputId="identityProvidersAllowed"
                                             value={selectedIdentityProvidersAllowed}
                                             isMulti={true}
                                             isSearchable={true}

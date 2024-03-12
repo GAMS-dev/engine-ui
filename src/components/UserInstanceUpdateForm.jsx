@@ -200,7 +200,7 @@ const UserInstanceUpdateForm = () => {
                                                         Instances user is allowed to use
                                                     </label>
                                                     <Select
-                                                        id="instancesAllowed"
+                                                        inputId="instancesAllowed"
                                                         value={selectedInstancesAllowed}
                                                         isMulti={true}
                                                         isSearchable={true}
@@ -250,7 +250,7 @@ const UserInstanceUpdateForm = () => {
                                                 No default instance is currently assigned to the user
                                             </div>
                                             <Select
-                                                id="instancesDefault"
+                                                inputId="instancesDefault"
                                                 isClearable={false}
                                                 value={defaultInstance}
                                                 isSearchable={true}

@@ -113,7 +113,7 @@ const CreateAuthTokenForm = () => {
                                     Access scopes
                                 </label>
                                 <Select
-                                    id="accessScopes"
+                                    inputId="accessScopes"
                                     placeholder="Full access"
                                     value={selectedScopes}
                                     isSearchable={true}

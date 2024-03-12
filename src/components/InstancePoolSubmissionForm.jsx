@@ -121,7 +121,7 @@ const InstancePoolSubmissionForm = () => {
                                     Instance
                                 </label>
                                 <Select
-                                    id="instanceReq"
+                                    inputId="instanceReq"
                                     isClearable={false}
                                     value={instanceReq}
                                     isSearchable={true}

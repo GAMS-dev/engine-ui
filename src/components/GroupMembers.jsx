@@ -225,7 +225,7 @@ const GroupMembers = () => {
                                         Username
                                     </label>
                                     <Select
-                                        id="userToAdd"
+                                        inputId="userToAdd"
                                         isClearable={false}
                                         value={userToAdd}
                                         isSearchable={true}

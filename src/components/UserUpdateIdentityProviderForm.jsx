@@ -114,7 +114,7 @@ const UserUpdateIdentityProviderForm = () => {
                             Identity provider
                         </label>
                         <Select
-                            id="identityProvider"
+                            inputId="identityProvider"
                             value={identityProvider}
                             isSearchable={true}
                             onChange={selected => setIdentityProvider(selected)}

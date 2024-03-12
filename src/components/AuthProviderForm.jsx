@@ -498,7 +498,7 @@ const AuthProviderForm = () => {
                                 Provider type
                             </label>
                             <Select
-                                id="providerType"
+                                inputId="providerType"
                                 isClearable={false}
                                 value={availableProviderTypes.filter(type => type.value === providerType)[0]}
                                 isSearchable={true}
@@ -856,7 +856,7 @@ const AuthProviderForm = () => {
                                         Auto discovery endpoint
                                     </label>
                                     <Select
-                                        id="autoDiscoveryMode"
+                                        inputId="autoDiscoveryMode"
                                         isClearable={false}
                                         value={autoDiscoveryMode}
                                         isSearchable={true}
@@ -1164,7 +1164,7 @@ const AuthProviderForm = () => {
                                         Encryption method
                                     </label>
                                     <Select
-                                        id="encryption"
+                                        inputId="encryption"
                                         isClearable={false}
                                         value={ldapAvailableEncryptionMethods.filter(type => type.value === ldapEncryptionMethod)[0]}
                                         isSearchable={true}

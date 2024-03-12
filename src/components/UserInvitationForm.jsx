@@ -268,7 +268,7 @@ const UserInvitationForm = () => {
                                                                 Instances user is allowed to use
                                                             </label>
                                                             <Select
-                                                                id="instancesAllowed"
+                                                                inputId="instancesAllowed"
                                                                 value={selectedInstancesAllowed}
                                                                 isMulti={true}
                                                                 isSearchable={true}
@@ -288,7 +288,7 @@ const UserInvitationForm = () => {
                                                                     Default Instance
                                                                 </label>
                                                                 <Select
-                                                                    id="instancesDefault"
+                                                                    inputId="instancesDefault"
                                                                     isClearable={false}
                                                                     value={defaultInstance}
                                                                     isSearchable={true}
@@ -326,7 +326,7 @@ const UserInvitationForm = () => {
                                             Identity providers user is allowed to invite with
                                         </label>
                                         <Select
-                                            id="identityProvidersAllowed"
+                                            inputId="identityProvidersAllowed"
                                             value={selectedIdentityProvidersAllowed}
                                             isMulti={true}
                                             isSearchable={true}
@@ -339,7 +339,7 @@ const UserInvitationForm = () => {
                                         Identity provider
                                     </label>
                                     <Select
-                                        id="identityProvider"
+                                        inputId="identityProvider"
                                         value={identityProvider}
                                         isSearchable={true}
                                         onChange={selected => setIdentityProvider(selected)}

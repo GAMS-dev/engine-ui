@@ -488,7 +488,7 @@ const Usage = () => {
                         {data.length > 0 &&
                             <>
                                 {!aggregated && <Select
-                                    id="usersToFiler"
+                                    inputId="usersToFiler"
                                     isMulti={true}
                                     isSearchable={true}
                                     placeholder={'Filter users'}

@@ -343,7 +343,7 @@ const JobSubmissionForm = props => {
                                                         Select Instance
                                                     </label>
                                                     <Select
-                                                        id="instance"
+                                                        inputId="instance"
                                                         isClearable={false}
                                                         value={instance}
                                                         isSearchable={true}
@@ -470,7 +470,7 @@ const JobSubmissionForm = props => {
                                             Select a Namespace
                                         </label>
                                         <Select
-                                            id="namespace"
+                                            inputId="namespace"
                                             isClearable={false}
                                             value={{ value: namespace, label: namespace }}
                                             isSearchable={true}
@@ -490,7 +490,7 @@ const JobSubmissionForm = props => {
                                                 Select a Model
                                             </label>
                                             <Select
-                                                id="registeredModelName"
+                                                inputId="registeredModelName"
                                                 isClearable={false}
                                                 value={{ value: registeredModelName, label: registeredModelName }}
                                                 isSearchable={true}

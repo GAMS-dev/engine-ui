@@ -49,7 +49,7 @@ export const InexJSONSelector = props => {
                             Include or exclude files from results archive?
                         </label>
                         <Select
-                            id="toggleIncludeExclude"
+                            inputId="toggleIncludeExclude"
                             isClearable={false}
                             value={toggleIncludeExclude}
                             isSearchable={true}
@@ -93,14 +93,14 @@ export const InexJSONSelector = props => {
                             />
                         </div>
                     }
-                <div className="form-check">
-                    <input type="checkbox"
-                        className="form-check-input"
-                        checked={globbingEnabled}
-                        onChange={e => setGlobbingEnabled(e.target.checked)}
-                        id="globbingEnabled" />
-                    <label className="form-check-label" htmlFor="globbingEnabled">Enable globbing (<kbd>*</kbd>/<kbd>?</kbd> wildcard characters)?</label>
-                </div>
+                    <div className="form-check">
+                        <input type="checkbox"
+                            className="form-check-input"
+                            checked={globbingEnabled}
+                            onChange={e => setGlobbingEnabled(e.target.checked)}
+                            id="globbingEnabled" />
+                        <label className="form-check-label" htmlFor="globbingEnabled">Enable globbing (<kbd>*</kbd>/<kbd>?</kbd> wildcard characters)?</label>
+                    </div>
                 </React.Fragment>)
             }
         </React.Fragment>

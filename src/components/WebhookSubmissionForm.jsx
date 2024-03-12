@@ -181,7 +181,7 @@ const WebhookSubmissionForm = () => {
                                     Events for which webhook should be triggered
                                 </label>
                                 <Select
-                                    id="events"
+                                    inputId="events"
                                     isClearable={true}
                                     isMulti={true}
                                     isSearchable={true}
@@ -213,7 +213,7 @@ const WebhookSubmissionForm = () => {
                                     Content type
                                 </label>
                                 <Select
-                                    id="contentType"
+                                    inputId="contentType"
                                     isClearable={false}
                                     value={contentType}
                                     isDisabled={isSubmitting}

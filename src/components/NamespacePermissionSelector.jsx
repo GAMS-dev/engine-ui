@@ -146,7 +146,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                                 User Groups
                             </label>
                             <Select
-                                id="nsGroups"
+                                inputId="nsGroups"
                                 value={selectedGroups}
                                 isMulti={true}
                                 isSearchable={true}
