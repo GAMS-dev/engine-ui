@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { RefreshCw } from "react-feather";
+import { RefreshCw, ToggleLeft, ToggleRight } from "react-feather";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import axios from "axios";
@@ -18,6 +18,7 @@ const Webhooks = props => {
     const [webhooks, setWebhooks] = useState([]);
     const [showModalDialog, setShowModalDialog] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [filterWebpush, setFilterWebpush] = useState(true);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
@@ -33,6 +34,9 @@ const Webhooks = props => {
             column: "Payload URL",
             sorter: "alphabetical",
             displayer: url => {
+                if (!url) {
+                    return "";
+                }
                 const urlTmp = new URL(url);
                 let urlTrimmed = urlTmp.href;
                 if (urlTmp.pathname.length > 1) {
@@ -141,6 +145,25 @@ const Webhooks = props => {
                             type="button"
                             className="btn btn-sm btn-outline-secondary"
                             onClick={() => {
+                                setFilterWebpush(currFilterWebpush => !currFilterWebpush)
+                            }}
+                        >
+                            {filterWebpush ?
+                                <ToggleRight size={18} style={{ marginTop: "2px" }} />
+                                :
+                                <ToggleLeft size={18} style={{ marginTop: "2px" }} />
+                            }
+                            &nbsp;
+                            <span className="flex-grow-1">
+                                {filterWebpush
+                                    ? "Show All"
+                                    : "Hide Webpush-only"}
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={() => {
                                 setRefresh(refresh + 1);
                             }}
                         >
@@ -150,9 +173,9 @@ const Webhooks = props => {
                     </div>
                 </div>
             </div>
-            {webhookAccess === "DISABLED" ? <p className="text-center">Webhooks disabled</p> :
+            {webhookAccess === "DISABLED" ? <p className="text-center">Webhooks/Webpush disabled</p> :
                 <Table
-                    data={webhooks}
+                    data={filterWebpush ? webhooks.filter(hook => hook.url != null) : webhooks}
                     noDataMsg="No Webhooks Found"
                     isLoading={isLoading}
                     displayFields={displayFields}

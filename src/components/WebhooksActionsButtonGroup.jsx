@@ -6,8 +6,7 @@ import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
 import { AlertContext } from "./Alert";
 
-const WebhooksActionsButtonGroup = props => {
-    const { id, url, events, server, setRefresh } = props;
+const WebhooksActionsButtonGroup = ({ id, url, events, server, setRefresh }) => {
 
     const [, setAlertMsg] = useContext(AlertContext);
 
@@ -36,7 +35,7 @@ const WebhooksActionsButtonGroup = props => {
 
     return (
         <>
-            {window.isSecureContext &&
+            {window.isSecureContext && url != null &&
                 <button
                     type="button"
                     className="btn btn-sm btn-outline-info"
