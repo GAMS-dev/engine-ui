@@ -22,8 +22,9 @@ const UserSettingsForm = ({ webhookAccess }) => {
     const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }]
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
     const [webPushIsSubmitting, setWebPushIsSubmitting] = useState(false)
-    const [webPushEvents, setWebPushEvents] = useState([allEvents[0]]);
-    const [webPushParameterizedEvents, setWebPushParameterizedEvents] = useState([]);
+    const [webpushSettingsJSON, setWebpushSettingsJSON] = useState(userSettings.webPush)
+    const [webPushEvents, setWebPushEvents] = useState(userSettings.webPush? JSON.parse(userSettings.webPush)['events']: [allEvents[0]]);
+    const [webPushParameterizedEvents, setWebPushParameterizedEvents] = useState(userSettings.webPush? JSON.parse(userSettings.webPush)['parameterized_events']: []);
     const [webPushParameterizedEventsValid, setWebPushParameterizedEventsValid] = useState(true);
     const [webPushSubmissionErrorMsg, setWebPushSubmissionErrorMsg] = useState("");
 
@@ -45,9 +46,11 @@ const UserSettingsForm = ({ webhookAccess }) => {
         setWebPushSubmissionErrorMsg("");
         try {
             await subscribe(server, webPushEvents, webPushParameterizedEvents)
+            setWebpushSettingsJSON(JSON.stringify({events: webPushEvents, parameterized_events: webPushParameterizedEvents}))
             setAlertMsg("success:Notification settings updated")
         } catch (err) {
             setWebPushSubmissionErrorMsg(err.message);
+            setWebpushSettingsJSON(null)
         }
         setWebPushIsSubmitting(false);
     }
@@ -55,9 +58,10 @@ const UserSettingsForm = ({ webhookAccess }) => {
     useEffect(() => {
         setUserSettings({
             mulitplierUnit: selectedMulitplierUnit,
-            tablePageLength: selectedTablePageLength
+            tablePageLength: selectedTablePageLength,
+            webPush: webpushSettingsJSON
         })
-    }, [selectedMulitplierUnit, selectedTablePageLength, setUserSettings])
+    }, [selectedMulitplierUnit, selectedTablePageLength, setUserSettings, webpushSettingsJSON])
 
     return (
         <div>
