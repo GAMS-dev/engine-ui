@@ -22,7 +22,7 @@ const subscribe = async (server, events, parameterizedEvents) => {
     try {
         let serviceWorkerRegistration = await navigator.serviceWorker.getRegistration();
         if (!serviceWorkerRegistration) {
-            serviceWorkerRegistration = await navigator.serviceWorker.register(`${server}/webpush-service-worker.js`);
+            serviceWorkerRegistration = await navigator.serviceWorker.register(`${server.substring(0, server.indexOf("/api"))}/webpush-service-worker.js`);
         }
         let pushSubscription = await serviceWorkerRegistration.pushManager.getSubscription();
         let unsubscribePromise;
