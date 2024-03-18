@@ -24,7 +24,7 @@ const Jobs = () => {
   const [sortAscJobs, setSortAscJobs] = useState(false);
   const [userSettings,] = useContext(UserSettingsContext)
   const [rowsPerPage, setRowsPerPage] = useState(userSettings.tablePageLength);
-  const [rowsPerPageHc, setRowsPerPageHc] = useState(10);
+  const [rowsPerPageHc, setRowsPerPageHc] = useState(userSettings.tablePageLength);
   const [jobData, setJobData] = useState([]);
   const [totalHcJobs, setTotalHcJobs] = useState(0);
   const [currentPageHcJobs, setCurrentPageHcJobs] = useState(1);

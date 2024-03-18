@@ -55,7 +55,7 @@ const Table = props => {
     setDisplayFields(props.displayFields);
     setRefreshCount(prev => prev + 1);
   }, [props.data, props.sortedAsc, props.sortedCol, props.idFieldName,
-  props.displayFields, props.rowsPerPage, onChange, total])
+  props.displayFields, props.rowsPerPage, onChange, total, userSettings])
 
   useEffect(() => {
     if (onChange != null) {
