@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Select from "react-select";
-import { UserSettingsContext } from "./UserSettingsContext";
+import { UserSettingsContext, availableTablePageLengths } from "./UserSettingsContext";
 
 const UserSettingsForm = () => {
 
@@ -8,7 +8,6 @@ const UserSettingsForm = () => {
 
     const availableMulitplierUnits = [{ value: "mults", label: "mults" }, { value: "multh", label: "multh" }]
     const [selectedMulitplierUnit, setSelectedMulitplierUnit] = useState(userSettings.mulitplierUnit)
-    const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }]
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
 
     useEffect(() => {

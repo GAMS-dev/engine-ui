@@ -9,6 +9,7 @@ import TimeDisplay from "./TimeDisplay";
 import { getResponseError } from "./util";
 import JobActionsButtonGroup from "./JobActionsButtonGroup";
 import { Tab, Tabs } from "react-bootstrap";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const Jobs = () => {
   const location = useLocation();
@@ -21,7 +22,8 @@ const Jobs = () => {
   const [currentPageJobs, setCurrentPageJobs] = useState(1);
   const [sortedColJobs, setSortedColJobs] = useState("submitted_at");
   const [sortAscJobs, setSortAscJobs] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [userSettings,] = useContext(UserSettingsContext)
+  const [rowsPerPage, setRowsPerPage] = useState(userSettings.tablePageLength);
   const [rowsPerPageHc, setRowsPerPageHc] = useState(10);
   const [jobData, setJobData] = useState([]);
   const [totalHcJobs, setTotalHcJobs] = useState(0);

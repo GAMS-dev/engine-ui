@@ -10,12 +10,10 @@ import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { UserSettingsContext } from "./UserSettingsContext";
 
-
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Quotas = ({ data, calcStartDate, calcEndTime}) => {
-
-  const [userSettings, ] = useContext(UserSettingsContext)
+const Quotas = ({ data, calcStartDate, calcEndTime }) => {
+  const [userSettings,] = useContext(UserSettingsContext)
   const quotaUnit = userSettings.mulitplierUnit
 
   const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
