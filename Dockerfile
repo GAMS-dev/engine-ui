@@ -1,4 +1,4 @@
-FROM node:lts AS builder
+FROM --platform=linux/amd64 node:lts AS builder
 WORKDIR /app
 RUN npm install react-scripts -g --silent
 COPY package*.json ./
@@ -9,7 +9,7 @@ ARG REACT_APP_BASE_NAME=DDDDEEEEFFFF
 ARG PUBLIC_URL=GGGGHHHHIIIIJJJJ
 RUN npm run build
 
-FROM nginx:1.25-alpine-slim
+FROM --platform=linux/amd64 nginx:1.25-alpine-slim
 COPY --from=builder /app/build /usr/share/nginx/engine
 RUN apk update && \
     apk upgrade --available
