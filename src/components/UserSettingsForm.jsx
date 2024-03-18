@@ -27,7 +27,7 @@ const UserSettingsForm = () => {
                 <Select
                     id="selectMulitplierUnit"
                     isClearable={false}
-                    value={availableMulitplierUnits.filter(type => type.value === selectedMulitplierUnit)[0]}
+                    value={availableMulitplierUnits.find(type => type.value === selectedMulitplierUnit)}
                     isSearchable={true}
                     onChange={selected => setSelectedMulitplierUnit(selected.value)}
                     options={availableMulitplierUnits}
@@ -40,7 +40,7 @@ const UserSettingsForm = () => {
                 <Select
                     id="tablePageLength"
                     isClearable={false}
-                    value={availableTablePageLengths.filter(type => type.value === selectedTablePageLength)[0]}
+                    value={availableTablePageLengths.find(type => type.value === selectedTablePageLength)}
                     isSearchable={true}
                     onChange={selected => setSelectedTablePageLength(selected.value)}
                     options={availableTablePageLengths}
