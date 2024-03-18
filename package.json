@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@testing-library/jest-dom": "^6.2.0",
+    "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",
     "canvas": "^2.11.2",
@@ -21,7 +21,7 @@
     "react-scripts": "^5.0.1",
     "react-select-event": "^5.5.1",
     "sass": "^1.54.9",
-    "user-event": "^4.0.0"
+    "@peculiar/webcrypto": "^1.4.5"
   },
   "dependencies": {
     "axios": "^1.6.1",
@@ -47,7 +47,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --testPathIgnorePatterns=src/__tests__/utils",
     "eject": "react-scripts eject",
     "test:coverage": "react-scripts test --env=jsdom --watchAll=false --coverage",
     "test:ci": "npm run test -- --testResultsProcessor=\"jest-junit\" --watchAll=false --ci --coverage",

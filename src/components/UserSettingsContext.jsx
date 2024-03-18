@@ -7,8 +7,8 @@ export const UserSettingsContext = createContext()
 
 export const UserSettingsProvider = (props) => {
     const [{ username }] = useContext(AuthContext);
-    let userSettingsLS = JSON.parse(localStorage.getItem('userSettings'))
-    userSettingsLS = userSettingsLS == null ? null : userSettingsLS[username]
+
+    const userSettingsLS = JSON.parse(localStorage.getItem('userSettings'))?.[username]
 
     const [userSettings, setUserSettings] = useState(userSettingsLS ? userSettingsLS : { mulitplierUnit: "mults", tablePageLength: "10" })
 

@@ -223,7 +223,7 @@ const Table = props => {
       </table>
       {noRows > 0 &&
         <>
-          <small>{currentPage * rowsPerPage + 1}-{Math.min((currentPage + 1) * rowsPerPage, noRows)} of {noRows}</small>
+          <small>{currentPage * rowsPerPage + 1}-{Math.min((currentPage + 1) * rowsPerPage, noRows)} of {noRows.toLocaleString()}</small>
           <Pagination>
             <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
             <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
