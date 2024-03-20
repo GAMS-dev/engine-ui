@@ -66,4 +66,22 @@ describe('UserSettingsForm', () => {
         expect(screen.queryAllByText('20')).toHaveLength(1);
     });
 
+    it('Cant edit notifications if webhooks not enabled', async () => {
+        render(<UserSettingsForm />, {
+            wrapper: RouterWrapper()
+        });
+
+        fireEvent.click(screen.getByText('Notifications'));
+        await waitFor(() => screen.getByText('Push notifications require webhooks to be enabled.'));
+    });
+
+    it('Cant edit notifications if push notifications not supported by browser', async () => {
+        render(<UserSettingsForm webhookAccess={"ENABLED"}/>, {
+            wrapper: RouterWrapper()
+        });
+
+        fireEvent.click(screen.getByText('Notifications'));
+        await waitFor(() => screen.getByText('Push notifications are not supported by your browser.'));
+    });
+
 });
