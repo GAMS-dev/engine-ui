@@ -4,19 +4,29 @@ import '@testing-library/jest-dom'
 
 import { UserSettingsContext, UserSettingsProvider } from "../components/UserSettingsContext";
 import { AuthContext } from '../AuthContext';
+import { ServerInfoContext } from '../ServerInfoContext';
 import UserSettingsForm from '../components/UserSettingsForm';
+import { MemoryRouter } from 'react-router-dom';
 
 
 const AdminAuthProviderWrapper = ({ children }) => (
-    <AuthContext.Provider value={[{ server: "http://localhost", username: 'admin'}]}>
-        {children}
-    </AuthContext.Provider>
+    <MemoryRouter>
+        <ServerInfoContext.Provider value={[{}, () => { }]}>
+            <AuthContext.Provider value={[{ server: "http://localhost", username: 'admin' }]}>
+                {children}
+            </AuthContext.Provider>
+        </ServerInfoContext.Provider>
+    </MemoryRouter>
 );
 
 const AuthProviderWrapper = ({ children }) => (
-    <AuthContext.Provider value={[{ server: "http://localhost", username: 'notAdmin'}]}>
-        {children}
-    </AuthContext.Provider>
+    <MemoryRouter>
+        <ServerInfoContext.Provider value={[{}, () => { }]}>
+            <AuthContext.Provider value={[{ server: "http://localhost", username: 'notAdmin' }]}>
+                {children}
+            </AuthContext.Provider>
+        </ServerInfoContext.Provider>
+    </MemoryRouter>
 );
 
 const TestingComponent = () => {

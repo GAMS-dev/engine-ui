@@ -83,11 +83,12 @@ const UserSettingsForm = ({ webhookAccess }) => {
                     <Route index element={<Navigate to="general" replace />} />
                     <Route path="general" element={<form>
                         <div className="form-group mt-3 mb-3 ">
-                            <label htmlFor="selectMulitplierUnit">
+                            <label htmlFor="selectMulitplierUnitInput">
                                 Multiplier unit
                             </label>
                             <Select
-                                inputId="selectMulitplierUnit"
+                                id="selectMulitplierUnit"
+                                inputId="selectMulitplierUnitInput"
                                 isClearable={false}
                                 value={availableMulitplierUnits.filter(type => type.value === selectedMulitplierUnit)[0]}
                                 isSearchable={true}
@@ -96,11 +97,12 @@ const UserSettingsForm = ({ webhookAccess }) => {
                             />
                         </div>
                         <div className="form-group mt-3 mb-3">
-                            <label htmlFor="tablePageLength">
+                            <label htmlFor="tablePageLengthInput">
                                 Default table page length
                             </label>
                             <Select
-                                inputId="tablePageLength"
+                                id="tablePageLength"
+                                inputId="tablePageLengthInput"
                                 isClearable={false}
                                 value={availableTablePageLengths.filter(type => type.value === selectedTablePageLength)[0]}
                                 isSearchable={true}

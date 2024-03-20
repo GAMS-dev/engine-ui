@@ -4,6 +4,8 @@ import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 
 import { UserSettingsContext } from "../components/UserSettingsContext";
+import { ServerInfoContext } from "../ServerInfoContext";
+import { AuthContext } from "../AuthContext";
 import UserSettingsForm from '../components/UserSettingsForm';
 
 const RouterWrapper = (options) => {
@@ -12,12 +14,16 @@ const RouterWrapper = (options) => {
 
     return ({ children }) => (
         <MemoryRouter>
-            <UserSettingsContext.Provider value={[{
-                mulitplierUnit: mulitplierUnit,
-                tablePageLength: tablePageLength
-            }, () => { }]}>
-                {children}
-            </UserSettingsContext.Provider>
+            <AuthContext.Provider value={[{ server: "http://localhost" }]}>
+                <ServerInfoContext.Provider value={[{}, () => { }]}>
+                    <UserSettingsContext.Provider value={[{
+                        mulitplierUnit: mulitplierUnit,
+                        tablePageLength: tablePageLength
+                    }, () => { }]}>
+                        {children}
+                    </UserSettingsContext.Provider>
+                </ServerInfoContext.Provider>
+            </AuthContext.Provider>
         </MemoryRouter >)
 };
 

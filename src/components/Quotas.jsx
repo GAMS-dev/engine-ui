@@ -298,11 +298,12 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
   return (
     <div className="App">
       <div className="form-group mt-3 mb-3">
-        <label htmlFor="aggregateDropdown">
+        <label htmlFor="aggregateDropdownInput">
           Aggregate
         </label>
         <Select
-          inputId="aggregateDropdown"
+          id="aggregateDropdown"
+          inputId="aggregateDropdownInput"
           isClearable={false}
           value={availableAggregateTypes.filter(type => type.value === selectedAggregateType)[0]}
           isSearchable={true}
