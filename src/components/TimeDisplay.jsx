@@ -3,7 +3,7 @@ import { ToggleLeft, ToggleRight } from "react-feather";
 
 const moment = require("moment");
 
-const TimeDisplay = props => {
+const TimeDisplay = ({ time }) => {
   const [rel, setRel] = useState(true);
 
   function toggleRel() {
@@ -21,8 +21,8 @@ const TimeDisplay = props => {
       <span className="flex-grow-1">
         {" "}
         {rel
-          ? moment.utc(props.time).fromNow()
-          : moment.utc(props.time).local().format("MMM Do, H:mm")}
+          ? moment.utc(time).fromNow()
+          : moment.utc(time).local().format(moment.utc(time).isSame(new Date(), 'year') ? "MMM Do YYYY, H:mm" : "MMM Do, H:mm")}
       </span>
     </button>
   );
