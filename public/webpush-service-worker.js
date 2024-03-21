@@ -119,6 +119,7 @@ self.addEventListener('notificationclick', event => {
     }
     urlToOpen = event.notification.data?.url
   }
+  urlToOpen = self.location.pathname.substring(0, self.location.pathname.lastIndexOf('/')) + urlToOpen
   event.waitUntil(
     clients.matchAll({ type: "window" }).then((clientsArr) => {
       // If a Window tab matching the targeted URL already exists, focus that;
