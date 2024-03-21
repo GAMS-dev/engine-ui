@@ -533,6 +533,20 @@ const JobSubmissionForm = props => {
                                                 label="Drop Hypercube description file here"
                                                 onDrop={updateHcFile} multiple={false} />
                                         </div>}
+                                    <div className="mb-3">
+                                        <label htmlFor="jobTag" className="visually-hidden">
+                                            Job tag (human-readable identifier, optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="jobTag"
+                                            placeholder="Job tag (human-readable identifier, optional)"
+                                            autoComplete="on"
+                                            value={jobTag}
+                                            onChange={e => setJobTag(e.target.value)}
+                                        />
+                                    </div>
                                 </fieldset>
                             </div>
                             <div className="col-md-6 col-12">
@@ -561,22 +575,8 @@ const JobSubmissionForm = props => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label htmlFor="jobTag" className="visually-hidden">
-                                                    Job tag (human-readable identifier, optional)
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="jobTag"
-                                                    placeholder="Job tag (human-readable identifier, optional)"
-                                                    autoComplete="on"
-                                                    value={jobTag}
-                                                    onChange={e => setJobTag(e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="mb-3">
                                                 <label htmlFor="logFileName" className="visually-hidden">
-                                                    Log Filename
+                                                    Log Filename (optional)
                                                 </label>
                                                 <input
                                                     type="text"
