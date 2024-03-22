@@ -11,6 +11,15 @@ const allEvents = [{ value: 'ALL', label: 'All events' },
 { value: 'HC_JOB_OUT_OF_RESOURCES', label: 'Hypercube job out of resources' }
 ];
 
+const getPushSubscription = async (server) => {
+    let serviceWorkerRegistration = await navigator.serviceWorker.getRegistration();
+    if (!serviceWorkerRegistration) {
+        serviceWorkerRegistration = await navigator.serviceWorker.register(`${server.substring(0, server.indexOf("/api"))}/webpush-service-worker.js`);
+    }
+    const pushSubscription = await serviceWorkerRegistration.pushManager.getSubscription();
+    return { serviceWorkerRegistration, pushSubscription }
+}
+
 const subscribe = async (server, events, parameterizedEvents) => {
     if (!webpushSupported()) {
         throw new Error('Push messaging isn\'t supported.');
@@ -20,14 +29,10 @@ const subscribe = async (server, events, parameterizedEvents) => {
         throw new Error('Push messaging request was denied.');
     }
     try {
-        let serviceWorkerRegistration = await navigator.serviceWorker.getRegistration();
-        if (!serviceWorkerRegistration) {
-            serviceWorkerRegistration = await navigator.serviceWorker.register(`${server.substring(0, server.indexOf("/api"))}/webpush-service-worker.js`);
-        }
-        let pushSubscription = await serviceWorkerRegistration.pushManager.getSubscription();
+        const { serviceWorkerRegistration, pushSubscription } = await getPushSubscription(server);
         let unsubscribePromise;
         if (pushSubscription) {
-            unsubscribePromise = unsubscribe(pushSubscription, server, true)
+            unsubscribePromise = unsubscribe(server, pushSubscription, true)
         }
         const webhookSubmissionForm = new FormData();
         webhookSubmissionForm.append("recursive", false);
@@ -52,22 +57,22 @@ const subscribe = async (server, events, parameterizedEvents) => {
         if (unsubscribePromise) {
             await unsubscribePromise;
         }
-        pushSubscription = await serviceWorkerRegistration.pushManager.subscribe(options);
-        pushSubscription = pushSubscription.toJSON()
+        let newPushSubscription = await serviceWorkerRegistration.pushManager.subscribe(options);
+        newPushSubscription = newPushSubscription.toJSON()
         const webhookResp = await webhookRespPromise;
         const webhookId = webhookResp.data.id;
         await axios.post(`${server}/users/webhooks/webpush`, {
             webhook_id: webhookId,
-            endpoint: pushSubscription.endpoint,
-            key_p256dh: pushSubscription.keys?.p256dh,
-            key_auth: pushSubscription.keys?.auth
+            endpoint: newPushSubscription.endpoint,
+            key_p256dh: newPushSubscription.keys?.p256dh,
+            key_auth: newPushSubscription.keys?.auth
         });
     }
     catch (err) {
         throw new Error(`Problems subscribing to webhook. Error message: ${getResponseError(err)}`);
     }
 }
-const unsubscribe = async (pushSubscription, server, deleteWebhook) => {
+const unsubscribe = async (server, pushSubscription, deleteWebhook) => {
     try {
         await axios.delete(`${server}/users/webhooks/webpush`, {
             params: {
@@ -86,5 +91,5 @@ const unsubscribe = async (pushSubscription, server, deleteWebhook) => {
     await pushSubscription.unsubscribe();
 }
 export {
-    webpushSupported, subscribe, unsubscribe, allEvents
+    webpushSupported, subscribe, unsubscribe, getPushSubscription, allEvents
 }

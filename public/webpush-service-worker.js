@@ -128,11 +128,10 @@ self.addEventListener('notificationclick', event => {
           ? (windowClient.focus(), true)
           : false,
       );
-      // Otherwise, open a new tab to the applicable URL and focus it.
+      // Otherwise, open a new tab to the applicable URL
       if (!hadWindowToFocus)
         clients
-          .openWindow(urlToOpen)
-          .then((windowClient) => (windowClient ? windowClient.focus() : null));
+          .openWindow(urlToOpen);
     }),
   );
 });
