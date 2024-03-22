@@ -10,6 +10,8 @@ import { allEvents, getPushSubscription, subscribe, unsubscribe, webpushSupporte
 import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
 import SubmitButton from "./SubmitButton";
 import { AlertContext } from "./Alert";
+import { isMobileDevice } from "./util";
+import { Share } from "react-feather";
 
 const UserSettingsForm = ({ webhookAccess }) => {
     const [{ server, roles }] = useContext(AuthContext);
@@ -189,7 +191,8 @@ const UserSettingsForm = ({ webhookAccess }) => {
                                 </> : <></>}
                             </fieldset>
                         </form> :
-                            <Alert variant="danger" className="mt-3">Push notifications are not supported by your browser.</Alert> :
+                            <Alert variant="danger" className="mt-3">Push notifications are not supported by your browser.
+                                {isMobileDevice() ? <> You may need to install the app first (e.g. on iOS by tapping the "Share" <Share size={14} /> button and selecting "Add to home screen).</> : ''}</Alert> :
                         <Alert variant="danger" className="mt-3">Push notifications require webhooks to be enabled.</Alert>} />
                 </Routes>
             </Tab.Content>
