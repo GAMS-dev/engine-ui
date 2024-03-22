@@ -48,7 +48,9 @@ const UserSettingsForm = ({ webhookAccess }) => {
             const { pushSubscription } = await getPushSubscription(server);
             setShowNotificationForm(pushSubscription != null);
         }
-        checkForPushSubscription();
+        if (webpushSupported()) {
+            checkForPushSubscription();
+        }
     }, [server])
 
     const toggleNotifications = async (enable) => {
