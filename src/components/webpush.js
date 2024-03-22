@@ -83,9 +83,9 @@ const unsubscribe = async (server, pushSubscription, deleteWebhook) => {
     }
     catch (err) {
         if (err?.response?.status === 404) {
-            console.error('Webpush subscription could not be deleted as it was not found.')
+            console.error('Web Push subscription could not be deleted as it was not found.')
         } else {
-            throw new Error(`Problems deleting webpush subscription. Error message: ${getResponseError(err)}`);
+            throw new Error(`Problems deleting Web Push subscription. Error message: ${getResponseError(err)}`);
         }
     }
     await pushSubscription.unsubscribe();

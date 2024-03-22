@@ -157,7 +157,7 @@ const Webhooks = props => {
                             <span className="flex-grow-1">
                                 {filterWebpush
                                     ? "Show All"
-                                    : "Hide Webpush-only"}
+                                    : "Hide Web Push-only"}
                             </span>
                         </button>
                         <button
@@ -173,7 +173,7 @@ const Webhooks = props => {
                     </div>
                 </div>
             </div>
-            {webhookAccess === "DISABLED" ? <p className="text-center">Webhooks/Webpush disabled</p> :
+            {webhookAccess === "DISABLED" ? <p className="text-center">Webhooks/Web Push disabled</p> :
                 <Table
                     data={filterWebpush ? webhooks.filter(hook => hook.url != null) : webhooks}
                     noDataMsg="No Webhooks Found"
