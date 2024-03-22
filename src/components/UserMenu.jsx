@@ -38,21 +38,15 @@ export const UserMenu = () => {
                         <span className="username-container">{username}</span>
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                        {instancesAvailable && <Link to='/default-instance' className="dropdown-item" role="button">
-                            <small>Set default instance</small>
-                        </Link>}
-                        <Link to="/settings" className="dropdown-item"role="button">
-                            <small>Settings</small>
-                        </Link>
-                        <Link to='/auth-token' className="dropdown-item" role="button">
-                            <small>Create auth token</small>
-                        </Link>
-                        <Link to={`/users/${username}/change-pass`} className="dropdown-item" role="button">
+                        {instancesAvailable && <Dropdown.Item as={Link} to='/default-instance'><small>Set default instance</small></Dropdown.Item>}
+                        <Dropdown.Item as={Link} to='/settings'><small>Settings</small></Dropdown.Item>
+                        <Dropdown.Item as={Link} to='/auth-token'><small>Create auth token</small></Dropdown.Item>
+                        <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>
                             <small>Change password</small>
-                        </Link>
-                        <Link to='/logout' className="dropdown-item" role="button">
+                        </Dropdown.Item>
+                        <Dropdown.Item as={Link} to='/logout'>
                             <small>Sign Out</small>
-                        </Link>
+                        </Dropdown.Item>
                         <Dropdown.Divider />
                         <QuotaWidget isVisible={dropdownExpanded} className="dropdown-item dropdown-item-static small pe-none" />
                     </Dropdown.Menu>
