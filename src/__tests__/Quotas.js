@@ -13,12 +13,12 @@ let startDate = new Date('2020-08-03T17:10:15.000000+00:00');
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00');
 
 const RouterWrapper = (options) => {
-    const mulitplierUnit = options?.mulitplierUnit == null ? 'mults' : options.mulitplierUnit;
+    const quotaUnit = options?.quotaUnit == null ? 'mults' : options.quotaUnit;
 
     return ({ children }) => (
         <MemoryRouter>
             <UserSettingsContext.Provider value={[{
-                mulitplierUnit: mulitplierUnit,
+                quotaUnit: quotaUnit,
                 tablePageLength: '10'
             }]}>
                 {children}
@@ -289,7 +289,7 @@ describe('test multh also works', () => {
 
     it('multh with multiple jobs ', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper({ mulitplierUnit: 'multh' })
+            wrapper: RouterWrapper({ quotaUnit: 'multh' })
         });
 
         expect(screen.getByText('Total: 0.061 multh', { selector: 'h2' })).toBeInTheDocument();

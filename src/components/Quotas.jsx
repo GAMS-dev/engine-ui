@@ -12,7 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Quotas = ({ data, calcStartDate, calcEndTime }) => {
   const [userSettings,] = useContext(UserSettingsContext)
-  const quotaUnit = userSettings.mulitplierUnit
+  const quotaUnit = userSettings.quotaUnit
 
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
   const [ungroupedDataPools, setUngroupedDataPools] = useState([]);

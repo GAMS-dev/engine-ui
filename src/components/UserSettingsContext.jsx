@@ -10,7 +10,7 @@ export const UserSettingsProvider = (props) => {
 
     const userSettingsLS = JSON.parse(localStorage.getItem('userSettings'))?.[username]
 
-    const [userSettings, setUserSettings] = useState(userSettingsLS ? userSettingsLS : { mulitplierUnit: "mults", tablePageLength: "10" })
+    const [userSettings, setUserSettings] = useState(userSettingsLS ? userSettingsLS : { quotaUnit: "mults", tablePageLength: "10" })
 
     const userSettingsState = [userSettings, setUserSettings]
 
