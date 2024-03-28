@@ -9,7 +9,7 @@ import { AuthContext } from "../AuthContext";
 import UserSettingsForm from '../components/UserSettingsForm';
 
 const RouterWrapper = (options) => {
-    const mulitplierUnit = options?.mulitplierUnit == null ? 'mults' : options.mulitplierUnit;
+    const quotaUnit = options?.quotaUnit == null ? 'mults' : options.quotaUnit;
     const tablePageLength = options?.tablePageLength == null ? '10' : options.tablePageLength;
 
     return ({ children }) => (
@@ -17,7 +17,7 @@ const RouterWrapper = (options) => {
             <AuthContext.Provider value={[{ server: "http://localhost" }]}>
                 <ServerInfoContext.Provider value={[{}, () => { }]}>
                     <UserSettingsContext.Provider value={[{
-                        mulitplierUnit: mulitplierUnit,
+                        quotaUnit: quotaUnit,
                         tablePageLength: tablePageLength
                     }, () => { }]}>
                         {children}
@@ -39,7 +39,7 @@ describe('UserSettingsForm', () => {
             wrapper: RouterWrapper()
         });
 
-        fireEvent.keyDown(document.getElementById('selectMulitplierUnit'), { key: 'ArrowDown' });
+        fireEvent.keyDown(document.getElementById('selectQuotaUnit'), { key: 'ArrowDown' });
         expect(screen.queryAllByText('mults')).toHaveLength(2);
         expect(screen.queryAllByText('multh')).toHaveLength(1);
 
@@ -53,7 +53,7 @@ describe('UserSettingsForm', () => {
             wrapper: RouterWrapper()
         });
 
-        fireEvent.keyDown(document.getElementById('selectMulitplierUnit'), { key: 'ArrowDown' });
+        fireEvent.keyDown(document.getElementById('selectQuotaUnit'), { key: 'ArrowDown' });
         await waitFor(() => screen.getByText('multh'));
         fireEvent.click(screen.getByText('multh'));
         expect(screen.queryAllByText('mults')).toHaveLength(0);
@@ -76,7 +76,7 @@ describe('UserSettingsForm', () => {
     });
 
     it('Cant edit notifications if push notifications not supported by browser', async () => {
-        render(<UserSettingsForm webhookAccess={"ENABLED"}/>, {
+        render(<UserSettingsForm webhookAccess={"ENABLED"} />, {
             wrapper: RouterWrapper()
         });
 

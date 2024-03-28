@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 
 import Quotas from '../components/Quotas';
-import { testDatax } from '../utils/testData';
+import { testDatax } from './utils/testData';
 import { UserSettingsContext } from "../components/UserSettingsContext";
 
 
@@ -13,17 +13,17 @@ let startDate = new Date('2020-08-03T17:10:15.000000+00:00');
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00');
 
 const RouterWrapper = (options) => {
-    const mulitplierUnit = options?.mulitplierUnit == null? 'mults': options.mulitplierUnit;
+    const quotaUnit = options?.quotaUnit == null ? 'mults' : options.quotaUnit;
 
-    return ({children}) => (
-    <MemoryRouter>
-        <UserSettingsContext.Provider value={[{
-            mulitplierUnit: mulitplierUnit,
-            tablePageLength: '10'
-        }]}>
-        {children}
-    </UserSettingsContext.Provider>
-    </MemoryRouter >)
+    return ({ children }) => (
+        <MemoryRouter>
+            <UserSettingsContext.Provider value={[{
+                quotaUnit: quotaUnit,
+                tablePageLength: '10'
+            }]}>
+                {children}
+            </UserSettingsContext.Provider>
+        </MemoryRouter >)
 };
 
 window.ResizeObserver = function () {
@@ -101,7 +101,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
         expect(screen.getByText('Users', { selector: 'h3' })).toBeInTheDocument();
         expect(screen.getByText('Instances', { selector: 'h3' })).toBeInTheDocument();
-        expect(screen.queryByText('Pool *', { selector: 'h3' })).toBeNull();
+        expect(screen.queryByText('Pools *', { selector: 'h3' })).toBeNull();
 
         // can't look for canvas, because its saved as the name inside the 'img' role
         expect(screen.getAllByRole('img')).toHaveLength(2);
@@ -265,7 +265,7 @@ describe('charts cut of correctly when to many parts are given', () => {
 
         expect(screen.queryByText('Users', { selector: 'h3' })).toBeNull();
         expect(screen.queryByText('Instances', { selector: 'h3' })).toBeNull();
-        expect(screen.getByText('Pool *', { selector: 'h3' })).toBeInTheDocument();
+        expect(screen.getByText('Pools *', { selector: 'h3' })).toBeInTheDocument();
 
         expect(screen.getAllByRole('img')).toHaveLength(1);
         expect(screen.getByText('Only the 10 most used pool_label displayed in the chart.')).toBeInTheDocument();
@@ -289,7 +289,7 @@ describe('test multh also works', () => {
 
     it('multh with multiple jobs ', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper({mulitplierUnit: 'multh'})
+            wrapper: RouterWrapper({ quotaUnit: 'multh' })
         });
 
         expect(screen.getByText('Total: 0.061 multh', { selector: 'h2' })).toBeInTheDocument();

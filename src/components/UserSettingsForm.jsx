@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import Select from "react-select";
-import { UserSettingsContext } from "./UserSettingsContext";
+import { UserSettingsContext, availableTablePageLengths } from "./UserSettingsContext";
 import DefaultInstanceSelector from "./DefaultInstanceSelector";
 import { ServerInfoContext } from "../ServerInfoContext";
 import { AuthContext } from "../AuthContext";
-import { Alert, Form, Nav, Tab } from "react-bootstrap";
+import { Alert, Form, Nav, OverlayTrigger, Tab, Tooltip } from "react-bootstrap";
 import { Route, Routes, NavLink, useLocation, Navigate } from "react-router-dom";
 import { allEvents, getPushSubscription, subscribe, unsubscribe, webpushSupported } from "./webpush";
 import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
 import SubmitButton from "./SubmitButton";
 import { AlertContext } from "./Alert";
 import { isMobileDevice } from "./util";
-import { Share } from "react-feather";
+import { Info, Share } from "react-feather";
 
 const UserSettingsForm = ({ webhookAccess }) => {
     const [{ server, roles }] = useContext(AuthContext);
@@ -19,9 +19,8 @@ const UserSettingsForm = ({ webhookAccess }) => {
     const [serverInfo] = useContext(ServerInfoContext);
     const [, setAlertMsg] = useContext(AlertContext);
 
-    const availableMulitplierUnits = [{ value: "mults", label: "mults" }, { value: "multh", label: "multh" }]
-    const [selectedMulitplierUnit, setSelectedMulitplierUnit] = useState(userSettings.mulitplierUnit)
-    const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }]
+    const availableQuotaUnits = [{ value: "mults", label: "mults" }, { value: "multh", label: "multh" }]
+    const [selectedQuotaUnit, setSelectedQuotaUnit] = useState(userSettings.quotaUnit)
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
     const [webPushIsSubmitting, setWebPushIsSubmitting] = useState(false)
     const [webpushSettingsJSON, setWebpushSettingsJSON] = useState(userSettings.webPush)
@@ -88,11 +87,11 @@ const UserSettingsForm = ({ webhookAccess }) => {
 
     useEffect(() => {
         setUserSettings({
-            mulitplierUnit: selectedMulitplierUnit,
+            quotaUnit: selectedQuotaUnit,
             tablePageLength: selectedTablePageLength,
             webPush: webpushSettingsJSON
         })
-    }, [selectedMulitplierUnit, selectedTablePageLength, setUserSettings, webpushSettingsJSON])
+    }, [selectedQuotaUnit, selectedTablePageLength, setUserSettings, webpushSettingsJSON])
 
     return (
         <div>
@@ -113,20 +112,26 @@ const UserSettingsForm = ({ webhookAccess }) => {
                 <Routes>
                     <Route index element={<Navigate to="general" replace />} />
                     <Route path="general" element={<form>
-                        <div className="form-group mt-3 mb-3 ">
-                            <label htmlFor="selectMulitplierUnitInput">
-                                Multiplier unit
-                            </label>
-                            <Select
-                                id="selectMulitplierUnit"
-                                inputId="selectMulitplierUnitInput"
-                                isClearable={false}
-                                value={availableMulitplierUnits.filter(type => type.value === selectedMulitplierUnit)[0]}
-                                isSearchable={true}
-                                onChange={selected => setSelectedMulitplierUnit(selected.value)}
-                                options={availableMulitplierUnits}
-                            />
-                        </div>
+                        <label htmlFor="selectQuotaUnitInput">
+                            Select quota unit
+                            <span className="ms-1" >
+                                <OverlayTrigger placement="bottom"
+                                    overlay={<Tooltip id="tooltip">
+                                        If multh is selected, all quota values are divided by 3600 (multiplier * hour). Otherwise, the quota is calculated by (multiplier * seconds).
+                                    </Tooltip>}>
+                                    <Info />
+                                </OverlayTrigger>
+                            </span>
+                        </label>
+                        <Select
+                            id="selectQuotaUnit"
+                            inputId="selectQuotaUnitInput"
+                            isClearable={false}
+                            value={availableQuotaUnits.find(type => type.value === selectedQuotaUnit)}
+                            isSearchable={true}
+                            onChange={selected => setSelectedQuotaUnit(selected.value)}
+                            options={availableQuotaUnits}
+                        />
                         <div className="form-group mt-3 mb-3">
                             <label htmlFor="tablePageLengthInput">
                                 Default table page length

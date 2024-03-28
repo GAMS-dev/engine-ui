@@ -1,31 +1,26 @@
-// not here, no default set
 import { useEffect, useRef, useState, useContext } from 'react';
 import { Chart as ChartJS, ArcElement, Legend, Tooltip } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
-// can rename, because it takes the default export
 import computeTimes from './calculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { UserSettingsContext } from "./UserSettingsContext";
 
-
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Quotas = ({ data, calcStartDate, calcEndTime }) => {
 
   const [userSettings,] = useContext(UserSettingsContext)
-  const quotaUnit = userSettings.mulitplierUnit
+  const quotaUnit = userSettings.quotaUnit
 
-  const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
-
-  const [ungroupedDataJobs, setUngroupedDataJobs] = useState(dataTmp.data_jobs);
-  const [ungroupedDataPools, setUngroupedDataPools] = useState(dataTmp.data_pools);
-  const [numUser, setNumUser] = useState(dataTmp.num_users);
-  const [numInstances, setNumInstances] = useState(dataTmp.num_instances);
-  const [numPools, setNumPools] = useState(dataTmp.num_pools);
-  const [numCharts, setNumCharts] = useState(dataTmp.num_pools);
+  const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
+  const [ungroupedDataPools, setUngroupedDataPools] = useState([]);
+  const [numUser, setNumUser] = useState([]);
+  const [numInstances, setNumInstances] = useState(0);
+  const [numPools, setNumPools] = useState(0);
+  const [numCharts, setNumCharts] = useState(0);
 
   // if data, calcStartDate, calcEndTime, quotaUnit changes:
   useEffect(() => {
@@ -36,12 +31,12 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
     setNumInstances(dataTmp.num_instances)
     setNumPools(dataTmp.num_pools)
 
-    let tmp = 0;
-    tmp = (dataTmp.num_users > 1) ? tmp += 1 : tmp;
-    tmp = (dataTmp.num_instances > 1) ? tmp += 1 : tmp;
-    tmp = (dataTmp.num_pools > 1) ? tmp += 1 : tmp;
+    let numChartsTmp = 0;
+    numChartsTmp = (dataTmp.num_users > 1) ? numChartsTmp += 1 : numChartsTmp;
+    numChartsTmp = (dataTmp.num_instances > 1) ? numChartsTmp += 1 : numChartsTmp;
+    numChartsTmp = (dataTmp.num_pools > 1) ? numChartsTmp += 1 : numChartsTmp;
 
-    setNumCharts(tmp)
+    setNumCharts(numChartsTmp)
   }, [data, calcStartDate, calcEndTime, quotaUnit])
 
 
@@ -50,35 +45,33 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
     let labels = []
     let cost = []
     if (label === 'usernames') {
-      groupedData = GroupByUser(ungroupedData);
+      groupedData = groupByUser(ungroupedData);
       labels = groupedData.map(elem => elem.user);
       cost = groupedData.map(elem => elem.cost);
     } else if (label === 'instance') {
-      groupedData = GroupByInstance(ungroupedData);
+      groupedData = groupByInstance(ungroupedData);
       labels = groupedData.map(elem => elem.instance);
       cost = groupedData.map(elem => elem.cost);
     } else if (label === 'pool_label') {
-      groupedData = GroupByPoolLabel(ungroupedData);
+      groupedData = groupByPoolLabel(ungroupedData);
       labels = groupedData.map(elem => elem.pool_label);
       cost = groupedData.map(elem => elem.cost);
     }
 
-    const labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
+    let labelTimePairs = labels.map((label, index) => ({ label, cost: cost[index] }));
 
     // Sort the array of objects based on decreasing time
     labelTimePairs.sort((a, b) => b.cost - a.cost);
 
+    const cutOff = 10;
+    if (labelTimePairs.length > cutOff) {
+      setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed in the chart. `)
+      labelTimePairs = labelTimePairs.slice(0, cutOff);
+    }
+
     // Extract the sorted labels and times separately
     labels = labelTimePairs.map(pair => pair.label);
     cost = labelTimePairs.map(pair => pair.cost);
-
-    const cutOff = 10;
-
-    if (labels.length > cutOff) {
-      setTruncateWarning(current => `${current} Only the ${cutOff} most used ${label} displayed in the chart. `)
-      labels = labels.slice(0, cutOff);
-      cost = cost.slice(0, cutOff)
-    }
 
     return {
       labels: labels,
@@ -106,7 +99,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: (user, _) => user
+      displayer: String
     },
     {
       field: "token,is_hypercube",
@@ -135,7 +128,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
       field: "fails",
       column: "Number Crashes",
       sorter: "numerical",
-      displayer: (fails) => fails
+      displayer: Number
     },
     {
       field: "jobs",
@@ -168,7 +161,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: (user, _) => user
+      displayer: String
     },
     {
       field: "pool_label",
@@ -186,7 +179,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
       field: "fails",
       column: "Number Crashes",
       sorter: "numerical",
-      displayer: (fails) => fails
+      displayer: Number
     },
     {
       field: "jobs",
@@ -220,7 +213,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
 
   const availableAggregateTypes = [{ value: '_', label: '_' }, { value: "username", label: 'User' }, { value: "instance", label: 'Instance' }, { value: "pool_label", label: 'Pool Label' }]
 
-  const [selectedAggregateType, setSelectedAggregateType] = useState('_')
+  const [selectedAggregateType, setSelectedAggregateType] = useState(availableAggregateTypes[0].value)
   const [totalUsage, setTotalUsage] = useState(0);
   const [tableDataJobs, setTableDataJobs] = useState([])
   const [tableDataPools, setTableDataPools] = useState([])
@@ -228,7 +221,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
   const [instanceChartData, setInstanceChartData] = useState({ labels: ['-'], datasets: [{ label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"] }] })
   const [poolLabelChartData, setPoolLabelChartData] = useState({ labels: ['-'], datasets: [{ label: '# of Votes', data: [1], backgroundColor: ["rgba(31,120,180,0.2)"] }] })
 
-  const [truncateWarning, setTruncateWarning] = useState([])
+  const [truncateWarning, setTruncateWarning] = useState("")
 
   useEffect(() => {
     if (selectedAggregateType === '_') {
@@ -244,8 +237,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
     } else if (selectedAggregateType === 'username') {
       const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier'].includes(el.field))
-      setTableDataJobs(GroupByUser(ungroupedDataJobs))
-      setTableDataPools(GroupByUser(ungroupedDataPools))
+      setTableDataJobs(groupByUser(ungroupedDataJobs))
+      setTableDataPools(groupByUser(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
@@ -254,8 +247,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
     } else if (selectedAggregateType === 'instance') {
       const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier'].includes(el.field))
-      setTableDataJobs(GroupByInstance(ungroupedDataJobs))
-      setTableDataPools(GroupByInstance(ungroupedDataPools))
+      setTableDataJobs(groupByInstance(ungroupedDataJobs))
+      setTableDataPools(groupByInstance(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       sumTmp += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp)
@@ -264,8 +257,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
     } else if (selectedAggregateType === 'pool_label') {
       const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(el.field))
       const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'user', 'multiplier'].includes(el.field))
-      setTableDataJobs(GroupByPoolLabel(ungroupedDataJobs))
-      setTableDataPools(GroupByPoolLabel(ungroupedDataPools))
+      setTableDataJobs(groupByPoolLabel(ungroupedDataJobs))
+      setTableDataPools(groupByPoolLabel(ungroupedDataPools))
       let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       sumTmp2 += ungroupedDataPools.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
       setTotalUsage(sumTmp2)
@@ -305,7 +298,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
           id="aggregateDropdown"
           inputId="aggregateDropdownInput"
           isClearable={false}
-          value={availableAggregateTypes.filter(type => type.value === selectedAggregateType)[0]}
+          value={availableAggregateTypes.find(type => type.value === selectedAggregateType)}
           isSearchable={true}
           onChange={selected => setSelectedAggregateType(selected.value)}
           options={availableAggregateTypes}
@@ -336,7 +329,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
               {(numPools > 1) ? (
                 <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
                   ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                  <h3>Pool *</h3>
+                  <h3>Pools *</h3>
                   <Pie data={poolLabelChartData} />
                 </div>
               ) : null}
@@ -379,7 +372,6 @@ function formatTime(milliseconds) {
   const remainingMinutes = minutes % 60;
   const remainingSeconds = seconds % 60;
 
-  //const new_time = `${days} days, ${remainingHours}:${remainingMinutes}:${remainingSeconds}, ${remainingMilliseconds} milliseconds`;
   const new_time = `${hours}:${remainingMinutes}:${remainingSeconds}`;
 
   return (
@@ -387,7 +379,7 @@ function formatTime(milliseconds) {
   );
 }
 
-function GroupByUser(ungroupedData) {
+function groupByUser(ungroupedData) {
 
   let allUsers = ungroupedData.map(elem => elem.user);
 
@@ -422,7 +414,7 @@ function GroupByUser(ungroupedData) {
   return groupedUserData
 }
 
-function GroupByInstance(ungroupedData) {
+function groupByInstance(ungroupedData) {
 
   let allInstances = ungroupedData.map(elem => elem.instance);
 
@@ -457,7 +449,7 @@ function GroupByInstance(ungroupedData) {
   return groupedInstanceData
 }
 
-function GroupByPoolLabel(ungroupedData) {
+function groupByPoolLabel(ungroupedData) {
 
   let allPoolLabel = ungroupedData.map(elem => elem.pool_label);
   allPoolLabel = allPoolLabel.filter(elem => elem !== null)

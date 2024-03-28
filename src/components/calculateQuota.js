@@ -1,8 +1,5 @@
-function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUnit) {
+function getComputationTimes(data, calcStartTime, calcEndTime, quotaUnit) {
     const debug = false
-
-    const calcStartTime = calcStartTimeInput
-    const calcEndTime = calcEndTimeInput
 
     // extract the three different job types
     const dataJobUsage = data['job_usage'] == null ? [] : data['job_usage'];
@@ -12,8 +9,8 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
     // first extract all the pool infos, to later check if an individual job was part of a pool
     // only need the idle multiplier from the pools
     // for the jobs use the multiplier from the jop instance
-    let dataPoolUsageNEW = dataPoolUsage.map(pool => {
-        return {
+    let dataPoolUsageNEW = dataPoolUsage.map(pool => (
+        {
             pool_label: pool['label'],
             instance: pool['instance']['label'],
             user: pool['owner'],
@@ -24,7 +21,7 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
             created_at: new Date(pool['created_at']),
             deleted_at: pool['deleted_at'] == null ? calcEndTime : new Date(pool['deleted_at'])
         }
-    });
+    ));
 
     // check if workers failed, if so keep the first start time and set the finish time
     // to the last occurence of that particular worker
@@ -105,28 +102,22 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
     // flatten it so its no loner ordered by hypercubes
     // this way it can just be conbined with the job list (depth one always is enough here)
     let dataHypercubeNEW = dataHypercube.flatMap(function (hypercube) {
-        // save the label and  mutliplier of the current hypercupe to add them to the job list
-        let currentInstance = hypercube['labels']['instance'];
-        let currentMultiplier = hypercube['labels']['multiplier'];
-        let currentUser = hypercube['username'];
-        let currentStartTime = hypercube['submitted']
-        let currentToken = hypercube['token']
-
         // Map each job to a new object containing the relevant information
-        return hypercube['jobs'].map(function (job) {
-            return {
-                instance: currentInstance,
-                user: currentUser,
-                multiplier: currentMultiplier,
+        return hypercube['jobs'].map((job) => (
+            {
+                instance: hypercube['labels']['instance'],
+                user: hypercube['username'],
+                multiplier: hypercube['labels']['multiplier'],
                 times: job['times'],
                 fails: 0,
                 pool_label: null,
                 included: false,
-                start_time: new Date(currentStartTime),
-                token: currentToken,
+                start_time: new Date(hypercube['submitted']),
+                token: hypercube['token'],
                 is_hypercube: true
-            };
-        });
+            }
+        ));
+
     });
 
     dataJobUsageNEW = dataJobUsageNEW.concat(dataHypercubeNEW)
@@ -218,11 +209,10 @@ function getComputationTimes(data, calcStartTimeInput, calcEndTimeInput, quotaUn
         return pool
     })
 
-    const numberUsers = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.user))].length;
-    const numberInstances = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.instance))].length;
+    const numberUsers = new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.user)).size;
+    const numberInstances = new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.instance)).size;
 
-    let numberPools = [...new Set(dataJobUsageNEW.concat(dataPoolUsageNEW).map(elem => elem.pool_label))]
-    numberPools = numberPools.filter(elem => elem !== null).length
+    const numberPools = new Set(dataPoolUsageNEW.map(elem => elem.pool_label)).size;
 
     const result = {
         'data_jobs': dataJobUsageNEW,

@@ -33,7 +33,7 @@ const TestingComponent = () => {
     const [userSettings,] = useContext(UserSettingsContext)
     return (
         <>
-            <p>{userSettings?.mulitplierUnit}</p>
+            <p>{userSettings?.quotaUnit}</p>
             <p>{userSettings?.tablePageLength}</p>
         </>
     );
@@ -41,7 +41,7 @@ const TestingComponent = () => {
 
 let testUserSettings = {}
 testUserSettings['admin'] = {
-    mulitplierUnit: 'multh',
+    quotaUnit: 'multh',
     tablePageLength: '20'
 }
 
@@ -105,11 +105,11 @@ describe('UserSettingsContext', () => {
             </UserSettingsProvider>, {
             wrapper: AuthProviderWrapper
         });
-        fireEvent.keyDown(document.getElementById('selectMulitplierUnit'), { key: 'ArrowDown' });
+        fireEvent.keyDown(document.getElementById('selectQuotaUnit'), { key: 'ArrowDown' });
         await waitFor(() => screen.getByText('multh'));
         fireEvent.click(screen.getByText('multh'));
 
-        expect(window.localStorage.setItem).toHaveBeenLastCalledWith('userSettings', '{"notAdmin":{"mulitplierUnit":"multh","tablePageLength":"10"}}')
+        expect(window.localStorage.setItem).toHaveBeenLastCalledWith('userSettings', '{"notAdmin":{"quotaUnit":"multh","tablePageLength":"10"}}')
 
     });
 

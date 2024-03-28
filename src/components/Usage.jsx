@@ -51,7 +51,8 @@ const Usage = () => {
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
-    const [showParallelQuota, setShowParallelQuota] = useState(true);
+    const availableWeightingOptions = [{ value: true, label: "Jobs weighted with multiplier" }, { value: false, label: "Parallel job view" }]
+    const [selectedWeightingOption, setSelectedWeightingOption] = useState(availableWeightingOptions[0].value)
     const [displayFields] = useState([
         {
             field: "username",
@@ -140,9 +141,7 @@ const Usage = () => {
             .then(res => {
                 const dataDisaggregatedTmp = res.data.job_usage.concat(res.data.hypercube_job_usage);
                 setDataQuota(res.data)
-                console.log(dataDisaggregatedTmp)
                 let aggregatedUsageData = Object.values(dataDisaggregatedTmp.reduce((a, c) => {
-                    console.log(c)
                     if ("job_count" in c) {
                         // is Hypercube job
                         const isFinished = c.finished != null || c.completed === c.job_count;
@@ -292,7 +291,7 @@ const Usage = () => {
                     if (!(dataDisaggregatedTmp[i].username in chartEvents)) {
                         chartEvents[dataDisaggregatedTmp[i].username] = [];
                     }
-                    const multiplier = (showParallelQuota && dataDisaggregatedTmp[i].labels?.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
+                    const multiplier = (selectedWeightingOption && dataDisaggregatedTmp[i].labels?.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
                     if ('times' in dataDisaggregatedTmp[i]) {
                         // normal job
                         chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier));
@@ -367,7 +366,7 @@ const Usage = () => {
                 setIsLoading(false);
             });
     }, [jwt, server, refresh, displayFields, setAlertMsg,
-        username, recursive, startDate, endDate, isInviter, showParallelQuota]);
+        username, recursive, startDate, endDate, isInviter, selectedWeightingOption]);
 
     return (
         <>
@@ -412,7 +411,7 @@ const Usage = () => {
                     setTabSelected(k)
                 }}>
                 <Tab eventKey="usage" title="Usage">
-                    <div>
+                    <div className="mt-3">
                         <div className="row">
                             {isInviter &&
                                 <div className="col-sm-6 mb-4">
@@ -441,23 +440,22 @@ const Usage = () => {
                                         }} />
                                 </label>
                             </div>
-                            <div className="col-sm-6 mb-4">
-                                <input className="form-check-input" type="radio" id="flexRadioDefault1"
-                                    checked={showParallelQuota === true}
-                                    onChange={e => setShowParallelQuota(true)} />
-                                <label className="form-check-label" htmlFor="flexRadioDefault1">
-                                    Jobs weighted with multiplier
-                                </label>
-                            </div>
-                            <div className="col-sm-6 mb-4">
-                                <input className="form-check-input" type="radio" id="flexRadioDefault2"
-                                    checked={showParallelQuota !== true}
-                                    onChange={e => setShowParallelQuota(false)} />
-                                <label className="form-check-label" htmlFor="flexRadioDefault2">
-                                    Parallel job view
-                                </label>
+                        </div>
+                        <div className="row">
+                            <div className="col-12 col-lg-3">
+                                <div className="form-group mt-3 mb-3">
+                                    <Select
+                                        id="weighting_option"
+                                        isClearable={false}
+                                        value={availableWeightingOptions.find(type => type.value === selectedWeightingOption)}
+                                        isSearchable={true}
+                                        onChange={selected => setSelectedWeightingOption(selected.value)}
+                                        options={availableWeightingOptions}
+                                    />
+                                </div>
                             </div>
                         </div>
+
                         {data.length > 1 &&
                             <div className="row">
                                 <div className="col-md-6 col-12 mb-2">
@@ -545,7 +543,7 @@ const Usage = () => {
                                             y: {
                                                 title: {
                                                     display: true,
-                                                    text: showParallelQuota ? 'Weighted parallel jobs' : 'Number of parallel jobs'
+                                                    text: selectedWeightingOption ? 'Weighted parallel jobs' : 'Number of parallel jobs'
                                                 }
                                             }
                                         }
