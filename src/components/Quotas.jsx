@@ -212,7 +212,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
 
   const availableAggregateTypes = [{ value: '_', label: '_' }, { value: "username", label: 'User' }, { value: "instance", label: 'Instance' }, { value: "pool_label", label: 'Pool Label' }]
 
-  const [selectedAggregateType, setSelectedAggregateType] = useState(availableAggregateTypes[0].value)
+  const [selectedAggregateType, setSelectedAggregateType] = useState(availableAggregateTypes[1].value)
   const [totalUsage, setTotalUsage] = useState(0);
   const [tableDataJobs, setTableDataJobs] = useState([])
   const [tableDataPools, setTableDataPools] = useState([])
