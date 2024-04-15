@@ -34,7 +34,7 @@ const AdministrationForm = ({ setLicenseExpiration }) => {
                 <Tab.Container defaultActiveKey="authproviders" activeKey={activeTab}>
                     <Nav variant="tabs">
                         <Nav.Item>
-                            <Nav.Link eventKey="authproviders" as={Link} to={`authproviders`}>Authentication Providers</Nav.Link>
+                            <Nav.Link eventKey="authproviders" as={Link} to={`authproviders`}>Identity Providers</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
                             <Nav.Link eventKey="instances" as={Link} to={`instances`}>Instances</Nav.Link>
