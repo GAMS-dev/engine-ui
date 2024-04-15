@@ -67,7 +67,7 @@ const UserInvitationForm = () => {
                         setSelectedIdentityProvidersAllowed(availableIdentityProvidersTmp);
                     })
                     .catch(err => {
-                        setSubmissionErrorMsg(`Problems while retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+                        setSubmissionErrorMsg(`Problems while retrieving identity providers. Error message: ${getResponseError(err)}.`);
                     })
             ]
             try {

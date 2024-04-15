@@ -109,7 +109,7 @@ const UserUpdateForm = () => {
                 setAvailableIdentityProviders(availableIdentityProvidersTmp);
                 setSelectedIdentityProvidersAllowed(selectedProvidersTmp == null ? availableIdentityProvidersTmp : selectedProvidersTmp);
             } catch (err) {
-                setErrorMsg(`Problems while retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+                setErrorMsg(`Problems while retrieving identity providers. Error message: ${getResponseError(err)}.`);
             } finally {
                 setIDPLoading(false);
             }

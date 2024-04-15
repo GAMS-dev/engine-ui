@@ -202,7 +202,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         const response = await axios.get(`${server}/auth/providers`, { params: { name: providerName } });
         if (response.data.length === 0) {
-          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists.");
+          setLoginErrorMsg("Invitation code is attached to identity provider that no longer exists.");
           return false;
         }
         const providerConfig = response.data[0];
@@ -219,7 +219,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           };
         }
       } catch (err) {
-        setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${providerName}. Error message: ${getResponseError(err)}.`);
+        setLoginErrorMsg(`Problems retrieving configuration of identity provider: ${providerName}. Error message: ${getResponseError(err)}.`);
         return false;
       }
     }
@@ -300,7 +300,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         response = await axios.get(`${server}/auth/providers`);
       } catch (err) {
-        setLoginErrorMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+        setLoginErrorMsg(`Problems retrieving identity providers. Error message: ${getResponseError(err)}.`);
         return;
       }
       const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null || config.oidc != null);
@@ -323,7 +323,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           try {
             response = await axios.get(`${server}/auth/providers`, { params: { name: selectedProvider } });
           } catch (err) {
-            setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${selectedProvider}. Error message: ${getResponseError(err)}.`);
+            setLoginErrorMsg(`Problems retrieving configuration of identity provider: ${selectedProvider}. Error message: ${getResponseError(err)}.`);
             return;
           }
           if (response.data.length > 0) {

@@ -115,7 +115,7 @@ const AuthProviderForm = () => {
                 setLdapProviders(responseLdap.data);
                 setIsLoading(false);
             } catch (err) {
-                setAlertMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+                setAlertMsg(`Problems retrieving identity providers. Error message: ${getResponseError(err)}.`);
             }
         }
         fetchAuthProviders();
@@ -409,14 +409,14 @@ const AuthProviderForm = () => {
             } else {
                 await axios.put(authURI, authProviderForm);
             }
-            setAlertMsg(`success:Authentication provider ${selectedAuthProvider === '__+add_new' ? 'added' : 'updated'} successfully!`);
+            setAlertMsg(`success:Identity provider ${selectedAuthProvider === '__+add_new' ? 'added' : 'updated'} successfully!`);
             setRefreshProviders(curr => curr + 1);
         } catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setFormErrors(err.response.data.errors);
-                setSubmissionErrorMsg('Problems updating authentication providers.');
+                setSubmissionErrorMsg('Problems updating identity providers.');
             } else {
-                setSubmissionErrorMsg(`Problems updating authentication providers. Error message: ${getResponseError(err)}`);
+                setSubmissionErrorMsg(`Problems updating identity providers. Error message: ${getResponseError(err)}`);
             }
         } finally {
             setIsSubmitting(false);
