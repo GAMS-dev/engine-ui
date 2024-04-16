@@ -13,6 +13,7 @@ import TimeDisplay from "./TimeDisplay";
 import SubmitButton from "./SubmitButton";
 import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
 import { ClipLoader } from "react-spinners";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const Cleanup = () => {
 
@@ -29,7 +30,8 @@ const Cleanup = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortedCol, setSortedCol] = useState("upload_date");
     const [sortAsc, setSortAsc] = useState(false);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [userSettings,] = useContext(UserSettingsContext)
+    const [rowsPerPage, setRowsPerPage] = useState(userSettings.tablePageLength);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");

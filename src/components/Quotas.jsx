@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useContext } from 'react';
 import { Chart as ChartJS, ArcElement, Legend, Tooltip } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
@@ -6,10 +6,13 @@ import computeTimes from './calculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select';
 import { Link } from "react-router-dom";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Quotas = ({ data, calcStartDate, calcEndTime, quotaUnit }) => {
+const Quotas = ({ data, calcStartDate, calcEndTime }) => {
+  const [userSettings,] = useContext(UserSettingsContext)
+  const quotaUnit = userSettings.quotaUnit
 
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
   const [ungroupedDataPools, setUngroupedDataPools] = useState([]);

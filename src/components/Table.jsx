@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import moment from "moment";
 import { ArrowUp, ArrowDown } from "react-feather";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -6,9 +6,10 @@ import Pagination from 'react-bootstrap/Pagination';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { FormControl} from "react-bootstrap";
+import { FormControl } from "react-bootstrap";
 import OverlayFilter from "./OverlayFilter";
 import { getRandomInt } from "./util";
+import { UserSettingsContext, availableTablePageLengths } from "./UserSettingsContext";
 
 const Table = props => {
   const { noDataMsg, isLoading, onChange, total, resetPageNumber } = props;
@@ -26,11 +27,10 @@ const Table = props => {
 
   const [currentFilters, setCurrentFilters] = useState({});
 
+  const [userSettings,] = useContext(UserSettingsContext);
   const [noRows, setNoRows] = useState(onChange == null ? props.data.length : total);
-  const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage == null ? 10: props.rowsPerPage);
+  const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage == null ? userSettings.tablePageLength : props.rowsPerPage);
   const [noPages, setNoPages] = useState(Math.ceil(noRows / rowsPerPage));
-
-  const noRowsPerPageOptions = [{value: "10", label: "10"}, {value: "20", label: "20"}, {value: "50", label: "50"}, {value: "100", label: "100"}];
 
   useEffect(() => {
     if (resetPageNumber === true) {
@@ -43,7 +43,7 @@ const Table = props => {
     setDataRaw([...props.data]);
     const newNoRows = onChange == null ? props.data.length : total;
     setNoRows(newNoRows);
-    const newRowsPerPage = props.rowsPerPage? props.rowsPerPage: 10;
+    const newRowsPerPage = props.rowsPerPage ? props.rowsPerPage : userSettings.tablePageLength;
     const newNoPages = Math.ceil(newNoRows / newRowsPerPage);
     setRowsPerPage(newRowsPerPage);
     setNoPages(newNoPages);
@@ -55,7 +55,7 @@ const Table = props => {
     setDisplayFields(props.displayFields);
     setRefreshCount(prev => prev + 1);
   }, [props.data, props.sortedAsc, props.sortedCol, props.idFieldName,
-  props.displayFields, props.rowsPerPage, onChange, total])
+  props.displayFields, props.rowsPerPage, onChange, total, userSettings])
 
   useEffect(() => {
     if (onChange != null) {
@@ -223,7 +223,7 @@ const Table = props => {
       </table>
       {noRows > 0 &&
         <>
-          <small>{currentPage*rowsPerPage+1}-{Math.min((currentPage+1)*rowsPerPage, noRows)} of {noRows.toLocaleString()}</small>
+          <small>{currentPage * rowsPerPage + 1}-{Math.min((currentPage + 1) * rowsPerPage, noRows)} of {noRows.toLocaleString()}</small>
           <Pagination>
             <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
             <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
@@ -265,7 +265,7 @@ const Table = props => {
                 />
                 <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
               </InputGroup>}
-              <li>
+            <li>
               <Form.Group controlId={`table${getRandomInt(100000)}_rpp`} className="d-flex ms-3 text-nowrap pt-1">
                 <Form.Label>Rows per page</Form.Label>
                 <Form.Select
@@ -277,11 +277,11 @@ const Table = props => {
                     setNoPages(Math.ceil(noRows / newNoRows))
                   }}
                   value={rowsPerPage.toString()}>
-                  {noRowsPerPageOptions.map((rpp, idx) =>
-                          <option
-                            key={`rpp_${idx}`}
-                            value={rpp.name}>
-                          {rpp.label}</option>)}
+                  {availableTablePageLengths.map((rpp, idx) =>
+                    <option
+                      key={`rpp_${idx}`}
+                      value={rpp.name}>
+                      {rpp.label}</option>)}
                 </Form.Select>
               </Form.Group>
             </li>
