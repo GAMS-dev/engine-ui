@@ -11,10 +11,12 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Table from "./Table";
+import { Tab, Tabs } from "react-bootstrap";
 import { getResponseError, mergeSortedArrays } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
 import Select from 'react-select';
+import Quotas from "./Quotas";
 
 ChartJS.register(
     LinearScale,
@@ -33,6 +35,7 @@ const Usage = () => {
     const { username } = useParams();
     const [data, setData] = useState([]);
     const [dataDisaggregated, setDataDisaggregated] = useState([]);
+    const [dataQuota, setDataQuota] = useState([]);
     const [availableUsers, setAvailableUsers] = useState([]);
     const [usersToFiler, setUsersToFiler] = useState([]);
     const [aggregatedChartData, setAggregatedChartData] = useState([]);
@@ -43,10 +46,13 @@ const Usage = () => {
     const [totalSolveTime, setTotalSolveTime] = useState(0);
     const [refresh, setRefresh] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [tabSelected, setTabSelected] = useState("usage");
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
+    const availableWeightingOptions = [{ value: true, label: "Jobs weighted with multiplier" }, { value: false, label: "Parallel job view" }]
+    const [selectedWeightingOption, setSelectedWeightingOption] = useState(availableWeightingOptions[0].value)
     const [displayFields] = useState([
         {
             field: "username",
@@ -134,6 +140,7 @@ const Usage = () => {
             })
             .then(res => {
                 const dataDisaggregatedTmp = res.data.job_usage.concat(res.data.hypercube_job_usage);
+                setDataQuota(res.data)
                 let aggregatedUsageData = Object.values(dataDisaggregatedTmp.reduce((a, c) => {
                     if ("job_count" in c) {
                         // is Hypercube job
@@ -284,7 +291,7 @@ const Usage = () => {
                     if (!(dataDisaggregatedTmp[i].username in chartEvents)) {
                         chartEvents[dataDisaggregatedTmp[i].username] = [];
                     }
-                    const multiplier = (dataDisaggregatedTmp[i].labels != null && dataDisaggregatedTmp[i].labels.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
+                    const multiplier = (selectedWeightingOption && dataDisaggregatedTmp[i].labels?.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
                     if ('times' in dataDisaggregatedTmp[i]) {
                         // normal job
                         chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier));
@@ -359,10 +366,10 @@ const Usage = () => {
                 setIsLoading(false);
             });
     }, [jwt, server, refresh, displayFields, setAlertMsg,
-        username, recursive, startDate, endDate, isInviter]);
+        username, recursive, startDate, endDate, isInviter, selectedWeightingOption]);
 
     return (
-        <div>
+        <>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">{`Usage of user: ${username}`}</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
@@ -378,35 +385,6 @@ const Usage = () => {
                             <RefreshCw width="12px" className="ms-2" />
                         </button>
                     </div>
-                </div>
-            </div>
-            <div className="row">
-                {isInviter &&
-                    <div className="col-sm-6 mb-4">
-                        <label>
-                            Show Invitees?
-                            <input
-                                name="showinvitees"
-                                type="checkbox"
-                                className="ms-2"
-                                checked={recursive}
-                                onChange={e => {
-                                    setRecursive(e.target.checked)
-                                }} />
-                        </label>
-                    </div>}
-                <div className="col-sm-6 mb-4">
-                    <label>
-                        Show disaggregated data?
-                        <input
-                            name="showAggregated"
-                            type="checkbox"
-                            className="ms-2"
-                            checked={!aggregated}
-                            onChange={e => {
-                                setAggregated(!e.target.checked)
-                            }} />
-                    </label>
                 </div>
             </div>
             <div className="row">
@@ -427,107 +405,164 @@ const Usage = () => {
                     </div>
                 </div>
             </div>
-            {data.length > 1 &&
-                <div className="row">
-                    <div className="col-md-6 col-12 mb-2">
-                        <small>
-                            <div className="row">
-                                <div className="col-4">
-                                    Total Time:
-                                </div>
-                                <div className="col-8">
-                                    <TimeDiffDisplay time={totalTime} classNames="badge bg-secondary" />
+            <Tabs
+                activeKey={tabSelected}
+                onSelect={(k) => {
+                    setTabSelected(k)
+                }}>
+                <Tab eventKey="usage" title="Usage">
+                    <div className="mt-3">
+                        <div className="row">
+                            {isInviter &&
+                                <div className="col-sm-6 mb-4">
+                                    <label>
+                                        Show Invitees?
+                                        <input
+                                            name="showinvitees"
+                                            type="checkbox"
+                                            className="ms-2"
+                                            checked={recursive}
+                                            onChange={e => {
+                                                setRecursive(e.target.checked)
+                                            }} />
+                                    </label>
+                                </div>}
+                            <div className="col-sm-6 mb-4">
+                                <label>
+                                    Show disaggregated data?
+                                    <input
+                                        name="showAggregated"
+                                        type="checkbox"
+                                        className="ms-2"
+                                        checked={!aggregated}
+                                        onChange={e => {
+                                            setAggregated(!e.target.checked)
+                                        }} />
+                                </label>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-12 col-lg-3">
+                                <div className="form-group mt-3 mb-3">
+                                    <Select
+                                        id="weighting_option"
+                                        isClearable={false}
+                                        value={availableWeightingOptions.find(type => type.value === selectedWeightingOption)}
+                                        isSearchable={true}
+                                        onChange={selected => setSelectedWeightingOption(selected.value)}
+                                        options={availableWeightingOptions}
+                                    />
                                 </div>
                             </div>
-                        </small>
-                    </div>
-                    <div className="col-md-6 col-12 mb-2">
-                        <small>
+                        </div>
+
+                        {data.length > 1 &&
                             <div className="row">
-                                <div className="col-4">
-                                    Total Solve Time:
+                                <div className="col-md-6 col-12 mb-2">
+                                    <small>
+                                        <div className="row">
+                                            <div className="col-4">
+                                                Total Time:
+                                            </div>
+                                            <div className="col-8">
+                                                <TimeDiffDisplay time={totalTime} classNames="badge bg-secondary" />
+                                            </div>
+                                        </div>
+                                    </small>
                                 </div>
-                                <div className="col-8">
-                                    <TimeDiffDisplay time={totalSolveTime} classNames="badge bg-secondary" />
+                                <div className="col-md-6 col-12 mb-2">
+                                    <small>
+                                        <div className="row">
+                                            <div className="col-4">
+                                                Total Solve Time:
+                                            </div>
+                                            <div className="col-8">
+                                                <TimeDiffDisplay time={totalSolveTime} classNames="badge bg-secondary" />
+                                            </div>
+                                        </div>
+                                    </small>
                                 </div>
-                            </div>
-                        </small>
+                            </div>}
+                        {data.length > 0 &&
+                            <>
+                                {!aggregated && <Select
+                                    id="usersToFiler"
+                                    isMulti={true}
+                                    isSearchable={true}
+                                    placeholder={'Filter users'}
+                                    closeMenuOnSelect={false}
+                                    blurInputOnSelect={false}
+                                    value={usersToFiler}
+                                    onChange={users => setUsersToFiler(users)}
+                                    options={availableUsers}
+                                    isOptionDisabled={() => usersToFiler.length >= 5}
+                                />}
+                                <Line data={{
+                                    datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
+                                        usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
+                                }}
+                                    height={80}
+                                    options={{
+                                        interaction: {
+                                            mode: 'nearest',
+                                            axis: 'x',
+                                            intersect: false
+                                        },
+                                        plugins: {
+                                            zoom: {
+                                                zoom: {
+                                                    wheel: {
+                                                        enabled: true
+                                                    },
+                                                    pinch: {
+                                                        enabled: true
+                                                    },
+                                                    mode: "x"
+                                                },
+                                                pan: {
+                                                    enabled: true,
+                                                    mode: "x"
+                                                }
+                                            }
+                                        },
+                                        elements: {
+                                            point: {
+                                                radius: 0
+                                            }
+                                        },
+                                        animation: {
+                                            duration: 0
+                                        },
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                min: startDate,
+                                                max: endDate,
+                                                autoSkip: true
+                                            },
+                                            y: {
+                                                title: {
+                                                    display: true,
+                                                    text: selectedWeightingOption ? 'Weighted parallel jobs' : 'Number of parallel jobs'
+                                                }
+                                            }
+                                        }
+                                    }} />
+                            </>}
+                        <Table data={aggregated ? data : dataDisaggregated}
+                            noDataMsg="No Usage data found"
+                            displayFields={aggregated ? displayFields : displayFieldsDisaggregated}
+                            sortedAsc={false}
+                            isLoading={isLoading}
+                            sortedCol="username"
+                            idFieldName={aggregated ? "username" : "token"} />
                     </div>
-                </div>}
-            {data.length > 0 &&
-                <>
-                    {!aggregated && <Select
-                        id="usersToFiler"
-                        isMulti={true}
-                        isSearchable={true}
-                        placeholder={'Filter users'}
-                        closeMenuOnSelect={false}
-                        blurInputOnSelect={false}
-                        value={usersToFiler}
-                        onChange={users => setUsersToFiler(users)}
-                        options={availableUsers}
-                        isOptionDisabled={() => usersToFiler.length >= 5}
-                    />}
-                    <Line data={{
-                        datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
-                            usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
-                    }}
-                        height={80}
-                        options={{
-                            interaction: {
-                                mode: 'nearest',
-                                axis: 'x',
-                                intersect: false
-                            },
-                            plugins: {
-                                zoom: {
-                                    zoom: {
-                                        wheel: {
-                                            enabled: true
-                                        },
-                                        pinch: {
-                                            enabled: true
-                                        },
-                                        mode: "x"
-                                    },
-                                    pan: {
-                                        enabled: true,
-                                        mode: "x"
-                                    }
-                                }
-                            },
-                            elements: {
-                                point: {
-                                    radius: 0
-                                }
-                            },
-                            animation: {
-                                duration: 0
-                            },
-                            scales: {
-                                x: {
-                                    type: 'time',
-                                    min: startDate,
-                                    max: endDate,
-                                    autoSkip: true
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Weighted parallel jobs'
-                                    }
-                                }
-                            }
-                        }} />
-                </>}
-            <Table data={aggregated ? data : dataDisaggregated}
-                noDataMsg="No Usage data found"
-                displayFields={aggregated ? displayFields : displayFieldsDisaggregated}
-                sortedAsc={false}
-                isLoading={isLoading}
-                sortedCol="username"
-                idFieldName={aggregated ? "username" : "token"} />
-        </div>
+                </Tab>
+                <Tab eventKey="quotas" title="Quotas">
+                    <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} quotaUnit='mults' />
+                </Tab>
+            </Tabs>
+        </>
     );
 };
 
