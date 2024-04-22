@@ -401,9 +401,9 @@ const Usage = () => {
         <>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <p className="h2">{`Usage of user: ${username}`}
-                <div className="h6 m-1">
-                    Remaining Quota: {remainingQuota} {((remainingQuota!=="unlimited") ? quotaUnit:null)}
-                </div>
+                    <div className="h6 m-1">
+                        Remaining Quota: {remainingQuota} {((remainingQuota !== "unlimited") ? quotaUnit : null)}
+                    </div>
                 </p>
 
                 <div className="btn-toolbar mb-2 mb-md-0">
@@ -440,6 +440,20 @@ const Usage = () => {
                     </div>
                 </div>
             </div>
+            {isInviter &&
+                <div className="col-sm-6 mb-4">
+                    <label>
+                        Show Invitees?
+                        <input
+                            name="showinvitees"
+                            type="checkbox"
+                            className="ms-2"
+                            checked={recursive}
+                            onChange={e => {
+                                setRecursive(e.target.checked)
+                            }} />
+                    </label>
+                </div>}
             <Tabs
                 activeKey={tabSelected}
                 onSelect={(k) => {
@@ -448,20 +462,7 @@ const Usage = () => {
                 <Tab eventKey="usage" title="Usage">
                     <div className="mt-3">
                         <div className="row">
-                            {isInviter &&
-                                <div className="col-sm-6 mb-4">
-                                    <label>
-                                        Show Invitees?
-                                        <input
-                                            name="showinvitees"
-                                            type="checkbox"
-                                            className="ms-2"
-                                            checked={recursive}
-                                            onChange={e => {
-                                                setRecursive(e.target.checked)
-                                            }} />
-                                    </label>
-                                </div>}
+
                             <div className="col-sm-6 mb-4">
                                 <label>
                                     Show disaggregated data?
@@ -475,10 +476,7 @@ const Usage = () => {
                                         }} />
                                 </label>
                             </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-12 col-lg-3">
-                                <div className="form-group mt-3 mb-3">
+                            <div className="col-sm-6 mb-4">
                                     <Select
                                         id="weighting_option"
                                         isClearable={false}
@@ -487,7 +485,6 @@ const Usage = () => {
                                         onChange={selected => setSelectedWeightingOption(selected.value)}
                                         options={availableWeightingOptions}
                                     />
-                                </div>
                             </div>
                         </div>
 
