@@ -170,6 +170,11 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaUnit) {
                 job['times'] = 0
             }
         }
+        // jobs that where canceld while the instance was generated
+        else {
+            job['included'] = true;
+            job['times'] = 0;
+        }
         return job
     });
 
