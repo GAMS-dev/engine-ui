@@ -7,10 +7,11 @@ import Table from './Table.jsx'
 import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { UserSettingsContext } from "./UserSettingsContext";
+import { ClipLoader } from 'react-spinners';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Quotas = ({ data, calcStartDate, calcEndTime }) => {
+const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
 
   const [userSettings,] = useContext(UserSettingsContext)
   const quotaUnit = userSettings.quotaUnit
@@ -21,9 +22,14 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
   const [numInstances, setNumInstances] = useState(0);
   const [numPools, setNumPools] = useState(0);
   const [numCharts, setNumCharts] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // if data, calcStartDate, calcEndTime, quotaUnit changes:
   useEffect(() => {
+    if (dataIsLoading) {
+      return;
+    }
+    setIsLoading(true)
     const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
     setUngroupedDataJobs(dataTmp.data_jobs)
     setUngroupedDataPools(dataTmp.data_pools)
@@ -37,7 +43,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
     numChartsTmp = (dataTmp.num_pools > 1) ? numChartsTmp += 1 : numChartsTmp;
 
     setNumCharts(numChartsTmp)
-  }, [data, calcStartDate, calcEndTime, quotaUnit])
+    setIsLoading(false)
+  }, [data, calcStartDate, calcEndTime, quotaUnit, dataIsLoading])
 
 
   function getChartData(label, ungroupedData) {
@@ -304,62 +311,66 @@ const Quotas = ({ data, calcStartDate, calcEndTime }) => {
           options={availableAggregateTypes}
         />
       </div>
-      <h2 className="text-end">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
-      {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
-        {truncateWarning}
-      </div>}
-      <div className='row'>
-        {(numCharts > 0) ? (
-          <div className={'col-xl-' + ((numCharts === 3) ? '12' : '3') + ' col-lg-3 col-md-12 col-12'}>
-            <div className='row'>
-              {(numUser > 1) ? (
-                <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
-                  ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                  <h3>Users</h3>
-                  <Pie data={userChartData} />
+      {isLoading ? (
+        <ClipLoader />
+      ) : (
+        <>
+          <h2 className="text-end">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
+          {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
+            {truncateWarning}
+          </div>}
+          <div className='row'>
+            {(numCharts > 0) ? (
+              <div className={'col-xl-' + ((numCharts === 3) ? '12' : '3') + ' col-lg-3 col-md-12 col-12'}>
+                <div className='row'>
+                  {(numUser > 1) ? (
+                    <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
+                      ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+                      <h3>Users</h3>
+                      <Pie data={userChartData} />
+                    </div>
+                  ) : null}
+                  {(numInstances > 1) ? (
+                    <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
+                      ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+                      <h3>Instances</h3>
+                      <Pie data={instanceChartData} />
+                    </div>
+                  ) : null}
+                  {(numPools > 1) ? (
+                    <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
+                      ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+                      <h3>Pools *</h3>
+                      <Pie data={poolLabelChartData} />
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-              {(numInstances > 1) ? (
-                <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
-                  ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                  <h3>Instances</h3>
-                  <Pie data={instanceChartData} />
-                </div>
-              ) : null}
-              {(numPools > 1) ? (
-                <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
-                  ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                  <h3>Pools *</h3>
-                  <Pie data={poolLabelChartData} />
-                </div>
-              ) : null}
+              </div>
+            ) : null}
+            <div className={'col-xl-' + ((numCharts === 3) ? '12' : ((numCharts > 0) ? '9' : '12')) +
+              ' col-lg-' + (((numCharts > 0) ? '9' : '12')) + ' col-md-12 col-12'}>
+              <h3>Jobs</h3>
+              <div data-testid="tableJobs" >
+                <Table data={tableDataJobs}
+                  noDataMsg="No Usage data found"
+                  displayFields={displayFieldsJobs}
+                  isLoading={false}
+                  idFieldName={'unique_id'} />
+              </div>
+              <h3>Idle Pool Times</h3>
+              <div data-testid="tableIdlePool" >
+                <Table data={tableDataPools}
+                  noDataMsg="No Usage data found"
+                  displayFields={displayFieldsPools}
+                  isLoading={false}
+                  idFieldName={'unique_id'} />
+              </div>
             </div>
           </div>
-        ) : null}
-        <div className={'col-xl-' + ((numCharts === 3) ? '12' : ((numCharts > 0) ? '9' : '12')) +
-          ' col-lg-' + (((numCharts > 0) ? '9' : '12')) + ' col-md-12 col-12'}>
-          <h3>Jobs</h3>
-          <div data-testid="tableJobs" >
-            <Table data={tableDataJobs}
-              noDataMsg="No Usage data found"
-              displayFields={displayFieldsJobs}
-              isLoading={false}
-              idFieldName={'unique_id'} />
-          </div>
-          <h3>Idle Pool Times</h3>
-          <div data-testid="tableIdlePool" >
-            <Table data={tableDataPools}
-              noDataMsg="No Usage data found"
-              displayFields={displayFieldsPools}
-              isLoading={false}
-              idFieldName={'unique_id'} />
-          </div>
-        </div>
-      </div>
-      {(numPools > 1) ? (
-        <div>* includes Idle Times</div>
-      ) : null}
-
+          {(numPools > 1) ? (
+            <div>* includes Idle Times</div>
+          ) : null}
+        </>)}
     </div>
   );
 }
