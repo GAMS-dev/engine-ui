@@ -12,11 +12,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Table from "./Table";
 import { Tab, Tabs } from "react-bootstrap";
-import { getResponseError, mergeSortedArrays } from "./util";
+import { getResponseError, mergeSortedArrays, calcRemainingQuota } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
 import Select from 'react-select';
 import Quotas from "./Quotas";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 ChartJS.register(
     LinearScale,
@@ -53,6 +54,9 @@ const Usage = () => {
     const [{ jwt, server, roles }] = useContext(AuthContext);
     const availableWeightingOptions = [{ value: true, label: "Jobs weighted with multiplier" }, { value: false, label: "Parallel job view" }]
     const [selectedWeightingOption, setSelectedWeightingOption] = useState(availableWeightingOptions[0].value)
+    const [remainingQuota, setRemainingQuota] = useState(0)
+    const [userSettings,] = useContext(UserSettingsContext)
+    const quotaUnit = userSettings.quotaUnit
     const [displayFields] = useState([
         {
             field: "username",
@@ -368,10 +372,40 @@ const Usage = () => {
     }, [jwt, server, refresh, displayFields, setAlertMsg,
         username, recursive, startDate, endDate, isInviter, selectedWeightingOption]);
 
+    useEffect(() => {
+        const getRemainingQuota = async () => {
+            try {
+                const result = await axios({
+                    url: `${server}/usage/quota`,
+                    method: "GET",
+                    params: { username: username }
+                });
+                if (result.data && result.data.length) {
+                    const quotaRemaining = calcRemainingQuota(result.data);
+                    if (quotaUnit === "multh") {
+                        setRemainingQuota(new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume / 3600))
+                    } else {
+                        setRemainingQuota(new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume)); // in seconds
+
+                    }
+                } else {
+                    setRemainingQuota("unlimited")
+                }
+            } catch (err) {
+                setAlertMsg(`Problems fetching quota data. Error message: ${getResponseError(err)}`)
+            }
+        }
+        getRemainingQuota()
+    }, [server, setAlertMsg, username, remainingQuota, quotaUnit]);
     return (
         <>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">{`Usage of user: ${username}`}</h1>
+                <p className="h2">{`Usage of user: ${username}`}
+                    <div className="h6 m-1">
+                        Remaining Quota: {remainingQuota} {((remainingQuota !== "unlimited") ? quotaUnit : null)}
+                    </div>
+                </p>
+
                 <div className="btn-toolbar mb-2 mb-md-0">
                     <div className="btn-group me-2">
                         <button
@@ -386,6 +420,7 @@ const Usage = () => {
                         </button>
                     </div>
                 </div>
+
             </div>
             <div className="row">
                 <div className="col-sm-6 col-12 mb-4">
@@ -405,6 +440,20 @@ const Usage = () => {
                     </div>
                 </div>
             </div>
+            {isInviter &&
+                <div className="col-sm-6 mb-4">
+                    <label>
+                        Show Invitees?
+                        <input
+                            name="showinvitees"
+                            type="checkbox"
+                            className="ms-2"
+                            checked={recursive}
+                            onChange={e => {
+                                setRecursive(e.target.checked)
+                            }} />
+                    </label>
+                </div>}
             <Tabs
                 activeKey={tabSelected}
                 onSelect={(k) => {
@@ -413,20 +462,7 @@ const Usage = () => {
                 <Tab eventKey="usage" title="Usage">
                     <div className="mt-3">
                         <div className="row">
-                            {isInviter &&
-                                <div className="col-sm-6 mb-4">
-                                    <label>
-                                        Show Invitees?
-                                        <input
-                                            name="showinvitees"
-                                            type="checkbox"
-                                            className="ms-2"
-                                            checked={recursive}
-                                            onChange={e => {
-                                                setRecursive(e.target.checked)
-                                            }} />
-                                    </label>
-                                </div>}
+
                             <div className="col-sm-6 mb-4">
                                 <label>
                                     Show disaggregated data?
@@ -440,10 +476,7 @@ const Usage = () => {
                                         }} />
                                 </label>
                             </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-12 col-lg-3">
-                                <div className="form-group mt-3 mb-3">
+                            <div className="col-sm-6 mb-4">
                                     <Select
                                         id="weighting_option"
                                         isClearable={false}
@@ -452,7 +485,6 @@ const Usage = () => {
                                         onChange={selected => setSelectedWeightingOption(selected.value)}
                                         options={availableWeightingOptions}
                                     />
-                                </div>
                             </div>
                         </div>
 

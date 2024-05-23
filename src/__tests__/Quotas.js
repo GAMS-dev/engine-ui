@@ -44,10 +44,17 @@ describe('Quotas with single job', () => {
         });
     });
 
-    it('displays the jobs table correctly for a single job', () => {
+    it('displays the jobs table correctly for a single job', async() => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
             wrapper: RouterWrapper()
+
         });
+
+        // default was changed
+        fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
+        const aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
+        await waitFor(() => aggregateDropdownEl.getByText('_'));
+        fireEvent.click(aggregateDropdownEl.getByText('_'));
 
         const tableJobs = within(screen.getByTestId('tableJobs'));
         expect(tableJobs.getByRole('row', { name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier mults' })).toBeInTheDocument();
@@ -113,10 +120,16 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         expect(tablePool.queryByRole('cell', { name: 'No Usage data found' })).toBeNull();
     });
 
-    it('displays correct data in the tables', () => {
+    it('displays correct data in the tables', async() => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
             wrapper: RouterWrapper()
+
         });
+
+        fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
+        const aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
+        await waitFor(() => aggregateDropdownEl.getByText('_'));
+        fireEvent.click(aggregateDropdownEl.getByText('_'));
 
         const tableJobs = within(screen.getByTestId('tableJobs'));
         expect(tableJobs.getByRole('row', { name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier mults' })).toBeInTheDocument();
@@ -135,14 +148,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     it('displays correct data in the tables if grouped by user', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
             wrapper: RouterWrapper()
+
         });
-
-        fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
-
-        const aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
-        await waitFor(() => aggregateDropdownEl.getByText('User'));
-        fireEvent.click(aggregateDropdownEl.getByText('User'));
-
 
         const tableJobs = within(screen.getByTestId('tableJobs'));
         expect(tableJobs.getByRole('row', { name: 'User Number Crashes Number Jobs Solve Time mults' })).toBeInTheDocument();
@@ -212,13 +219,18 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
             wrapper: RouterWrapper()
         });
 
+        fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
+        let aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
+        await waitFor(() => aggregateDropdownEl.getByText('_'));
+        fireEvent.click(aggregateDropdownEl.getByText('_'));
+
         let tableJobs = within(screen.getByTestId('tableJobs'));
         expect(tableJobs.getByRole('row', { name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier mults' })).toBeInTheDocument();
         expect(tableJobs.getByRole('row', { name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 60' })).toBeInTheDocument();
         expect(tableJobs.getAllByRole('row')).toHaveLength(5);
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
-        let aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
+        aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
         await waitFor(() => aggregateDropdownEl.getByText('Pool Label'));
         fireEvent.click(aggregateDropdownEl.getByText('Pool Label'));
 
@@ -287,10 +299,16 @@ describe('test cases in calculateQuota', () => {
 describe('test multh also works', () => {
     const testData = testDatax.test_hypercube_with_pool_and_job
 
-    it('multh with multiple jobs ', () => {
+    it('multh with multiple jobs ', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
             wrapper: RouterWrapper({ quotaUnit: 'multh' })
+
         });
+
+        fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
+        const aggregateDropdownEl = within(document.getElementById('aggregateDropdown'))
+        await waitFor(() => aggregateDropdownEl.getByText('_'));
+        fireEvent.click(aggregateDropdownEl.getByText('_'));
 
         expect(screen.getByText('Total: 0.061 multh', { selector: 'h2' })).toBeInTheDocument();
 

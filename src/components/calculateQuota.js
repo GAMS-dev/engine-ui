@@ -85,9 +85,9 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaUnit) {
     // extract the necessary job data
     let dataJobUsageNEW = dataJobUsage.map(job => {
         return {
-            instance: job['labels']['instance'],
+            instance: job?.labels?.instance??'default',
             user: job['username'],
-            multiplier: job['labels']['multiplier'],
+            multiplier: job?.labels?.multiplier??1,
             times: job['times'],
             fails: 0,
             pool_label: null,
@@ -169,6 +169,11 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaUnit) {
                 if (debug) console.error('Found job outside of the timeframe, even though this should not happen!');
                 job['times'] = 0
             }
+        }
+        // jobs that where canceld while the instance was generated
+        else {
+            job['included'] = true;
+            job['times'] = 0;
         }
         return job
     });

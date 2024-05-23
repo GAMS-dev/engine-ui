@@ -23,8 +23,8 @@ const zipAsync = filesToZip => {
     for (let i = 0; i < filesToZip.length; i++) {
         accumulatedFileSize += filesToZip[i].size;
     }
-    if (accumulatedFileSize > 10e6) {
-        throw EvalError("Engine UI does not support uploading individual files larger than 10MB. Please zip the files first and try uploading the zip archive instead.");
+    if (accumulatedFileSize > 10e7) {
+        throw EvalError("Engine UI does not support uploading individual files larger than 100MB. Please zip the files first and try uploading the zip archive instead.");
     }
     const dataZip = new JSZip();
     for (let i = 0; i < filesToZip.length; i++) {
