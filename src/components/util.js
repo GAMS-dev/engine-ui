@@ -46,6 +46,15 @@ const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
     volume: calcRemainingQuotaInternal(data, "volume_quota", "volume_used", noQuotaVal),
     disk: calcRemainingQuotaInternal(data, "disk_quota", "disk_used", noQuotaVal)
 })
+const getQuotaWarningMessage = (quotaWarningData, quotaUnit) => {
+    const remainingQuota = calcRemainingQuota(quotaWarningData);
+    const remainingVolumeStr = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaUnit === 'multh'? remainingQuota.volume/3600: remainingQuota.volume)} ${quotaUnit}`
+    const remainingDiskStr = formatFileSize(remainingQuota.disk);
+      return <><strong>Quota warning</strong>
+          {Number.isFinite(remainingQuota.volume) ? <div>Remaining <span className="fst-italic">volume</span> quota: {remainingVolumeStr}</div> : <></>}
+          {Number.isFinite(remainingQuota.disk) ? <>Remaining <span className="fst-italic">disk</span> quota: {remainingDiskStr}</>: <></>}
+    </>
+}
 const mergeSortedArrays = (arraysToMerge, comparisonFunction) => {
     const mergeInner = (arrL, arrR, comparisonFunction) => {
         if (arrR == null) {
@@ -120,6 +129,7 @@ const formatInstancesSelectInput = (instances) => {
         .filter(instance => instance.cancelling !== true)
         .map(instance => ({
             value: instance.label,
+            multiplier: instance.multiplier,
             label: instance.is_pool === true ? (
                 <>
                     <Layers size={12} />
@@ -128,6 +138,12 @@ const formatInstancesSelectInput = (instances) => {
             ) : formatLabel(instance.label, instance)
         }))
         .sort((a, b) => ('' + a.label).localeCompare(b.label))
+}
+const formatDurationString = (duration) => {
+  if (duration > 3600) {
+    return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration / 3600)}h`
+  }
+  return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration)}s`
 }
 const getEventsString = (events, parameterized_events) => {
     let eventsStr = events == null ? '' : events.join(',');
@@ -160,5 +176,6 @@ const isMobileDevice = function () {
 export {
     zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays,
     formatFileSize, getInstanceData, formatInstancesSelectInput, getEventsString,
-    urlB64ToUint8Array, getRandomInt, isMobileDevice
+    urlB64ToUint8Array, getRandomInt, isMobileDevice, getQuotaWarningMessage,
+    formatDurationString
 }

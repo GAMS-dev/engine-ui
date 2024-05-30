@@ -65,7 +65,7 @@ const Cleanup = () => {
             field: "length",
             column: "Size",
             sorter: "numerical",
-            displayer: size => size >= 1e6 ? `${(size / 1e6).toFixed(2)}MB` : `${(size / 1e3).toFixed(2)}KB`
+            displayer: formatFileSize
         },
         {
             field: "upload_date",

@@ -9,8 +9,9 @@ export const Alert = () => {
 
   useEffect(() => {
     if (alertMsg !== "") {
-      if (alertMsg.startsWith('success:')) {
+      if (typeof alertMsg === "string" && alertMsg.startsWith('success:')) {
         setAlertType("success");
+        return;
       } else {
         setAlertType("danger");
       }
@@ -25,7 +26,7 @@ export const Alert = () => {
     <div className={`alert alert-${alertType} alert-absolute alert-dismissible`} role="alert" style={{ display: alertMsg === "" && "none" }}>
       <button type="button" className="btn-close" aria-label="Close" data-bs-dismiss="alert" onClick={() => setAlertMsg("")}>
       </button>
-      <strong>{alertMsg.startsWith('success:') ? alertMsg.substring(8) : alertMsg}</strong>
+      <strong>{typeof alertMsg === 'string' && alertMsg.startsWith('success:') ? alertMsg.substring(8) : alertMsg}</strong>
     </div>
   );
 };

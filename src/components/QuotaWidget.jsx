@@ -4,6 +4,7 @@ import axios from "axios";
 import { calcRemainingQuota, getResponseError } from "./util";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Cpu, HardDrive } from "react-feather";
+import { quotaWarningThresholds } from "./constants";
 
 
 const QuotaWidget = ({ isVisible, className }) => {
@@ -36,14 +37,14 @@ const QuotaWidget = ({ isVisible, className }) => {
                         title: 'Volume quota',
                         icon: <Cpu size={14} />,
                         text: `: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume) + quotaFormatted.unitVolume}\n`,
-                        className: quotaRemaining.volume < 10000 ? 'text-danger' : ''
+                        className: quotaRemaining.volume < quotaWarningThresholds.volume ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
                         title: 'Disk quota',
                         icon: <HardDrive size={14} />,
                         text: `: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.disk) + quotaFormatted.unitDisk}`,
-                        className: quotaRemaining.disk < 100 ? 'text-danger' : ''
+                        className: quotaRemaining.disk < quotaWarningThresholds.disk ? 'text-danger' : ''
                     }]);
                 } else {
                     setData([{
