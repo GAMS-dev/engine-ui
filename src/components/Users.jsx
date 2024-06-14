@@ -62,12 +62,13 @@ const Users = () => {
       displayer: e => e == null ? "-" : <TimeDisplay time={e} />
     },
     {
-      field: "id,username,roles",
+      field: "id,username,roles,identity_provider",
       column: "Actions",
-      displayer: (id, name, roles) => <UserActionsButtonGroup
+      displayer: (id, name, roles, idp) => <UserActionsButtonGroup
         id={id}
         username={name}
         userroles={roles}
+        idp={idp}
         me={username}
         isAdmin={isAdmin}
         isInviter={isInviter}
@@ -129,7 +130,7 @@ const Users = () => {
         const queries = [
           axios.get(`${server}/users/`, {
             params: queryParamsUsersQuery,
-            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted" }
+            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted, identity_provider" }
           })];
         if (roles?.length > 0) {
           queries.push(axios.get(`${server}/users/invitation`, {

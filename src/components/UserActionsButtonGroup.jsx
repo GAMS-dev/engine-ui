@@ -7,7 +7,7 @@ import { AlertContext } from "./Alert";
 const UserActionsButtonGroup = props => {
   const { id, username, userroles, me, isAdmin, isInviter,
     setUserToDelete, setDeleteInvitation,
-    handleShowDeleteConfirmDialog } = props;
+    handleShowDeleteConfirmDialog, idp } = props;
   const [serverInfo] = useContext(ServerInfoContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
@@ -37,7 +37,7 @@ const UserActionsButtonGroup = props => {
                 <Dropdown.Item as={Link} to={`/users/${username}/change-username`}>Change Username</Dropdown.Item>}
               <Dropdown.Item as={Link} to={`/users/${username}/licenses`}>Update License</Dropdown.Item>
             </>}
-          <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>Change Password</Dropdown.Item>
+          {idp === 'gams_engine' && <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>Change Password</Dropdown.Item>}
           <Dropdown.Item as={Link} to={`/users/${username}/usage`}>Usage</Dropdown.Item>
           {username !== 'admin' && <Dropdown.Item as={Link} to={`/users/${username}/permissions`}>
             Edit Permissions

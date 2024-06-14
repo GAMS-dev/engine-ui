@@ -123,6 +123,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           roles: reponse.data[0].roles,
           username: reponse.data[0].username,
           isOAuthToken: token?.isOAuthToken,
+          isIDPManaged: token?.isIDPManaged !== false,
           refreshTokenData: token?.refreshTokenData
         });
         setRedirectToRoot(true);
@@ -147,6 +148,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     setIsSubmitting(true);
     try {
       let authResponse;
+      let isIDPManaged = true;
       if (selectedAuthProvider === "gams_engine") {
         authResponse = await axios.post(`${server}/auth/login`,
           {
@@ -155,6 +157,7 @@ const LoginForm = ({ showRegistrationForm }) => {
             expires_in: sessionTokenExpirationSeconds
           }
         );
+        isIDPManaged = false;
       } else {
         authResponse = await axios.post(`${server}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
           {
@@ -164,7 +167,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           }
         );
       }
-      loginUser({ jwt: authResponse.data.token });
+      loginUser({ jwt: authResponse.data.token, isIDPManaged });
     } catch (err) {
       if (err.response == null || err.response.status !== 401) {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");

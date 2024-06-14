@@ -7,7 +7,7 @@ import QuotaWidget from "./QuotaWidget";
 
 
 export const UserMenu = () => {
-    const [{ username }] = useContext(AuthContext);
+    const [{ username, isIDPManaged }] = useContext(AuthContext);
     const [dropdownExpanded, setDropdownExpanded] = useState(false);
     return (
         <>
@@ -22,9 +22,9 @@ export const UserMenu = () => {
                     <Dropdown.Menu>
                         <Dropdown.Item as={Link} to='/settings'><small>Settings</small></Dropdown.Item>
                         <Dropdown.Item as={Link} to='/auth-token'><small>Create auth token</small></Dropdown.Item>
-                        <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>
+                        {isIDPManaged !== true && <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>
                             <small>Change password</small>
-                        </Dropdown.Item>
+                        </Dropdown.Item>}
                         <Dropdown.Item as={Link} to='/logout'>
                             <small>Sign Out</small>
                         </Dropdown.Item>

@@ -22,42 +22,36 @@ const UserChangePassForm = () => {
 
     const navigate = useNavigate();
 
-    const handleChangePassword = () => {
+    const handleChangePassword = async () => {
         if (newPassword !== newPasswordConfirm) {
             setSubmissionErrorMsg("The passwords you entered do not match. Please try again.");
             return;
         }
         setIsSubmitting(true);
-        axios
-            .put(
+        try {
+            await axios.put(
                 `${server}/users/`,
                 {
                     username: user,
                     password: newPassword
                 }
             )
-            .then(res => {
-                setIsSubmitting(false);
-                if (res.status === 200) {
-                    if (user === username) {
-                        navigate("/logout")
-                    } else {
-                        setAlertMsg("success:Password successfully updated!");
-                        setPasswordUpdated(true);
-                    }
-                } else {
-                    setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
-                }
-            })
-            .catch(err => {
-                if (err.response == null || err.response.status !== 400 ||
-                    err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('password')) {
-                    setSubmissionErrorMsg(`Some error occurred while trying to changing the password. Error message: ${getResponseError(err)}.`);
-                } else {
-                    setSubmissionErrorMsg(err.response.data.errors.password);
-                }
-                setIsSubmitting(false);
-            });
+            setIsSubmitting(false);
+            if (user === username) {
+                navigate("/logout")
+            } else {
+                setAlertMsg("success:Password successfully updated!");
+                setPasswordUpdated(true);
+            }
+        } catch (err) {
+            if (err.response == null || err.response.status !== 400 ||
+                err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('password')) {
+                setSubmissionErrorMsg(`Some error occurred while trying to changing the password. Error message: ${getResponseError(err)}.`);
+            } else {
+                setSubmissionErrorMsg(err.response.data.errors.password);
+            }
+            setIsSubmitting(false);
+        }
     }
 
     return (
