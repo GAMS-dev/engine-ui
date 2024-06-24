@@ -12,7 +12,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 const UserUpdateForm = () => {
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const { user } = useParams();
+    const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
     const [IDPLoading, setIDPLoading] = useState(false);
@@ -51,7 +51,7 @@ const UserUpdateForm = () => {
                         }
                         const nsPerm = res.data.map(el => ({
                             name: el.name,
-                            perm: el.permissions.filter(perm => perm.username === user).map(el => el.permission)[0],
+                            perm: el.permissions.filter(perm => perm.username === userToEdit).map(el => el.permission)[0],
                             maxPerm: 7
                         }));
                         setNamespacePermissions(nsPerm);
@@ -63,7 +63,7 @@ const UserUpdateForm = () => {
                 axios
                     .get(`${server}/users/`, {
                         headers: { "X-Fields": "roles,inviter_name" },
-                        params: { username: user }
+                        params: { username: userToEdit }
                     })
                     .then(res => {
                         if (res.status !== 200) {
@@ -89,7 +89,7 @@ const UserUpdateForm = () => {
             }
         };
         fetchRequiredData();
-    }, [server, jwt, user, username]);
+    }, [server, jwt, userToEdit, username]);
 
     useEffect(() => {
         const fetchAvailableIDPs = async () => {
@@ -101,7 +101,7 @@ const UserUpdateForm = () => {
                 const availableProvidersPromise = axios.get(`${server}/users/inviters-providers/${encodeURIComponent(inviterName)}`);
                 let selectedProvidersTmp = null;
                 if (currentRole === "inviter") {
-                    const currentProvidersResponse = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(user)}`);
+                    const currentProvidersResponse = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(userToEdit)}`);
                     selectedProvidersTmp = currentProvidersResponse.data.map(provider => ({ value: provider.name, label: provider.name }));
                 }
                 const availableProvidersResponse = await availableProvidersPromise;
@@ -115,7 +115,7 @@ const UserUpdateForm = () => {
             }
         }
         fetchAvailableIDPs();
-    }, [server, jwt, user, currentRole, inviterName]);
+    }, [server, jwt, userToEdit, currentRole, inviterName]);
 
     const handleUserUpdateSubmission = async () => {
         setIsSubmitting(true);
@@ -127,7 +127,7 @@ const UserUpdateForm = () => {
             }
             try {
                 await axios.put(`${server}/users/role`, {
-                    username: user,
+                    username: userToEdit,
                     roles: newRole === "user" ? [] : [newRole]
                 });
                 setCurrentRole(newRole);
@@ -144,7 +144,7 @@ const UserUpdateForm = () => {
                 selectedIdentityProvidersAllowed.forEach(provider => {
                     invitersProvidersForm.append("name", provider.value);
                 });
-                await axios.put(`${server}/users/inviters-providers/${encodeURIComponent(user)}`, invitersProvidersForm);
+                await axios.put(`${server}/users/inviters-providers/${encodeURIComponent(userToEdit)}`, invitersProvidersForm);
             }
             catch (err) {
                 setIsSubmitting(false);
@@ -160,7 +160,7 @@ const UserUpdateForm = () => {
                 }
 
                 const userUpdateForm = new FormData();
-                userUpdateForm.append("username", user);
+                userUpdateForm.append("username", userToEdit);
                 userUpdateForm.append("permissions", nsPerm.perm);
                 try {
                     await axios.put(`${server}/namespaces/${encodeURIComponent(nsPerm.name)}/permissions`,
@@ -181,9 +181,6 @@ const UserUpdateForm = () => {
     return (
         <>
             <div>
-                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 className="h2">Edit Permissions of User: {user}</h1>
-                </div>
                 {isLoading ? <ClipLoader /> :
                     (errorMsg ?
                         <div className="invalid-feedback text-center" style={{ display: "block" }

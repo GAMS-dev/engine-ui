@@ -7,10 +7,10 @@ import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
 
-const UserChangePassForm = () => {
+const UserChangePassForm = ({ hideTitle }) => {
     const [{ username, server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const { user } = useParams();
+    const { userToEdit } = useParams();
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,12 +32,12 @@ const UserChangePassForm = () => {
             await axios.put(
                 `${server}/users/`,
                 {
-                    username: user,
+                    username: userToEdit,
                     password: newPassword
                 }
             )
             setIsSubmitting(false);
-            if (user === username) {
+            if (userToEdit === username) {
                 navigate("/logout")
             } else {
                 setAlertMsg("success:Password successfully updated!");
@@ -57,9 +57,10 @@ const UserChangePassForm = () => {
     return (
         <>
             <div>
-                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 className="h2">{username === user ? 'Change Password' : `Change Password of User: ${user}`}</h1>
-                </div>
+                {hideTitle !== true &&
+                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 className="h2"> Change Password</h1>
+                    </div>}
                 <form
                     className="m-auto"
                     onSubmit={e => {

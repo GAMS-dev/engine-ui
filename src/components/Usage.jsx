@@ -34,7 +34,7 @@ ChartJS.register(
 
 const Usage = () => {
 
-    const { username } = useParams();
+    const { userToEdit } = useParams();
     const [data, setData] = useState([]);
     const [dataDisaggregated, setDataDisaggregated] = useState([]);
     const [dataQuota, setDataQuota] = useState([]);
@@ -48,7 +48,7 @@ const Usage = () => {
     const [totalSolveTime, setTotalSolveTime] = useState(0);
     const [refresh, setRefresh] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [tabSelected, setTabSelected] = useState("usage");
+    const [tabSelected, setTabSelected] = useState("quotas");
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
@@ -138,7 +138,7 @@ const Usage = () => {
                     .get(`${server}/usage/`, {
                         params: {
                             recursive: isInviter ? recursive : false,
-                            username: username,
+                            username: userToEdit,
                             from_datetime: startDate,
                             to_datetime: endDate
                         },
@@ -375,7 +375,7 @@ const Usage = () => {
         }
         fetchData();
     }, [jwt, server, refresh, displayFields, setAlertMsg,
-        username, recursive, startDate, endDate, isInviter, selectedWeightingOption]);
+        userToEdit, recursive, startDate, endDate, isInviter, selectedWeightingOption]);
 
     useEffect(() => {
         const getRemainingQuota = async () => {
@@ -383,7 +383,7 @@ const Usage = () => {
                 const result = await axios({
                     url: `${server}/usage/quota`,
                     method: "GET",
-                    params: { username: username }
+                    params: { username: userToEdit }
                 });
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
@@ -401,11 +401,11 @@ const Usage = () => {
             }
         }
         getRemainingQuota()
-    }, [server, setAlertMsg, username, remainingQuota, quotaUnit]);
+    }, [server, setAlertMsg, userToEdit, remainingQuota, quotaUnit]);
     return (
         <>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <div className="h2">{`Usage of user: ${username}`}
+                <div className="h2">
                     <div className="h6 m-1">
                         Remaining Quota: {remainingQuota} {((remainingQuota !== "unlimited") ? quotaUnit : null)}
                     </div>
@@ -464,6 +464,9 @@ const Usage = () => {
                 onSelect={(k) => {
                     setTabSelected(k)
                 }}>
+                <Tab eventKey="quotas" title="Quotas">
+                    <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />
+                </Tab>
                 <Tab eventKey="usage" title="Usage">
                     <div className="mt-3">
                         <div className="row">
@@ -595,9 +598,6 @@ const Usage = () => {
                                 idFieldName={aggregated ? "username" : "token"} />
                         </>}
                     </div>
-                </Tab>
-                <Tab eventKey="quotas" title="Quotas">
-                    <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />
                 </Tab>
             </Tabs>
         </>

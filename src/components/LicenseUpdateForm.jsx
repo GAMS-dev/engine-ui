@@ -10,7 +10,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 const LicenseUpdateForm = () => {
     const [{ jwt, server, roles }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const { username } = useParams();
+    const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
     const [licenseErrorMsg, setlicenseErrorMsg] = useState("");
@@ -23,7 +23,7 @@ const LicenseUpdateForm = () => {
 
     useEffect(() => {
         axios.get(`${server}/licenses/`, {
-            params: { username: username }
+            params: { username: userToEdit }
         })
             .then(res => {
                 if (res.data[0].inherited_from === res.data[0].user) {
@@ -45,12 +45,12 @@ const LicenseUpdateForm = () => {
                     setIsLoading(false);
                 }
             });
-    }, [server, jwt, username]);
+    }, [server, jwt, userToEdit]);
 
     const handleUserUpdateLicense = async () => {
         setIsSubmitting(true);
         const licenseUpdateForm = new FormData();
-        licenseUpdateForm.append("username", username);
+        licenseUpdateForm.append("username", userToEdit);
 
         if (licenseAction === "update") {
             const licenseModified = license.trim();
@@ -108,9 +108,6 @@ const LicenseUpdateForm = () => {
             {!roles.includes('admin') && <Navigate replace to="/users" />}
             {isLoading ? <ClipLoader /> :
                 <div>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 className="h2">Update License of User: {username}</h1>
-                    </div>
                     <form
                         className="m-auto"
                         onSubmit={e => {

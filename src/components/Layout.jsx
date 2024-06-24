@@ -35,6 +35,7 @@ import CreateAuthTokenForm from "./CreateAuthTokenForm";
 import InstancePools from "./InstancePools";
 import UserSettingsForm from "./UserSettingsForm";
 import { UserSettingsProvider } from "./UserSettingsContext";
+import UserEditBundle from "./UserEditBundle";
 
 const Layout = () => {
   const [{ server, roles, username }] = useContext(AuthContext);
@@ -132,24 +133,9 @@ const Layout = () => {
                     <Route exact path="/quotas/:namespace" element={<NamespaceQuotaUpdateForm />} />
                   }
                   <Route path="/users" element={<Users />} />
-                  {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
-                    <Route path="/users/:user/permissions" element={<UserPermissionUpdateForm />} />
-                  }
-                  {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
-                    <Route path="/users/:username/quotas" element={<UserQuotaUpdateForm />} />
-                  }
-                  {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1) &&
-                    <Route path="/users/:user/identity-provider" element={<UserUpdateIdentityProviderForm />} />
-                  }
-                  {(roles && roles.findIndex(role => ["admin", "inviter"].includes(role)) !== -1 && serverInfo.in_kubernetes === true) &&
-                    <Route path="/users/:userToEdit/instances" element={<UserInstanceUpdateForm />} />
-                  }
-                  <Route path="/users/:user/change-pass" element={<UserChangePassForm />} />
-                  <Route path="/users/:user/change-username" element={<UserChangeNameForm />} />
-                  {(roles && roles.includes('admin')) &&
-                    <Route path="/users/:username/licenses" element={<LicenseUpdateForm />} />
-                  }
-                  <Route path="/users/:username/usage" element={<Usage />} />
+                  <Route path="/users/:userToEdit/*" element={<UserEditBundle />} />
+                  <Route path="/users/:userToEdit/change-pass" element={<UserChangePassForm />} />
+
                   <Route path="/cleanup" element={<Cleanup />} />
                   <Route path="/auth-token" element={<CreateAuthTokenForm />} />
                   {roles && roles.includes('admin') &&
