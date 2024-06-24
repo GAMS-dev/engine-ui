@@ -15,7 +15,7 @@ export const UserSettingsProvider = (props) => {
     const userSettingsState = [userSettings, setUserSettings]
 
     useLayoutEffect(() => {
-        const userSettingsToStore = {}
+        const userSettingsToStore = JSON.parse(localStorage.getItem('userSettings')) ?? {}
         userSettingsToStore[username] = userSettings
         localStorage.setItem('userSettings', JSON.stringify(userSettingsToStore))
     }, [userSettings, username]);
