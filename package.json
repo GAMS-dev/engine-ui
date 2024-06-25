@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@peculiar/webcrypto": "^1.4.5",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",
@@ -20,8 +21,7 @@
     "jest-junit": "^16.0.0",
     "react-scripts": "^5.0.1",
     "react-select-event": "^5.5.1",
-    "sass": "^1.54.9",
-    "@peculiar/webcrypto": "^1.4.5"
+    "sass": "^1.54.9"
   },
   "dependencies": {
     "axios": "^1.6.1",
