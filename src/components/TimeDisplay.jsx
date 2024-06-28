@@ -22,7 +22,7 @@ const TimeDisplay = ({ time }) => {
         {" "}
         {rel
           ? moment.utc(time).fromNow()
-          : moment.utc(time).local().format(moment.utc(time).isSame(new Date(), 'year') ? "MMM Do YYYY, H:mm" : "MMM Do, H:mm")}
+          : moment.utc(time).local().format(moment.utc(time).isSame(new Date(), 'year') ? "MMM Do, H:mm" : "MMM Do YYYY, H:mm")}
       </span>
     </button>
   );
