@@ -6,19 +6,22 @@ import Collapse from "react-bootstrap/Collapse";
 import { AlertContext } from "./Alert";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
-import { zipAsync, getResponseError, getInstanceData, formatInstancesSelectInput } from "./util";
+import { zipAsync, getResponseError, getInstanceData, formatInstancesSelectInput, getQuotaWarningMessage, formatDurationString, calcRemainingQuota, formatFileSize } from "./util";
 import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import { ServerInfoContext } from "../ServerInfoContext";
 import FileDropZone from "./FileDropZone";
+import { UserSettingsContext } from "./UserSettingsContext";
+import { quotaWarningThresholds } from "./constants";
 
 const JobSubmissionForm = props => {
     const { newHcJob } = props;
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [serverInfo,] = useContext(ServerInfoContext);
+    const [userSettings,] = useContext(UserSettingsContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [unableToSolve, setUnableToSolve] = useState(null);
@@ -45,6 +48,9 @@ const JobSubmissionForm = props => {
     const [validWsReq, setValidWsReq] = useState(true);
     const [instancesLoaded, setInstancesLoaded] = useState(false);
     const [availableInstances, setAvailableInstances] = useState([]);
+    const [remainingVolumeQuota, setRemainingVolumeQuota] = useState(Infinity);
+    const [remainingDiskQuota, setRemainingDiskQuota] = useState(Infinity);
+    const [remainingWallTime, setRemainingWallTime] = useState(Infinity);
     const [rawResourceRequestsAllowed, setRawResourceRequestsAllowed] = useState(false);
     const [useRawRequests, setUseRawRequests] = useState(false);
     const [cpuReq, setCpuReq] = useState("");
@@ -58,33 +64,49 @@ const JobSubmissionForm = props => {
     const [accessGroups, setAccessGroups] = useState([]);
 
     useEffect(() => {
-        axios
-            .get(`${server}/namespaces/`, {
-                headers: { "X-Fields": "name,permissions" }
-            })
-            .then(res => {
-                if (res.status !== 200) {
-                    setSubmissionErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
+        const getData = async () => {
+            const responses = await Promise.allSettled([
+                axios
+                    .get(`${server}/namespaces/`, {
+                        headers: { "X-Fields": "name,permissions" }
+                    }),
+                axios({
+                    url: `${server}/usage/quota`,
+                    method: "GET",
+                    params: { username: username }
+                })
+            ])
+            responses.forEach((response, index) => {
+                if (index === 0) {
+                    if (response.status !== 'fulfilled') {
+                        setSubmissionErrorMsg(`An error occurred while retrieving namespaces. Error message: ${getResponseError(response.reason)}.`);
+                        return;
+                    }
+                    const availableNsTmp = response.value.data
+                        .filter(ns => roles && roles.includes("admin") ? true : ns.permissions
+                            .filter(perm => (perm.username === username && (perm.permission & 1) === 1)).length > 0)
+                        .map(ns => ns.name);
+                    if (availableNsTmp.length === 0) {
+                        setSubmissionErrorMsg("You do not have permissions to execute models.");
+                        setUnableToSolve(<><p><strong>You have no execute access to any namespace.</strong></p>
+                            <p>Ask your inviter to grant you permission to submit jobs and try again.</p></>);
+                        setIsLoading(false);
+                        return;
+                    }
+                    setAvailableNamespaces(availableNsTmp);
+                    setNamespace(availableNsTmp[0]);
                     return;
                 }
-                const availableNsTmp = res.data
-                    .filter(ns => roles && roles.includes("admin") ? true : ns.permissions
-                        .filter(perm => (perm.username === username && (perm.permission & 1) === 1)).length > 0)
-                    .map(ns => ns.name);
-                if (availableNsTmp.length === 0) {
-                    setSubmissionErrorMsg("You do not have permissions to execute models.");
-                    setUnableToSolve(<><p><strong>You have no execute access to any namespace.</strong></p>
-                        <p>Ask your inviter to grant you permission to submit jobs and try again.</p></>);
-                    setIsLoading(false);
+                if (response.status !== 'fulfilled') {
+                    setSubmissionErrorMsg(`Problems fetching quota data. Error message: ${getResponseError(response.reason)}`)
                     return;
                 }
-                setAvailableNamespaces(availableNsTmp);
-                setNamespace(availableNsTmp[0]);
+                const remainingQuotas = calcRemainingQuota(response.value.data);
+                setRemainingVolumeQuota(remainingQuotas.volume);
+                setRemainingDiskQuota(remainingQuotas.disk);
             })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
-                setIsLoading(false);
-            });
+        }
+        getData();
     }, [server, jwt, roles, username]);
 
     useEffect(() => {
@@ -143,7 +165,7 @@ const JobSubmissionForm = props => {
             }
         }
         loadInstanceData();
-    }, [server, serverInfo, username, instancesLoaded]);
+    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota]);
 
     useEffect(() => {
         if (submissionErrorMsg !== "") {
@@ -151,7 +173,15 @@ const JobSubmissionForm = props => {
         }
     }, [submissionErrorMsg]);
 
-    const handleJobSubmission = () => {
+    useEffect(() => {
+        if (typeof instance?.multiplier === 'number' && isFinite(instance.multiplier)) {
+            setRemainingWallTime(remainingVolumeQuota / instance.multiplier)
+        } else {
+            setRemainingWallTime(Infinity)
+        }
+    }, [instance, remainingVolumeQuota])
+
+    const handleJobSubmission = async () => {
         if (!validCpuReq || !validMemReq || !validWsReq) {
             return;
         }
@@ -268,31 +298,31 @@ const JobSubmissionForm = props => {
                 jobSubmissionForm.append('labels', `instance=${instance.value}`);
             }
         }
-        Promise.all(promisesToAwait).then(() => {
-            axios
-                .post(
-                    newHcJob ? `${server}/hypercube/` : `${server}/jobs/`,
-                    jobSubmissionForm,
-                    {
-                        "Content-Type": "multipart/form-data"
-                    }
-                )
-                .then(res => {
-                    if (res.status !== 201 || !("token" in res.data || "hypercube_token" in res.data)) {
-                        setSubmissionErrorMsg("An error occurred while posting job. Please try again later.");
-                        return;
-                    }
-                    setAlertMsg("success:Job successfully submitted!");
-                    setIsSubmitting(false);
-                    setJobPosted(true);
-                })
-                .catch(err => {
-                    setSubmissionErrorMsg(`Problems posting job. Error message: ${getResponseError(err)}.`);
-                });
-        })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems posting job.`);
-            });
+        try {
+            await Promise.all(promisesToAwait);
+        } catch (err) {
+            setSubmissionErrorMsg(`Problems posting job. Error message: ${err.message}`);
+            setIsSubmitting(false);
+            return;
+        }
+        try {
+            const postJobResponse = await axios.post(
+                newHcJob ? `${server}/hypercube/` : `${server}/jobs/`,
+                jobSubmissionForm,
+                {
+                    "Content-Type": "multipart/form-data"
+                }
+            );
+            if (postJobResponse.data?.quota_warning?.length) {
+                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit));
+            } else {
+                setAlertMsg("success:Job successfully submitted!");
+            }
+            setJobPosted(true);
+        } catch (err) {
+            setSubmissionErrorMsg(`Problems posting job. Error message: ${getResponseError(err)}.`);
+            setIsSubmitting(false);
+        }
     }
     const updateModelFiles = useCallback(acceptedFiles => {
         if (modelName === "") {
@@ -343,13 +373,22 @@ const JobSubmissionForm = props => {
                                                         Select Instance
                                                     </label>
                                                     <Select
-                                                        id="instance"
+                                                        inputId="instance"
                                                         isClearable={false}
                                                         value={instance}
                                                         isSearchable={true}
                                                         onChange={selected => setInstance(selected)}
                                                         options={availableInstances}
                                                     />
+                                                    {isFinite(remainingDiskQuota) || isFinite(remainingWallTime) ?
+                                                        <small className="form-text text-muted">
+                                                            Remaining: {isFinite(remainingWallTime) ?
+                                                                <span className={remainingWallTime < quotaWarningThresholds.volume ? "text-danger fw-bold" : ""}>
+                                                                    {formatDurationString(remainingWallTime)}</span> : <></>}
+                                                            {isFinite(remainingDiskQuota) ? <>{isFinite(remainingWallTime) ? "," : ""} <span className={remainingDiskQuota < quotaWarningThresholds.disk ? "text-danger fw-bold" : ""}>
+                                                                {formatFileSize(remainingDiskQuota)}</span></> : <></>}
+                                                        </small> :
+                                                        <></>}
                                                 </div>
                                             </div>
                                             <div style={{
@@ -470,7 +509,7 @@ const JobSubmissionForm = props => {
                                             Select a Namespace
                                         </label>
                                         <Select
-                                            id="namespace"
+                                            inputId="namespace"
                                             isClearable={false}
                                             value={{ value: namespace, label: namespace }}
                                             isSearchable={true}
@@ -490,7 +529,7 @@ const JobSubmissionForm = props => {
                                                 Select a Model
                                             </label>
                                             <Select
-                                                id="registeredModelName"
+                                                inputId="registeredModelName"
                                                 isClearable={false}
                                                 value={{ value: registeredModelName, label: registeredModelName }}
                                                 isSearchable={true}
@@ -533,6 +572,20 @@ const JobSubmissionForm = props => {
                                                 label="Drop Hypercube description file here"
                                                 onDrop={updateHcFile} multiple={false} />
                                         </div>}
+                                    <div className="mb-3">
+                                        <label htmlFor="jobTag" className="visually-hidden">
+                                            Job tag (human-readable identifier, optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="jobTag"
+                                            placeholder="Job tag (human-readable identifier, optional)"
+                                            autoComplete="on"
+                                            value={jobTag}
+                                            onChange={e => setJobTag(e.target.value)}
+                                        />
+                                    </div>
                                 </fieldset>
                             </div>
                             <div className="col-md-6 col-12">
@@ -561,22 +614,8 @@ const JobSubmissionForm = props => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label htmlFor="jobTag" className="visually-hidden">
-                                                    Job tag (human-readable identifier, optional)
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="jobTag"
-                                                    placeholder="Job tag (human-readable identifier, optional)"
-                                                    autoComplete="on"
-                                                    value={jobTag}
-                                                    onChange={e => setJobTag(e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="mb-3">
                                                 <label htmlFor="logFileName" className="visually-hidden">
-                                                    Log Filename
+                                                    Log Filename (optional)
                                                 </label>
                                                 <input
                                                     type="text"

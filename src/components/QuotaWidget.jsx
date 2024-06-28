@@ -1,12 +1,16 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
-import { calcRemainingQuota, getResponseError } from "./util";
+import { calcRemainingQuota, formatFileSize, getResponseError } from "./util";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Cpu, HardDrive } from "react-feather";
+import { quotaWarningThresholds } from "./constants";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 
 const QuotaWidget = ({ isVisible, className }) => {
+    const [userSettings,] = useContext(UserSettingsContext)
+    const quotaUnit = userSettings.quotaUnit
     const [{ server, username }] = useContext(AuthContext);
 
     const [data, setData] = useState([]);
@@ -24,26 +28,27 @@ const QuotaWidget = ({ isVisible, className }) => {
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
                     const quotaFormatted = {
-                        volume: quotaRemaining.volume, disk: quotaRemaining.disk / 1e6,
-                        unitVolume: 's', unitDisk: 'MB'
+                        volume: quotaRemaining.volume, disk: formatFileSize(quotaRemaining.disk),
+                        unitVolume: 'mults',
                     }
-                    if (quotaFormatted.volume >= 1e4) {
+                    if (quotaUnit === 'multh') {
                         quotaFormatted.volume /= 3600;
-                        quotaFormatted.unitVolume = 'h';
+                        quotaFormatted.unitVolume = 'multh';
                     }
+                    quotaFormatted.volume = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume)}${quotaFormatted.unitVolume}`;
                     setData([{
                         key: 'volume',
                         title: 'Volume quota',
                         icon: <Cpu size={14} />,
-                        text: `: ${quotaRemaining.volume === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume) + quotaFormatted.unitVolume}\n`,
-                        className: quotaRemaining.volume < 10000 ? 'text-danger' : ''
+                        text: `: ${quotaRemaining.volume === Infinity ? 'unlimited' : quotaFormatted.volume}\n`,
+                        className: quotaRemaining.volume < quotaWarningThresholds.volume ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
                         title: 'Disk quota',
                         icon: <HardDrive size={14} />,
-                        text: `: ${quotaRemaining.disk === Infinity ? 'unlimited' : new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.disk) + quotaFormatted.unitDisk}`,
-                        className: quotaRemaining.disk < 100 ? 'text-danger' : ''
+                        text: `: ${quotaRemaining.disk === Infinity ? 'unlimited' : quotaFormatted.disk}`,
+                        className: quotaRemaining.disk < quotaWarningThresholds.disk ? 'text-danger' : ''
                     }]);
                 } else {
                     setData([{
@@ -74,7 +79,7 @@ const QuotaWidget = ({ isVisible, className }) => {
         return () => {
             cancelTokenSource.cancel()
         }
-    }, [server, username, isVisible])
+    }, [server, username, isVisible, quotaUnit])
 
     return (data ?
         <span className="pre-line">

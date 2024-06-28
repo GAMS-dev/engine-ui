@@ -56,4 +56,8 @@ const GAMSRcMap = {
     "5000": "Driver error: internal error: cannot load option handling library"
 }
 const sessionTokenExpirationSeconds = 604800;
-export { GAMSRcMap, sessionTokenExpirationSeconds }
+const quotaWarningThresholds = {
+    volume: 100 * 3600,
+    disk: 500 * 1e6
+}
+export { GAMSRcMap, sessionTokenExpirationSeconds, quotaWarningThresholds }

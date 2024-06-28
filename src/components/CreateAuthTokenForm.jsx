@@ -92,7 +92,7 @@ const CreateAuthTokenForm = () => {
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <div className="mt-3 mb-3">
-                                <label htmlFor="ldapPort">
+                                <label>
                                     Expiration date
                                 </label>
                                 <DatePicker
@@ -113,7 +113,7 @@ const CreateAuthTokenForm = () => {
                                     Access scopes
                                 </label>
                                 <Select
-                                    id="accessScopes"
+                                    inputId="accessScopes"
                                     placeholder="Full access"
                                     value={selectedScopes}
                                     isSearchable={true}

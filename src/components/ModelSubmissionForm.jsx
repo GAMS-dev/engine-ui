@@ -334,7 +334,7 @@ const ModelSubmissionForm = () => {
                                         User Groups
                                     </label>
                                     <Select
-                                        id="userGroups"
+                                        inputId="userGroups"
                                         value={userGroups}
                                         isMulti={true}
                                         isSearchable={true}

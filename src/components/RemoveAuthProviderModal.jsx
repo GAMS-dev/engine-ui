@@ -23,10 +23,10 @@ const RemoveAuthProviderModal = props => {
                     name: providerId
                 }
             });
-            setAlertMsg(`success:Authentication provider: ${providerId} removed successfully!`);
+            setAlertMsg(`success:Identity provider: ${providerId} removed successfully!`);
             setRefreshProviders(curr => curr + 1);
         } catch (err) {
-            setSubmissionErrorMsg(`Some error occurred while trying to remove the authentication provider: ${providerId}. Error message: ${getResponseError(err)}.`);
+            setSubmissionErrorMsg(`Some error occurred while trying to remove the identity provider: ${providerId}. Error message: ${getResponseError(err)}.`);
         } finally {
             setIsSubmitting(false);
         }
@@ -53,7 +53,7 @@ const RemoveAuthProviderModal = props => {
                     <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
                         {submissionErrorMsg}
                     </div>
-                    <p>Are you sure you want to remove the authentication provider: <code>{providerId}</code>?</p>
+                    <p>Are you sure you want to remove the identity provider: <code>{providerId}</code>?</p>
                     <p>Unused invitations that use this identity provider are considered invalid.
                         Users using this identity provider can no longer sign in, and their identity provider must be updated before they can sign in again.
                         All JWT tokens signed by this identity provider are considered invalid.</p>
@@ -63,7 +63,7 @@ const RemoveAuthProviderModal = props => {
                         Cancel
                     </Button>
                     <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
-                        Remove Authentication Provider
+                        Remove Identity Provider
                     </SubmitButton>
                 </Modal.Footer>
             </form>

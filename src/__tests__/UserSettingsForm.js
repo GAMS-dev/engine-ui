@@ -4,6 +4,8 @@ import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 
 import { UserSettingsContext } from "../components/UserSettingsContext";
+import { ServerInfoContext } from "../ServerInfoContext";
+import { AuthContext } from "../AuthContext";
 import UserSettingsForm from '../components/UserSettingsForm';
 
 const RouterWrapper = (options) => {
@@ -12,12 +14,16 @@ const RouterWrapper = (options) => {
 
     return ({ children }) => (
         <MemoryRouter>
-            <UserSettingsContext.Provider value={[{
-                quotaUnit: quotaUnit,
-                tablePageLength: tablePageLength
-            }, () => { }]}>
-                {children}
-            </UserSettingsContext.Provider>
+            <AuthContext.Provider value={[{ server: "http://localhost" }]}>
+                <ServerInfoContext.Provider value={[{}, () => { }]}>
+                    <UserSettingsContext.Provider value={[{
+                        quotaUnit: quotaUnit,
+                        tablePageLength: tablePageLength
+                    }, () => { }]}>
+                        {children}
+                    </UserSettingsContext.Provider>
+                </ServerInfoContext.Provider>
+            </AuthContext.Provider>
         </MemoryRouter >)
 };
 
@@ -58,6 +64,24 @@ describe('UserSettingsForm', () => {
         fireEvent.click(screen.getByText('20'));
         expect(screen.queryAllByText('10')).toHaveLength(0);
         expect(screen.queryAllByText('20')).toHaveLength(1);
+    });
+
+    it('Cant edit notifications if webhooks not enabled', async () => {
+        render(<UserSettingsForm />, {
+            wrapper: RouterWrapper()
+        });
+
+        fireEvent.click(screen.getByText('Notifications'));
+        await waitFor(() => screen.getByText('Push notifications require webhooks to be enabled.'));
+    });
+
+    it('Cant edit notifications if push notifications not supported by browser', async () => {
+        render(<UserSettingsForm webhookAccess={"ENABLED"} />, {
+            wrapper: RouterWrapper()
+        });
+
+        fireEvent.click(screen.getByText('Notifications'));
+        await waitFor(() => screen.getByText('Push notifications are not supported by your browser.'));
     });
 
 });

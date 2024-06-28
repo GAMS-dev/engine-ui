@@ -29,7 +29,6 @@ import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import GroupMembers from "./GroupMembers";
 import WebhookSubmissionForm from "./WebhookSubmissionForm";
-import DefaultInstanceForm from "./DefaultInstanceForm";
 import AdministrationForm from "./AdministrationForm";
 import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
 import CreateAuthTokenForm from "./CreateAuthTokenForm";
@@ -128,7 +127,7 @@ const Layout = () => {
                   <Route path="/groups/:selectedNs" element={<Models />} />
                   <Route path="/selectedNs" element={<Models />} />
                   <Route path="/nsusers/:selectedNs" element={<Models />} />
-                  <Route path="/settings" element={<UserSettingsForm />} />
+                  <Route path="/settings/*" element={<UserSettingsForm webhookAccess={webhookAccess} />} />
                   {(roles && roles.includes('admin')) &&
                     <Route exact path="/quotas/:namespace" element={<NamespaceQuotaUpdateForm />} />
                   }
@@ -152,9 +151,6 @@ const Layout = () => {
                   }
                   <Route path="/users/:username/usage" element={<Usage />} />
                   <Route path="/cleanup" element={<Cleanup />} />
-                  {serverInfo.in_kubernetes === true &&
-                    <Route path="/default-instance" element={<DefaultInstanceForm />} />
-                  }
                   <Route path="/auth-token" element={<CreateAuthTokenForm />} />
                   {roles && roles.includes('admin') &&
                     <Route path="/administration/*" element={<AdministrationForm setLicenseExpiration={setLicenseExpiration} />} />

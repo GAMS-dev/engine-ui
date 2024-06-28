@@ -51,7 +51,7 @@ const JobAccessGroupsSelector = props => {
                         Select access groups
                     </label>
                     <Select
-                        id="access-groups"
+                        inputId="access-groups"
                         isClearable={true}
                         isMulti={true}
                         isSearchable={true}

@@ -7,23 +7,18 @@ import { AuthContext } from "../AuthContext";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
+import { allEvents } from "./webpush";
 
 const WebhookSubmissionForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server, roles }] = useContext(AuthContext);
 
     const allContentTypes = [{ value: 'json', label: 'JSON' }, { value: 'form', label: 'Form' }];
-    const allEvents = [{ value: 'ALL', label: 'All events' },
-    { value: 'JOB_FINISHED', label: 'Job finished' },
-    { value: 'HC_JOB_FINISHED', label: 'Hypercube job finished' },
-    { value: 'JOB_OUT_OF_RESOURCES', label: 'Job out of resources' },
-    { value: 'HC_JOB_OUT_OF_RESOURCES', label: 'Hypercube job out of resources' }
-    ];
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [formErrors, setFormErrors] = useState("");
     const [url, setUrl] = useState("");
-    const [urlValid, setUrlValid] = useState(false);
+    const [urlValid, setUrlValid] = useState(true);
     const [secret, setSecret] = useState("");
     const [recursive, setRecursive] = useState(false);
     const [contentType, setContentType] = useState(allContentTypes[0]);
@@ -50,7 +45,9 @@ const WebhookSubmissionForm = () => {
         setIsSubmitting(true);
         try {
             const webhookSubmissionForm = new FormData();
-            webhookSubmissionForm.append("url", url);
+            if (url?.length > 0) {
+                webhookSubmissionForm.append("url", url);
+            }
             if (secret?.length > 0) {
                 webhookSubmissionForm.append("secret", secret);
             }
@@ -69,7 +66,7 @@ const WebhookSubmissionForm = () => {
             setWebhookCreated(true);
         }
         catch (err) {
-            if (err.response && err.response.data && err.response.data.errors) {
+            if (err?.response?.data?.errors) {
                 const formErrorsTmp = {};
                 ['url', 'secret', 'events', 'parameterized_events'].forEach(key => {
                     if (err.response.data.errors.hasOwnProperty(key)) {
@@ -112,10 +109,13 @@ const WebhookSubmissionForm = () => {
                                     className={"form-control" + (urlValid !== true || formErrors.url ? " is-invalid" : "")}
                                     id="url"
                                     aria-describedby="urlHelp"
-                                    required
                                     value={url}
                                     onChange={e => {
                                         setUrl(e.target.value);
+                                        if (e.target.value.length === 0) {
+                                            setUrlValid(true);
+                                            return;
+                                        }
                                         try {
                                             const url_validated = new URL(e.target.value);
                                             setUrlValid(['http:', 'https:'].includes(url_validated.protocol));
@@ -181,7 +181,7 @@ const WebhookSubmissionForm = () => {
                                     Events for which webhook should be triggered
                                 </label>
                                 <Select
-                                    id="events"
+                                    inputId="events"
                                     isClearable={true}
                                     isMulti={true}
                                     isSearchable={true}
@@ -213,7 +213,7 @@ const WebhookSubmissionForm = () => {
                                     Content type
                                 </label>
                                 <Select
-                                    id="contentType"
+                                    inputId="contentType"
                                     isClearable={false}
                                     value={contentType}
                                     isDisabled={isSubmitting}

@@ -123,6 +123,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           roles: reponse.data[0].roles,
           username: reponse.data[0].username,
           isOAuthToken: token?.isOAuthToken,
+          isIDPManaged: token?.isIDPManaged !== false,
           refreshTokenData: token?.refreshTokenData
         });
         setRedirectToRoot(true);
@@ -147,6 +148,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     setIsSubmitting(true);
     try {
       let authResponse;
+      let isIDPManaged = true;
       if (selectedAuthProvider === "gams_engine") {
         authResponse = await axios.post(`${server}/auth/login`,
           {
@@ -155,6 +157,7 @@ const LoginForm = ({ showRegistrationForm }) => {
             expires_in: sessionTokenExpirationSeconds
           }
         );
+        isIDPManaged = false;
       } else {
         authResponse = await axios.post(`${server}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
           {
@@ -164,7 +167,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           }
         );
       }
-      loginUser({ jwt: authResponse.data.token });
+      loginUser({ jwt: authResponse.data.token, isIDPManaged });
     } catch (err) {
       if (err.response == null || err.response.status !== 401) {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
@@ -202,7 +205,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         const response = await axios.get(`${server}/auth/providers`, { params: { name: providerName } });
         if (response.data.length === 0) {
-          setLoginErrorMsg("Invitation code is attached to authentication provider that no longer exists.");
+          setLoginErrorMsg("Invitation code is attached to identity provider that no longer exists.");
           return false;
         }
         const providerConfig = response.data[0];
@@ -219,7 +222,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           };
         }
       } catch (err) {
-        setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${providerName}. Error message: ${getResponseError(err)}.`);
+        setLoginErrorMsg(`Problems retrieving configuration of identity provider: ${providerName}. Error message: ${getResponseError(err)}.`);
         return false;
       }
     }
@@ -300,7 +303,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         response = await axios.get(`${server}/auth/providers`);
       } catch (err) {
-        setLoginErrorMsg(`Problems retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+        setLoginErrorMsg(`Problems retrieving identity providers. Error message: ${getResponseError(err)}.`);
         return;
       }
       const OAuthConfigTmp = response.data.filter(config => config.oauth2 != null || config.oidc != null);
@@ -323,7 +326,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           try {
             response = await axios.get(`${server}/auth/providers`, { params: { name: selectedProvider } });
           } catch (err) {
-            setLoginErrorMsg(`Problems retrieving configuration of authentication provider: ${selectedProvider}. Error message: ${getResponseError(err)}.`);
+            setLoginErrorMsg(`Problems retrieving configuration of identity provider: ${selectedProvider}. Error message: ${getResponseError(err)}.`);
             return;
           }
           if (response.data.length > 0) {

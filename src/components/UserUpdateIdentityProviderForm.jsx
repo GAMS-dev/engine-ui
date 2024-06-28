@@ -48,7 +48,7 @@ const UserUpdateIdentityProviderForm = () => {
                     availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0]);
                 setIdentityProviderSubject(userInfo.identity_provider_user_subject == null ? "" : userInfo.identity_provider_user_subject);
             } catch (err) {
-                setSubmissionErrorMsg(`Problems while retrieving authentication providers. Error message: ${getResponseError(err)}.`);
+                setSubmissionErrorMsg(`Problems while retrieving identity providers. Error message: ${getResponseError(err)}.`);
             }
         }
         fetchAvailableProviders();
@@ -114,7 +114,7 @@ const UserUpdateIdentityProviderForm = () => {
                             Identity provider
                         </label>
                         <Select
-                            id="identityProvider"
+                            inputId="identityProvider"
                             value={identityProvider}
                             isSearchable={true}
                             onChange={selected => setIdentityProvider(selected)}
