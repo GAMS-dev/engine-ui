@@ -14,6 +14,7 @@ import SubmitButton from "./SubmitButton";
 import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
 import { ClipLoader } from "react-spinners";
 import { UserSettingsContext } from "./UserSettingsContext";
+import { UserLink } from "./UserLink";
 
 const Cleanup = () => {
 
@@ -53,7 +54,12 @@ const Cleanup = () => {
             field: "username",
             column: "User",
             sorter: "alphabetical",
-            displayer: String
+            displayer: (user) =>
+                <UserLink user={user}>
+                    {user === username ? <sup>
+                        <span className="badge rounded-pill bg-primary ms-1">me</span>
+                    </sup> : <></>}
+                </UserLink>
         },
         {
             field: "namespace",

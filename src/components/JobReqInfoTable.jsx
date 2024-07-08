@@ -11,9 +11,10 @@ import { Button } from "react-bootstrap";
 import { getResponseError } from "./util";
 import axios from "axios";
 import { Edit3 } from "react-feather";
+import { UserLink } from "./UserLink";
 
 const JobReqInfoTable = props => {
-  const [{ server }] = useContext(AuthContext);
+  const [{ server, username }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const { job, isHcJob, inKubernetes, setRefreshJob } = props;
   const [jobLabels, setJobLabels] = useState(null);
@@ -167,7 +168,14 @@ const JobReqInfoTable = props => {
           <th>Submitted by</th>
           <td>
             {job.user.deleted ? <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
-              : job.user.username}
+              : <>
+                < UserLink user={job.user.username}>
+                  {job.user.username === username ? <sup>
+                    <span className="badge rounded-pill bg-primary ms-1">me</span>
+                  </sup> : <></>}
+                </UserLink>
+              </>
+            }
           </td>
         </tr>
         <tr>

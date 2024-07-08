@@ -12,6 +12,7 @@ import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useParams } from "react-router";
 import GroupMemberActionsButtonGroup from "./GroupMemberActionsButtonGroup";
+import { UserLink } from "./UserLink";
 
 const GroupMembers = () => {
     const { namespace, label } = useParams();
@@ -170,7 +171,12 @@ const GroupMembers = () => {
                     field: "username",
                     column: "Username",
                     sorter: "alphabetical",
-                    displayer: String
+                    displayer: (user) =>
+                        <UserLink user={user}>
+                            {user === username ? <sup>
+                                <span className="badge rounded-pill bg-primary ms-1">me</span>
+                            </sup> : <></>}
+                        </UserLink>
                 },
                 {
                     field: "added_at",

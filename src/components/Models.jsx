@@ -14,6 +14,7 @@ import AddUserGroupModal from "./AddUserGroupModal";
 import GroupActionsButtonGroup from "./GroupActionsButtonGroup";
 import { Tab, Tabs } from "react-bootstrap";
 import UserActionsButtonGroup from "./UserActionsButtonGroup";
+import { UserLink } from "./UserLink";
 
 const Models = () => {
   const location = useLocation();
@@ -334,8 +335,13 @@ const Models = () => {
                     column: "Created By",
                     sorter: "alphabetical",
                     displayer: user => user.deleted ?
-                      <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
-
+                      <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
+                      :
+                      <UserLink user={user.username}>
+                        {user.username === username ? <sup>
+                          <span className="badge rounded-pill bg-primary ms-1">me</span>
+                        </sup> : <></>}
+                      </UserLink>
                   },
                   {
                     field: "no_members",
@@ -371,13 +377,11 @@ const Models = () => {
                     column: "User",
                     sorter: "alphabetical",
                     displayer: user =>
-                      user === username ?
-                        <>
-                          {user}
-                          <sup>
-                            <span className="badge rounded-pill bg-primary ms-1">me</span>
-                          </sup>
-                        </> : user
+                      <UserLink user={user}>
+                        {user === username ? <sup>
+                          <span className="badge rounded-pill bg-primary ms-1">me</span>
+                        </sup> : <></>}
+                      </UserLink>
                   },
                   {
                     field: "permission",

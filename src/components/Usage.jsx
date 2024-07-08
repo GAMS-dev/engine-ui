@@ -19,6 +19,7 @@ import Select from 'react-select';
 import Quotas from "./Quotas";
 import { UserSettingsContext } from "./UserSettingsContext";
 import { ClipLoader } from "react-spinners";
+import { UserLink } from "./UserLink";
 
 ChartJS.register(
     LinearScale,
@@ -52,7 +53,7 @@ const Usage = () => {
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const availableWeightingOptions = [{ value: true, label: "Jobs weighted with multiplier" }, { value: false, label: "Parallel job view" }]
     const [selectedWeightingOption, setSelectedWeightingOption] = useState(availableWeightingOptions[0].value)
     const [remainingQuota, setRemainingQuota] = useState(0)
@@ -63,7 +64,12 @@ const Usage = () => {
             field: "username",
             column: "User",
             sorter: "alphabetical",
-            displayer: String
+            displayer: (user) =>
+                <UserLink user={user}>
+                    {user === username ? <sup>
+                        <span className="badge rounded-pill bg-primary ms-1">me</span>
+                    </sup> : <></>}
+                </UserLink>
         },
         {
             field: "nojobs",
@@ -464,10 +470,10 @@ const Usage = () => {
                 onSelect={(k) => {
                     setTabSelected(k)
                 }}>
-                <Tab eventKey="quotas" title="Quotas">
+                <Tab eventKey="quotas" title="Dashboard">
                     <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />
                 </Tab>
-                <Tab eventKey="usage" title="Usage">
+                <Tab eventKey="usage" title="Timeline">
                     <div className="mt-3">
                         <div className="row">
 

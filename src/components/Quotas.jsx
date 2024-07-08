@@ -8,6 +8,8 @@ import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { UserSettingsContext } from "./UserSettingsContext";
 import { ClipLoader } from 'react-spinners';
+import { AuthContext } from "../AuthContext";
+import { UserLink } from './UserLink.jsx';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -23,6 +25,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
   const [numPools, setNumPools] = useState(0);
   const [numCharts, setNumCharts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [{ username }] = useContext(AuthContext);
 
   // if data, calcStartDate, calcEndTime, quotaUnit changes:
   useEffect(() => {
@@ -106,7 +109,12 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: String
+      displayer: (user) =>
+        <UserLink user={user}>
+          {user === username ? <sup>
+            <span className="badge rounded-pill bg-primary ms-1">me</span>
+          </sup> : <></>}
+        </UserLink>
     },
     {
       field: "token,is_hypercube",
@@ -168,7 +176,12 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: String
+      displayer: (user) =>
+        <UserLink user={user}>
+          {user === username ? <sup>
+            <span className="badge rounded-pill bg-primary ms-1">me</span>
+          </sup> : <></>}
+        </UserLink>
     },
     {
       field: "pool_label",

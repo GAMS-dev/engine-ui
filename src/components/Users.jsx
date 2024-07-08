@@ -12,6 +12,7 @@ import TimeDisplay from "./TimeDisplay";
 import UserActionsButtonGroup from "./UserActionsButtonGroup";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
+import { UserLink } from "./UserLink";
 
 const Users = () => {
   const navigate = useNavigate();
@@ -35,13 +36,11 @@ const Users = () => {
       column: "User",
       sorter: "alphabetical",
       displayer: (user, id) => user === "" ? <span className="badge rounded-pill bg-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
-        (user === username ?
-          <>
-            {user}
-            <sup>
-              <span className="badge rounded-pill bg-primary ms-1">me</span>
-            </sup>
-          </> : user)
+        <UserLink user={user}>
+          {user === username ? <sup>
+            <span className="badge rounded-pill bg-primary ms-1">me</span>
+          </sup> : <></>}
+        </UserLink>
     },
     {
       field: "roles",
@@ -53,7 +52,12 @@ const Users = () => {
       field: "inviter_name",
       column: "Invited by",
       sorter: "alphabetical",
-      displayer: e => e === null ? "" : String(e)
+      displayer: (user) =>
+        isAdmin ? <UserLink user={user}>
+          {user === username ? <sup>
+            <span className="badge rounded-pill bg-primary ms-1">me</span>
+          </sup> : <></>}
+        </UserLink> : user
     },
     {
       field: "created",

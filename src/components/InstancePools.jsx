@@ -9,6 +9,7 @@ import { formatInstancesSelectInput, getResponseError } from "./util";
 import InstancePoolsActionsButtonGroup from "./InstancePoolsActionsButtonGroup";
 import axios from "axios";
 import SubmitButton from "./SubmitButton";
+import { UserLink } from "./UserLink";
 
 const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
     const [{ jwt, server, username, roles }] = useContext(AuthContext);
@@ -37,7 +38,13 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
             column: "Owner",
             sorter: "alphabetical",
             displayer: user => user.deleted ?
-                <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
+                <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
+                < UserLink user={user.username} >
+                    {user.username === username ? <sup>
+                        <span className="badge rounded-pill bg-primary ms-1">me</span>
+                    </sup> : <></>
+                    }
+                </UserLink >
         },
         {
             field: "instance",
