@@ -13,7 +13,6 @@ import axios from "axios";
 import AddUserGroupModal from "./AddUserGroupModal";
 import GroupActionsButtonGroup from "./GroupActionsButtonGroup";
 import { Tab, Tabs } from "react-bootstrap";
-import UserActionsButtonGroup from "./UserActionsButtonGroup";
 import { UserLink } from "./UserLink";
 
 const Models = () => {
@@ -388,15 +387,6 @@ const Models = () => {
                     column: "Permissions",
                     sorter: "numerical",
                     displayer: Number
-                  },
-                  {
-                    field: "username",
-                    column: "Actions",
-                    displayer: name => <UserActionsButtonGroup
-                      username={name}
-                      me={username}
-                      isAdmin={roles && roles.includes("admin")}
-                      isInviter={roles && roles.includes("inviter")} />
                   }]}
                   idFieldName="id"
                   sortedAsc={true}

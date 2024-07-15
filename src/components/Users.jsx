@@ -68,11 +68,10 @@ const Users = () => {
     {
       field: "id,username,roles,identity_provider",
       column: "Actions",
-      displayer: (id, name, roles, idp) => <UserActionsButtonGroup
+      displayer: (id, name, roles) => <UserActionsButtonGroup
         id={id}
         username={name}
         userroles={roles}
-        idp={idp}
         me={username}
         isAdmin={isAdmin}
         isInviter={isInviter}
