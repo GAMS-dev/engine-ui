@@ -55,11 +55,7 @@ const Cleanup = () => {
             column: "User",
             sorter: "alphabetical",
             displayer: (user) =>
-                <UserLink user={user}>
-                    {user === username ? <sup>
-                        <span className="badge rounded-pill bg-primary ms-1">me</span>
-                    </sup> : <></>}
-                </UserLink>
+                <UserLink user={user} />
         },
         {
             field: "namespace",

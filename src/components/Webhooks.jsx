@@ -22,18 +22,14 @@ const Webhooks = props => {
     const [filterWebpush, setFilterWebpush] = useState(true);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server, roles, username }] = useContext(AuthContext);
+    const [{ jwt, server, roles }] = useContext(AuthContext);
     const [displayFields] = useState([
         {
             field: "username",
             column: "User",
             sorter: "alphabetical",
             displayer: (user) =>
-                <UserLink user={user}>
-                    {user === username ? <sup>
-                        <span className="badge rounded-pill bg-primary ms-1">me</span>
-                    </sup> : <></>}
-                </UserLink>
+                <UserLink user={user} />
         },
         {
             field: "url",

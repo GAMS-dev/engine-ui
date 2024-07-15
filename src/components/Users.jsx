@@ -36,11 +36,7 @@ const Users = () => {
       column: "User",
       sorter: "alphabetical",
       displayer: (user, id) => user === "" ? <span className="badge rounded-pill bg-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
-        <UserLink user={user}>
-          {user === username ? <sup>
-            <span className="badge rounded-pill bg-primary ms-1">me</span>
-          </sup> : <></>}
-        </UserLink>
+        <UserLink user={user} />
     },
     {
       field: "roles",
@@ -53,11 +49,7 @@ const Users = () => {
       column: "Invited by",
       sorter: "alphabetical",
       displayer: (user) =>
-        isAdmin ? <UserLink user={user}>
-          {user === username ? <sup>
-            <span className="badge rounded-pill bg-primary ms-1">me</span>
-          </sup> : <></>}
-        </UserLink> : user
+        isAdmin ? <UserLink user={user} /> : user
     },
     {
       field: "created",

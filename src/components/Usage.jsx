@@ -53,7 +53,7 @@ const Usage = () => {
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server, roles, username }] = useContext(AuthContext);
+    const [{ jwt, server, roles }] = useContext(AuthContext);
     const availableWeightingOptions = [{ value: true, label: "Jobs weighted with multiplier" }, { value: false, label: "Parallel job view" }]
     const [selectedWeightingOption, setSelectedWeightingOption] = useState(availableWeightingOptions[0].value)
     const [remainingQuota, setRemainingQuota] = useState(0)
@@ -65,11 +65,7 @@ const Usage = () => {
             column: "User",
             sorter: "alphabetical",
             displayer: (user) =>
-                <UserLink user={user}>
-                    {user === username ? <sup>
-                        <span className="badge rounded-pill bg-primary ms-1">me</span>
-                    </sup> : <></>}
-                </UserLink>
+                <UserLink user={user} />
         },
         {
             field: "nojobs",

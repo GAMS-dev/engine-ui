@@ -39,12 +39,7 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
             sorter: "alphabetical",
             displayer: user => user.deleted ?
                 <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
-                < UserLink user={user.username} >
-                    {user.username === username ? <sup>
-                        <span className="badge rounded-pill bg-primary ms-1">me</span>
-                    </sup> : <></>
-                    }
-                </UserLink >
+                < UserLink user={user.username} />
         },
         {
             field: "instance",

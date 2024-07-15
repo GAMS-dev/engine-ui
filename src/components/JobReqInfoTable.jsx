@@ -14,7 +14,7 @@ import { Edit3 } from "react-feather";
 import { UserLink } from "./UserLink";
 
 const JobReqInfoTable = props => {
-  const [{ server, username }] = useContext(AuthContext);
+  const [{ server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const { job, isHcJob, inKubernetes, setRefreshJob } = props;
   const [jobLabels, setJobLabels] = useState(null);
@@ -169,11 +169,7 @@ const JobReqInfoTable = props => {
           <td>
             {job.user.deleted ? <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
               : <>
-                < UserLink user={job.user.username}>
-                  {job.user.username === username ? <sup>
-                    <span className="badge rounded-pill bg-primary ms-1">me</span>
-                  </sup> : <></>}
-                </UserLink>
+                < UserLink user={job.user.username} />
               </>
             }
           </td>

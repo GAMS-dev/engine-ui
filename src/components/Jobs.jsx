@@ -34,7 +34,7 @@ const Jobs = () => {
   const [hcJobData, setHcJobData] = useState([]);
   const [filterActive, setFilterActive] = useState(false);
   const [resetPageNumber, setResetPageNumber] = useState(false);
-  const [{ jwt, server, roles, username }] = useContext(AuthContext);
+  const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
   const isInviter = roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined;
@@ -46,13 +46,7 @@ const Jobs = () => {
       sorter: "alphabetical-object",
       displayer: user => user.deleted ?
         <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
-        < UserLink user={user.username} >
-          {
-            user.username === username ? <sup>
-              <span className="badge rounded-pill bg-primary ms-1">me</span>
-            </sup> : <></>
-          }
-        </UserLink >
+        <UserLink user={user.username} />
     },
     {
       field: "model",
