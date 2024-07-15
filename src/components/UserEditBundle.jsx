@@ -76,8 +76,6 @@ const UserEditBundle = () => {
         fetchUserInfo();
     }, [server, userToEdit, setAlertMsg]);
 
-    serverInfo.in_kubernetes = true
-
     return (
         invalidUser ?
             <div className="alert alert-danger mt-3">
