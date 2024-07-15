@@ -45,7 +45,43 @@ testUserSettings['admin'] = {
     tablePageLength: '20'
 }
 
+const localStorageMock = (function () {
+    let store = {};
+
+    return {
+        getItem(key) {
+            return store[key] ? store[key] : JSON.stringify({});
+        },
+
+        setItem(key, value) {
+            store[key] = value;
+        },
+
+        clear() {
+            store = {};
+        },
+
+        removeItem(key) {
+            delete store[key];
+        },
+
+        getAll() {
+            return store;
+        },
+    };
+})();
+
+Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+const setLocalStorage = (id, data) => {
+    window.localStorage.setItem(id, JSON.stringify(data));
+};
+
 describe('UserSettingsContext', () => {
+    beforeEach(() => {
+        window.localStorage.clear();
+    });
+
     it('provides expected UserSettingsContext obj to child elements', () => {
         render(
             <UserSettingsProvider />, {
@@ -54,13 +90,7 @@ describe('UserSettingsContext', () => {
     });
 
     it('if user has set his settings they are displayed', () => {
-        Object.defineProperty(window, "localStorage", {
-            value: {
-                getItem: jest.fn(() => JSON.stringify(testUserSettings)),
-                setItem: jest.fn(() => null),
-            },
-            writable: true,
-        });
+        setLocalStorage('userSettings', testUserSettings)
         render(
             <UserSettingsProvider>
                 <TestingComponent />
@@ -73,13 +103,7 @@ describe('UserSettingsContext', () => {
     });
 
     it('if a second user logs in and has not set settings yet, but another has, use still default values', () => {
-        Object.defineProperty(window, "localStorage", {
-            value: {
-                getItem: jest.fn(() => JSON.stringify(testUserSettings)),
-                setItem: jest.fn(() => null),
-            },
-            writable: true,
-        });
+        setLocalStorage('userSettings', testUserSettings)
         render(
             <UserSettingsProvider>
                 <TestingComponent />
@@ -92,13 +116,6 @@ describe('UserSettingsContext', () => {
     });
 
     it('localstorage is correctly set', async () => {
-        Object.defineProperty(window, "localStorage", {
-            value: {
-                getItem: jest.fn(() => JSON.stringify(testUserSettings)),
-                setItem: jest.fn(() => null),
-            },
-            writable: true,
-        });
         render(
             <UserSettingsProvider>
                 <UserSettingsForm />
@@ -109,8 +126,23 @@ describe('UserSettingsContext', () => {
         await waitFor(() => screen.getByText('multh'));
         fireEvent.click(screen.getByText('multh'));
 
-        expect(window.localStorage.setItem).toHaveBeenLastCalledWith('userSettings', '{"notAdmin":{"quotaUnit":"multh","tablePageLength":"10"}}')
+        expect(window.localStorage.getAll()).toEqual({ 'userSettings': '{"notAdmin":{"quotaUnit":"multh","tablePageLength":"10"}}' })
+    });
 
+    it('if multiple user use the same browser, both settings are saved', async () => {
+        render(
+            <UserSettingsProvider>
+                <UserSettingsForm />
+            </UserSettingsProvider>, {
+            wrapper: AuthProviderWrapper
+        });
+        render(
+            <UserSettingsProvider>
+                <UserSettingsForm />
+            </UserSettingsProvider>, {
+            wrapper: AdminAuthProviderWrapper
+        });
+        expect(window.localStorage.getAll()).toEqual({ 'userSettings': '{"notAdmin":{"quotaUnit":"mults","tablePageLength":"10"},"admin":{"quotaUnit":"mults","tablePageLength":"10"}}' })
     });
 
 });
