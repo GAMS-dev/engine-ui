@@ -41,6 +41,20 @@ const Jobs = () => {
 
   const displayFieldsDefault = [
     {
+      field: "user",
+      column: "Username",
+      sorter: "alphabetical-object",
+      displayer: user => user.deleted ?
+        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
+        < UserLink user={user.username} >
+          {
+            user.username === username ? <sup>
+              <span className="badge rounded-pill bg-primary ms-1">me</span>
+            </sup> : <></>
+          }
+        </UserLink >
+    },
+    {
       field: "model",
       column: "Model",
       sorter: "alphabetical",
@@ -79,22 +93,7 @@ const Jobs = () => {
           setRefresh={setRefresh} />
     }
   ];
-  const [displayFields, setDisplayFields] = useState(isInviter ?
-    [{
-      field: "user",
-      column: "Username",
-      sorter: "alphabetical-object",
-      displayer: user => user.deleted ?
-        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
-        < UserLink user={user.username} >
-          {
-            user.username === username ? <sup>
-              <span className="badge rounded-pill bg-primary ms-1">me</span>
-            </sup> : <></>
-          }
-        </UserLink >
-    }].concat(displayFieldsDefault) :
-    displayFieldsDefault);
+  const [displayFields, setDisplayFields] = useState(displayFieldsDefault);
 
   const [displayFieldKeys,] = useState(displayFields.map(e => e.field));
 
