@@ -336,11 +336,7 @@ const Models = () => {
                     displayer: user => user.deleted ?
                       <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
                       :
-                      <UserLink user={user.username}>
-                        {user.username === username ? <sup>
-                          <span className="badge rounded-pill bg-primary ms-1">me</span>
-                        </sup> : <></>}
-                      </UserLink>
+                      <UserLink user={user.username} />
                   },
                   {
                     field: "no_members",
@@ -376,17 +372,27 @@ const Models = () => {
                     column: "User",
                     sorter: "alphabetical",
                     displayer: user =>
-                      <UserLink user={user}>
-                        {user === username ? <sup>
-                          <span className="badge rounded-pill bg-primary ms-1">me</span>
-                        </sup> : <></>}
-                      </UserLink>
+                      <UserLink user={user} />
                   },
                   {
                     field: "permission",
                     column: "Permissions",
                     sorter: "numerical",
-                    displayer: Number
+                    displayer: num => <>
+                      {num}
+                      {num & 4 ?
+                        <sup>
+                          <span className="badge rounded-pill bg-secondary ms-1">read</span>
+                        </sup> : <></>}
+                      {num & 2 ?
+                        <sup>
+                          <span className="badge rounded-pill bg-secondary ms-1">write</span>
+                        </sup> : <></>}
+                      {num & 1 ?
+                        <sup>
+                          <span className="badge rounded-pill bg-secondary ms-1">execute</span>
+                        </sup> : <></>}
+                    </>
                   }]}
                   idFieldName="id"
                   sortedAsc={true}
