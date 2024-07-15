@@ -7,24 +7,28 @@ import '@testing-library/jest-dom'
 import Quotas from '../components/Quotas';
 import { testDatax } from './utils/testData';
 import { UserSettingsContext } from "../components/UserSettingsContext";
+import { AuthContext } from '../AuthContext';
 
 
 let startDate = new Date('2020-08-03T17:10:15.000000+00:00');
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00');
 
-const RouterWrapper = (options) => {
+const RouterAuthContextWrapper = (options) => {
     const quotaUnit = options?.quotaUnit == null ? 'mults' : options.quotaUnit;
 
     return ({ children }) => (
         <MemoryRouter>
-            <UserSettingsContext.Provider value={[{
-                quotaUnit: quotaUnit,
-                tablePageLength: '10'
-            }]}>
-                {children}
-            </UserSettingsContext.Provider>
+            <AuthContext.Provider value={[{ username: "testuser" }]}>
+                <UserSettingsContext.Provider value={[{
+                    quotaUnit: quotaUnit,
+                    tablePageLength: '10'
+                }]}>
+                    {children}
+                </UserSettingsContext.Provider>
+            </AuthContext.Provider>
         </MemoryRouter >)
 };
+
 
 window.ResizeObserver = function () {
     return {
@@ -40,13 +44,13 @@ describe('Quotas with single job', () => {
 
     it('renders Quotas component for single job', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
     });
 
-    it('displays the jobs table correctly for a single job', async() => {
+    it('displays the jobs table correctly for a single job', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
 
         });
 
@@ -72,7 +76,7 @@ describe('Quotas with single job', () => {
 
     it('displays the pool table correctly for a single job (not on pool)', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         const tablePool = within(screen.getByTestId('tableIdlePool'));
@@ -81,7 +85,7 @@ describe('Quotas with single job', () => {
 
     it('displays Total correctly and no charts are visible', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         expect(screen.getByText('Total: 259,200 mults', { selector: 'h2' })).toBeInTheDocument();
@@ -95,13 +99,13 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
     it('renders Quotas component for multiple jobs', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
     });
 
     it('displays both charts and tables with usage data', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         expect(screen.getByText('Total: 220 mults', { selector: 'h2' })).toBeInTheDocument();
@@ -120,9 +124,9 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         expect(tablePool.queryByRole('cell', { name: 'No Usage data found' })).toBeNull();
     });
 
-    it('displays correct data in the tables', async() => {
+    it('displays correct data in the tables', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
 
         });
 
@@ -147,7 +151,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
     it('displays correct data in the tables if grouped by user', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
 
         });
 
@@ -166,7 +170,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
     it('displays correct data in the tables if grouped by instance', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
@@ -191,7 +195,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
     it('displays correct data in the tables if grouped by pool label', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
@@ -216,7 +220,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
     it('changing aggregate multiple times works', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         fireEvent.keyDown(document.getElementById('aggregateDropdown'), { key: 'ArrowDown' });
@@ -272,7 +276,7 @@ describe('charts cut of correctly when to many parts are given', () => {
 
     it('displays only first 10 pool labels in chart', () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
 
         expect(screen.queryByText('Users', { selector: 'h3' })).toBeNull();
@@ -290,7 +294,7 @@ describe('test cases in calculateQuota', () => {
 
     it('cases in calculateQuota work', () => {
         render(<Quotas data={testData} calcStartDate={new Date('2021-08-03T17:10:15.000000+00:00')} calcEndTime={new Date('2021-08-05T17:10:15.000000+00:00')} />, {
-            wrapper: RouterWrapper()
+            wrapper: RouterAuthContextWrapper()
         });
         expect(screen.getAllByRole('img')).toHaveLength(3);
     })
@@ -301,7 +305,7 @@ describe('test multh also works', () => {
 
     it('multh with multiple jobs ', async () => {
         render(<Quotas data={testData} calcStartDate={startDate} calcEndTime={endDate} />, {
-            wrapper: RouterWrapper({ quotaUnit: 'multh' })
+            wrapper: RouterAuthContextWrapper({ quotaUnit: 'multh' })
 
         });
 
