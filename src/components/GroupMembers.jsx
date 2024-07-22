@@ -172,11 +172,7 @@ const GroupMembers = () => {
                     column: "Username",
                     sorter: "alphabetical",
                     displayer: (user) =>
-                        <UserLink user={user}>
-                            {user === username ? <sup>
-                                <span className="badge rounded-pill bg-primary ms-1">me</span>
-                            </sup> : <></>}
-                        </UserLink>
+                        <UserLink user={user} />
                 },
                 {
                     field: "added_at",
@@ -189,7 +185,7 @@ const GroupMembers = () => {
                     column: "Added By",
                     sorter: "alphabetical",
                     displayer: user => user.deleted ?
-                        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
+                        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : <UserLink user={user.username} />
 
                 },
                 {
