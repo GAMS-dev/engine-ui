@@ -28,6 +28,17 @@ const AuthProviderWrapper = ({ children }) => (
 
 
 describe('test UpdatePasswordPolicyButton', () => {
+    beforeEach(() => {
+        const passwordPlociy = {
+            min_password_length: 10,
+            must_include_uppercase: false,
+            must_include_lowercase: false,
+            must_include_number: false,
+            must_include_special_char: false,
+            not_in_popular_passwords: false,
+        }
+        axios.get.mockImplementation(() => Promise.resolve({ status: 200, data: passwordPlociy }));
+    });
 
     it('renders Button corectly', () => {
         render(<UpdatePasswordPolicyButton />, {
@@ -35,7 +46,8 @@ describe('test UpdatePasswordPolicyButton', () => {
         });
     });
 
-    it('display default passwordPlociy on first use', async () => {
+    it('display default passwordPolicy on first use', async () => {
+
         render(<UpdatePasswordPolicyButton />, {
             wrapper: AuthProviderWrapper
         });
@@ -86,7 +98,7 @@ describe('test UpdatePasswordPolicyButton', () => {
         fireEvent.click(screen.getByText('Update password policy'))
         await waitFor(() => screen.getByText('Include at least one number?'));
 
-        fireEvent.change(screen.getByLabelText('Minimum password length:'), {target: {value: '12'}});
+        fireEvent.change(screen.getByLabelText('Minimum password length:'), { target: { value: '12' } });
         fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one uppercase letter?' }));
         fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one lowercase letter?' }));
         fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one number?' }));
