@@ -67,22 +67,25 @@ const Layout = () => {
         console.log(getResponseError(err));
       }
     }
+
+    const fetchEngineLicense = async () => {
+      let elReq
+      try {
+        elReq = await axios.get(`${server}/licenses/engine`,)
+      } catch (err) {
+        console.error(getResponseError(err))
+        return
+      }
+      let expirationDate = elReq.data.expiration_date;
+      if (expirationDate == null && elReq.data.license != null) {
+        expirationDate = 'perpetual';
+      }
+      setLicenseExpiration(expirationDate);
+    }
+
     fetchConfigData();
     if (roles.includes("admin")) {
-      axios
-        .get(
-          `${server}/licenses/engine`,
-        )
-        .then(res => {
-          let expirationDate = res.data.expiration_date;
-          if (expirationDate == null && res.data.license != null) {
-            expirationDate = 'perpetual';
-          }
-          setLicenseExpiration(expirationDate);
-        })
-        .catch(err => {
-          console.error(getResponseError(err));
-        });
+      fetchEngineLicense()
     }
   }, [serverInfo, server, roles, username])
 

@@ -98,10 +98,10 @@ const Jobs = () => {
 
   //init the list
   useEffect(() => {
-    setIsLoading(true);
-    if (tabSelected === "jobs") {
-      axios
-        .get(server + `/jobs/`, {
+    const fetchJobs = async () => {
+      let jReq
+      try {
+        jReq = await axios.get(server + `/jobs/`, {
           params: {
             everyone: true,
             per_page: rowsPerPage,
@@ -112,18 +112,20 @@ const Jobs = () => {
           },
           headers: { "X-Fields": displayFieldKeys.join(",") }
         })
-        .then(res => {
-          setTotalJobs(res.data.count);
-          setJobData(res.data.results);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
-          setIsLoading(false);
-        });
-    } else {
-      axios
-        .get(server + `/hypercube/`, {
+      } catch (err) {
+        setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
+        setIsLoading(false)
+        return
+      }
+      setTotalJobs(jReq.data.count);
+      setJobData(jReq.data.results);
+      setIsLoading(false);
+    }
+
+    const fetchHCJobs = async () => {
+      let jHCReq
+      try {
+        jHCReq = await axios.get(server + `/hypercube/`, {
           params: {
             everyone: true,
             per_page: rowsPerPageHc,
@@ -134,15 +136,20 @@ const Jobs = () => {
           },
           headers: { "X-Fields": displayFieldKeys.join(",") }
         })
-        .then(resHc => {
-          setTotalHcJobs(resHc.data.count);
-          setHcJobData(resHc.data.results);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
-          setIsLoading(false);
-        });
+      } catch (err) {
+        setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
+        setIsLoading(false)
+        return
+      }
+      setTotalHcJobs(jHCReq.data.count);
+      setHcJobData(jHCReq.data.results);
+      setIsLoading(false);
+    }
+    setIsLoading(true);
+    if (tabSelected === "jobs") {
+      fetchJobs()
+    } else {
+      fetchHCJobs()
     }
   }, [jwt, server, isInviter, filterActive, refresh, setAlertMsg,
     currentPageJobs, currentPageHcJobs, sortedColJobs, sortedColHcJobs, sortAscJobs,
@@ -150,22 +157,25 @@ const Jobs = () => {
 
   //fetch status codes
   useEffect(() => {
+    const fetchStatusCode = async () => {
+      let scReq
+      try {
+        scReq = await axios.get(server + `/jobs/status-codes`)
+      } catch (err) {
+        setAlertMsg(`Problems fetching status code map. Error message: ${getResponseError(err)}`)
+        return
+      }
+      const newStatusCodes = scReq.data.reduce(statusCodeReducer, {});
+      setStatusCodes(newStatusCodes);
+      const newDisplayFields = displayFields.map(e => ({ ...e }));
+      newDisplayFields.find(e => e.field === "status").displayer = e => (
+        <p className="text-info">{newStatusCodes[e]}</p>
+      );
+      setDisplayFields(newDisplayFields);
+    }
     // Only fetch status codes if not already fetched
     if (statusCodes.length === 0) {
-      axios
-        .get(server + `/jobs/status-codes`)
-        .then(res => {
-          const newStatusCodes = res.data.reduce(statusCodeReducer, {});
-          setStatusCodes(newStatusCodes);
-          const newDisplayFields = displayFields.map(e => ({ ...e }));
-          newDisplayFields.find(e => e.field === "status").displayer = e => (
-            <p className="text-info">{newStatusCodes[e]}</p>
-          );
-          setDisplayFields(newDisplayFields);
-        })
-        .catch(err => {
-          setAlertMsg(`Problems fetching status code map. Error message: ${getResponseError(err)}`);
-        });
+      fetchStatusCode()
     }
   }, [server, displayFields, statusCodes, setAlertMsg]);
 

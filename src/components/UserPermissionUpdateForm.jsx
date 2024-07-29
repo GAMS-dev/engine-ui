@@ -28,6 +28,8 @@ const UserUpdateForm = () => {
     const [selectedIdentityProvidersAllowed, setSelectedIdentityProvidersAllowed] = useState(null);
 
     const [userEdited, setUserEdited] = useState(false);
+    const [requierDataError, setRequierDataError] = useState(false);
+    const [requierDataErrorMessage, setRequierDataErrorMessage] = useState('');
 
     const updateNewRole = e => {
         setNewRole(e.target.value);
@@ -42,51 +44,49 @@ const UserUpdateForm = () => {
     useEffect(() => {
         const fetchRequiredData = async () => {
             const requests = [
-                axios
-                    .get(`${server}/namespaces/`)
-                    .then(res => {
-                        if (res.status !== 200) {
-                            setErrorMsg("An error occurred while retrieving namespaces. Please try again later.");
-                            return;
-                        }
-                        const nsPerm = res.data.map(el => ({
-                            name: el.name,
-                            perm: el.permissions.filter(perm => perm.username === userToEdit).map(el => el.permission)[0],
-                            maxPerm: 7
-                        }));
-                        setNamespacePermissions(nsPerm);
-                        setCurrNamespacePermissions(nsPerm.map(el => ({ name: el.name, perm: el.perm })));
-                    })
-                    .catch(err => {
-                        setErrorMsg(`Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`);
-                    }),
-                axios
-                    .get(`${server}/users/`, {
-                        headers: { "X-Fields": "roles,inviter_name" },
-                        params: { username: userToEdit }
-                    })
-                    .then(res => {
-                        if (res.status !== 200) {
-                            setErrorMsg("An error occurred while retrieving user roles. Please try again later.");
-                            return;
-                        }
-                        const currentRoleTmp = res.data[0].roles[0];
-                        setInviterName(res.data[0].inviter_name);
-                        setCurrentRole(currentRoleTmp == null ? "user" : currentRoleTmp);
-                    })
-                    .catch(err => {
-                        setErrorMsg(`Problems while while retrieving user roles. Error message: ${getResponseError(err)}.`);
-                    })
-            ]
-            try {
-                await Promise.all(requests);
-            }
-            catch (err) {
-                console.error(err);
-            }
-            finally {
-                setIsLoading(false);
-            }
+                axios.get(`${server}/namespaces/`),
+                axios.get(`${server}/users/`, {
+                    headers: { "X-Fields": "roles,inviter_name" },
+                    params: { username: userToEdit }
+                })
+            ];
+            (await Promise.allSettled(requests)).forEach((result, idx) => {
+                if (result.status === "rejected") {
+                    if (idx === 0) {
+                        setRequierDataError(true)
+                        setRequierDataErrorMessage(`Problems while retrieving namespaces. Error message: ${getResponseError(result.reason)}.`);
+                    } else {
+                        setRequierDataError(true)
+                        setRequierDataErrorMessage(`Problems while retrieving user roles. Error message: ${getResponseError(result.reason)}.`);
+                    }
+                    return
+                }
+                const responseData = result.value.data
+                if (idx === 0) {
+                    if (result.value.status !== 200) {
+                        setRequierDataError(true)
+                        setRequierDataErrorMessage("An error occurred while retrieving namespaces. Please try again later.");
+                        return;
+                    }
+                    const nsPerm = responseData.map(el => ({
+                        name: el.name,
+                        perm: el.permissions.filter(perm => perm.username === userToEdit).map(el => el.permission)[0],
+                        maxPerm: 7
+                    }));
+                    setNamespacePermissions(nsPerm);
+                    setCurrNamespacePermissions(nsPerm.map(el => ({ name: el.name, perm: el.perm })));
+                    return
+                }
+                if (result.value.status !== 200) {
+                    setRequierDataError(true)
+                    setRequierDataErrorMessage("An error occurred while retrieving user roles. Please try again later.");
+                    return;
+                }
+                const currentRoleTmp = responseData[0].roles[0];
+                setInviterName(responseData[0].inviter_name);
+                setCurrentRole(currentRoleTmp == null ? "user" : currentRoleTmp);
+            })
+            setIsLoading(false)
         };
         fetchRequiredData();
     }, [server, jwt, userToEdit, username]);
@@ -179,65 +179,69 @@ const UserUpdateForm = () => {
     }
 
     return (
-        <>
-            <div>
-                {isLoading ? <ClipLoader /> :
-                    (errorMsg ?
-                        <div className="invalid-feedback text-center" style={{ display: "block" }
-                        } >
-                            {errorMsg}
-                        </div> :
-                        <form
-                            className="m-auto"
-                            onSubmit={e => {
-                                e.preventDefault();
-                                handleUserUpdateSubmission();
-                                return false;
-                            }}
-                        >
-                            <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                                {submissionErrorMsg}
-                            </div>
-                            <fieldset disabled={isSubmitting}>
-                                <div className="mb-3">
-                                    <label htmlFor="roleSelector">
-                                        {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
-                                    </label>
-                                    <select id="roleSelector" className="form-control form-select" value={newRole} onChange={updateNewRole}>
-                                        <option key="user" value="user">User</option>
-                                        <option key="inviter" value="inviter">Inviter</option>
-                                        {(roles.find(role => role === "admin") !== undefined) &&
-                                            <option key="admin" value="admin">Admin</option>}
-                                    </select>
+        requierDataError ?
+            <div className="alert alert-danger mt-3">
+                <p><strong>{requierDataErrorMessage}</strong></p>
+            </div> :
+            <>
+                <div>
+                    {isLoading ? <ClipLoader /> :
+                        (errorMsg ?
+                            <div className="invalid-feedback text-center" style={{ display: "block" }
+                            } >
+                                {errorMsg}
+                            </div> :
+                            <form
+                                className="m-auto"
+                                onSubmit={e => {
+                                    e.preventDefault();
+                                    handleUserUpdateSubmission();
+                                    return false;
+                                }}
+                            >
+                                <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                                    {submissionErrorMsg}
                                 </div>
-                                {newRole === "inviter" && availableIdentityProviders.length > 1 &&
-                                    (IDPLoading ? <ClipLoader /> : <div className="mb-3">
-                                        <label htmlFor="identityProvidersAllowed">
-                                            Identity providers user is allowed to invite with
+                                <fieldset disabled={isSubmitting}>
+                                    <div className="mb-3">
+                                        <label htmlFor="roleSelector">
+                                            {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
                                         </label>
-                                        <Select
-                                            inputId="identityProvidersAllowed"
-                                            value={selectedIdentityProvidersAllowed}
-                                            isMulti={true}
-                                            isSearchable={true}
-                                            onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
-                                            options={availableIdentityProviders}
-                                        />
-                                    </div>)}
-                                {newRole !== "admin" && <NamespacePermissionSelector
-                                    namespacePermissions={namespacePermissions}
-                                    setNamespacePermissions={setNamespacePermissions}
-                                />}
-                            </fieldset>
-                            <div className="mt-3">
-                                <SubmitButton isSubmitting={isSubmitting}>
-                                    Update Permissions
-                                </SubmitButton>
-                            </div>
-                            {userEdited && <Navigate to="/users" />}
-                        </form>)}
-            </div>
-        </>
+                                        <select id="roleSelector" className="form-control form-select" value={newRole} onChange={updateNewRole}>
+                                            <option key="user" value="user">User</option>
+                                            <option key="inviter" value="inviter">Inviter</option>
+                                            {(roles.find(role => role === "admin") !== undefined) &&
+                                                <option key="admin" value="admin">Admin</option>}
+                                        </select>
+                                    </div>
+                                    {newRole === "inviter" && availableIdentityProviders.length > 1 &&
+                                        (IDPLoading ? <ClipLoader /> : <div className="mb-3">
+                                            <label htmlFor="identityProvidersAllowed">
+                                                Identity providers user is allowed to invite with
+                                            </label>
+                                            <Select
+                                                inputId="identityProvidersAllowed"
+                                                value={selectedIdentityProvidersAllowed}
+                                                isMulti={true}
+                                                isSearchable={true}
+                                                onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
+                                                options={availableIdentityProviders}
+                                            />
+                                        </div>)}
+                                    {newRole !== "admin" && <NamespacePermissionSelector
+                                        namespacePermissions={namespacePermissions}
+                                        setNamespacePermissions={setNamespacePermissions}
+                                    />}
+                                </fieldset>
+                                <div className="mt-3">
+                                    <SubmitButton isSubmitting={isSubmitting}>
+                                        Update Permissions
+                                    </SubmitButton>
+                                </div>
+                                {userEdited && <Navigate to="/users" />}
+                            </form>)}
+                </div>
+            </>
     );
 }
 

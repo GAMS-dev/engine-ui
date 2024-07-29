@@ -49,103 +49,106 @@ const Job = () => {
     if (serverInfo.in_kubernetes === true) {
       fields.push("labels{*}");
     }
-    let jobDataPromise;
-    if (token.startsWith("hc:")) {
-      setIsHcJob(true);
-      jobDataPromise = axios
-        .get(`${server}/hypercube/`, {
-          headers: { "X-Fields": "*, labels{*}" },
-          params: {
-            hypercube_token: token.substring(3)
-          },
-          cancelToken: source.token
-        })
-        .then(res => {
-          if (!Array.isArray(res.data.results) || res.data.results.length === 0) {
-            setAlertMsg("Problems fetching Hypercube job information. Please try again later.");
-            return;
-          }
-          return res.data.results[0];
-        })
-        .catch(err => {
-          if (!axios.isCancel(err)) {
-            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`);
-          }
-        });
-    } else {
-      setIsHcJob(false);
-      jobDataPromise = axios
-        .get(`${server}/jobs/${encodeURIComponent(token)}`, {
-          headers: { "X-Fields": fields.join(", ") + ',user' },
-          cancelToken: source.token
-        })
-        .then(res => {
-          return res.data;
-        })
-        .catch(err => {
-          if (!axios.isCancel(err)) {
-            setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
-          }
-        });
-    }
-    jobDataPromise
-      .then(jobData => {
-        if (jobData) {
-          if (jobData.is_temporary_model) {
-            setJob(jobData);
-            setIsLoading(false);
-          } else {
-            axios.get(`${server}/namespaces/${encodeURIComponent(jobData.namespace)}`, {
+    const fetchJobData = async () => {
+      let jobData;
+      if (token.startsWith("hc:")) {
+        setIsHcJob(true);
+        try {
+          jobData = await axios
+            .get(`${server}/hypercube/`, {
+              headers: { "X-Fields": "*, labels{*}" },
               params: {
-                model: jobData.model
+                hypercube_token: token.substring(3)
               },
-              headers: { "X-Fields": "upload_date" },
               cancelToken: source.token
             })
-              .then(res => {
-                if (res.data.length === 1) {
-                  const newJobData = jobData;
-                  if (Date.parse(newJobData.submitted_at) > Date.parse(res.data[0].upload_date)) {
-                    // TODO: we can get false positives here as the submission time is not the time the
-                    // model is extracted. We should consider using the time the job was actually
-                    // started (using the /usage endpoint)
-                    newJobData.model_consistent = true;
-                  }
-                  setJob(newJobData);
-                } else {
-                  setJob(jobData);
-                }
-                setIsLoading(false);
-              })
-              .catch(err => {
-                if (!axios.isCancel(err) && err.response && err.response.status !== 403) {
-                  setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`);
-                }
-                setJob(jobData);
-                setIsLoading(false);
-              });
+          if (jobData.data.results.length === 0) {
+            setAlertMsg("Problems fetching Hypercube job information. Please try again later.")
+            setIsLoading(false)
+            return
           }
+          jobData = jobData.data.results[0]
+        } catch (err) {
+          if (!axios.isCancel(err)) {
+            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
+            setIsLoading(false)
+          }
+          return
         }
-      });
+      } else {
+        setIsHcJob(false)
+        try {
+          jobData = await axios
+            .get(`${server}/jobs/${encodeURIComponent(token)}`, {
+              headers: { "X-Fields": fields.join(", ") + ',user' },
+              cancelToken: source.token
+            })
+          jobData = jobData.data
+        } catch (err) {
+          if (!axios.isCancel(err)) {
+            setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
+            setIsLoading(false)
+          }
+          return
+        }
+      }
+      if (jobData.is_temporary_model) {
+        setJob(jobData)
+        setIsLoading(false)
+        return
+      }
+      try {
+        const modelInfo = await axios.get(`${server}/namespaces/${encodeURIComponent(jobData.namespace)}`, {
+          params: {
+            model: jobData.model
+          },
+          headers: { "X-Fields": "upload_date" },
+          cancelToken: source.token
+        })
+        console.log(modelInfo)
+        if (modelInfo.data.length === 1) {
+          const newJobData = jobData;
+          if (Date.parse(newJobData.submitted_at) > Date.parse(modelInfo.data[0].upload_date)) {
+            // TODO: we can get false positives here as the submission time is not the time the
+            // model is extracted. We should consider using the time the job was actually
+            // started (using the /usage endpoint)
+            newJobData.model_consistent = true
+          }
+          setJob(newJobData)
+        } else {
+          setJob(jobData)
+        }
+      } catch (err) {
+        if (!axios.isCancel(err) && err?.response?.status !== 403) {
+          setAlertMsg(`Problems fetching model information. Error message: ${getResponseError(err)}`)
+        }
+        setJob(jobData)
+      }
+      setIsLoading(false)
+    }
+    fetchJobData()
     return () => {
       source.cancel('Fetching job info canceled due to component being unmounted.');
     }
   }, [jwt, server, token, setAlertMsg, refresh, serverInfo]);
 
   useEffect(() => {
-    axios
-      .get(`${server}/jobs/status-codes`)
-      .then(res => {
-        const newStatusCodes = {};
-        for (let i = 0; i < res.data.length; i++) {
-          const element = res.data[i];
-          newStatusCodes[element.status_code] = element.description;
-        }
-        setStatusCodes(newStatusCodes);
-      })
-      .catch(err => {
-        setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`);
-      });
+    const fetchJobInfo = async () => {
+      let jReq
+      try {
+        jReq = await axios.get(`${server}/jobs/status-codes`)
+      } catch (err) {
+        setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
+        return
+      }
+      const newStatusCodes = {};
+      for (let i = 0; i < jReq.data.length; i++) {
+        const element = jReq.data[i];
+        newStatusCodes[element.status_code] = element.description;
+      }
+      setStatusCodes(newStatusCodes);
+    }
+    fetchJobInfo()
   }, [server, setAlertMsg]);
 
   return (

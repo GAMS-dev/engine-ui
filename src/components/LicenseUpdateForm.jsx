@@ -22,20 +22,12 @@ const LicenseUpdateForm = () => {
     const [userEdited, setUserEdited] = useState(false);
 
     useEffect(() => {
-        axios.get(`${server}/licenses/`, {
-            params: { username: userToEdit }
-        })
-            .then(res => {
-                if (res.data[0].inherited_from === res.data[0].user) {
-                    setLicense(res.data[0].license);
-                    setRegisteredLicense(res.data[0].license);
-                    setIsLoading(false);
-                } else {
-                    setlicenseErrorMsg(`User inherits the license from ${res.data[0].inherited_from}`);
-                    setIsLoading(false);
-                }
-            })
-            .catch(err => {
+        const fetchLicense = async () => {
+            let lReq
+            try {
+                lReq = await axios.get(`${server}/licenses/`,
+                    { params: { username: userToEdit } })
+            } catch (err) {
                 if (err.response.status === 404) {
                     setlicenseErrorMsg('User does not have and does not inherit any license');
                     setIsLoading(false);
@@ -44,7 +36,18 @@ const LicenseUpdateForm = () => {
                     setlicenseErrorMsg(`Problems while while retrieving user license. Error message: ${getResponseError(err)}.`);
                     setIsLoading(false);
                 }
-            });
+                return
+            }
+            if (lReq.data[0].inherited_from === lReq.data[0].user) {
+                setLicense(lReq.data[0].license);
+                setRegisteredLicense(lReq.data[0].license);
+                setIsLoading(false);
+            } else {
+                setlicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
+                setIsLoading(false);
+            }
+        }
+        fetchLicense()
     }, [server, jwt, userToEdit]);
 
     const handleUserUpdateLicense = async () => {

@@ -20,38 +20,37 @@ const UserChangeNameForm = () => {
 
     const navigate = useNavigate();
 
-    const handleChangeUsername = () => {
+    const handleChangeUsername = async () => {
         setIsSubmitting(true);
-        axios
-            .put(
+        let uReq
+        try {
+            uReq = await axios.put(
                 `${server}/users/username`,
                 {
                     username: user,
                     new_username: newUsername
-                }
-            )
-            .then(res => {
-                setIsSubmitting(false);
-                if (res.status === 200) {
-                    if (user === username) {
-                        navigate("/logout")
-                    } else {
-                        setAlertMsg("success:Username successfully updated!");
-                        setUsernameUpdated(true);
-                    }
-                } else {
-                    setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
-                }
-            })
-            .catch(err => {
-                if (err.response == null || err.response.status !== 400 ||
-                    err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('new_username')) {
-                    setSubmissionErrorMsg(`Some error occurred while trying to change the name of the user: ${user}. Error message: ${getResponseError(err)}.`);
-                } else {
-                    setSubmissionErrorMsg(err.response.data.errors.new_username);
-                }
-                setIsSubmitting(false);
-            });
+                })
+        } catch (err) {
+            if (err.response == null || err.response.status !== 400 ||
+                err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('new_username')) {
+                setSubmissionErrorMsg(`Some error occurred while trying to change the name of the user: ${user}. Error message: ${getResponseError(err)}.`);
+            } else {
+                setSubmissionErrorMsg(err.response.data.errors.new_username);
+            }
+            setIsSubmitting(false);
+            return
+        }
+        setIsSubmitting(false);
+        if (uReq.status === 200) {
+            if (user === username) {
+                navigate("/logout")
+            } else {
+                setAlertMsg("success:Username successfully updated!");
+                setUsernameUpdated(true);
+            }
+        } else {
+            setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
+        }
     }
 
     return (

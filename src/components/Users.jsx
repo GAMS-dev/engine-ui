@@ -77,7 +77,7 @@ const Users = () => {
     }
   ]);
 
-  const deleteUser = () => {
+  const deleteUser = async () => {
     const deleteRequestParams = {};
     if (deleteInvitation) {
       deleteRequestParams['token'] = userToDelete.username;
@@ -86,33 +86,29 @@ const Users = () => {
       deleteRequestParams['delete_results'] = deleteResults;
       deleteRequestParams['delete_children'] = deleteChildren;
     }
-    axios
-      .delete(
-        deleteInvitation ?
-          `${server}/users/invitation` :
-          `${server}/users/`,
-        {
-          params: deleteRequestParams
-        }
+    try {
+      await axios.delete(
+        deleteInvitation ? `${server}/users/invitation` : `${server}/users/`,
+        { params: deleteRequestParams }
       )
-      .then(() => {
-        if (!deleteInvitation && userToDelete.username === username) {
-          // log me out when I deleted myself
-          navigate("/logout");
-          return;
-        }
-        setRefresh(refreshCnt => ({
-          refresh: refreshCnt + 1
-        }));
-        setIsSubmitting(false);
-        setShowDeleteConfirmDialog(false);
-      })
-      .catch(err => {
-        setAlertMsg(`Problems deleting user. Error message: ${getResponseError(err)}`);
-        setIsSubmitting(false);
-        setShowDeleteConfirmDialog(false);
-      });
+    } catch (err) {
+      setAlertMsg(`Problems deleting user. Error message: ${getResponseError(err)}`);
+      setIsSubmitting(false);
+      setShowDeleteConfirmDialog(false);
+      return
+    }
+    if (!deleteInvitation && userToDelete.username === username) {
+      // log me out when I deleted myself
+      navigate("/logout");
+      return;
+    }
+    setRefresh(refreshCnt => ({
+      refresh: refreshCnt + 1
+    }));
+    setIsSubmitting(false);
+    setShowDeleteConfirmDialog(false);
   }
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);

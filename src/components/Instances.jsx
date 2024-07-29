@@ -57,26 +57,29 @@ const Instances = () => {
     ]);
 
     useEffect(() => {
+        const fetchInstances = async () => {
+            let iReq
+            try {
+                iReq = await axios.get(`${server}/usage/instances`)
+            } catch (err) {
+                setAlertMsg(`Problems fetching instance information. Error message: ${getResponseError(err)}`)
+                setIsLoading(false)
+                return
+            }
+            if (iReq.status !== 200) {
+                setAlertMsg("Problems fetching instance information.");
+                setIsLoading(false);
+                return;
+            }
+            setInstances(iReq.data.sort((a, b) => ('' + a.label).localeCompare(b.label)));
+            setIsLoading(false);
+        }
         if (!roles.length || roles.find(role => role === "admin") === undefined) {
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
-        axios
-            .get(`${server}/usage/instances`)
-            .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("Problems fetching instance information.");
-                    setIsLoading(false);
-                    return;
-                }
-                setInstances(res.data.sort((a, b) => ('' + a.label).localeCompare(b.label)));
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems fetching instance information. Error message: ${getResponseError(err)}`);
-                setIsLoading(false);
-            });
+        fetchInstances();
     }, [jwt, server, roles, refresh, setAlertMsg]);
 
     return (

@@ -80,22 +80,21 @@ const Webhooks = props => {
         }
     ]);
 
-    const setWebhookAccessConfig = (accessConfig) => {
+    const setWebhookAccessConfig = async (accessConfig) => {
         setIsSubmitting(true);
         setSubmissionErrorMsg("");
         const payload = new FormData();
         payload.append('webhook_access', accessConfig);
-        axios
-            .patch(`${server}/configuration`, payload)
-            .then(() => {
-                setWebhookAccess(accessConfig);
-                setIsSubmitting(false);
-                setShowModalDialog(false);
-            })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems updating webhook access configuration. Error message: ${getResponseError(err)}`);
-                setIsSubmitting(false);
-            });
+        try {
+            await axios.patch(`${server}/configuration`, payload)
+        } catch (err) {
+            setSubmissionErrorMsg(`Problems updating webhook access configuration. Error message: ${getResponseError(err)}`)
+            setIsSubmitting(false)
+            return
+        }
+        setWebhookAccess(accessConfig);
+        setIsSubmitting(false);
+        setShowModalDialog(false);
     }
 
     useEffect(() => {
@@ -103,22 +102,25 @@ const Webhooks = props => {
             setIsLoading(false);
             return;
         }
+        const fetchWebhook = async () => {
+            let wReq
+            try {
+                wReq = await axios.get(`${server}/users/webhooks`)
+            } catch (err) {
+                setAlertMsg(`Problems fetching webhooks. Error message: ${getResponseError(err)}`)
+                setIsLoading(false)
+                return
+            }
+            if (wReq.status !== 200) {
+                setAlertMsg("Problems fetching webhooks.");
+                setIsLoading(false);
+                return;
+            }
+            setWebhooks(wReq.data);
+            setIsLoading(false);
+        }
         setIsLoading(true);
-        axios
-            .get(`${server}/users/webhooks`)
-            .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("Problems fetching webhooks.");
-                    setIsLoading(false);
-                    return;
-                }
-                setWebhooks(res.data);
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems fetching webhooks. Error message: ${getResponseError(err)}`);
-                setIsLoading(false);
-            });
+        fetchWebhook()
     }, [webhookAccess, jwt, server, roles, refresh, setAlertMsg]);
 
     return (

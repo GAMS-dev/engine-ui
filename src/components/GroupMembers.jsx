@@ -34,108 +34,119 @@ const GroupMembers = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
+        const fetchUsersData = async () => {
+            let uReq
+            try {
+                uReq = await axios.get(`${server}/users/`,
+                    { headers: { "X-Fields": "username" } })
+            } catch (err) {
+                setAlertMsg(`Problems while loading users. Error message: ${getResponseError(err)}.`)
+                setIsLoading(false)
+                return
+            }
+            if (uReq.data && uReq.data.length > 0) {
+                const usersTmp = uReq.data
+                    .map(user => user.username);
+                setInvitees(usersTmp);
+            }
+            setIsLoading(false);
+        }
         if (!isInviter) {
             return;
         }
         setIsLoading(true);
-        axios
-            .get(`${server}/users/`,
-                { headers: { "X-Fields": "username" } })
-            .then(res => {
-                if (res.data && res.data.length > 0) {
-                    const usersTmp = res.data
-                        .map(user => user.username);
-                    setInvitees(usersTmp);
-                }
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems while loading users. Error message: ${getResponseError(err)}.`);
-                setIsLoading(false);
-            });
+        fetchUsersData();
     }, [jwt, server, namespace, setAlertMsg, isInviter]);
 
     useEffect(() => {
+        const fetchGroupMembers = async () => {
+            let gmReq
+            try {
+                gmReq = await axios.get(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`)
+            } catch (err) {
+                setAlertMsg(`Problems while retrieving group members. Error message: ${getResponseError(err)}.`);
+                setIsLoading(false);
+                return
+            }
+            if (gmReq.status !== 200) {
+                setAlertMsg("An error occurred while retrieving group members. Please try again later.");
+                setIsLoading(false);
+                return;
+            }
+            const groupMembersTmp = gmReq.data
+                .filter(group => group.label === label)
+                .map(group => group.members.map(member => ({
+                    id: member.username,
+                    username: member.username,
+                    added_at: member.added_at,
+                    added_by: member.added_by
+                }))).flat()
+                .sort((a, b) => ('' + a.username).localeCompare(b.username));
+            setGroupMembers(groupMembersTmp);
+            setIsLoading(false);
+        }
+
         if (!namespace || !label) {
             return;
         }
-        setIsLoading(true);
-        axios
-            .get(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`)
-            .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("An error occurred while retrieving group members. Please try again later.");
-                    setIsLoading(false);
-                    return;
-                }
-                const groupMembersTmp = res.data
-                    .filter(group => group.label === label)
-                    .map(group => group.members.map(member => ({
-                        id: member.username,
-                        username: member.username,
-                        added_at: member.added_at,
-                        added_by: member.added_by
-                    }))).flat()
-                    .sort((a, b) => ('' + a.username).localeCompare(b.username));
-                setGroupMembers(groupMembersTmp);
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems while retrieving group members. Error message: ${getResponseError(err)}.`);
-                setIsLoading(false);
-            });
+        setIsLoading(true)
+        fetchGroupMembers()
     }, [jwt, server, namespace, label, refresh, setAlertMsg]);
 
     useEffect(() => {
+        const fetchUsersData = async () => {
+            let uReq
+            try {
+                uReq = await axios.get(`${server}/users/`,
+                    { headers: { "X-Fields": "username,deleted" } })
+            } catch (err) {
+                setSubmissionErrorMsg(`Problems while loading users. Error message: ${getResponseError(err)}.`)
+                setAddMemberIsLoading(false)
+                return
+            }
+            if (uReq.data && uReq.data.length > 0) {
+                const existingUsers = groupMembers.map(member => member.username);
+                const usersTmp = uReq.data
+                    .filter(user => user.deleted === false)
+                    .map(user => ({
+                        value: user.username,
+                        label: user.username
+                    }))
+                    .filter(user => !existingUsers.includes(user.value));
+                setUsersToAdd(usersTmp);
+                setUserToAdd(usersTmp[0]);
+            }
+            setAddMemberIsLoading(false);
+        }
         if (!showAddMemberDialog) {
             return;
         }
-        setAddMemberIsLoading(true);
-        axios
-            .get(`${server}/users/`,
-                { headers: { "X-Fields": "username,deleted" } })
-            .then(res => {
-                if (res.data && res.data.length > 0) {
-                    const existingUsers = groupMembers.map(member => member.username);
-                    const usersTmp = res.data
-                        .filter(user => user.deleted === false)
-                        .map(user => ({
-                            value: user.username,
-                            label: user.username
-                        }))
-                        .filter(user => !existingUsers.includes(user.value));
-                    setUsersToAdd(usersTmp);
-                    setUserToAdd(usersTmp[0]);
-                }
-                setAddMemberIsLoading(false);
-            })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems while loading users. Error message: ${getResponseError(err)}.`);
-                setAddMemberIsLoading(false);
-            });
+        setAddMemberIsLoading(true)
+        fetchUsersData()
     }, [jwt, server, username, groupMembers, showAddMemberDialog])
 
     function addUserToGroup() {
+        const postUserToGroup = async () => {
+            try {
+                await axios.post(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups/${encodeURIComponent(label)}`, null, {
+                    params: { username: userToAdd.value }
+                })
+            } catch (err) {
+                setSubmissionErrorMsg(`Problems while adding user to group: ${label}. Error message: ${getResponseError(err)}.`)
+                setIsSubmitting(false)
+                return
+            }
+            setIsSubmitting(false);
+            setShowAddMemberDialog(false);
+            setRefresh(curr => curr + 1);
+
+        }
         if (!userToAdd) {
             return;
         }
-        setSubmissionErrorMsg("");
-        setIsSubmitting(true);
-        axios
-            .post(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups/${encodeURIComponent(label)}`, null, {
-                params: {
-                    username: userToAdd.value
-                }
-            })
-            .then(() => {
-                setIsSubmitting(false);
-                setShowAddMemberDialog(false);
-                setRefresh(curr => curr + 1);
-            })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems while adding user to group: ${label}. Error message: ${getResponseError(err)}.`);
-                setIsSubmitting(false);
-            });
+        setSubmissionErrorMsg("")
+        setIsSubmitting(true)
+        postUserToGroup()
     }
 
     return (

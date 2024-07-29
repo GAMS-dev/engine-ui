@@ -22,40 +22,41 @@ const SolveTraceEntryView = props => {
     const { token } = useParams();
 
     useEffect(() => {
-        const fetchStreamEntry = () => {
-            axios
-            [jobFinished ? 'get' : 'delete'](
-                `${server}/jobs/${encodeURIComponent(token)}/${jobFinished ? 'text-entry' : 'stream-entry'}/${encodeURIComponent(solveTraceEntry)}`
-            )
-                .then(res => {
-                    try {
-                        if (res.data.entry_value == null) {
-                            return;
-                        }
-                        const dataRaw = res.data.entry_value
-                            .trim()
-                            .split(/\r\n|\n/)
-                            .filter(l => !l.startsWith('* '))
-                            .map(l => l.split(",").slice(3,).map(el => parseFloat(el)));
-                        if (jobFinished) {
-                            setData(dataRaw);
-                        } else if (res.data.entry_value.trim() !== '') {
-                            setData(el => el.concat(dataRaw));
-                            setRefresh(refresh + 1);
-                        } else {
-                            setRefresh(refresh + 1);
-                        }
-                    } catch (err) {
-                        setErrorMsg(`Problems parsing solvetrace file. Error message: ${getResponseError(err)}`);
-                    };
-                })
-                .catch(err => {
-                    if (err.response.status === 308) {
-                        setRefreshJob(refresh => refresh + 1);
-                    } else {
-                        setErrorMsg(`A problem occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
-                    }
-                });
+        const fetchStreamEntry = async () => {
+            let seReq
+            try {
+                seReq = await axios
+                [jobFinished ? 'get' : 'delete'](
+                    `${server}/jobs/${encodeURIComponent(token)}/${jobFinished ? 'text-entry' : 'stream-entry'}/${encodeURIComponent(solveTraceEntry)}`
+                )
+            } catch (err) {
+                if (err.response.status === 308) {
+                    setRefreshJob(refresh => refresh + 1);
+                } else {
+                    setErrorMsg(`A problem occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
+                }
+                return
+            }
+            try {
+                if (seReq.data.entry_value == null) {
+                    return;
+                }
+                const dataRaw = seReq.data.entry_value
+                    .trim()
+                    .split(/\r\n|\n/)
+                    .filter(l => !l.startsWith('* '))
+                    .map(l => l.split(",").slice(3,).map(el => parseFloat(el)));
+                if (jobFinished) {
+                    setData(dataRaw);
+                } else if (seReq.data.entry_value.trim() !== '') {
+                    setData(el => el.concat(dataRaw));
+                    setRefresh(refresh + 1);
+                } else {
+                    setRefresh(refresh + 1);
+                }
+            } catch (err) {
+                setErrorMsg(`Problems parsing solvetrace file. Error message: ${getResponseError(err)}`);
+            };
         }
         if (refresh === 0) {
             fetchStreamEntry();

@@ -31,37 +31,41 @@ const InstanceSubmissionForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
+        const fetchInstances = async () => {
+            let iReq
+            try {
+                iReq = await axios.get(`${server}/usage/instances`)
+            } catch (err) {
+                setErrorMsg(`Problems while while retrieving instance data. Error message: ${getResponseError(err)}.`)
+                setIsLoading(false)
+                return
+            }
+            const instanceData = iReq.data.filter(el => el.label === label && el.is_pool !== true);
+            if (instanceData.length > 0) {
+                setInstanceLabel(instanceData[0].label);
+                setCpuReq(instanceData[0].cpu_request);
+                setMemReq(instanceData[0].memory_request);
+                setWsReq(instanceData[0].workspace_request);
+                setMultiplier(instanceData[0].multiplier);
+                setMultiplierIdle(instanceData[0].multiplier_idle);
+                setTolerations(instanceData[0].tolerations.map(el => `${el.key}=${el.value}`).join(","));
+                setNodeSelectors(instanceData[0].node_selectors.map(el => `${el.key}=${el.value}`).join(","));
+                const gamsLicenseAssigned = instanceData[0].gams_license != null && instanceData[0].gams_license !== "";
+                setAssignLicense(gamsLicenseAssigned);
+                setGAMSLicense(gamsLicenseAssigned ? instanceData[0].gams_license.trim() : "");
+                setIsLoading(false);
+            } else {
+                setErrorMsg(`Instance: ${label} does not exist`);
+                setIsLoading(false);
+            }
+        }
         if (!label) {
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
         setErrorMsg("");
-        axios.get(`${server}/usage/instances`)
-            .then(res => {
-                const instanceData = res.data.filter(el => el.label === label && el.is_pool !== true);
-                if (instanceData.length > 0) {
-                    setInstanceLabel(instanceData[0].label);
-                    setCpuReq(instanceData[0].cpu_request);
-                    setMemReq(instanceData[0].memory_request);
-                    setWsReq(instanceData[0].workspace_request);
-                    setMultiplier(instanceData[0].multiplier);
-                    setMultiplierIdle(instanceData[0].multiplier_idle);
-                    setTolerations(instanceData[0].tolerations.map(el => `${el.key}=${el.value}`).join(","));
-                    setNodeSelectors(instanceData[0].node_selectors.map(el => `${el.key}=${el.value}`).join(","));
-                    const gamsLicenseAssigned = instanceData[0].gams_license != null && instanceData[0].gams_license !== "";
-                    setAssignLicense(gamsLicenseAssigned);
-                    setGAMSLicense(gamsLicenseAssigned ? instanceData[0].gams_license.trim() : "");
-                    setIsLoading(false);
-                } else {
-                    setErrorMsg(`Instance: ${label} does not exist`);
-                    setIsLoading(false);
-                }
-            })
-            .catch(err => {
-                setErrorMsg(`Problems while while retrieving instance data. Error message: ${getResponseError(err)}.`);
-                setIsLoading(false);
-            });
+        fetchInstances()
     }, [server, label]);
 
     const handleInstanceSubmission = async () => {

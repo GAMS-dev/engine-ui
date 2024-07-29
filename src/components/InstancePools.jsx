@@ -109,22 +109,21 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
         fetchInstances();
     }, [jwt, server, username, roles, refresh, setAlertMsg]);
 
-    const setInstancePoolAccessConfig = (accessConfig) => {
+    const setInstancePoolAccessConfig = async (accessConfig) => {
         setPoolAccessIsSubmitting(true);
         setPoolAccessSubmissionError("");
         const payload = new FormData();
         payload.append('instance_pool_access', accessConfig);
-        axios
-            .patch(`${server}/configuration`, payload)
-            .then(() => {
-                setInstancePoolAccess(accessConfig);
-                setPoolAccessIsSubmitting(false);
-                setShowInstancePoolAccessModal(false);
-            })
-            .catch(err => {
-                setPoolAccessSubmissionError(`Problems updating instance pool access configuration. Error message: ${getResponseError(err)}`);
-                setPoolAccessIsSubmitting(false);
-            });
+        try {
+            await axios.patch(`${server}/configuration`, payload)
+        } catch (err) {
+            setPoolAccessSubmissionError(`Problems updating instance pool access configuration. Error message: ${getResponseError(err)}`)
+            setPoolAccessIsSubmitting(false)
+            return
+        }
+        setInstancePoolAccess(accessConfig);
+        setPoolAccessIsSubmitting(false);
+        setShowInstancePoolAccessModal(false);
     }
 
     return (

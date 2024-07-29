@@ -122,7 +122,7 @@ const AuthProviderForm = () => {
     }, [jwt, server, roles, username, setAlertMsg, refreshProviders]);
 
     useEffect(() => {
-        const validateIssuerId = (issuerIDToAssert) => {
+        const validateIssuerId = async (issuerIDToAssert) => {
             if (issuerIDModified === false) {
                 return true;
             }
@@ -146,19 +146,17 @@ const AuthProviderForm = () => {
                 });
                 return false;
             }
-            axios.get(`${issuerURL.href}/.well-known/openid-configuration`)
-                .then(_ => {
-                    setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'oidc')[0]);
-                })
-                .catch(_ => {
-                    axios.get(`${issuerURL.href}/.well-known/oauth-authorization-server`)
-                        .then(_ => {
-                            setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'oauth2')[0]);
-                        })
-                        .catch(_ => {
-                            setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'manual')[0]);
-                        });
-                });
+            try {
+                await axios.get(`${issuerURL.href}/.well-known/openid-configuration`)
+                setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'oidc')[0])
+            } catch (_) {
+                try {
+                    await axios.get(`${issuerURL.href}/.well-known/oauth-authorization-server`)
+                    setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'oauth2')[0])
+                } catch (_) {
+                    setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'manual')[0])
+                }
+            }
             return true;
         }
         const updateIssuerID = setTimeout(() => {

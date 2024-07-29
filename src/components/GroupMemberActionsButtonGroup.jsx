@@ -14,28 +14,24 @@ const GroupMemberActionsButtonGroup = props => {
     const [, setAlertMsg] = useContext(AlertContext);
 
     function deleteMember() {
-        setIsSubmitting(true);
-        axios
-            .delete(
-                `${server}/namespaces/${encodeURIComponent(namespace)}/user-groups/${encodeURIComponent(label)}`,
-                {
-                    params: {
-                        username: id
-                    }
-                }
-            )
-            .then(res => {
-                setIsSubmitting(false);
-                setShowDeleteDialog(false);
-                setRefresh(refreshCnt => ({
-                    refresh: refreshCnt + 1
-                }));
-            })
-            .catch(err => {
-                setIsSubmitting(false);
-                setShowDeleteDialog(false);
-                setAlertMsg(`Problems removing user: ${username} grom group: ${label}. Error message: ${getResponseError(err)}`);
-            });
+        const deleteMemberReq = async () => {
+            try {
+                await axios.delete(
+                    `${server}/namespaces/${encodeURIComponent(namespace)}/user-groups/${encodeURIComponent(label)}`,
+                    { params: { username: id } })
+            } catch (err) {
+                setIsSubmitting(false)
+                setShowDeleteDialog(false)
+                setAlertMsg(`Problems removing user: ${username} grom group: ${label}. Error message: ${getResponseError(err)}`)
+            }
+            setIsSubmitting(false)
+            setShowDeleteDialog(false)
+            setRefresh(refreshCnt => ({
+                refresh: refreshCnt + 1
+            }));
+        }
+        setIsSubmitting(true)
+        deleteMemberReq()
     }
 
     return (

@@ -49,38 +49,42 @@ const LicUpdateButton = props => {
     const [engineLicense, setEngineLicense] = useState("");
 
     useEffect(() => {
+        const fetchLicense = async () => {
+            let lReq
+            try {
+                lReq = await axios.get(`${server}/licenses/${encodeURIComponent(path)}`)
+            } catch (err) {
+                setIsSubmitting(false)
+                setSubmissionErrorMsg(`An error occurred while fetching license. Error message: ${getResponseError(err)}.`)
+                return
+            }
+            if (lReq.status !== 200) {
+                setIsSubmitting(false);
+                setSubmissionErrorMsg("An unexpected error occurred while fetching license. Please try again later.");
+                return;
+            }
+            let licFormatted = "";
+            if (lReq.data.license) {
+                if (b64enc) {
+                    licFormatted = lReq.data.license.trim();
+                } else {
+                    const liceMultiLine = [];
+
+                    while (liceMultiLine.length * 52 < lReq.data.license.length) {
+                        liceMultiLine.push(lReq.data.license.substring(liceMultiLine.length * 52,
+                            liceMultiLine.length * 52 + 52));
+                    }
+                    licFormatted = liceMultiLine.join('\n')
+                }
+            }
+            setIsSubmitting(false);
+            setUsi(lReq.data.usi);
+            setEngineLicense(licFormatted);
+        }
         if (showDialog) {
             setIsSubmitting(true);
             setSubmissionErrorMsg("");
-            axios.get(`${server}/licenses/${encodeURIComponent(path)}`)
-                .then(res => {
-                    if (res.status !== 200) {
-                        setIsSubmitting(false);
-                        setSubmissionErrorMsg("An unexpected error occurred while fetching license. Please try again later.");
-                        return;
-                    }
-                    let licFormatted = "";
-                    if (res.data.license) {
-                        if (b64enc) {
-                            licFormatted = res.data.license.trim();
-                        } else {
-                            const liceMultiLine = [];
-
-                            while (liceMultiLine.length * 52 < res.data.license.length) {
-                                liceMultiLine.push(res.data.license.substring(liceMultiLine.length * 52,
-                                    liceMultiLine.length * 52 + 52));
-                            }
-                            licFormatted = liceMultiLine.join('\n')
-                        }
-                    }
-                    setIsSubmitting(false);
-                    setUsi(res.data.usi);
-                    setEngineLicense(licFormatted);
-                })
-                .catch(err => {
-                    setIsSubmitting(false);
-                    setSubmissionErrorMsg(`An error occurred while fetching license. Error message: ${getResponseError(err)}.`);
-                });
+            fetchLicense()
         }
     }, [server, path, b64enc, showDialog])
 

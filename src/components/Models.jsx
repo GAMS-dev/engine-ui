@@ -80,6 +80,73 @@ const Models = () => {
   }, [jwt, server, roles, username, refresh, setAlertMsg]);
 
   useEffect(() => {
+    const fetchGroupsData = async () => {
+      let nsReq
+      try {
+        nsReq = await axios.get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`)
+      } catch (err) {
+        setAlertMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
+        setIsLoading(false);
+        return
+      }
+      const groupsTmp = nsReq.data
+        .map(group => ({
+          id: group.label,
+          label: group.label,
+          created_at: group.created_at,
+          created_by: group.created_by,
+          no_members: group.members.length
+        }))
+        .sort((a, b) => ('' + a.label).localeCompare(b.label));
+      setUserGroups(groupsTmp);
+      setIsLoading(false);
+    }
+
+    const fetchUsersData = async () => {
+      let nsReq
+      try {
+        nsReq = await axios.get(`${server}/namespaces/`, { headers: { "X-Fields": "name,permissions" } })
+      } catch (err) {
+        setAlertMsg(`Problems while retrieving users in namespace. Error message: ${getResponseError(err)}.`);
+        setIsLoading(false);
+        return;
+      }
+      setUsers(nsReq.data
+        .filter(ns => ns.name === namespace.name)[0].permissions
+        .filter(user => user.permission > 0)
+        .map(user => {
+          const newUserInfo = user;
+          newUserInfo.id = newUserInfo.username;
+          return newUserInfo;
+        })
+        .sort((a, b) => ('' + a.username).localeCompare(b.username)));
+      setIsLoading(false);
+    }
+
+    const fetchModelsData = async () => {
+      let nsReq
+      try {
+        nsReq = await axios.get(`${server}/namespaces/${encodeURIComponent(namespace.name)}`)
+      } catch (err) {
+        setAlertMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
+        setIsLoading(false);
+        return;
+      }
+      if (nsReq.data.length > 0) {
+        setModels(nsReq.data
+          .map(model => {
+            const newModel = model;
+            newModel.id = model.name;
+            return newModel;
+          })
+          .sort((a, b) => ('' + a.name).localeCompare(b.name)));
+        setIsLoading(false);
+      } else {
+        setModels([]);
+      }
+      setIsLoading(false);
+    }
+
     if (!namespace || namespace.name === "") {
       return;
     }
@@ -87,70 +154,13 @@ const Models = () => {
     refSelectedNs.current = namespace.name;
     if (tabSelected === "groups") {
       navigate("/groups/" + encodeURIComponent(namespace.name));
-      axios
-        .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`)
-        .then(res => {
-          const groupsTmp = res.data
-            .map(group => ({
-              id: group.label,
-              label: group.label,
-              created_at: group.created_at,
-              created_by: group.created_by,
-              no_members: group.members.length
-            }))
-            .sort((a, b) => ('' + a.label).localeCompare(b.label));
-          setUserGroups(groupsTmp);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          setAlertMsg(`Problems while retrieving user groups. Error message: ${getResponseError(err)}.`);
-          setIsLoading(false);
-        });
+      fetchGroupsData();
     } else if (tabSelected === "nsusers") {
       navigate("/nsusers/" + encodeURIComponent(namespace.name));
-      axios
-        .get(`${server}/namespaces/`, {
-          headers: { "X-Fields": "name,permissions" }
-        })
-        .then(res => {
-          setUsers(res.data
-            .filter(ns => ns.name === namespace.name)[0].permissions
-            .filter(user => user.permission > 0)
-            .map(user => {
-              const newUserInfo = user;
-              newUserInfo.id = newUserInfo.username;
-              return newUserInfo;
-            })
-            .sort((a, b) => ('' + a.username).localeCompare(b.username)));
-          setIsLoading(false);
-        })
-        .catch(err => {
-          setAlertMsg(`Problems while retrieving users in namespace. Error message: ${getResponseError(err)}.`);
-          setIsLoading(false);
-        });
+      fetchUsersData();
     } else {
       navigate("/models/" + encodeURIComponent(namespace.name));
-      axios
-        .get(`${server}/namespaces/${encodeURIComponent(namespace.name)}`)
-        .then(res => {
-          if (res.data.length > 0) {
-            setModels(res.data
-              .map(model => {
-                const newModel = model;
-                newModel.id = model.name;
-                return newModel;
-              })
-              .sort((a, b) => ('' + a.name).localeCompare(b.name)));
-            setIsLoading(false);
-          } else {
-            setModels([]);
-          }
-          setIsLoading(false);
-        })
-        .catch(err => {
-          setAlertMsg(`Problems while retrieving registered models. Error message: ${getResponseError(err)}.`);
-          setIsLoading(false);
-        });
+      fetchModelsData();
     }
   }, [server, namespace, navigate, refreshModels, setAlertMsg, tabSelected]);
 

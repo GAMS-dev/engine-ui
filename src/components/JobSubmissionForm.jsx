@@ -193,7 +193,7 @@ const JobSubmissionForm = props => {
         setIsSubmitting(true);
         const jobSubmissionForm = new FormData();
         jobSubmissionForm.append("namespace", namespace);
-        const promisesToAwait = [];
+        let modelPromise, dataPromise
 
         if (useRegisteredModel) {
             jobSubmissionForm.append("model", registeredModelName);
@@ -207,15 +207,7 @@ const JobSubmissionForm = props => {
             if (modelFiles.length > 1 ||
                 !modelFiles[0].name.toLowerCase().endsWith(".zip")) {
                 // we need to zip uploaded files first
-                try {
-                    promisesToAwait.push(zipAsync(modelFiles).then(zipFile => {
-                        jobSubmissionForm.append("model_data", zipFile, "model.zip");
-                        return;
-                    }));
-                } catch (err) {
-                    setSubmissionErrorMsg(err.message);
-                    return;
-                }
+                modelPromise = zipAsync(modelFiles)
             } else {
                 jobSubmissionForm.append("model_data", modelFiles[0], "model.zip");
             }
@@ -224,15 +216,7 @@ const JobSubmissionForm = props => {
             if (modelData.length > 1 ||
                 !modelData[0].name.toLowerCase().endsWith(".zip")) {
                 // we need to zip uploaded files first
-                try {
-                    promisesToAwait.push(zipAsync(modelData).then(zipFile => {
-                        jobSubmissionForm.append("data", zipFile, "data.zip");
-                        return;
-                    }));
-                } catch (err) {
-                    setSubmissionErrorMsg(err.message);
-                    return;
-                }
+                dataPromise = zipAsync(modelData)
             } else {
                 jobSubmissionForm.append("data", modelData[0], "data.zip");
             }
@@ -299,11 +283,19 @@ const JobSubmissionForm = props => {
             }
         }
         try {
-            await Promise.all(promisesToAwait);
+            (await Promise.all([modelPromise, dataPromise])).forEach((zipData, idx) => {
+                if (zipData == null) {
+                    return
+                }
+                if (idx === 0) {
+                    jobSubmissionForm.append("model_data", zipData, "model.zip")
+                } else {
+                    jobSubmissionForm.append("data", zipData, "data.zip")
+                }
+            })
         } catch (err) {
-            setSubmissionErrorMsg(`Problems posting job. Error message: ${err.message}`);
-            setIsSubmitting(false);
-            return;
+            setSubmissionErrorMsg(`Problems posting job as data could not be zipped. Error message: ${err.message}`)
+            setIsSubmitting(false)
         }
         try {
             const postJobResponse = await axios.post(
