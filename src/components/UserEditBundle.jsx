@@ -33,7 +33,7 @@ const UserEditBundle = () => {
 
     useEffect(() => {
         const path = location.pathname;
-        if (path.endsWith('/usage')) {
+        if (path.includes('/usage')) {
             setActiveTab('usage');
         } else if (path.endsWith('/change_pass')) {
             setActiveTab('change_pass');
@@ -76,17 +76,15 @@ const UserEditBundle = () => {
         fetchUserInfo();
     }, [server, userToEdit, setAlertMsg]);
 
-    return (
-        invalidUser ?
+    return invalidUser ?
             <div className="alert alert-danger mt-3">
                 <p><strong>You do not have permission to view information about user: {userToEdit}.</strong></p>
             </div> :
-            <>
                 <div>
                     <h1 className="h2">User: {userToEdit}</h1>
                     {(isAdmin || (isInviter && username !== userToEdit)) ?
                         <>
-                            <Tab.Container defaultActiveKey="usage" activeKey={activeTab} onSelect={(key) => setActiveTab(key)}>
+                            <Tab.Container defaultActiveKey="quotas" activeKey={activeTab} onSelect={(key) => setActiveTab(key)}>
                                 <Nav className="nav-tabs">
                                     <Nav.Item>
                                         <Nav.Link eventKey="usage" as={NavLink} to="usage">Usage</Nav.Link>
@@ -126,7 +124,7 @@ const UserEditBundle = () => {
                             <Tab.Content className="pt-3">
                                 <Routes>
                                     <Route index element={<Navigate to="usage" replace />} />
-                                    <Route path="usage" element={<Usage />} />
+                                    <Route path="usage/*" element={<Usage />} />
                                     <Route path="change_pass" element={<UserChangePassForm hideTitle={true} />} />
                                     {(isAdmin) && (
                                         <Route path="licenses" element={<LicenseUpdateForm />} />
@@ -144,8 +142,6 @@ const UserEditBundle = () => {
                         <Usage />
                     }
                 </div>
-            </>
-    );
 }
 
 export default UserEditBundle;

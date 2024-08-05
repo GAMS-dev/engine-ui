@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, Route, Routes, NavLink, useLocation, Navigate } from "react-router-dom";
 import { Chart as ChartJS, LinearScale, TimeScale, PointElement, LineElement, Legend, Tooltip, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
@@ -11,7 +11,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Table from "./Table";
-import { Tab, Tabs } from "react-bootstrap";
+import { Nav, Tab } from "react-bootstrap";
 import { getResponseError, mergeSortedArrays, calcRemainingQuota } from "./util";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
@@ -49,7 +49,6 @@ const Usage = () => {
     const [totalSolveTime, setTotalSolveTime] = useState(0);
     const [refresh, setRefresh] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [tabSelected, setTabSelected] = useState("quotas");
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
@@ -59,6 +58,19 @@ const Usage = () => {
     const [remainingQuota, setRemainingQuota] = useState(0)
     const [userSettings,] = useContext(UserSettingsContext)
     const quotaUnit = userSettings.quotaUnit
+
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState('dashboard');
+
+    useEffect(() => {
+        const path = location.pathname;
+        if (path.endsWith('/dashboard')) {
+            setActiveTab('dashboard');
+        } else if (path.endsWith('/timeline')) {
+            setActiveTab('timeline');
+        }
+    }, [location]);
+
     const [displayFields] = useState([
         {
             field: "username",
@@ -406,202 +418,213 @@ const Usage = () => {
     }, [server, setAlertMsg, userToEdit, remainingQuota, quotaUnit]);
     return (
         <>
-            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <div className="h2">
-                    <div className="h6 m-1">
-                        Remaining Quota: {remainingQuota} {((remainingQuota !== "unlimited") ? quotaUnit : null)}
-                    </div>
-                </div>
-
-                <div className="btn-toolbar mb-2 mb-md-0">
-                    <div className="btn-group me-2">
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => {
-                                setRefresh(refresh + 1);
-                            }}
-                        >
-                            Refresh
-                            <RefreshCw width="12px" className="ms-2" />
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-            <div className="row">
-                <div className="col-sm-6 col-12 mb-4">
-                    <div className="row">
-                        <div className="col-4">From:</div>
-                        <div className="col-8">
-                            <DatePicker selected={startDate} onChange={date => setStartDate(date)} />
+            <div>
+                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <div className="h2">
+                        <div className="h6 m-1">
+                            Remaining Quota: {remainingQuota} {((remainingQuota !== "unlimited") ? quotaUnit : null)}
                         </div>
                     </div>
-                </div>
-                <div className="col-sm-6 col-12 mb-4">
-                    <div className="row">
-                        <div className="col-4">To:</div>
-                        <div className="col-8">
-                            <DatePicker selected={endDate} onChange={date => setEndDate(date)} />
+
+                    <div className="btn-toolbar mb-2 mb-md-0">
+                        <div className="btn-group me-2">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={() => {
+                                    setRefresh(refresh + 1);
+                                }}
+                            >
+                                Refresh
+                                <RefreshCw width="12px" className="ms-2" />
+                            </button>
                         </div>
                     </div>
+
                 </div>
-            </div>
-            {isInviter &&
-                <div className="col-sm-6 mb-4">
-                    <label>
-                        Show Invitees?
-                        <input
-                            name="showinvitees"
-                            type="checkbox"
-                            className="ms-2"
-                            checked={recursive}
-                            onChange={e => {
-                                setRecursive(e.target.checked)
-                            }} />
-                    </label>
-                </div>}
-            <Tabs
-                activeKey={tabSelected}
-                onSelect={(k) => {
-                    setTabSelected(k)
-                }}>
-                <Tab eventKey="quotas" title="Dashboard">
-                    <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />
-                </Tab>
-                <Tab eventKey="usage" title="Timeline">
-                    <div className="mt-3">
+                <div className="row">
+                    <div className="col-sm-6 col-12 mb-4">
                         <div className="row">
-
-                            <div className="col-sm-6 mb-4">
-                                <label>
-                                    Show disaggregated data?
-                                    <input
-                                        name="showAggregated"
-                                        type="checkbox"
-                                        className="ms-2"
-                                        checked={!aggregated}
-                                        onChange={e => {
-                                            setAggregated(!e.target.checked)
-                                        }} />
-                                </label>
-                            </div>
-                            <div className="col-sm-6 mb-4">
-                                <Select
-                                    id="weighting_option"
-                                    isClearable={false}
-                                    value={availableWeightingOptions.find(type => type.value === selectedWeightingOption)}
-                                    isSearchable={true}
-                                    onChange={selected => setSelectedWeightingOption(selected.value)}
-                                    options={availableWeightingOptions}
-                                />
+                            <div className="col-4">From:</div>
+                            <div className="col-8">
+                                <DatePicker selected={startDate} onChange={date => setStartDate(date)} />
                             </div>
                         </div>
-                        {isLoading ? <ClipLoader /> : <>
-                            {data.length > 1 &&
-                                <div className="row">
-                                    <div className="col-md-6 col-12 mb-2">
-                                        <small>
-                                            <div className="row">
-                                                <div className="col-4">
-                                                    Total Time:
-                                                </div>
-                                                <div className="col-8">
-                                                    <TimeDiffDisplay time={totalTime} classNames="badge bg-secondary" />
-                                                </div>
-                                            </div>
-                                        </small>
-                                    </div>
-                                    <div className="col-md-6 col-12 mb-2">
-                                        <small>
-                                            <div className="row">
-                                                <div className="col-4">
-                                                    Total Solve Time:
-                                                </div>
-                                                <div className="col-8">
-                                                    <TimeDiffDisplay time={totalSolveTime} classNames="badge bg-secondary" />
-                                                </div>
-                                            </div>
-                                        </small>
-                                    </div>
-                                </div>}
-                            {data.length > 0 &&
-                                <>
-                                    {!aggregated && <Select
-                                        inputId="usersToFiler"
-                                        isMulti={true}
-                                        isSearchable={true}
-                                        placeholder={'Filter users'}
-                                        closeMenuOnSelect={false}
-                                        blurInputOnSelect={false}
-                                        value={usersToFiler}
-                                        onChange={users => setUsersToFiler(users)}
-                                        options={availableUsers}
-                                        isOptionDisabled={() => usersToFiler.length >= 5}
-                                    />}
-                                    <Line data={{
-                                        datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
-                                            usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
-                                    }}
-                                        height={80}
-                                        options={{
-                                            interaction: {
-                                                mode: 'nearest',
-                                                axis: 'x',
-                                                intersect: false
-                                            },
-                                            plugins: {
-                                                zoom: {
-                                                    zoom: {
-                                                        wheel: {
-                                                            enabled: true
-                                                        },
-                                                        pinch: {
-                                                            enabled: true
-                                                        },
-                                                        mode: "x"
-                                                    },
-                                                    pan: {
-                                                        enabled: true,
-                                                        mode: "x"
-                                                    }
-                                                }
-                                            },
-                                            elements: {
-                                                point: {
-                                                    radius: 0
-                                                }
-                                            },
-                                            animation: {
-                                                duration: 0
-                                            },
-                                            scales: {
-                                                x: {
-                                                    type: 'time',
-                                                    min: startDate,
-                                                    max: endDate,
-                                                    autoSkip: true
-                                                },
-                                                y: {
-                                                    title: {
-                                                        display: true,
-                                                        text: selectedWeightingOption ? 'Weighted parallel jobs' : 'Number of parallel jobs'
-                                                    }
-                                                }
-                                            }
-                                        }} />
-                                </>}
-                            <Table data={aggregated ? data : dataDisaggregated}
-                                noDataMsg="No Usage data found"
-                                displayFields={aggregated ? displayFields : displayFieldsDisaggregated}
-                                sortedAsc={false}
-                                isLoading={isLoading}
-                                sortedCol="username"
-                                idFieldName={aggregated ? "username" : "token"} />
-                        </>}
                     </div>
-                </Tab>
-            </Tabs>
+                    <div className="col-sm-6 col-12 mb-4">
+                        <div className="row">
+                            <div className="col-4">To:</div>
+                            <div className="col-8">
+                                <DatePicker selected={endDate} onChange={date => setEndDate(date)} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {isInviter &&
+                    <div className="col-sm-6 mb-4">
+                        <label>
+                            Show Invitees?
+                            <input
+                                name="showinvitees"
+                                type="checkbox"
+                                className="ms-2"
+                                checked={recursive}
+                                onChange={e => {
+                                    setRecursive(e.target.checked)
+                                }} />
+                        </label>
+                    </div>}
+                <Tab.Container defaultActiveKey="dashboard" activeKey={activeTab} onSelect={(key) => setActiveTab(key)}>
+                    <Nav className="nav-tabs">
+                        <Nav.Item>
+                            <Nav.Link eventKey="dashboard" as={NavLink} to="dashboard">Dashboard</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="timeline" as={NavLink} to="timeline">Timeline</Nav.Link>
+                        </Nav.Item>
+                    </Nav>
+                </Tab.Container>
+                <Tab.Content>
+                    <Routes>
+                        <Route index element={<Navigate to="dashboard" replace />} />
+                        <Route path="dashboard"
+                            element={<Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />} />
+                        <Route path="timeline"
+                            element={
+                                <div className="mt-3">
+                                    <div className="row">
+
+                                        <div className="col-sm-6 mb-4">
+                                            <label>
+                                                Show disaggregated data?
+                                                <input
+                                                    name="showAggregated"
+                                                    type="checkbox"
+                                                    className="ms-2"
+                                                    checked={!aggregated}
+                                                    onChange={e => {
+                                                        setAggregated(!e.target.checked)
+                                                    }} />
+                                            </label>
+                                        </div>
+                                        <div className="col-sm-6 mb-4">
+                                            <Select
+                                                id="weighting_option"
+                                                isClearable={false}
+                                                value={availableWeightingOptions.find(type => type.value === selectedWeightingOption)}
+                                                isSearchable={true}
+                                                onChange={selected => setSelectedWeightingOption(selected.value)}
+                                                options={availableWeightingOptions}
+                                            />
+                                        </div>
+                                    </div>
+                                    {isLoading ? <ClipLoader /> : <>
+                                        {data.length > 1 &&
+                                            <div className="row">
+                                                <div className="col-md-6 col-12 mb-2">
+                                                    <small>
+                                                        <div className="row">
+                                                            <div className="col-4">
+                                                                Total Time:
+                                                            </div>
+                                                            <div className="col-8">
+                                                                <TimeDiffDisplay time={totalTime} classNames="badge bg-secondary" />
+                                                            </div>
+                                                        </div>
+                                                    </small>
+                                                </div>
+                                                <div className="col-md-6 col-12 mb-2">
+                                                    <small>
+                                                        <div className="row">
+                                                            <div className="col-4">
+                                                                Total Solve Time:
+                                                            </div>
+                                                            <div className="col-8">
+                                                                <TimeDiffDisplay time={totalSolveTime} classNames="badge bg-secondary" />
+                                                            </div>
+                                                        </div>
+                                                    </small>
+                                                </div>
+                                            </div>}
+                                        {data.length > 0 &&
+                                            <>
+                                                {!aggregated && <Select
+                                                    inputId="usersToFiler"
+                                                    isMulti={true}
+                                                    isSearchable={true}
+                                                    placeholder={'Filter users'}
+                                                    closeMenuOnSelect={false}
+                                                    blurInputOnSelect={false}
+                                                    value={usersToFiler}
+                                                    onChange={users => setUsersToFiler(users)}
+                                                    options={availableUsers}
+                                                    isOptionDisabled={() => usersToFiler.length >= 5}
+                                                />}
+                                                <Line data={{
+                                                    datasets: aggregated ? aggregatedChartData : disaggregatedChartData.filter((_, index) =>
+                                                        usersToFiler.map(el => parseInt(el.value, 10)).includes(index))
+                                                }}
+                                                    height={80}
+                                                    options={{
+                                                        interaction: {
+                                                            mode: 'nearest',
+                                                            axis: 'x',
+                                                            intersect: false
+                                                        },
+                                                        plugins: {
+                                                            zoom: {
+                                                                zoom: {
+                                                                    wheel: {
+                                                                        enabled: true
+                                                                    },
+                                                                    pinch: {
+                                                                        enabled: true
+                                                                    },
+                                                                    mode: "x"
+                                                                },
+                                                                pan: {
+                                                                    enabled: true,
+                                                                    mode: "x"
+                                                                }
+                                                            }
+                                                        },
+                                                        elements: {
+                                                            point: {
+                                                                radius: 0
+                                                            }
+                                                        },
+                                                        animation: {
+                                                            duration: 0
+                                                        },
+                                                        scales: {
+                                                            x: {
+                                                                type: 'time',
+                                                                min: startDate,
+                                                                max: endDate,
+                                                                autoSkip: true
+                                                            },
+                                                            y: {
+                                                                title: {
+                                                                    display: true,
+                                                                    text: selectedWeightingOption ? 'Weighted parallel jobs' : 'Number of parallel jobs'
+                                                                }
+                                                            }
+                                                        }
+                                                    }} />
+                                            </>}
+                                        <Table data={aggregated ? data : dataDisaggregated}
+                                            noDataMsg="No Usage data found"
+                                            displayFields={aggregated ? displayFields : displayFieldsDisaggregated}
+                                            sortedAsc={false}
+                                            isLoading={isLoading}
+                                            sortedCol="username"
+                                            idFieldName={aggregated ? "username" : "token"} />
+                                    </>}
+                                </div>
+                            } />
+                    </Routes>
+                </Tab.Content>
+            </div>
         </>
     );
 };
