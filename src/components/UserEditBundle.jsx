@@ -33,13 +33,21 @@ const UserEditBundle = () => {
 
     useEffect(() => {
         const path = location.pathname;
-        ['usage', 'change_pass', 'instances', 'quotas', 'identity_provider', 'permissions', 'licenses'].some((tabId) => {
-            if (path.endsWith(`/${tabId}`)) {
-                setActiveTab(tabId);
-                return true;
-            }
-        });
+        if (path.includes('/usage')) {
+            setActiveTab('usage');
+        } else {
+            ['change_pass', 'instances', 'quotas', 'identity_provider', 'permissions', 'licenses'].some((tabId) => {
+                if (path.endsWith(`/${tabId}`)) {
+                    setActiveTab(tabId);
+                    return true;
+                }
+                return false
+            });
+        }
     }, [location]);
+
+
+
 
     useEffect(() => {
         const fetchUserInfo = async () => {
