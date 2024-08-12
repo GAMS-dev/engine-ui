@@ -123,7 +123,7 @@ const getInstanceData = async (server, username) => {
 }
 const formatInstancesSelectInput = (instances) => {
     const formatLabel = (label, instance) => (
-        `${label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${instance.multiplier}x)`
+        `${label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.multiplier)}x)`
     )
     return instances
         .filter(instance => instance.cancelling !== true)

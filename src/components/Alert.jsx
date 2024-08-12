@@ -11,7 +11,6 @@ export const Alert = () => {
     if (alertMsg !== "") {
       if (typeof alertMsg === "string" && alertMsg.startsWith('success:')) {
         setAlertType("success");
-        return;
       } else {
         setAlertType("danger");
       }

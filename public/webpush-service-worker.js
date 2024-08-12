@@ -4,7 +4,7 @@ const getJobDescriptionString = (data) => {
     if (truncatedTag.length > 10) {
       truncatedTag += '..'
     }
-    return ` (${data.payload.tag})`
+    return ` (${truncatedTag})`
   }
   return ''
 }

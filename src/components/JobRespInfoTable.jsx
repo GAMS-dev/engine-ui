@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AlertContext } from "./Alert";
 import axios from "axios";
-import { FileText } from "react-feather";
+import { Bell, FileText } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import DownloadLink from "./DownloadLink";
@@ -11,6 +11,8 @@ import TerminateJobButton from "./TerminateJobButton";
 import { GAMSRcMap } from "./constants";
 import { isActiveJob, getResponseError } from "./util";
 import JobTimingInfoBar from "./JobTimingInfoBar";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const JobRespInfoTable = props => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
@@ -73,7 +75,18 @@ const JobRespInfoTable = props => {
             </td>
           </tr>
           <tr>
-            <th>Timing</th>
+            <th>Timing
+              <span className="ms-1" >
+                <OverlayTrigger placement="bottom"
+                  overlay={<Tooltip id="tooltip">
+                    Receive push notifications when job finishes
+                  </Tooltip>}>
+                  <Link to="/settings/notifications" className="btn btn-sm">
+                    <Bell size={18} />
+                  </Link>
+                </OverlayTrigger>
+              </span>
+            </th>
             <td>
               {job.user.deleted ?
                 <span className="badge bg-danger">

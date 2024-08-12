@@ -12,7 +12,7 @@ ARG REACT_APP_BASE_NAME=DDDDEEEEFFFF
 ARG PUBLIC_URL=GGGGHHHHIIIIJJJJ
 RUN npm run build
 
-FROM --platform=linux/amd64 nginx:1.25-alpine-slim
+FROM --platform=linux/amd64 nginx:1.27-alpine-slim
 COPY --from=builder /app/build /usr/share/nginx/engine
 RUN apk update && \
     apk upgrade --available
