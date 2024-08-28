@@ -58,6 +58,7 @@ const Usage = () => {
     const [remainingQuota, setRemainingQuota] = useState(0)
     const [userSettings,] = useContext(UserSettingsContext)
     const quotaUnit = userSettings.quotaUnit
+    const quotaConversionFactor = userSettings.quotaConversionFactor
 
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -401,12 +402,7 @@ const Usage = () => {
                 });
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
-                    if (quotaUnit === "multh") {
-                        setRemainingQuota(new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume / 3600))
-                    } else {
-                        setRemainingQuota(new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume)); // in seconds
-
-                    }
+                    setRemainingQuota(new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume / quotaConversionFactor))
                 } else {
                     setRemainingQuota("unlimited")
                 }
@@ -415,7 +411,7 @@ const Usage = () => {
             }
         }
         getRemainingQuota()
-    }, [server, setAlertMsg, userToEdit, remainingQuota, quotaUnit]);
+    }, [server, setAlertMsg, userToEdit, remainingQuota, quotaConversionFactor]);
     return (
         <>
             <div>

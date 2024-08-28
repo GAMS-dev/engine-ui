@@ -12,15 +12,17 @@ import SubmitButton from "./SubmitButton";
 import { AlertContext } from "./Alert";
 import { isMobileDevice } from "./util";
 import { Info, Share } from "react-feather";
+import { ServerConfigContext } from "../ServerConfigContext";
 
-const UserSettingsForm = ({ webhookAccess }) => {
+const UserSettingsForm = () => {
     const [{ server, roles }] = useContext(AuthContext);
     const [userSettings, setUserSettings] = useContext(UserSettingsContext)
     const [serverInfo] = useContext(ServerInfoContext);
+    const [serverConfig,] = useContext(ServerConfigContext);
     const [, setAlertMsg] = useContext(AlertContext);
 
-    const availableQuotaUnits = [{ value: "mults", label: "mults" }, { value: "multh", label: "multh" }]
-    const [selectedQuotaUnit, setSelectedQuotaUnit] = useState(userSettings.quotaUnit)
+    const availableMultUnits = [{ value: "s", label: "s/s" }, { value: "cent", label: "¢/s" }]
+    const [selectedMultUnit, setSelectedMultUnit] = useState(userSettings.quotaUnit === "s" ? "s" : "cent")
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
     const [webPushIsSubmitting, setWebPushIsSubmitting] = useState(false)
     const [webpushSettingsJSON, setWebpushSettingsJSON] = useState(userSettings.webPush)
@@ -87,11 +89,12 @@ const UserSettingsForm = ({ webhookAccess }) => {
 
     useEffect(() => {
         setUserSettings({
-            quotaUnit: selectedQuotaUnit,
+            quotaUnit: selectedMultUnit === "cent" ? "$" : "h",
+            quotaConversionFactor: selectedMultUnit === "cent" ? 100 : 3600,
             tablePageLength: selectedTablePageLength,
             webPush: webpushSettingsJSON
         })
-    }, [selectedQuotaUnit, selectedTablePageLength, setUserSettings, webpushSettingsJSON])
+    }, [selectedMultUnit, selectedTablePageLength, setUserSettings, webpushSettingsJSON])
 
     return (
         <div>
@@ -112,25 +115,25 @@ const UserSettingsForm = ({ webhookAccess }) => {
                 <Routes>
                     <Route index element={<Navigate to="general" replace />} />
                     <Route path="general" element={<form>
-                        <label htmlFor="selectQuotaUnitInput">
+                        <label htmlFor="selectMultUnitInput">
                             Select quota unit
                             <span className="ms-1" >
                                 <OverlayTrigger placement="bottom"
                                     overlay={<Tooltip id="tooltip">
-                                        If multh is selected, all quota values are divided by 3600 (multiplier * hour). Otherwise, the quota is calculated by (multiplier * seconds).
+                                        If ¢/s is selected (cent per second), all quota values are divided by 100 and displayed in $ (U.S. Dollar). If s/s (second per second) is selected, quota values are divided by 3600 and displayed in hours.
                                     </Tooltip>}>
                                     <Info />
                                 </OverlayTrigger>
                             </span>
                         </label>
                         <Select
-                            id="selectQuotaUnit"
-                            inputId="selectQuotaUnitInput"
+                            id="selectMultUnit"
+                            inputId="selectMultUnitInput"
                             isClearable={false}
-                            value={availableQuotaUnits.find(type => type.value === selectedQuotaUnit)}
+                            value={availableMultUnits.find(type => type.value === selectedMultUnit)}
                             isSearchable={true}
-                            onChange={selected => setSelectedQuotaUnit(selected.value)}
-                            options={availableQuotaUnits}
+                            onChange={selected => setSelectedMultUnit(selected.value)}
+                            options={availableMultUnits}
                         />
                         <div className="form-group mt-3 mb-3">
                             <label htmlFor="tablePageLengthInput">
@@ -148,7 +151,7 @@ const UserSettingsForm = ({ webhookAccess }) => {
                         </div>
                         {serverInfo.in_kubernetes === true ? <DefaultInstanceSelector className={"form-group mt-3 mb-3"} /> : <></>}
                     </form>} />
-                    <Route path="notifications" element={webhookAccess === "ENABLED" || (webhookAccess === "ADMIN_ONLY" && roles && roles.includes("admin")) ?
+                    <Route path="notifications" element={serverConfig.webhook_access === "ENABLED" || (serverConfig.webhook_access === "ADMIN_ONLY" && roles && roles.includes("admin")) ?
                         webpushSupported() ? <form className="m-auto"
                             onSubmit={e => {
                                 e.preventDefault();
@@ -203,7 +206,7 @@ const UserSettingsForm = ({ webhookAccess }) => {
                         <Alert variant="danger" className="mt-3">Push notifications require webhooks to be enabled.</Alert>} />
                 </Routes>
             </Tab.Content>
-        </div>
+        </div >
     )
 }
 
