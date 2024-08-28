@@ -44,7 +44,7 @@ const Instances = () => {
             field: "multiplier",
             column: "Multiplier",
             sorter: "numerical",
-            displayer: Number
+            displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
         },
         {
             field: "id,label",
