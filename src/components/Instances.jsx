@@ -7,6 +7,7 @@ import axios from "axios";
 import Table from "./Table";
 import { getResponseError } from "./util";
 import InstancesActionsButtonGroup from "./InstancesActionsButtonGroup";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const Instances = () => {
 
@@ -15,6 +16,7 @@ const Instances = () => {
     const [instances, setInstances] = useState([]);
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [userSettings] = useContext(UserSettingsContext);
     const [displayFields] = useState([
         {
             field: "label",
@@ -42,7 +44,7 @@ const Instances = () => {
         },
         {
             field: "multiplier",
-            column: "Multiplier",
+            column: `Multiplier (${userSettings.multiplierUnit})`,
             sorter: "numerical",
             displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
         },

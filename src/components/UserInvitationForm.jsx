@@ -10,10 +10,12 @@ import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import UserQuotaSelector from "./UserQuotaSelector";
 import { ServerInfoContext } from "../ServerInfoContext";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const UserInvitationForm = () => {
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [serverInfo,] = useContext(ServerInfoContext);
+    const [userSettings,] = useContext(UserSettingsContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -55,7 +57,7 @@ const UserInvitationForm = () => {
             ]
             try {
                 const instanceData = await getInstanceData(server, username);
-                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances, userSettings.multiplierUnit);
                 if (availableInstancesTmp.length > 0) {
                     setAvailableInstances(availableInstancesTmp);
                     setSelectedInstancesAllowed([availableInstancesTmp[0]]);
@@ -95,7 +97,7 @@ const UserInvitationForm = () => {
             setIsLoading(false)
         };
         fetchRequiredData();
-    }, [server, jwt, roles, username]);
+    }, [server, jwt, roles, username, userSettings]);
 
     const handleInvitationSubmission = async (forceSubmission) => {
         setFormErrors("");

@@ -11,6 +11,7 @@ import axios from "axios";
 import SubmitButton from "./SubmitButton";
 import { UserLink } from "./UserLink";
 import { ServerConfigContext } from "../ServerConfigContext";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const InstancePools = () => {
     const [{ jwt, server, username, roles }] = useContext(AuthContext);
@@ -23,6 +24,7 @@ const InstancePools = () => {
     const [poolAccessSubmissionError, setPoolAccessSubmissionError] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
     const [serverConfig, setServerConfig] = useContext(ServerConfigContext);
+    const [userSettings] = useContext(UserSettingsContext);
 
     const instancePoolsEnabled = serverConfig.instance_pool_access === "ENABLED" ||
         (['INVITER_ONLY', 'ADMIN_ONLY'].includes(serverConfig.instance_pool_access) && roles?.includes('admin') === true) ||
@@ -53,7 +55,7 @@ const InstancePools = () => {
                     'cpu_request': instance.cpu_request,
                     'memory_request': instance.memory_request,
                     'multiplier': instance.multiplier
-                }])[0].label
+                }], userSettings.multiplierUnit)[0].label
         },
         {
             field: "size",

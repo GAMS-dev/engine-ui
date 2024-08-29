@@ -145,7 +145,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
             }
             try {
                 const instanceData = await getInstanceData(server, username);
-                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances, userSettings.multiplierUnit);
                 setAvailableInstances(availableInstancesTmp);
                 setRawResourceRequestsAllowed(instanceData.rawResourceRequestsAllowed);
                 setUseRawRequests(instanceData.rawResourceRequestsAllowed && availableInstancesTmp.length === 0);
@@ -169,7 +169,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
             }
         }
         loadInstanceData();
-    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota]);
+    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota, userSettings]);
 
     useEffect(() => {
         if (submissionErrorMsg !== "") {
@@ -313,7 +313,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
                 }
             );
             if (postJobResponse.data?.quota_warning?.length) {
-                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit));
+                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit, userSettings.quotaConversionFactor));
             } else {
                 setAlertMsg("success:Job successfully submitted!");
             }

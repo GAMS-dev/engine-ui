@@ -21,8 +21,8 @@ const UserSettingsForm = () => {
     const [serverConfig,] = useContext(ServerConfigContext);
     const [, setAlertMsg] = useContext(AlertContext);
 
-    const availableMultUnits = [{ value: "s", label: "s/s" }, { value: "cent", label: "¢/s" }]
-    const [selectedMultUnit, setSelectedMultUnit] = useState(userSettings.quotaUnit === "s" ? "s" : "cent")
+    const availableMultUnits = [{ value: "¢/s", label: "¢/s" }, { value: "s/s", label: "s/s" }]
+    const [selectedMultUnit, setSelectedMultUnit] = useState(userSettings.multiplierUnit ?? availableMultUnits[0].value)
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
     const [webPushIsSubmitting, setWebPushIsSubmitting] = useState(false)
     const [webpushSettingsJSON, setWebpushSettingsJSON] = useState(userSettings.webPush)
@@ -89,8 +89,9 @@ const UserSettingsForm = () => {
 
     useEffect(() => {
         setUserSettings({
-            quotaUnit: selectedMultUnit === "cent" ? "$" : "h",
-            quotaConversionFactor: selectedMultUnit === "cent" ? 100 : 3600,
+            quotaUnit: selectedMultUnit === "¢/s" ? "$" : "h",
+            multiplierUnit: selectedMultUnit,
+            quotaConversionFactor: selectedMultUnit === "¢/s" ? 100 : 3600,
             tablePageLength: selectedTablePageLength,
             webPush: webpushSettingsJSON
         })
@@ -116,11 +117,11 @@ const UserSettingsForm = () => {
                     <Route index element={<Navigate to="general" replace />} />
                     <Route path="general" element={<form>
                         <label htmlFor="selectMultUnitInput">
-                            Select quota unit
+                            Select multiplier unit
                             <span className="ms-1" >
                                 <OverlayTrigger placement="bottom"
                                     overlay={<Tooltip id="tooltip">
-                                        If ¢/s is selected (cent per second), all quota values are divided by 100 and displayed in $ (U.S. Dollar). If s/s (second per second) is selected, quota values are divided by 3600 and displayed in hours.
+                                        If ¢/s is selected (cent per second), all quota values are divided by 100 and displayed in $ (U.S. Dollars). If s/s (second per second) is selected, quota values are divided by 3600 and displayed in hours.
                                     </Tooltip>}>
                                     <Info />
                                 </OverlayTrigger>
