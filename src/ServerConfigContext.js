@@ -24,7 +24,6 @@ export const ServerConfigProvider = ({ children }) => {
         }
         const patchConfigForm = new FormData()
         const newConfigEntries = Object.entries(newConfig)
-        console.log(newConfigEntries)
         if (newConfigEntries.length < 1) {
             return
         }
