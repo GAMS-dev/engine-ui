@@ -181,9 +181,8 @@ const ModelSubmissionForm = () => {
             setIsSubmitting(false);
             return;
         }
-        let modelReq
         try {
-            modelReq = await axios({
+            await axios({
                 method: modelname ? 'patch' : 'post',
                 url: `${server}/namespaces/${encodeURIComponent(namespace)}/models/${encodeURIComponent(newModelName)}`,
                 data: modelSubmissionForm,
@@ -195,17 +194,6 @@ const ModelSubmissionForm = () => {
             setSubmissionErrorMsg(`Problems while ${modelname ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`)
             setIsSubmitting(false)
             return
-        }
-        let successCode;
-        if (modelname) {
-            successCode = 200;
-        } else {
-            successCode = 201;
-        }
-        if (modelReq.status !== successCode) {
-            setSubmissionErrorMsg(`An error occurred while ${modelname ? "updating" : "registering"} model. Please try again later.`);
-            setIsSubmitting(false);
-            return;
         }
         setIsSubmitting(false);
         setAlertMsg(`success:Model successfully ${modelname ? "updated" : "added"}!`);

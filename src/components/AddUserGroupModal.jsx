@@ -23,10 +23,13 @@ const AddUserGroupModal = props => {
     }
     const handleAddGroup = () => {
         const postUserGroup = async () => {
-            let ugReq
+            setIsSubmitting(true);
             try {
-                ugReq = await axios.post(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`,
+                await axios.post(`${server}/namespaces/${encodeURIComponent(namespace)}/user-groups`,
                     null, { params: { label: groupLabel } })
+                setIsSubmitting(false);
+                handleCloseDialog();
+                handleSuccess();
             } catch (err) {
                 if (err.response == null || err.response.status !== 400) {
                     setSubmissionErrorMsg(`Some error occurred. Error message: ${getResponseError(err)}.`);
@@ -38,17 +41,8 @@ const AddUserGroupModal = props => {
                     }
                 }
                 setIsSubmitting(false);
-                return;
-            }
-            setIsSubmitting(false);
-            if (ugReq.status === 201) {
-                handleCloseDialog();
-                handleSuccess();
-            } else {
-                setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
             }
         }
-        setIsSubmitting(true);
         postUserGroup();
     }
 

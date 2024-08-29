@@ -191,7 +191,7 @@ const UserInvitationForm = () => {
             return
         }
         setIsSubmitting(false);
-        if (inviteReq.status !== 201 || !("invitation_token" in inviteReq.data)) {
+        if (!("invitation_token" in inviteReq.data)) {
             setSubmissionErrorMsg("An error occurred while creating an invitation code. Please try again later.");
             setIsSubmitting(false);
             return;

@@ -19,21 +19,16 @@ const RemoveNamespaceModal = props => {
   }
   const handleRemoveNamespace = () => {
     const deleteNamespaceReq = async () => {
-      let nsReq
       try {
-        nsReq = await axios.delete(`${server}/namespaces/${encodeURIComponent(namespace)}`)
+        await axios.delete(`${server}/namespaces/${encodeURIComponent(namespace)}`)
       } catch (err) {
         setSubmissionErrorMsg(`Some error occurred while trying to remove the namespace. Error message: ${getResponseError(err)}.`)
         setIsSubmitting(false)
         return
       }
       setIsSubmitting(false);
-      if (nsReq.status === 200) {
-        handleCloseDialog();
-        handleSuccess();
-      } else {
-        setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
-      }
+      handleCloseDialog();
+      handleSuccess();
     }
     setIsSubmitting(true);
     deleteNamespaceReq()

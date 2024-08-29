@@ -58,11 +58,6 @@ const LicUpdateButton = props => {
                 setSubmissionErrorMsg(`An error occurred while fetching license. Error message: ${getResponseError(err)}.`)
                 return
             }
-            if (lReq.status !== 200) {
-                setIsSubmitting(false);
-                setSubmissionErrorMsg("An unexpected error occurred while fetching license. Please try again later.");
-                return;
-            }
             let licFormatted = "";
             if (lReq.data.license) {
                 if (b64enc) {
@@ -127,12 +122,7 @@ const LicUpdateButton = props => {
             licenseUpdateForm.append("license", licenseTrimmed);
         }
         try {
-            const res = await axios.put(`${server}/licenses/${encodeURIComponent(path)}`, licenseUpdateForm);
-            if (res.status !== 200) {
-                setSubmissionErrorMsg("An unexpected error occurred while updating license. Please try again later.");
-                setIsSubmitting(false);
-                return;
-            }
+            await axios.put(`${server}/licenses/${encodeURIComponent(path)}`, licenseUpdateForm);
             if (type === "engine") {
                 refreshExpirationDate();
             }

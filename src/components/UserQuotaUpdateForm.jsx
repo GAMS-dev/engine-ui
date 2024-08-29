@@ -32,10 +32,6 @@ const UserQuotaUpdateForm = () => {
                     .get(`${server}/usage/quota`, {
                         params: { username: userToEdit }
                     });
-                if (res.status !== 200) {
-                    setErrorMsg("An error occurred while retrieving user quotas. Please try again later.");
-                    return;
-                }
                 const quotasUser = res.data.filter(el => el.username === userToEdit)[0];
                 setQuotaData(res.data);
                 if (quotasUser) {

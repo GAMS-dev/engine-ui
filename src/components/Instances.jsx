@@ -68,11 +68,6 @@ const Instances = () => {
                 setIsLoading(false)
                 return
             }
-            if (iReq.status !== 200) {
-                setAlertMsg("Problems fetching instance information.");
-                setIsLoading(false);
-                return;
-            }
             setInstances(iReq.data.sort((a, b) => ('' + a.label).localeCompare(b.label)));
             setIsLoading(false);
         }

@@ -22,9 +22,8 @@ const UserChangeNameForm = () => {
 
     const handleChangeUsername = async () => {
         setIsSubmitting(true);
-        let uReq
         try {
-            uReq = await axios.put(
+            await axios.put(
                 `${server}/users/username`,
                 {
                     username: user,
@@ -41,15 +40,11 @@ const UserChangeNameForm = () => {
             return
         }
         setIsSubmitting(false);
-        if (uReq.status === 200) {
-            if (user === username) {
-                navigate("/logout")
-            } else {
-                setAlertMsg("success:Username successfully updated!");
-                setUsernameUpdated(true);
-            }
+        if (user === username) {
+            navigate("/logout")
         } else {
-            setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
+            setAlertMsg("success:Username successfully updated!");
+            setUsernameUpdated(true);
         }
     }
 

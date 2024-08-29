@@ -109,11 +109,6 @@ const Webhooks = () => {
                 setIsLoading(false)
                 return
             }
-            if (wReq.status !== 200) {
-                setAlertMsg("Problems fetching webhooks.");
-                setIsLoading(false);
-                return;
-            }
             setWebhooks(wReq.data);
             setIsLoading(false);
         }
