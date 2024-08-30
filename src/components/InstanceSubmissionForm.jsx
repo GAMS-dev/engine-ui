@@ -6,11 +6,13 @@ import axios from "axios";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const InstanceSubmissionForm = () => {
     const { label } = useParams();
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server }] = useContext(AuthContext);
+    const [userSettings] = useContext(UserSettingsContext);
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [formErrors, setFormErrors] = useState("");
@@ -225,7 +227,7 @@ const InstanceSubmissionForm = () => {
                                 <fieldset disabled={isSubmitting}>
                                     <div className="mb-3">
                                         <label htmlFor="multiplier">
-                                            Multiplier
+                                            Multiplier ({userSettings.multiplierUnit})
                                         </label>
                                         <input
                                             type="number"
@@ -243,7 +245,7 @@ const InstanceSubmissionForm = () => {
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="multiplier_idle">
-                                            Idle Multiplier (applied when worker in instance pool is idle)
+                                            Idle Multiplier ({userSettings.multiplierUnit}, applied when worker in instance pool is idle)
                                         </label>
                                         <input
                                             type="number"
