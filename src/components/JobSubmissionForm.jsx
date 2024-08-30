@@ -65,7 +65,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [accessGroups, setAccessGroups] = useState([]);
 
-    const prioritiesEnabled = serverConfig.job_priorities_access === "ENABLED";
+    const prioritiesEnabled = serverInfo.in_kubernetes !== true && serverConfig.job_priorities_access === "ENABLED";
 
     useEffect(() => {
         const getData = async () => {
