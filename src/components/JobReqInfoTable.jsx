@@ -169,7 +169,7 @@ const JobReqInfoTable = props => {
           <td>
             {job.user.deleted ? <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
               : <>
-                < UserLink user={job.user.username} />
+                <UserLink user={job.user.username} />
               </>
             }
           </td>

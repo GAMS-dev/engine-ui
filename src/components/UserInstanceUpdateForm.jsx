@@ -7,10 +7,12 @@ import axios from "axios";
 import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const UserInstanceUpdateForm = () => {
     const [{ jwt, server, username, roles }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
+    const [userSettings] = useContext(UserSettingsContext);
     const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +68,7 @@ const UserInstanceUpdateForm = () => {
 
                 setInviterHasInstancesAssigned(inviterHasInstancesAssignedTmp);
 
-                let instancesAllowedTmp = formatInstancesSelectInput(instanceDataInviter.instances);
+                let instancesAllowedTmp = formatInstancesSelectInput(instanceDataInviter.instances, userSettings.multiplierUnit);
 
                 if (instancesAllowedTmp.length === 0) {
                     setErrorMsg("No instances available.");
@@ -83,7 +85,7 @@ const UserInstanceUpdateForm = () => {
                 if (userToEditIsAdminTmp) {
                     selectedInstancesAllowedTmp = instancesAllowedTmp;
                 } else {
-                    selectedInstancesAllowedTmp = formatInstancesSelectInput(instanceDataUser.instances);
+                    selectedInstancesAllowedTmp = formatInstancesSelectInput(instanceDataUser.instances, userSettings.multiplierUnit);
                 }
                 setSelectedInstancesAllowed(selectedInstancesAllowedTmp);
 
@@ -107,7 +109,7 @@ const UserInstanceUpdateForm = () => {
             }
         };
         fetchRequiredData();
-    }, [server, jwt, roles, userToEdit, username]);
+    }, [server, jwt, roles, userToEdit, username, userSettings]);
 
     const handleUserUpdateInstancesSubmission = async () => {
         setIsSubmitting(true);

@@ -12,6 +12,7 @@ import axios from "axios";
 import { ClipLoader } from "react-spinners";
 import SubmitButton from "./SubmitButton";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
+import { ServerConfigContext } from "../ServerConfigContext";
 
 const availableProviderTypes = [{ value: 'oidc', label: 'OpenID Connect' },
 { value: 'ldap', label: 'LDAP' },
@@ -25,6 +26,7 @@ const ldapAvailableEncryptionMethods = [{ value: 'start_tls', label: 'StartTLS' 
 const AuthProviderForm = () => {
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
+    const [serverConfig, setServerConfig] = useContext(ServerConfigContext);
     const navigate = useNavigate();
 
     const updateHostnameButton = useRef(null);
@@ -39,7 +41,6 @@ const AuthProviderForm = () => {
     const [authProviders, setAuthProviders] = useState([]);
     const [ldapProviders, setLdapProviders] = useState([]);
     const [OAuthProviders, setOAuthProviders] = useState([]);
-    const [currentConfigHostname, setCurrentConfigHostname] = useState("http://localhost/api");
     const [expectedConfigHostname, setExpectedConfigHostname] = useState(server);
     const [hostnameUpdating, setHostnameUpdating] = useState(false);
 
@@ -98,18 +99,16 @@ const AuthProviderForm = () => {
                 setShowRemoveAuthProviderModal(false);
                 setSelectedAuthProvider('__+add_new');
                 setIsLoading(true);
-                const [response, responseLdap, responseOidc, responseOAuth, responseConfig] = await Promise.all([
+                const [response, responseLdap, responseOidc, responseOAuth] = await Promise.all([
                     axios.get(`${server}/auth/providers/all`),
                     axios.get(`${server}/auth/ldap-providers`),
                     axios.get(`${server}/auth/oidc-providers`),
-                    axios.get(`${server}/auth/oauth2-providers`),
-                    axios.get(`${server}/configuration`)]);
+                    axios.get(`${server}/auth/oauth2-providers`)]);
                 try {
                     setExpectedConfigHostname(new URL(server).href);
                 } catch (_) {
                     setExpectedConfigHostname(new URL(server, document.baseURI).href);
                 }
-                setCurrentConfigHostname(responseConfig.data.hostname);
                 setAuthProviders(response.data.filter(config => config.is_main_identity_provider !== true));
                 setOAuthProviders(responseOAuth.data.concat(responseOidc.data));
                 setLdapProviders(responseLdap.data);
@@ -124,27 +123,31 @@ const AuthProviderForm = () => {
     useEffect(() => {
         const validateIssuerId = async (issuerIDToAssert) => {
             if (issuerIDModified === false) {
-                return true;
+                setIssuerValid(true);
+                return;
             }
             let issuerURL;
             try {
                 issuerURL = new URL(issuerIDToAssert);
             } catch (_) {
-                return false;
+                setIssuerValid(false);
+                return;
             }
             if (issuerURL.protocol !== "https:") {
                 setFormErrors(formErrors => {
                     formErrors.issuer = "Only HTTPS allowed";
                     return formErrors;
                 });
-                return false;
+                setIssuerValid(false);
+                return;
             }
             if (issuerURL.search !== "" || issuerURL.hash !== "") {
                 setFormErrors(formErrors => {
                     formErrors.issuer = "Issuer URL must not contain query string or fragment components";
                     return formErrors;
                 });
-                return false;
+                setIssuerValid(false);
+                return;
             }
             try {
                 await axios.get(`${issuerURL.href}/.well-known/openid-configuration`)
@@ -157,10 +160,10 @@ const AuthProviderForm = () => {
                     setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'manual')[0])
                 }
             }
-            return true;
+            setIssuerValid(true);
         }
         const updateIssuerID = setTimeout(() => {
-            setIssuerValid(validateIssuerId(issuerID))
+            validateIssuerId(issuerID)
         }, 1000);
         return () => clearTimeout(updateIssuerID)
     }, [issuerID, issuerIDModified])
@@ -184,7 +187,7 @@ const AuthProviderForm = () => {
             setEndSessionEndpoint('');
             setDeviceAuthorizationEndpoint('');
             setJwksUri('');
-            setOauthAudience(currentConfigHostname);
+            setOauthAudience(serverConfig.hostname);
             setResponseTypesSupported('');
             setGrantTypesSupported('');
             setTokenAuthMethodsSupported('');
@@ -232,7 +235,7 @@ const AuthProviderForm = () => {
                 setWebuiClientSecret(oAuthProviderConfig.web_ui_client_secret == null ? '' : oAuthProviderConfig.web_ui_client_secret);
                 setDeviceClientId(oAuthProviderConfig.device_client_id == null ? '' : oAuthProviderConfig.device_client_id);
                 setDeviceClientSecret(oAuthProviderConfig.device_client_secret == null ? '' : oAuthProviderConfig.device_client_secret);
-                setOauthAudience(oAuthProviderConfig.override_audience ? oAuthProviderConfig.override_audience : currentConfigHostname);
+                setOauthAudience(oAuthProviderConfig.override_audience ? oAuthProviderConfig.override_audience : serverConfig.hostname);
                 setAuthorizationEndpoint(oAuthProviderConfig.authorization_endpoint);
                 setTokenEndpoint(oAuthProviderConfig.token_endpoint);
                 setEndSessionEndpoint(oAuthProviderConfig.end_session_endpoint == null ? '' : oAuthProviderConfig.end_session_endpoint);
@@ -275,7 +278,7 @@ const AuthProviderForm = () => {
                 setAlertMsg('Unknown identity provider type')
             }
         }
-    }, [selectedAuthProvider, authProviders, ldapProviders, OAuthProviders, setAlertMsg, server, currentConfigHostname]);
+    }, [selectedAuthProvider, authProviders, ldapProviders, OAuthProviders, setAlertMsg, server, serverConfig]);
 
     const updateHostname = async (acceptLogout) => {
         if (acceptLogout === false) {
@@ -284,15 +287,12 @@ const AuthProviderForm = () => {
         }
         try {
             setHostnameUpdating(true);
-            const patchConfigForm = new FormData();
-            patchConfigForm.append("hostname", expectedConfigHostname);
-            await axios.patch(`${server}/configuration`, patchConfigForm);
-            setCurrentConfigHostname(expectedConfigHostname);
+            await setServerConfig({ hostname: expectedConfigHostname })
+            navigate("/logout");
         } catch (err) {
             setAlertMsg(`Problems updating hostname. Error message: ${getResponseError(err)}.`);
         } finally {
             setHostnameUpdating(false);
-            navigate("/logout");
         }
     }
 
@@ -358,7 +358,7 @@ const AuthProviderForm = () => {
                 authProviderForm.append("request_scope_LICENSES", requestScopeLICENSES);
                 authProviderForm.append("request_scope_USAGE", requestScopeUSAGE);
                 authProviderForm.append("request_scope_AUTH", requestScopeAUTH);
-                if (oauthAudience !== currentConfigHostname) {
+                if (oauthAudience !== serverConfig.hostname) {
                     authProviderForm.append("override_audience", oauthAudience);
                 }
                 if (autoDiscoveryMode.value === 'manual') {
@@ -621,10 +621,10 @@ const AuthProviderForm = () => {
                                             <label htmlFor="oauthAudience">
                                                 Audience of the JWT tokens
                                             </label>
-                                            {currentConfigHostname !== expectedConfigHostname ?
+                                            {serverConfig.hostname !== expectedConfigHostname ?
                                                 <div>
                                                     {hostnameUpdating ? <ClipLoader /> : <small>
-                                                        The Engine configuration does not seem to be set to the correct hostname (current: {currentConfigHostname}, expected: {expectedConfigHostname}). Do you want to update the hostname now?
+                                                        The Engine configuration does not seem to be set to the correct hostname (current: {serverConfig.hostname}, expected: {expectedConfigHostname}). Do you want to update the hostname now?
                                                         <Button className="btn-update-hostname" variant="link" ref={updateHostnameButton} onClick={() => updateHostname(false)}>Update</Button>
                                                     </small>}
                                                 </div> : <></>}

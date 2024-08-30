@@ -7,6 +7,7 @@ import axios from "axios";
 import Table from "./Table";
 import { getResponseError } from "./util";
 import InstancesActionsButtonGroup from "./InstancesActionsButtonGroup";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const Instances = () => {
 
@@ -15,6 +16,7 @@ const Instances = () => {
     const [instances, setInstances] = useState([]);
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [userSettings] = useContext(UserSettingsContext);
     const [displayFields] = useState([
         {
             field: "label",
@@ -42,9 +44,9 @@ const Instances = () => {
         },
         {
             field: "multiplier",
-            column: "Multiplier",
+            column: `Multiplier (${userSettings.multiplierUnit})`,
             sorter: "numerical",
-            displayer: Number
+            displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
         },
         {
             field: "id,label",
@@ -65,11 +67,6 @@ const Instances = () => {
                 setAlertMsg(`Problems fetching instance information. Error message: ${getResponseError(err)}`)
                 setIsLoading(false)
                 return
-            }
-            if (iReq.status !== 200) {
-                setAlertMsg("Problems fetching instance information.");
-                setIsLoading(false);
-                return;
             }
             setInstances(iReq.data.sort((a, b) => ('' + a.label).localeCompare(b.label)));
             setIsLoading(false);

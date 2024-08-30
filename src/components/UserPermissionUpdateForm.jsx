@@ -63,11 +63,6 @@ const UserUpdateForm = () => {
                 }
                 const responseData = result.value.data
                 if (idx === 0) {
-                    if (result.value.status !== 200) {
-                        setRequierDataError(true)
-                        setRequierDataErrorMessage("An error occurred while retrieving namespaces. Please try again later.");
-                        return;
-                    }
                     const nsPerm = responseData.map(el => ({
                         name: el.name,
                         perm: el.permissions.filter(perm => perm.username === userToEdit).map(el => el.permission)[0],
@@ -76,11 +71,6 @@ const UserUpdateForm = () => {
                     setNamespacePermissions(nsPerm);
                     setCurrNamespacePermissions(nsPerm.map(el => ({ name: el.name, perm: el.perm })));
                     return
-                }
-                if (result.value.status !== 200) {
-                    setRequierDataError(true)
-                    setRequierDataErrorMessage("An error occurred while retrieving user roles. Please try again later.");
-                    return;
                 }
                 const currentRoleTmp = responseData[0].roles[0];
                 setInviterName(responseData[0].inviter_name);

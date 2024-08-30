@@ -5,10 +5,12 @@ import axios from "axios";
 import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
 import { ClipLoader } from "react-spinners";
 import { AlertContext } from "./Alert";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const DefaultInstanceSelector = ({ className }) => {
     const [{ username, server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
+    const [userSettings] = useContext(UserSettingsContext);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -19,7 +21,7 @@ const DefaultInstanceSelector = ({ className }) => {
     useEffect(() => {
         const fetchInstanceData = async () => {
             const instanceData = await getInstanceData(server, username);
-            const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+            const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances, userSettings.multiplierUnit);
             setAvailableInstances(availableInstancesTmp);
             let defaultInstance;
             if (instanceData.default == null) {
@@ -31,7 +33,7 @@ const DefaultInstanceSelector = ({ className }) => {
             setNewDefaultInstance(defaultInstance);
         }
         fetchInstanceData()
-    }, [server, username])
+    }, [server, username, userSettings])
 
     const handleChangeDefaultInstance = async (newDefaultInstance) => {
         if (!availableInstances || availableInstances.length === 0) {

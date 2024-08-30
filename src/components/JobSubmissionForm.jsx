@@ -15,13 +15,14 @@ import { ServerInfoContext } from "../ServerInfoContext";
 import FileDropZone from "./FileDropZone";
 import { UserSettingsContext } from "./UserSettingsContext";
 import { quotaWarningThresholds } from "./constants";
+import { ServerConfigContext } from "../ServerConfigContext";
 
-const JobSubmissionForm = props => {
-    const { newHcJob } = props;
+const JobSubmissionForm = ({ newHcJob }) => {
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [serverInfo,] = useContext(ServerInfoContext);
     const [userSettings,] = useContext(UserSettingsContext);
+    const [serverConfig,] = useContext(ServerConfigContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [unableToSolve, setUnableToSolve] = useState(null);
@@ -59,9 +60,12 @@ const JobSubmissionForm = props => {
     const [tolerations, setTolerations] = useState("");
     const [nodeSelectors, setNodeSelectors] = useState("");
     const [instance, setInstance] = useState("");
+    const [priority, setPriority] = useState({ value: "medium", label: "medium" });
     const [jobPosted, setJobPosted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [accessGroups, setAccessGroups] = useState([]);
+
+    const prioritiesEnabled = serverConfig.job_priorities_access === "ENABLED";
 
     useEffect(() => {
         const getData = async () => {
@@ -141,7 +145,7 @@ const JobSubmissionForm = props => {
             }
             try {
                 const instanceData = await getInstanceData(server, username);
-                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances, userSettings.multiplierUnit);
                 setAvailableInstances(availableInstancesTmp);
                 setRawResourceRequestsAllowed(instanceData.rawResourceRequestsAllowed);
                 setUseRawRequests(instanceData.rawResourceRequestsAllowed && availableInstancesTmp.length === 0);
@@ -165,7 +169,7 @@ const JobSubmissionForm = props => {
             }
         }
         loadInstanceData();
-    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota]);
+    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota, userSettings]);
 
     useEffect(() => {
         if (submissionErrorMsg !== "") {
@@ -238,6 +242,9 @@ const JobSubmissionForm = props => {
         } else {
             optionalArgs = optionalArgs.concat([{ key: "text_entries", value: textEntries },
             { key: "stream_entries", value: streamEntries }]);
+            if (prioritiesEnabled) {
+                jobSubmissionForm.append("priority", priority.value);
+            }
         }
 
         optionalArgs.forEach(el => {
@@ -306,7 +313,7 @@ const JobSubmissionForm = props => {
                 }
             );
             if (postJobResponse.data?.quota_warning?.length) {
-                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit));
+                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit, userSettings.quotaConversionFactor));
             } else {
                 setAlertMsg("success:Job successfully submitted!");
             }
@@ -665,6 +672,19 @@ const JobSubmissionForm = props => {
                                                     onChange={e => setJobDeps(e.target.value)}
                                                 />
                                             </div>
+                                            {!newHcJob && prioritiesEnabled && <div className="mb-3">
+                                                <label htmlFor="priority">
+                                                    Priority
+                                                </label>
+                                                <Select
+                                                    id="priority"
+                                                    isClearable={false}
+                                                    value={priority}
+                                                    isSearchable={true}
+                                                    onChange={selected => setPriority(selected)}
+                                                    options={[{ value: "low", label: "low" }, { value: "medium", label: "medium" }, { value: "high", label: "high" }]}
+                                                />
+                                            </div>}
                                             <JobAccessGroupsSelector namespace={namespace} value={accessGroups} onChange={setAccessGroups} hideIfNoGroupsAvailable={true} />
                                             <InexJSONSelector onChangeHandler={e => setInexJSON(e)} />
                                         </div>

@@ -6,10 +6,12 @@ import { Button } from "react-bootstrap";
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { calcRemainingQuota, getResponseError } from "./util";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [{ server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
+    const [userSettings] = useContext(UserSettingsContext);
     const [quotaParallel, setQuotaParallel] = useState(quotas != null && quotas.parallel != null ? quotas.parallel : '');
     const [validQuotaParallel, setValidQuotaParallel] = useState(true);
     const [quotaVolume, setQuotaVolume] = useState(quotas != null && quotas.volume != null ? quotas.volume : '');
@@ -38,7 +40,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             const maxQuotasTmp = getBindingQuotas(quotaData.filter(quotaObj => quotaObj.username !== userToEdit));
             setMaxQuotas({
                 parallel: maxQuotasTmp.parallel_quota,
-                volume: maxQuotasTmp.volume_quota / 3600,
+                volume: maxQuotasTmp.volume_quota / userSettings.quotaConversionFactor,
                 disk: maxQuotasTmp.disk_quota / 1e6
             });
             setMaxQuotasInitialized(true);
@@ -49,16 +51,12 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 const resQuotas = await axios.get(`${server}/usage/quota`, {
                     params: { username: username }
                 });
-                if (resQuotas.status !== 200) {
-                    setAlertMsg("Problems while retrieving user quotas. Please try again later.");
-                    return;
-                }
                 setQuotaDataInternal(resQuotas.data);
                 if (resQuotas.data.length > 0) {
                     const maxQuotasTmp = getBindingQuotas(resQuotas.data);
                     setMaxQuotas({
                         parallel: maxQuotasTmp.parallel_quota,
-                        volume: maxQuotasTmp.volume_quota / 3600,
+                        volume: maxQuotasTmp.volume_quota / userSettings.quotaConversionFactor,
                         disk: maxQuotasTmp.disk_quota / 1e6
                     });
                     setMaxQuotasInitialized(true);
@@ -76,7 +74,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         } else {
             fetchQuotas();
         }
-    }, [server, username, quotaData, userToEdit, roles, setAlertMsg]);
+    }, [server, username, quotaData, userToEdit, roles, setAlertMsg, userSettings]);
 
     useEffect(() => {
         if (quotas == null || maxQuotasInitialized !== true) {
@@ -91,8 +89,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         }
         setValidQuotaParallel(isValidQuota(quotas.parallel, maxQuotas.parallel));
         setValidQuotaDisk(isValidQuota(quotas.disk, maxQuotas.disk * 1e6));
-        setValidQuotaVolume(isValidQuota(quotas.volume, maxQuotas.volume * 3600));
-    }, [quotas, maxQuotas, maxQuotasInitialized])
+        setValidQuotaVolume(isValidQuota(quotas.volume, maxQuotas.volume * userSettings.quotaConversionFactor));
+    }, [quotas, maxQuotas, maxQuotasInitialized, userSettings])
 
     useEffect(() => {
         if (validQuotaParallel && validQuotaVolume && validQuotaDisk) {
@@ -124,14 +122,14 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         const quotaRemaining = calcRemainingQuota(quotaDataNew);
         setRemainingLive({
             disk: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.disk, quotaRemaining.disk / 1e6)),
-            volume: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.volume, quotaRemaining.volume / 3600))
+            volume: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.volume, quotaRemaining.volume / userSettings.quotaConversionFactor))
         })
-    }, [quotaDataInternal, userToEdit, quotas, maxQuotas])
+    }, [quotaDataInternal, userToEdit, quotas, maxQuotas, userSettings])
 
     return <>
         <div className="mb-3">
             <label htmlFor="quotaParallel">
-                Parallel Quota (weighted parallel jobs)
+                Parallel Quota (in {userSettings.multiplierUnit})
                 {isFinite(maxQuotas.parallel) && <Button
                     onClick={() => {
                         setQuotaParallel(maxQuotas.parallel);
@@ -176,10 +174,10 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         </div>
         <div className="mb-3">
             <label htmlFor="quotaVolume">
-                Volume Quota (weighted job hours)
+                Volume Quota (in {userSettings.quotaUnit})
                 {isFinite(maxQuotas.volume) && <Button
                     onClick={() => {
-                        setQuotaVolume(maxQuotas.volume * 3600);
+                        setQuotaVolume(maxQuotas.volume * userSettings.quotaConversionFactor);
                         setValidQuotaVolume(true);
                     }}
                     size="sm"
@@ -195,7 +193,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     step="any"
                     min="0"
                     max={isFinite(maxQuotas.volume) ? maxQuotas.volume : ''}
-                    value={quotaVolume === '' ? '' : Math.round(quotaVolume / 3.6) / 1000}
+                    value={quotaVolume === '' ? '' : (quotaVolume / userSettings.quotaConversionFactor).toFixed(3)}
                     onChange={e => {
                         if (e.target.value == null || e.target.value === '') {
                             setValidQuotaVolume(true);
@@ -205,11 +203,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                         const val = parseFloat(e.target.value);
                         if (isNaN(val) || !isFinite(val) || val < 0 || val > maxQuotas.volume) {
                             setValidQuotaVolume(false);
-                            setQuotaVolume(val * 3600);
+                            setQuotaVolume(val * userSettings.quotaConversionFactor);
                             return;
                         }
                         setValidQuotaVolume(true);
-                        setQuotaVolume(val * 3600);
+                        setQuotaVolume(val * userSettings.quotaConversionFactor);
                     }}
                 />
                 <div className="input-group-append">

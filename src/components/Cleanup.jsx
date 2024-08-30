@@ -133,11 +133,6 @@ const Cleanup = () => {
                 return
             }
             const reqDataTmp = cReq.data
-            if (cReq.status !== 200) {
-                setAlertMsg("Problems fetching cleanup information.");
-                setIsLoading(false);
-                return;
-            }
             setTotalFileSize(reqDataTmp.total_length);
             setTotal(reqDataTmp.count);
             setDatasets(reqDataTmp.results.map(el => {

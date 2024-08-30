@@ -28,20 +28,14 @@ const AddNamespaceModal = props => {
             return;
         }
         const postNamespace = async () => {
-            let nsReq
             try {
-                nsReq = await axios.post(`${server}/namespaces/${encodeURIComponent(namespaceName)}`)
-            } catch (err) {
-                setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${getResponseError(err)}.`);
-                setIsSubmitting(false);
-                return;
-            }
-            setIsSubmitting(false);
-            if (nsReq.status === 201) {
+                await axios.post(`${server}/namespaces/${encodeURIComponent(namespaceName)}`)
                 handleCloseDialog();
                 handleSuccess();
-            } else {
-                setSubmissionErrorMsg("Oops. Something went wrong! Please try again later..");
+            } catch (err) {
+                setSubmissionErrorMsg(`Some error occurred while trying to add the namespace. Error message: ${getResponseError(err)}.`);
+            } finally {
+                setIsSubmitting(false);
             }
         }
         postNamespace();

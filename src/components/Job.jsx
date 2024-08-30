@@ -105,7 +105,6 @@ const Job = () => {
           headers: { "X-Fields": "upload_date" },
           cancelToken: source.token
         })
-        console.log(modelInfo)
         if (modelInfo.data.length === 1) {
           const newJobData = jobData;
           if (Date.parse(newJobData.submitted_at) > Date.parse(modelInfo.data[0].upload_date)) {

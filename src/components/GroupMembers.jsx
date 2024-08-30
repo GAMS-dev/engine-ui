@@ -44,7 +44,7 @@ const GroupMembers = () => {
                 setIsLoading(false)
                 return
             }
-            if (uReq.data && uReq.data.length > 0) {
+            if (uReq?.data?.length > 0) {
                 const usersTmp = uReq.data
                     .map(user => user.username);
                 setInvitees(usersTmp);
@@ -67,11 +67,6 @@ const GroupMembers = () => {
                 setAlertMsg(`Problems while retrieving group members. Error message: ${getResponseError(err)}.`);
                 setIsLoading(false);
                 return
-            }
-            if (gmReq.status !== 200) {
-                setAlertMsg("An error occurred while retrieving group members. Please try again later.");
-                setIsLoading(false);
-                return;
             }
             const groupMembersTmp = gmReq.data
                 .filter(group => group.label === label)

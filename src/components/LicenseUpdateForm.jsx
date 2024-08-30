@@ -64,12 +64,7 @@ const LicenseUpdateForm = () => {
             }
             licenseUpdateForm.append("license", btoa(licenseModified));
             try {
-                const res = await axios.put(`${server}/licenses/`, licenseUpdateForm);
-                if (res.status !== 200) {
-                    setlicenseErrorMsg("An unexpected error occurred while updating user license. Please try again later.");
-                    setIsSubmitting(false);
-                    return;
-                }
+                await axios.put(`${server}/licenses/`, licenseUpdateForm);
                 setLicense(licenseModified);
                 setRegisteredLicense(licenseModified);
             }
@@ -82,12 +77,7 @@ const LicenseUpdateForm = () => {
         } else {
             setLicenseAction("update");
             try {
-                const res = await axios.delete(`${server}/licenses/`, { data: licenseUpdateForm });
-                if (res.status !== 200) {
-                    setlicenseErrorMsg("An unexpected error occurred while deleting user license. Please try again later.");
-                    setIsSubmitting(false);
-                    return;
-                }
+                await axios.delete(`${server}/licenses/`, { data: licenseUpdateForm });
             }
             catch (err) {
                 if (err.response.status === 404) {
