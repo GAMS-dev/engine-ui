@@ -80,7 +80,9 @@ const UserEditBundle = () => {
             <p><strong>You do not have permission to view information about user: {userToEdit}.</strong></p>
         </div> :
         <div>
+            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 className="h2">User: {userToEdit}</h1>
+            </div>
             {(isAdmin || (isInviter && username !== userToEdit)) ?
                 <>
                     <Tab.Container defaultActiveKey="quotas" activeKey={activeTab} onSelect={(key) => setActiveTab(key)}>
