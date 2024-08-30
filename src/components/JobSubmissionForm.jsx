@@ -303,6 +303,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
         } catch (err) {
             setSubmissionErrorMsg(`Problems posting job as data could not be zipped. Error message: ${err.message}`)
             setIsSubmitting(false)
+            return;
         }
         try {
             const postJobResponse = await axios.post(

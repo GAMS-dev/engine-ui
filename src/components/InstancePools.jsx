@@ -43,7 +43,7 @@ const InstancePools = () => {
             sorter: "alphabetical",
             displayer: user => user.deleted ?
                 <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
-                < UserLink user={user.username} />
+                <UserLink user={user.username} />
         },
         {
             field: "instance",

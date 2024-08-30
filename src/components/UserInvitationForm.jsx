@@ -39,8 +39,8 @@ const UserInvitationForm = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formErrors, setFormErrors] = useState("");
-    const [requierDataError, setRequierDataError] = useState(false);
-    const [requierDataErrorMessage, setRequierDataErrorMessage] = useState('');
+    const [requiredDataError, setRequiredDataError] = useState(false);
+    const [requiredDataErrorMessage, setRequiredDataErrorMessage] = useState('');
 
     const [invitationCode, setInvitationCode] = useState("");
     const [showConfirmNoInstanceDialog, setShowConfirmNoInstanceDialog] = useState(false);
@@ -64,19 +64,19 @@ const UserInvitationForm = () => {
                     setDefaultInstance(availableInstancesTmp[0]);
                 }
             } catch (err) {
-                setRequierDataError(true)
-                setRequierDataErrorMessage(`An error occurred fetching instances. Error message: ${getResponseError(err)}.`);
+                setRequiredDataError(true)
+                setRequiredDataErrorMessage(`An error occurred fetching instances. Error message: ${getResponseError(err)}.`);
                 setIsLoading(false);
                 return;
             }
             (await Promise.allSettled(requests)).forEach((result, idx) => {
                 if (result.status === "rejected") {
                     if (idx === 0) {
-                        setRequierDataError(true)
-                        setRequierDataErrorMessage(`Problems while retrieving namespaces. Error message: ${getResponseError(result.reason)}.`)
+                        setRequiredDataError(true)
+                        setRequiredDataErrorMessage(`Problems while retrieving namespaces. Error message: ${getResponseError(result.reason)}.`)
                     } else {
-                        setRequierDataError(true)
-                        setRequierDataErrorMessage(`Problems while retrieving identity providers. Error message: ${getResponseError(result.reason)}.`)
+                        setRequiredDataError(true)
+                        setRequiredDataErrorMessage(`Problems while retrieving identity providers. Error message: ${getResponseError(result.reason)}.`)
                     }
                     return
                 }
@@ -203,9 +203,9 @@ const UserInvitationForm = () => {
     }
 
     return (
-        requierDataError ?
+        requiredDataError ?
             <div className="alert alert-danger mt-3">
-                <p><strong>{requierDataErrorMessage}</strong></p>
+                <p><strong>{requiredDataErrorMessage}</strong></p>
             </div> :
             <>
                 {isLoading ? <ClipLoader /> :

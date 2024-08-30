@@ -59,6 +59,7 @@ const UserEditBundle = () => {
                         filter: "deleted=false"
                     }
                 });
+                console.log(userInfoReq)
                 if (userInfoReq.data?.length === 0) {
                     setInvalidUser(true)
                     return
@@ -66,9 +67,7 @@ const UserEditBundle = () => {
                 setUserToEditIDP(userInfoReq.data[0].identity_provider);
                 setUserToEditRoles(userInfoReq.data[0].roles);
             } catch (err) {
-                if (err?.response?.status === 403) {
-                    setInvalidUser(true)
-                }
+                setInvalidUser(true)
                 setAlertMsg(`Failed to fetch user information. Error message: ${getResponseError(err)}`);
             }
         }
