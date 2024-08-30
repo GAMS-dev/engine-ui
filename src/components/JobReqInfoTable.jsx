@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { AuthContext } from "../AuthContext";
@@ -8,14 +8,16 @@ import TimeDisplay from "./TimeDisplay";
 import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
 import SubmitButton from "./SubmitButton";
 import { Button } from "react-bootstrap";
-import { getResponseError } from "./util";
+import { formatInstanceSpecs, getResponseError } from "./util";
 import axios from "axios";
 import { Edit3 } from "react-feather";
 import { UserLink } from "./UserLink";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
+  const [userSettings] = useContext(UserSettingsContext);
   const { job, isHcJob, inKubernetes, setRefreshJob } = props;
   const [jobLabels, setJobLabels] = useState(null);
   const [showEditAccessGroupsDialog, setShowEditAccessGroupsDialog] = useState(false);
@@ -28,7 +30,7 @@ const JobReqInfoTable = props => {
 
   let preventUpdateTag = false;
 
-  const formatLabel = (label) => {
+  const formatLabel = useCallback((label) => {
     if (label == null || label.length < 2 || label[1] === "") {
       return "";
     }
@@ -39,10 +41,10 @@ const JobReqInfoTable = props => {
     } else if (label[0] === "workspace_request") {
       return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])} MiB Disk`;
     } else if (label[0] === "multiplier") {
-      return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])}x`;
+      return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(label[1])}${userSettings.multiplierUnit}`;
     }
     return "";
-  }
+  }, [userSettings])
 
   const updateJobTag = async (e) => {
     if (e.key !== 'Enter') {
@@ -72,6 +74,8 @@ const JobReqInfoTable = props => {
     }
   }
 
+  const formatInstanceSpecsCallback = useCallback(formatInstanceSpecs, [])
+
   useEffect(() => {
     if (!inKubernetes || !job.labels) {
       setJobLabels(null);
@@ -91,7 +95,14 @@ const JobReqInfoTable = props => {
             return el;
           }
           const elTmp = el;
-          elTmp[1] = `${elTmp[1]} (${formatLabel(cpuRequest)}, ${formatLabel(memoryRequest)}, ${formatLabel(multiplier)})`;
+          elTmp[1] = formatInstanceSpecsCallback({
+            label: elTmp[1],
+            cpu_request: cpuRequest?.length === 2 ? cpuRequest[1] : "",
+            memory_request: memoryRequest?.length === 2 ? memoryRequest[1] : "",
+            multiplier: multiplier?.length === 2 ? multiplier[1] : ""
+          },
+            userSettings.multiplierUnit
+          )
           elTmp[2] = formatLabel(workspaceRequest);
           return elTmp;
         })
@@ -99,7 +110,7 @@ const JobReqInfoTable = props => {
     } else {
       setJobLabels(jobLabelsTmp);
     }
-  }, [job, inKubernetes, setJobLabels]);
+  }, [job, inKubernetes, setJobLabels, userSettings, formatInstanceSpecsCallback, formatLabel]);
 
   const handleCloseEditAccessGroupsDialog = () => {
     setShowEditAccessGroupsDialog(false);
@@ -333,7 +344,7 @@ const JobReqInfoTable = props => {
                   </span>
                 } else if (el[0] === "multiplier") {
                   return <span key="multiplier" className="badge bg-secondary m-1" title="Multiplier">
-                    {`${el[1]}x`}
+                    {`${el[1]}${userSettings.multiplierUnit}`}
                   </span>
                 } else if (Array.isArray(el[1])) {
                   return el[1].map((arrayEl, arrayIdx) => {
