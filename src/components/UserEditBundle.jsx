@@ -20,7 +20,7 @@ const UserEditBundle = () => {
     const { userToEdit } = useParams();
     const [activeTab, setActiveTab] = useState('usage');
     const [userToEditIDP, setUserToEditIDP] = useState(null);
-    const [userToEditIsAdmin, setUserToEditIsAdmin] = useState(null);
+    const [userToEditRoles, setUserToEditRoles] = useState([]);
     const [invalidUser, setInvalidUser] = useState(false);
     const location = useLocation();
     const [, setAlertMsg] = useContext(AlertContext);
@@ -64,7 +64,7 @@ const UserEditBundle = () => {
                     return
                 }
                 setUserToEditIDP(userInfoReq.data[0].identity_provider);
-                setUserToEditIsAdmin(userInfoReq.data[0].roles?.includes("admin") === true);
+                setUserToEditRoles(userInfoReq.data[0].roles);
             } catch (err) {
                 if (err?.response?.status === 403) {
                     setInvalidUser(true)
@@ -81,7 +81,7 @@ const UserEditBundle = () => {
         </div> :
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 className="h2">User: {userToEdit}</h1>
+                <h1 className="h2">User: {userToEdit}</h1>
             </div>
             {(isAdmin || (isInviter && username !== userToEdit)) ?
                 <>
@@ -105,7 +105,7 @@ const UserEditBundle = () => {
                                     <Nav.Link eventKey="instances" as={NavLink} to="instances">Change Instances</Nav.Link>
                                 </Nav.Item>
                             )}
-                            {(!userToEditIsAdmin) && (
+                            {!userToEditRoles.includes("admin") && (
                                 <Nav.Item>
                                     <Nav.Link eventKey="quotas" as={NavLink} to="quotas">Change Quota</Nav.Link>
                                 </Nav.Item>
@@ -125,7 +125,7 @@ const UserEditBundle = () => {
                     <Tab.Content className="pt-3">
                         <Routes>
                             <Route index element={<Navigate to="usage" replace />} />
-                            <Route path="usage/*" element={<Usage />} />
+                            <Route path="usage/*" element={<Usage userToEditRoles={userToEditRoles} />} />
                             <Route path="change_pass" element={<UserChangePassForm hideTitle={true} />} />
                             {(isAdmin) && (
                                 <Route path="licenses" element={<LicenseUpdateForm />} />
@@ -140,7 +140,7 @@ const UserEditBundle = () => {
                     </Tab.Content>
                 </>
                 :
-                <Usage />
+                <Usage userToEditRoles={userToEditRoles} />
             }
         </div>
 }

@@ -33,7 +33,7 @@ ChartJS.register(
 );
 
 
-const Usage = () => {
+const Usage = ({ userToEditRoles }) => {
 
     const { userToEdit } = useParams();
     const [data, setData] = useState([]);
@@ -52,7 +52,7 @@ const Usage = () => {
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [{ jwt, server }] = useContext(AuthContext);
     const availableWeightingOptions = [{ value: true, label: "Jobs weighted with multiplier" }, { value: false, label: "Parallel job view" }]
     const [selectedWeightingOption, setSelectedWeightingOption] = useState(availableWeightingOptions[0].value)
     const [remainingQuota, setRemainingQuota] = useState(0)
@@ -62,6 +62,8 @@ const Usage = () => {
 
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('dashboard');
+
+    const userToEditIsInviter = userToEditRoles.includes('admin') || userToEditRoles.includes('inviter')
 
     useEffect(() => {
         const path = location.pathname;
@@ -142,9 +144,11 @@ const Usage = () => {
             displayer: e => <TimeDisplay time={e} />
         }
     ]);
-    const isInviter = roles && (roles.includes('admin') || roles.includes('inviter'));
 
     useEffect(() => {
+        if (userToEditIsInviter == null) {
+            return;
+        }
         const fetchData = async () => {
             setIsLoading(true);
             let testData;
@@ -152,7 +156,7 @@ const Usage = () => {
                 testData = (await axios
                     .get(`${server}/usage/`, {
                         params: {
-                            recursive: isInviter ? recursive : false,
+                            recursive: userToEditIsInviter ? recursive : false,
                             username: userToEdit,
                             from_datetime: startDate,
                             to_datetime: endDate
@@ -390,7 +394,7 @@ const Usage = () => {
         }
         fetchData();
     }, [jwt, server, refresh, displayFields, setAlertMsg,
-        userToEdit, recursive, startDate, endDate, isInviter, selectedWeightingOption]);
+        userToEdit, recursive, startDate, endDate, userToEditIsInviter, selectedWeightingOption]);
 
     useEffect(() => {
         const getRemainingQuota = async () => {
@@ -456,7 +460,7 @@ const Usage = () => {
                         </div>
                     </div>
                 </div>
-                {isInviter &&
+                {userToEditIsInviter &&
                     <div className="col-sm-6 mb-4">
                         <label>
                             Show Invitees?
