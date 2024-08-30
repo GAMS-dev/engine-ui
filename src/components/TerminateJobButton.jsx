@@ -13,20 +13,21 @@ const TerminateJobButton = props => {
     const [, setAlertMsg] = useContext(AlertContext);
 
     function terminateJob(hardKill = false) {
-        axios
-            .delete(
-                token.startsWith("hc:") ? `${server}/hypercube/${encodeURIComponent(token.substring(3))}?hard_kill=${hardKill}` :
-                    `${server}/jobs/${encodeURIComponent(token)}?hard_kill=${hardKill}`,
-                {}
-            )
-            .then(() => {
-                setRefresh(refreshCnt => ({
-                    refresh: refreshCnt + 1
-                }));
-            })
-            .catch(err => {
+        const deleteJob = async () => {
+            try {
+                await axios.delete(
+                    token.startsWith("hc:") ? `${server}/hypercube/${encodeURIComponent(token.substring(3))}?hard_kill=${hardKill}` :
+                        `${server}/jobs/${encodeURIComponent(token)}?hard_kill=${hardKill}`,
+                    {})
+            } catch (err) {
                 setAlertMsg(`Problems terminating job. Error message: ${getResponseError(err)}`);
-            });
+                return
+            }
+        }
+        setRefresh(refreshCnt => ({
+            refresh: refreshCnt + 1
+        }))
+        deleteJob()
     }
 
     return (

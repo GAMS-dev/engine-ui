@@ -7,6 +7,7 @@ import axios from "axios";
 import Table from "./Table";
 import { getResponseError } from "./util";
 import InstancesActionsButtonGroup from "./InstancesActionsButtonGroup";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const Instances = () => {
 
@@ -15,6 +16,7 @@ const Instances = () => {
     const [instances, setInstances] = useState([]);
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [userSettings] = useContext(UserSettingsContext);
     const [displayFields] = useState([
         {
             field: "label",
@@ -42,9 +44,9 @@ const Instances = () => {
         },
         {
             field: "multiplier",
-            column: "Multiplier",
+            column: `Multiplier (${userSettings.multiplierUnit})`,
             sorter: "numerical",
-            displayer: Number
+            displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
         },
         {
             field: "id,label",
@@ -57,26 +59,24 @@ const Instances = () => {
     ]);
 
     useEffect(() => {
+        const fetchInstances = async () => {
+            let iReq
+            try {
+                iReq = await axios.get(`${server}/usage/instances`)
+            } catch (err) {
+                setAlertMsg(`Problems fetching instance information. Error message: ${getResponseError(err)}`)
+                setIsLoading(false)
+                return
+            }
+            setInstances(iReq.data.sort((a, b) => ('' + a.label).localeCompare(b.label)));
+            setIsLoading(false);
+        }
         if (!roles.length || roles.find(role => role === "admin") === undefined) {
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
-        axios
-            .get(`${server}/usage/instances`)
-            .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("Problems fetching instance information.");
-                    setIsLoading(false);
-                    return;
-                }
-                setInstances(res.data.sort((a, b) => ('' + a.label).localeCompare(b.label)));
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems fetching instance information. Error message: ${getResponseError(err)}`);
-                setIsLoading(false);
-            });
+        fetchInstances();
     }, [jwt, server, roles, refresh, setAlertMsg]);
 
     return (

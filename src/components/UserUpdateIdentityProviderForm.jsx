@@ -14,7 +14,7 @@ import ShowHidePasswordInput from "./ShowHidePasswordInput";
 const UserUpdateIdentityProviderForm = () => {
     const [{ server, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const { user } = useParams();
+    const { userToEdit } = useParams();
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +34,7 @@ const UserUpdateIdentityProviderForm = () => {
         const fetchAvailableProviders = async () => {
             try {
                 const userInfoPromise = axios.get(`${server}/users/`, {
-                    params: { username: user }
+                    params: { username: userToEdit }
                 });
                 const response = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`);
                 const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
@@ -52,7 +52,7 @@ const UserUpdateIdentityProviderForm = () => {
             }
         }
         fetchAvailableProviders();
-    }, [server, user, username])
+    }, [server, userToEdit, username])
 
     const handleUpdateIdentityProvider = async (confirmBlock) => {
         setFormErrors("");
@@ -70,7 +70,7 @@ const UserUpdateIdentityProviderForm = () => {
         setIsSubmitting(true);
         try {
             const authProviderForm = new FormData();
-            authProviderForm.append("username", user);
+            authProviderForm.append("username", userToEdit);
             authProviderForm.append("identity_provider_name", identityProvider.value);
             if (identityProvider.value === "gams_engine") {
                 authProviderForm.append("password", enginePassword);
@@ -94,9 +94,6 @@ const UserUpdateIdentityProviderForm = () => {
 
     return (
         <div>
-            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">Change Identity Provider of User: {user}</h1>
-            </div>
             <form
                 className="m-auto"
                 onSubmit={e => {
@@ -166,7 +163,7 @@ const UserUpdateIdentityProviderForm = () => {
                         <Modal.Title>Please Confirm</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        You are about to remove the identity provider from the user: <code>{user}</code>. This user will no longer be able to log in.
+                        You are about to remove the identity provider from the user: <code>{userToEdit}</code>. This user will no longer be able to log in.
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setShowBlockConfirmDialog(false)}>

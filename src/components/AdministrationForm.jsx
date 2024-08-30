@@ -7,6 +7,7 @@ import AuthProviderForm from "./AuthProviderForm.jsx";
 import { ServerInfoContext } from "../ServerInfoContext";
 import LicUpdateButton from "./LicenseUpdateButton";
 import UpdatePasswordPolicyButton from "./UpdatePasswordPolicyButton";
+import ToggleConfigOptionButton from "./ToggleConfigOptionButton.jsx";
 
 const AdministrationForm = ({ setLicenseExpiration }) => {
     const [serverInfo] = useContext(ServerInfoContext);
@@ -25,8 +26,9 @@ const AdministrationForm = ({ setLicenseExpiration }) => {
                         <LicUpdateButton type="engine" setLicenseExpiration={setLicenseExpiration} />
                         <LicUpdateButton type="system" />
                     </div>
-                    <div className="mr-2">
-                        <UpdatePasswordPolicyButton/>
+                    <div className="btn-group">
+                        <UpdatePasswordPolicyButton />
+                        {serverInfo.in_kubernetes !== true && <ToggleConfigOptionButton configKey="job_priorities_access" />}
                     </div>
                 </div>
             </div>

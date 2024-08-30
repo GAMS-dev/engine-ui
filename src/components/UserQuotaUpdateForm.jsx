@@ -11,7 +11,7 @@ import UserQuotaSelector from "./UserQuotaSelector";
 const UserQuotaUpdateForm = () => {
     const [{ jwt, server }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const { username } = useParams();
+    const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState("");
@@ -30,13 +30,9 @@ const UserQuotaUpdateForm = () => {
             try {
                 const res = await axios
                     .get(`${server}/usage/quota`, {
-                        params: { username: username }
+                        params: { username: userToEdit }
                     });
-                if (res.status !== 200) {
-                    setErrorMsg("An error occurred while retrieving user quotas. Please try again later.");
-                    return;
-                }
-                const quotasUser = res.data.filter(el => el.username === username)[0];
+                const quotasUser = res.data.filter(el => el.username === userToEdit)[0];
                 setQuotaData(res.data);
                 if (quotasUser) {
                     setInheritQuotas(quotasUser.parallel_quota == null &&
@@ -56,7 +52,7 @@ const UserQuotaUpdateForm = () => {
             }
         };
         fetchRequiredData();
-    }, [server, jwt, username]);
+    }, [server, jwt, userToEdit]);
 
     const handleUserUpdateQuotaSubmission = async () => {
         if (quotas == null) {
@@ -86,7 +82,7 @@ const UserQuotaUpdateForm = () => {
         try {
             let updateRequest;
             if (needUpdate) {
-                quotaUpdateParams["username"] = username;
+                quotaUpdateParams["username"] = userToEdit;
                 updateRequest = axios.put(`${server}/usage/quota`, null, {
                     params: quotaUpdateParams
                 });
@@ -94,7 +90,7 @@ const UserQuotaUpdateForm = () => {
             const deleteRequests = quotasToDelete.map(quotaToDelete =>
                 axios.delete(`${server}/usage/quota`, {
                     params: {
-                        username: username,
+                        username: userToEdit,
                         field: quotaToDelete
                     }
                 })
@@ -113,9 +109,6 @@ const UserQuotaUpdateForm = () => {
     return (
         <>
             <div>
-                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 className="h2">Edit Quotas of User: {username}</h1>
-                </div>
                 {isLoading ? <ClipLoader /> :
                     (errorMsg ?
                         <div className="invalid-feedback text-center" style={{ display: "block" }
@@ -143,7 +136,7 @@ const UserQuotaUpdateForm = () => {
                                     <UserQuotaSelector
                                         quotas={quotas}
                                         quotaData={quotaData}
-                                        userToEdit={username}
+                                        userToEdit={userToEdit}
                                         setQuotas={setQuotas} />
                                 </fieldset>}
                             <div className="mt-3">

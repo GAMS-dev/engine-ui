@@ -7,9 +7,11 @@ import Select from 'react-select';
 import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const InstancePoolSubmissionForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
+    const [userSettings] = useContext(UserSettingsContext);
     const [{ server, username }] = useContext(AuthContext);
 
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
@@ -31,7 +33,7 @@ const InstancePoolSubmissionForm = () => {
             try {
                 const instanceData = await getInstanceData(server, username);
                 const instancePoolsTmp = formatInstancesSelectInput(instanceData.instances
-                    .filter(el => el.is_pool !== true));
+                    .filter(el => el.is_pool !== true), userSettings.multiplierUnit);
                 setAvailableInstances(instancePoolsTmp);
                 setInstanceReq(instancePoolsTmp[0]);
             }
@@ -41,7 +43,7 @@ const InstancePoolSubmissionForm = () => {
             setIsLoading(false);
         }
         fetchInstances();
-    }, [server, username]);
+    }, [server, username, userSettings]);
 
     const handleInstanceSubmission = async () => {
         if (instanceReq == null) {

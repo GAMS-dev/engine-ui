@@ -21,7 +21,7 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setQue
         if (token == null || isFinished) {
             return;
         }
-        const fetchJobTimes = () => {
+        const fetchJobTimes = async () => {
             const reqParams = {
                 recursive: false,
                 username: jobOwner
@@ -34,116 +34,113 @@ const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setQue
                 reqParams.token = token;
                 reqHeaders["X-Fields"] = "job_usage";
             }
-            axios
-                .get(`${server}/usage/`, {
-                    params: reqParams,
-                    headers: reqHeaders
-                })
-                .then(res => {
-                    const data = isHcJob ? res.data.hypercube_job_usage[0] : res.data.job_usage[0];
-                    if (data.submitted == null) {
-                        setHasError(true);
-                        setAlertMsg("A problem occurred while retrieving job progress info.");
-                        return;
-                    }
-                    if (data.status === 0 && serverInfo.in_kubernetes !== true) {
-                        // refresh queue position
-                        axios
-                            .get(isHcJob ? `${server}/hypercube/` : `${server}/jobs/${encodeURIComponent(token)}`, {
-                                params: isHcJob ? {
-                                    hypercube_token: token
-                                } : null,
-                                headers: { "X-Fields": "queue_position" }
-                            })
-                            .then(res => {
-                                setQueuePosition(res.data.queue_position);
-                            })
-                            .catch(err => {
-                                console.error(`A problem occurred while retrieving job queue position. Error message: ${getResponseError(err)}`);
-                            });
-                    }
-                    let totalDuration;
-                    const isFinishedTmp = data.finished != null;
-                    if (isFinishedTmp) {
-                        totalDuration = (new Date(data.finished) - new Date(data.submitted)) / 1000;
-                    } else {
-                        totalDuration = (new Date() - new Date(data.submitted)) / 1000;
-                    }
-                    const timingsTmp = (isHcJob ? data.jobs.map(el => el.times) : [data.times]).map(jobTimes => {
-                        let jobTimingTmp;
-                        if (jobTimes.length > 0) {
-                            const intervalDuration = (new Date(jobTimes[0].start) - new Date(data.submitted)) / 1000;
-                            jobTimingTmp = [{
-                                desc: 'Queued',
-                                className: 'job-timings-info-queued',
-                                duration: intervalDuration,
-                                width: intervalDuration / totalDuration * 100
-                            }].concat(jobTimes.map((interval, idx) => {
-                                let intervalDuration;
-                                if (interval.finish == null) {
-                                    if (jobTimes.length > idx + 1) {
-                                        // job was restarted
-                                        intervalDuration = (new Date(jobTimes[idx + 1].start) - new Date(interval.start)) / 1000;
-                                    } else if (isFinishedTmp) {
-                                        // job is finished, but 'finish' was not set for interval
-                                        intervalDuration = (new Date(data.finished) - new Date(interval.start)) / 1000;
-                                    } else {
-                                        // job is still running
-                                        intervalDuration = (new Date() - new Date(interval.start)) / 1000;
-                                        setJobStatus(data.status);
-                                    }
-                                } else {
-                                    intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;
-                                }
-                                return {
-                                    desc: 'Running',
-                                    className: 'job-timings-info-running',
-                                    duration: intervalDuration,
-                                    width: intervalDuration / totalDuration * 100
-                                }
-                            }));
-                            if (isFinishedTmp && jobTimes[jobTimes.length - 1].finish != null) {
-                                const intervalDuration = (new Date(data.finished) - new Date(jobTimes[jobTimes.length - 1].finish)) / 1000;
-                                jobTimingTmp.push({
-                                    desc: 'Finalizing',
-                                    className: 'job-timings-info-finalizing',
-                                    duration: intervalDuration,
-                                    width: intervalDuration / totalDuration * 100
-                                })
+            let jpReq
+            try {
+                jpReq = await axios.get(`${server}/usage/`,
+                    { params: reqParams, headers: reqHeaders })
+            } catch (err) {
+                setHasError(true)
+                setAlertMsg(`A problem occurred while retrieving job progress info. Error message: ${getResponseError(err)}`)
+                return
+            }
+
+            const data = isHcJob ? jpReq.data.hypercube_job_usage[0] : jpReq.data.job_usage[0];
+            if (data.submitted == null) {
+                setHasError(true);
+                setAlertMsg("A problem occurred while retrieving job progress info.");
+                return;
+            }
+            if (data.status === 0 && serverInfo.in_kubernetes !== true) {
+                // refresh queue position
+                let jqReq
+                try {
+                    jqReq = await axios.get(isHcJob ? `${server}/hypercube/` : `${server}/jobs/${encodeURIComponent(token)}`, {
+                        params: isHcJob ? { hypercube_token: token } : null,
+                        headers: { "X-Fields": "queue_position" }
+                    })
+                } catch (err) {
+                    console.error(`A problem occurred while retrieving job queue position. Error message: ${getResponseError(err)}`)
+                    return
+                }
+                setQueuePosition(jqReq.data.queue_position);
+            }
+            let totalDuration;
+            const isFinishedTmp = data.finished != null;
+            if (isFinishedTmp) {
+                totalDuration = (new Date(data.finished) - new Date(data.submitted)) / 1000;
+            } else {
+                totalDuration = (new Date() - new Date(data.submitted)) / 1000;
+            }
+            const timingsTmp = (isHcJob ? data.jobs.map(el => el.times) : [data.times]).map(jobTimes => {
+                let jobTimingTmp;
+                if (jobTimes.length > 0) {
+                    const intervalDuration = (new Date(jobTimes[0].start) - new Date(data.submitted)) / 1000;
+                    jobTimingTmp = [{
+                        desc: 'Queued',
+                        className: 'job-timings-info-queued',
+                        duration: intervalDuration,
+                        width: intervalDuration / totalDuration * 100
+                    }].concat(jobTimes.map((interval, idx) => {
+                        let intervalDuration;
+                        if (interval.finish == null) {
+                            if (jobTimes.length > idx + 1) {
+                                // job was restarted
+                                intervalDuration = (new Date(jobTimes[idx + 1].start) - new Date(interval.start)) / 1000;
+                            } else if (isFinishedTmp) {
+                                // job is finished, but 'finish' was not set for interval
+                                intervalDuration = (new Date(data.finished) - new Date(interval.start)) / 1000;
+                            } else {
+                                // job is still running
+                                intervalDuration = (new Date() - new Date(interval.start)) / 1000;
+                                setJobStatus(data.status);
                             }
                         } else {
-                            jobTimingTmp = [{
-                                desc: 'Queued',
-                                className: 'job-timings-info-queued',
-                                duration: totalDuration,
-                                width: 100
-                            }];
-                            setJobStatus(data.status);
+                            intervalDuration = (new Date(interval.finish) - new Date(interval.start)) / 1000;
                         }
-                        return jobTimingTmp;
-                    });
-                    setTimingData(timingsTmp);
-                    if (isFinishedTmp) {
-                        setIsFinished(true);
-                        if (refresh > 0) {
-                            setRefreshJob(refresh => refresh + 1);
-                            if (serverInfo.in_kubernetes === true) {
-                                // labels for resource warnings might come in delayed,
-                                // so we update job info once more delayed. Setting refreshJob
-                                // to false results in no spinner being displayed while fetching data.
-                                setTimeout(() => {
-                                    setRefreshJob(false);
-                                }, 3000);
-                            }
+                        return {
+                            desc: 'Running',
+                            className: 'job-timings-info-running',
+                            duration: intervalDuration,
+                            width: intervalDuration / totalDuration * 100
                         }
-                    } else {
-                        setRefresh(refresh + 1);
+                    }));
+                    if (isFinishedTmp && jobTimes[jobTimes.length - 1].finish != null) {
+                        const intervalDuration = (new Date(data.finished) - new Date(jobTimes[jobTimes.length - 1].finish)) / 1000;
+                        jobTimingTmp.push({
+                            desc: 'Finalizing',
+                            className: 'job-timings-info-finalizing',
+                            duration: intervalDuration,
+                            width: intervalDuration / totalDuration * 100
+                        })
                     }
-                })
-                .catch(err => {
-                    setHasError(true);
-                    setAlertMsg(`A problem occurred while retrieving job progress info. Error message: ${getResponseError(err)}`);
-                });
+                } else {
+                    jobTimingTmp = [{
+                        desc: 'Queued',
+                        className: 'job-timings-info-queued',
+                        duration: totalDuration,
+                        width: 100
+                    }];
+                    setJobStatus(data.status);
+                }
+                return jobTimingTmp;
+            });
+            setTimingData(timingsTmp);
+            if (isFinishedTmp) {
+                setIsFinished(true);
+                if (refresh > 0) {
+                    setRefreshJob(refresh => refresh + 1);
+                    if (serverInfo.in_kubernetes === true) {
+                        // labels for resource warnings might come in delayed,
+                        // so we update job info once more delayed. Setting refreshJob
+                        // to false results in no spinner being displayed while fetching data.
+                        setTimeout(() => {
+                            setRefreshJob(false);
+                        }, 3000);
+                    }
+                }
+            } else {
+                setRefresh(refresh + 1);
+            }
         }
         if (refresh === 0) {
             fetchJobTimes();

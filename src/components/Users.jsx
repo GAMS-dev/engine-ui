@@ -12,6 +12,7 @@ import TimeDisplay from "./TimeDisplay";
 import UserActionsButtonGroup from "./UserActionsButtonGroup";
 import SubmitButton from "./SubmitButton";
 import { getResponseError } from "./util";
+import { UserLink } from "./UserLink";
 
 const Users = () => {
   const navigate = useNavigate();
@@ -35,13 +36,7 @@ const Users = () => {
       column: "User",
       sorter: "alphabetical",
       displayer: (user, id) => user === "" ? <span className="badge rounded-pill bg-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
-        (user === username ?
-          <>
-            {user}
-            <sup>
-              <span className="badge rounded-pill bg-primary ms-1">me</span>
-            </sup>
-          </> : user)
+        <UserLink user={user} />
     },
     {
       field: "roles",
@@ -53,7 +48,8 @@ const Users = () => {
       field: "inviter_name",
       column: "Invited by",
       sorter: "alphabetical",
-      displayer: e => e === null ? "" : String(e)
+      displayer: (user) =>
+        isAdmin ? <UserLink user={user} /> : user
     },
     {
       field: "created",
@@ -64,11 +60,10 @@ const Users = () => {
     {
       field: "id,username,roles,identity_provider",
       column: "Actions",
-      displayer: (id, name, roles, idp) => <UserActionsButtonGroup
+      displayer: (id, name, roles) => <UserActionsButtonGroup
         id={id}
         username={name}
         userroles={roles}
-        idp={idp}
         me={username}
         isAdmin={isAdmin}
         isInviter={isInviter}
@@ -82,7 +77,7 @@ const Users = () => {
     }
   ]);
 
-  const deleteUser = () => {
+  const deleteUser = async () => {
     const deleteRequestParams = {};
     if (deleteInvitation) {
       deleteRequestParams['token'] = userToDelete.username;
@@ -91,33 +86,29 @@ const Users = () => {
       deleteRequestParams['delete_results'] = deleteResults;
       deleteRequestParams['delete_children'] = deleteChildren;
     }
-    axios
-      .delete(
-        deleteInvitation ?
-          `${server}/users/invitation` :
-          `${server}/users/`,
-        {
-          params: deleteRequestParams
-        }
+    try {
+      await axios.delete(
+        deleteInvitation ? `${server}/users/invitation` : `${server}/users/`,
+        { params: deleteRequestParams }
       )
-      .then(() => {
-        if (!deleteInvitation && userToDelete.username === username) {
-          // log me out when I deleted myself
-          navigate("/logout");
-          return;
-        }
-        setRefresh(refreshCnt => ({
-          refresh: refreshCnt + 1
-        }));
-        setIsSubmitting(false);
-        setShowDeleteConfirmDialog(false);
-      })
-      .catch(err => {
-        setAlertMsg(`Problems deleting user. Error message: ${getResponseError(err)}`);
-        setIsSubmitting(false);
-        setShowDeleteConfirmDialog(false);
-      });
+    } catch (err) {
+      setAlertMsg(`Problems deleting user. Error message: ${getResponseError(err)}`);
+      setIsSubmitting(false);
+      setShowDeleteConfirmDialog(false);
+      return
+    }
+    if (!deleteInvitation && userToDelete.username === username) {
+      // log me out when I deleted myself
+      navigate("/logout");
+      return;
+    }
+    setRefresh(refreshCnt => ({
+      refresh: refreshCnt + 1
+    }));
+    setIsSubmitting(false);
+    setShowDeleteConfirmDialog(false);
   }
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);

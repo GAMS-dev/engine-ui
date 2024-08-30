@@ -10,7 +10,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 const LicenseUpdateForm = () => {
     const [{ jwt, server, roles }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
-    const { username } = useParams();
+    const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
     const [licenseErrorMsg, setlicenseErrorMsg] = useState("");
@@ -22,20 +22,12 @@ const LicenseUpdateForm = () => {
     const [userEdited, setUserEdited] = useState(false);
 
     useEffect(() => {
-        axios.get(`${server}/licenses/`, {
-            params: { username: username }
-        })
-            .then(res => {
-                if (res.data[0].inherited_from === res.data[0].user) {
-                    setLicense(res.data[0].license);
-                    setRegisteredLicense(res.data[0].license);
-                    setIsLoading(false);
-                } else {
-                    setlicenseErrorMsg(`User inherits the license from ${res.data[0].inherited_from}`);
-                    setIsLoading(false);
-                }
-            })
-            .catch(err => {
+        const fetchLicense = async () => {
+            let lReq
+            try {
+                lReq = await axios.get(`${server}/licenses/`,
+                    { params: { username: userToEdit } })
+            } catch (err) {
                 if (err.response.status === 404) {
                     setlicenseErrorMsg('User does not have and does not inherit any license');
                     setIsLoading(false);
@@ -44,13 +36,24 @@ const LicenseUpdateForm = () => {
                     setlicenseErrorMsg(`Problems while while retrieving user license. Error message: ${getResponseError(err)}.`);
                     setIsLoading(false);
                 }
-            });
-    }, [server, jwt, username]);
+                return
+            }
+            if (lReq.data[0].inherited_from === lReq.data[0].user) {
+                setLicense(lReq.data[0].license);
+                setRegisteredLicense(lReq.data[0].license);
+                setIsLoading(false);
+            } else {
+                setlicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
+                setIsLoading(false);
+            }
+        }
+        fetchLicense()
+    }, [server, jwt, userToEdit]);
 
     const handleUserUpdateLicense = async () => {
         setIsSubmitting(true);
         const licenseUpdateForm = new FormData();
-        licenseUpdateForm.append("username", username);
+        licenseUpdateForm.append("username", userToEdit);
 
         if (licenseAction === "update") {
             const licenseModified = license.trim();
@@ -61,12 +64,7 @@ const LicenseUpdateForm = () => {
             }
             licenseUpdateForm.append("license", btoa(licenseModified));
             try {
-                const res = await axios.put(`${server}/licenses/`, licenseUpdateForm);
-                if (res.status !== 200) {
-                    setlicenseErrorMsg("An unexpected error occurred while updating user license. Please try again later.");
-                    setIsSubmitting(false);
-                    return;
-                }
+                await axios.put(`${server}/licenses/`, licenseUpdateForm);
                 setLicense(licenseModified);
                 setRegisteredLicense(licenseModified);
             }
@@ -79,12 +77,7 @@ const LicenseUpdateForm = () => {
         } else {
             setLicenseAction("update");
             try {
-                const res = await axios.delete(`${server}/licenses/`, { data: licenseUpdateForm });
-                if (res.status !== 200) {
-                    setlicenseErrorMsg("An unexpected error occurred while deleting user license. Please try again later.");
-                    setIsSubmitting(false);
-                    return;
-                }
+                await axios.delete(`${server}/licenses/`, { data: licenseUpdateForm });
             }
             catch (err) {
                 if (err.response.status === 404) {
@@ -108,9 +101,6 @@ const LicenseUpdateForm = () => {
             {!roles.includes('admin') && <Navigate replace to="/users" />}
             {isLoading ? <ClipLoader /> :
                 <div>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 className="h2">Update License of User: {username}</h1>
-                    </div>
                     <form
                         className="m-auto"
                         onSubmit={e => {

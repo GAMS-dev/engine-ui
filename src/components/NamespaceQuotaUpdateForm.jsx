@@ -29,17 +29,11 @@ const NamespaceQuotaUpdateForm = () => {
             try {
                 const res = await axios
                     .get(`${server}/namespaces/${encodeURIComponent(namespace)}/disk-quota`);
-                if (res.status !== 200) {
-                    setErrorMsg("An error occurred while retrieving namespace quota. Please try again later.");
-                    return;
+                if (res.data.disk_quota) {
+                    setQuota(res.data.disk_quota / 1e6);
                 }
-                if (res.data) {
-                    if (res.data.disk_quota) {
-                        setQuota(res.data.disk_quota / 1e6);
-                    }
-                    if (res.data.disk_use) {
-                        setDiskUsed(res.data.disk_use / 1e6);
-                    }
+                if (res.data.disk_use) {
+                    setDiskUsed(res.data.disk_use / 1e6);
                 }
             }
             catch (err) {

@@ -16,24 +16,26 @@ const ModelActionsButtonGroup = props => {
   const [, setAlertMsg] = useContext(AlertContext);
 
   function deleteModel() {
+    const deleteModelReq = async () => {
+      try {
+        await axios.delete(
+          `${server}/namespaces/${encodeURIComponent(namespace.name)}/models/${encodeURIComponent(id)}`,
+          {}
+        )
+      } catch (err) {
+        setIsSubmitting(false)
+        setShowDeleteModelDialog(false)
+        setAlertMsg(`Problems deleting model. Error message: ${getResponseError(err)}`)
+        return
+      }
+      setIsSubmitting(false);
+      setShowDeleteModelDialog(false);
+      setRefresh(refreshCnt => ({
+        refresh: refreshCnt + 1
+      }));
+    }
     setIsSubmitting(true);
-    axios
-      .delete(
-        `${server}/namespaces/${encodeURIComponent(namespace.name)}/models/${encodeURIComponent(id)}`,
-        {}
-      )
-      .then(res => {
-        setIsSubmitting(false);
-        setShowDeleteModelDialog(false);
-        setRefresh(refreshCnt => ({
-          refresh: refreshCnt + 1
-        }));
-      })
-      .catch(err => {
-        setIsSubmitting(false);
-        setShowDeleteModelDialog(false);
-        setAlertMsg(`Problems deleting model. Error message: ${getResponseError(err)}`);
-      });
+    deleteModelReq()
   }
 
   return (
@@ -46,7 +48,7 @@ const ModelActionsButtonGroup = props => {
               filename={`${id}.zip`}
               className="btn btn-sm btn-outline-info">
               Download
-                </DownloadLink>}
+            </DownloadLink>}
           {(namespace.permission & 2) === 2 &&
             <>
               <Link to={`/models/${encodeURIComponent(namespace.name)}/${encodeURIComponent(id)}`} className="btn btn-sm btn-outline-info">

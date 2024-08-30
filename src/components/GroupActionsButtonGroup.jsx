@@ -15,28 +15,26 @@ const GroupActionsButtonGroup = props => {
     const [, setAlertMsg] = useContext(AlertContext);
 
     function deleteGroup() {
-        setIsSubmitting(true);
-        axios
-            .delete(
-                `${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`,
-                {
-                    params: {
-                        label: id
-                    }
-                }
-            )
-            .then(res => {
-                setIsSubmitting(false);
-                setShowDeleteDialog(false);
-                setRefresh(refreshCnt => ({
-                    refresh: refreshCnt + 1
-                }));
-            })
-            .catch(err => {
-                setIsSubmitting(false);
-                setShowDeleteDialog(false);
-                setAlertMsg(`Problems deleting user group. Error message: ${getResponseError(err)}`);
-            });
+        const delteUserGroup = async () => {
+            try {
+                await axios.delete(
+                    `${server}/namespaces/${encodeURIComponent(namespace.name)}/user-groups`,
+                    { params: { label: id } })
+            } catch (err) {
+                setIsSubmitting(false)
+                setShowDeleteDialog(false)
+                setAlertMsg(`Problems deleting user group. Error message: ${getResponseError(err)}`)
+                return
+            }
+            setIsSubmitting(false);
+            setShowDeleteDialog(false);
+            setRefresh(refreshCnt => ({
+                refresh: refreshCnt + 1
+            }));
+
+        }
+        setIsSubmitting(true)
+        delteUserGroup()
     }
 
     return (

@@ -29,20 +29,21 @@ const UpdatePasswordPolicyButton = () => {
             return
         }
         const fetchCurrentPolicy = async () => {
+            let pReq
             setSubmissionErrorMsg('')
             try {
-                await axios.get(`${server}/auth/password-policy`).then(resp => {
-                    setMinPasswordLength(resp.data.min_password_length)
-                    setIncludeUppercase(resp.data.must_include_uppercase )
-                    setIncludeLowercase(resp.data.must_include_lowercase)
-                    setIncludeNumber(resp.data.must_include_number)
-                    setIncludeSpecialChar(resp.data.must_include_special_char)
-                    setNotInPopular(resp.data.not_in_popular_passwords)
-                });
+                pReq = await axios.get(`${server}/auth/password-policy`)
             } catch (err) {
                 setSubmissionErrorMsg(`Problems retrieving password policy. Error message: ${getResponseError(err)}.`);
                 return;
             }
+            const respDataTmp = pReq.data
+            setMinPasswordLength(respDataTmp.min_password_length)
+            setIncludeUppercase(respDataTmp.must_include_uppercase)
+            setIncludeLowercase(respDataTmp.must_include_lowercase)
+            setIncludeNumber(respDataTmp.must_include_number)
+            setIncludeSpecialChar(respDataTmp.must_include_special_char)
+            setNotInPopular(respDataTmp.not_in_popular_passwords)
         }
         fetchCurrentPolicy()
     }, [server, showDialog])
@@ -53,18 +54,20 @@ const UpdatePasswordPolicyButton = () => {
 
         try {
             await axios.put(`${server}/auth/password-policy`,
-            {'min_password_length': minPasswordLength,
-             'must_include_uppercase': includeUppercase,
-             'must_include_lowercase': includeLowercase,
-             'must_include_number': includeNumber,
-             'must_include_special_char': includeSpecialChar,
-             'not_in_popular_passwords': notInPopular})
-             setShowDialog(false);
-             setAlertMsg("success:Password policy updated successfully!");
+                {
+                    'min_password_length': minPasswordLength,
+                    'must_include_uppercase': includeUppercase,
+                    'must_include_lowercase': includeLowercase,
+                    'must_include_number': includeNumber,
+                    'must_include_special_char': includeSpecialChar,
+                    'not_in_popular_passwords': notInPopular
+                })
+            setShowDialog(false);
+            setAlertMsg("success:Password policy updated successfully!");
         } catch (err) {
             setSubmissionErrorMsg(`Couldn't set new password policy. Error message: ${getResponseError(err)}.`);
             return;
-        }  finally {
+        } finally {
             setIsSubmitting(false)
         }
     }

@@ -102,12 +102,12 @@ const ModelSubmissionForm = () => {
         }
     }, [server, modelname, namespace]);
 
-    const handleModelSubmission = () => {
+    const handleModelSubmission = async () => {
         if (newModelName.toLowerCase().endsWith(".gms")) {
             setSubmissionErrorMsg("Model name must not end with '.gms'!");
             return;
         }
-        const promisesToAwait = [];
+        let zipPromise
 
         setIsSubmitting(true);
         const modelSubmissionForm = new FormData();
@@ -120,16 +120,7 @@ const ModelSubmissionForm = () => {
         } else if (modelFiles.length > 1 ||
             !modelFiles[0].name.toLowerCase().endsWith(".zip")) {
             // we need to zip uploaded files first
-            try {
-                promisesToAwait.push(zipAsync(modelFiles).then(zipFile => {
-                    modelSubmissionForm.append("data", zipFile, "model.zip");
-                    return;
-                }));
-            } catch (err) {
-                setSubmissionErrorMsg(getResponseError(err));
-                setIsSubmitting(false);
-                return;
-            }
+            zipPromise = zipAsync(modelFiles)
         } else {
             modelSubmissionForm.append("data", modelFiles[0], "model.zip");
         }
@@ -180,8 +171,18 @@ const ModelSubmissionForm = () => {
         } else if (modelname) {
             modelSubmissionForm.append("delete_user_groups", "true");
         }
-        Promise.all(promisesToAwait).then(() => {
-            axios({
+        try {
+            const zipData = await zipPromise
+            if (zipData != null) {
+                modelSubmissionForm.append("data", zipData, "model.zip")
+            }
+        } catch (err) {
+            setSubmissionErrorMsg(getResponseError(err));
+            setIsSubmitting(false);
+            return;
+        }
+        try {
+            await axios({
                 method: modelname ? 'patch' : 'post',
                 url: `${server}/namespaces/${encodeURIComponent(namespace)}/models/${encodeURIComponent(newModelName)}`,
                 data: modelSubmissionForm,
@@ -189,31 +190,15 @@ const ModelSubmissionForm = () => {
                     "Content-Type": "multipart/form-data"
                 }
             })
-                .then(res => {
-                    let successCode;
-                    if (modelname) {
-                        successCode = 200;
-                    } else {
-                        successCode = 201;
-                    }
-                    if (res.status !== successCode) {
-                        setSubmissionErrorMsg(`An error occurred while ${modelname ? "updating" : "registering"} model. Please try again later.`);
-                        setIsSubmitting(false);
-                        return;
-                    }
-                    setIsSubmitting(false);
-                    setAlertMsg(`success:Model successfully ${modelname ? "updated" : "added"}!`);
-                    setModelAdded(true);
-                })
-                .catch(err => {
-                    setSubmissionErrorMsg(`Problems while ${modelname ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
-                    setIsSubmitting(false);
-                });
-        })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems while ${modelname ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`);
-                setIsSubmitting(false);
-            });
+        } catch (err) {
+            setSubmissionErrorMsg(`Problems while ${modelname ? "updating" : "registering"} model. Error message: ${getResponseError(err)}.`)
+            setIsSubmitting(false)
+            return
+        }
+        setIsSubmitting(false);
+        setAlertMsg(`success:Model successfully ${modelname ? "updated" : "added"}!`);
+        setModelAdded(true);
+
     }
     const updateModelFiles = useCallback(acceptedFiles => {
         setModelFiles([...acceptedFiles]);

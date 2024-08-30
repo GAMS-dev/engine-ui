@@ -14,6 +14,7 @@ import SubmitButton from "./SubmitButton";
 import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
 import { ClipLoader } from "react-spinners";
 import { UserSettingsContext } from "./UserSettingsContext";
+import { UserLink } from "./UserLink";
 
 const Cleanup = () => {
 
@@ -53,7 +54,8 @@ const Cleanup = () => {
             field: "username",
             column: "User",
             sorter: "alphabetical",
-            displayer: String
+            displayer: (user) =>
+                <UserLink user={user} />
         },
         {
             field: "namespace",
@@ -115,35 +117,34 @@ const Cleanup = () => {
     }, [jwt, server, username, refresh, setAlertMsg]);
 
     useEffect(() => {
-        setIsLoading(true);
-        axios
-            .get(`${server}/cleanup/results`, {
-                params: {
-                    per_page: rowsPerPage, page: currentPage,
-                    order_by: sortedCol, order_asc: sortAsc
-                },
-                headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
-            })
-            .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("Problems fetching cleanup information.");
-                    setIsLoading(false);
-                    return;
-                }
-                setTotalFileSize(res.data.total_length);
-                setTotal(res.data.count);
-                setDatasets(res.data.results.map(el => {
-                    const newData = el;
-                    newData.id = el.token;
-                    newData.username = el.user.deleted ? "" : el.user.username;
-                    return newData;
-                }));
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems fetching cleanup information. Error message: ${getResponseError(err)}`);
-                setIsLoading(false);
-            });
+        const fetchCleanup = async () => {
+            let cReq
+            try {
+                cReq = await axios.get(`${server}/cleanup/results`, {
+                    params: {
+                        per_page: rowsPerPage, page: currentPage,
+                        order_by: sortedCol, order_asc: sortAsc
+                    },
+                    headers: { "X-Fields": displayFields.map(e => e.field).join(", ") }
+                })
+            } catch (err) {
+                setAlertMsg(`Problems fetching cleanup information. Error message: ${getResponseError(err)}`)
+                setIsLoading(false)
+                return
+            }
+            const reqDataTmp = cReq.data
+            setTotalFileSize(reqDataTmp.total_length);
+            setTotal(reqDataTmp.count);
+            setDatasets(reqDataTmp.results.map(el => {
+                const newData = el;
+                newData.id = el.token;
+                newData.username = el.user.deleted ? "" : el.user.username;
+                return newData;
+            }));
+            setIsLoading(false);
+        }
+        setIsLoading(true)
+        fetchCleanup()
     }, [jwt, server, refresh, displayFields, setAlertMsg, currentPage, sortedCol, sortAsc, rowsPerPage]);
 
     const handleCloseDeleteConfirmDialog = () => {

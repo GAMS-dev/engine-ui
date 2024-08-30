@@ -46,9 +46,9 @@ const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
     volume: calcRemainingQuotaInternal(data, "volume_quota", "volume_used", noQuotaVal),
     disk: calcRemainingQuotaInternal(data, "disk_quota", "disk_used", noQuotaVal)
 })
-const getQuotaWarningMessage = (quotaWarningData, quotaUnit) => {
+const getQuotaWarningMessage = (quotaWarningData, quotaUnit, quotaConversionFactor) => {
     const remainingQuota = calcRemainingQuota(quotaWarningData);
-    const remainingVolumeStr = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaUnit === 'multh'? remainingQuota.volume/3600: remainingQuota.volume)} ${quotaUnit}`
+    const remainingVolumeStr = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(remainingQuota.volume/quotaConversionFactor)} ${quotaUnit}`
     const remainingDiskStr = formatFileSize(remainingQuota.disk);
       return <><strong>Quota warning</strong>
           {Number.isFinite(remainingQuota.volume) ? <div>Remaining <span className="fst-italic">volume</span> quota: {remainingVolumeStr}</div> : <></>}
@@ -121,10 +121,10 @@ const getInstanceData = async (server, username) => {
         defaultInheritedFrom: defaultInstanceData.data.default_inherited_from
     }
 }
-const formatInstancesSelectInput = (instances) => {
-    const formatLabel = (label, instance) => (
-        `${label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.multiplier)}x)`
-    )
+const formatInstanceSpecs = (instance, multiplierUnit) => (
+    `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.multiplier)}${multiplierUnit})`
+)
+const formatInstancesSelectInput = (instances, multiplierUnit) => {
     return instances
         .filter(instance => instance.cancelling !== true)
         .map(instance => ({
@@ -133,9 +133,9 @@ const formatInstancesSelectInput = (instances) => {
             label: instance.is_pool === true ? (
                 <>
                     <Layers size={12} />
-                    <span style={{ paddingLeft: "5px" }}>{formatLabel(instance.label, instance.instance)}</span>
+                    <span style={{ paddingLeft: "5px" }}>{formatInstanceSpecs(instance.label, instance.instance, multiplierUnit)}</span>
                 </>
-            ) : formatLabel(instance.label, instance)
+            ) : formatInstanceSpecs(instance, multiplierUnit)
         }))
         .sort((a, b) => ('' + a.label).localeCompare(b.label))
 }
@@ -177,5 +177,5 @@ export {
     zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays,
     formatFileSize, getInstanceData, formatInstancesSelectInput, getEventsString,
     urlB64ToUint8Array, getRandomInt, isMobileDevice, getQuotaWarningMessage,
-    formatDurationString
+    formatDurationString, formatInstanceSpecs
 }

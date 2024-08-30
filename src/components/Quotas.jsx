@@ -8,12 +8,14 @@ import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { UserSettingsContext } from "./UserSettingsContext";
 import { ClipLoader } from 'react-spinners';
+import { UserLink } from './UserLink.jsx';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
 
   const [userSettings,] = useContext(UserSettingsContext)
+  const quotaConversionFactor = userSettings.quotaConversionFactor
   const quotaUnit = userSettings.quotaUnit
 
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
@@ -24,13 +26,13 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
   const [numCharts, setNumCharts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // if data, calcStartDate, calcEndTime, quotaUnit changes:
+  // if data, calcStartDate, calcEndTime, quotaConversionFactor changes:
   useEffect(() => {
     if (dataIsLoading) {
       return;
     }
     setIsLoading(true)
-    const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaUnit)
+    const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaConversionFactor)
     setUngroupedDataJobs(dataTmp.data_jobs)
     setUngroupedDataPools(dataTmp.data_pools)
     setNumUser(dataTmp.num_users)
@@ -44,7 +46,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
 
     setNumCharts(numChartsTmp)
     setIsLoading(false)
-  }, [data, calcStartDate, calcEndTime, quotaUnit, dataIsLoading])
+  }, [data, calcStartDate, calcEndTime, quotaConversionFactor, dataIsLoading])
 
 
   function getChartData(label, ungroupedData) {
@@ -106,7 +108,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: String
+      displayer: (user) =>
+        <UserLink user={user} />
     },
     {
       field: "token,is_hypercube",
@@ -168,7 +171,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
       field: "user",
       column: "User",
       sorter: "alphabetical",
-      displayer: String
+      displayer: (user) =>
+        <UserLink user={user} />
     },
     {
       field: "pool_label",

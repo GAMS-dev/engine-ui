@@ -29,7 +29,7 @@ const Table = props => {
 
   const [userSettings,] = useContext(UserSettingsContext);
   const [noRows, setNoRows] = useState(onChange == null ? props.data.length : total);
-  const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage == null ? userSettings.tablePageLength : props.rowsPerPage);
+  const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage == null ? parseInt(userSettings.tablePageLength, 10) : props.rowsPerPage);
   const [noPages, setNoPages] = useState(Math.ceil(noRows / rowsPerPage));
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const Table = props => {
     setDataRaw([...props.data]);
     const newNoRows = onChange == null ? props.data.length : total;
     setNoRows(newNoRows);
-    const newRowsPerPage = props.rowsPerPage ? props.rowsPerPage : userSettings.tablePageLength;
+    const newRowsPerPage = props.rowsPerPage ? props.rowsPerPage : parseInt(userSettings.tablePageLength, 10);
     const newNoPages = Math.ceil(newNoRows / newRowsPerPage);
     setRowsPerPage(newRowsPerPage);
     setNoPages(newNoPages);

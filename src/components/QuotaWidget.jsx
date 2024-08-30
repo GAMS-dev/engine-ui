@@ -10,7 +10,6 @@ import { UserSettingsContext } from "./UserSettingsContext";
 
 const QuotaWidget = ({ isVisible, className }) => {
     const [userSettings,] = useContext(UserSettingsContext)
-    const quotaUnit = userSettings.quotaUnit
     const [{ server, username }] = useContext(AuthContext);
 
     const [data, setData] = useState([]);
@@ -28,12 +27,9 @@ const QuotaWidget = ({ isVisible, className }) => {
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
                     const quotaFormatted = {
-                        volume: quotaRemaining.volume, disk: formatFileSize(quotaRemaining.disk),
-                        unitVolume: 'mults',
-                    }
-                    if (quotaUnit === 'multh') {
-                        quotaFormatted.volume /= 3600;
-                        quotaFormatted.unitVolume = 'multh';
+                        volume: quotaRemaining.volume / userSettings.quotaConversionFactor,
+                        disk: formatFileSize(quotaRemaining.disk),
+                        unitVolume: userSettings.quotaUnit,
                     }
                     quotaFormatted.volume = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume)}${quotaFormatted.unitVolume}`;
                     setData([{
@@ -79,7 +75,7 @@ const QuotaWidget = ({ isVisible, className }) => {
         return () => {
             cancelTokenSource.cancel()
         }
-    }, [server, username, isVisible, quotaUnit])
+    }, [server, username, isVisible, userSettings])
 
     return (data ?
         <span className="pre-line">

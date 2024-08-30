@@ -9,8 +9,11 @@ import { formatInstancesSelectInput, getResponseError } from "./util";
 import InstancePoolsActionsButtonGroup from "./InstancePoolsActionsButtonGroup";
 import axios from "axios";
 import SubmitButton from "./SubmitButton";
+import { UserLink } from "./UserLink";
+import { ServerConfigContext } from "../ServerConfigContext";
+import { UserSettingsContext } from "./UserSettingsContext";
 
-const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
+const InstancePools = () => {
     const [{ jwt, server, username, roles }] = useContext(AuthContext);
     const [isLoading, setIsLoading] = useState(true);
     const [refresh, setRefresh] = useState(0);
@@ -20,10 +23,12 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
     const [poolAccessIsSubmitting, setPoolAccessIsSubmitting] = useState(false);
     const [poolAccessSubmissionError, setPoolAccessSubmissionError] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
+    const [serverConfig, setServerConfig] = useContext(ServerConfigContext);
+    const [userSettings] = useContext(UserSettingsContext);
 
-    const instancePoolsEnabled = instancePoolAccess === "ENABLED" ||
-        (['INVITER_ONLY', 'ADMIN_ONLY'].includes(instancePoolAccess) && roles?.includes('admin') === true) ||
-        (instancePoolAccess === 'INVITER_ONLY' && roles?.includes('inviter') === true);
+    const instancePoolsEnabled = serverConfig.instance_pool_access === "ENABLED" ||
+        (['INVITER_ONLY', 'ADMIN_ONLY'].includes(serverConfig.instance_pool_access) && roles?.includes('admin') === true) ||
+        (serverConfig.instance_pool_access === 'INVITER_ONLY' && roles?.includes('inviter') === true);
 
     const [displayFieldsPools] = useState([
         {
@@ -37,7 +42,8 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
             column: "Owner",
             sorter: "alphabetical",
             displayer: user => user.deleted ?
-                <span className="badge rounded-pill bg-secondary ms-1">deleted</span> : user.username
+                <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
+                <UserLink user={user.username} />
         },
         {
             field: "instance",
@@ -49,7 +55,7 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
                     'cpu_request': instance.cpu_request,
                     'memory_request': instance.memory_request,
                     'multiplier': instance.multiplier
-                }])[0].label
+                }], userSettings.multiplierUnit)[0].label
         },
         {
             field: "size",
@@ -107,22 +113,18 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
         fetchInstances();
     }, [jwt, server, username, roles, refresh, setAlertMsg]);
 
-    const setInstancePoolAccessConfig = (accessConfig) => {
+    const setInstancePoolAccessConfig = async (accessConfig) => {
         setPoolAccessIsSubmitting(true);
         setPoolAccessSubmissionError("");
-        const payload = new FormData();
-        payload.append('instance_pool_access', accessConfig);
-        axios
-            .patch(`${server}/configuration`, payload)
-            .then(() => {
-                setInstancePoolAccess(accessConfig);
-                setPoolAccessIsSubmitting(false);
-                setShowInstancePoolAccessModal(false);
-            })
-            .catch(err => {
-                setPoolAccessSubmissionError(`Problems updating instance pool access configuration. Error message: ${getResponseError(err)}`);
-                setPoolAccessIsSubmitting(false);
-            });
+        try {
+            await setServerConfig({ instance_pool_access: accessConfig });
+        } catch (err) {
+            setPoolAccessSubmissionError(`Problems updating instance pool access configuration. Error message: ${getResponseError(err)}`)
+            setPoolAccessIsSubmitting(false)
+            return
+        }
+        setPoolAccessIsSubmitting(false);
+        setShowInstancePoolAccessModal(false);
     }
 
     return (
@@ -138,12 +140,12 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
                                     <Layers width="12px" className="ms-2" />
                                 </button>
                             </Link> : <></>}
-                        {roles && roles.includes('admin') && instancePoolAccess !== "ENABLED" &&
+                        {roles && roles.includes('admin') && serverConfig.instance_pool_access !== "ENABLED" &&
                             <button type="button" className="btn btn-sm btn-outline-primary h-100"
                                 onClick={() => setShowInstancePoolAccessModal('enable')} >
                                 Enable Instance Pools
                             </button>}
-                        {roles && roles.includes('admin') && instancePoolAccess !== "DISABLED" &&
+                        {roles && roles.includes('admin') && serverConfig.instance_pool_access !== "DISABLED" &&
                             <button type="button" className="btn btn-sm btn-outline-primary h-100"
                                 onClick={() => setShowInstancePoolAccessModal('disable')} >
                                 Disable Instance Pools
@@ -161,7 +163,7 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
                     </div>
                 </div>
             </div>
-            {instancePoolAccess === "DISABLED" ? <p className="text-center">Instance pools disabled</p> : <Table
+            {serverConfig.instance_pool_access === "DISABLED" ? <p className="text-center">Instance pools disabled</p> : <Table
                 data={instancePools}
                 noDataMsg="No Instance Pools Found"
                 isLoading={isLoading}
@@ -185,11 +187,11 @@ const InstancePools = ({ instancePoolAccess, setInstancePoolAccess }) => {
                     <Button variant="secondary" onClick={() => setShowInstancePoolAccessModal(false)}>
                         Cancel
                     </Button>
-                    {instancePoolAccess !== 'ADMIN_ONLY' &&
+                    {serverConfig.instance_pool_access !== 'ADMIN_ONLY' &&
                         <SubmitButton poolAccessIsSubmitting={poolAccessIsSubmitting} onClick={() => setInstancePoolAccessConfig("ADMIN_ONLY")} className="btn-primary">
                             Enable for admins only
                         </SubmitButton>}
-                    {instancePoolAccess !== 'INVITER_ONLY' &&
+                    {serverConfig.instance_pool_access !== 'INVITER_ONLY' &&
                         <SubmitButton poolAccessIsSubmitting={poolAccessIsSubmitting} onClick={() => setInstancePoolAccessConfig("INVITER_ONLY")} className="btn-primary">
                             Enable for inviters only
                         </SubmitButton>}

@@ -21,6 +21,37 @@ const TextEntryView = props => {
       entry_value: "You will see here",
       entry_size: 17
     }*/
+    const fetchTextEntry = async () => {
+      let teReq
+      try {
+        teReq = await axios.get(
+          `${server}/jobs/${encodeURIComponent(token)}/text-entry`,
+          { params: { length: viewCharLimit + 1, entry_name: textEntries[entryIndex].entry_name } })
+      } catch (err) {
+        setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`)
+        return
+      }
+      const cacheTmp = cache;
+      if (teReq.data.entry_value == null) {
+        cacheTmp[entryIndex] = {
+          entry_size: 0,
+          entry_value: ""
+        };
+      } else {
+        cacheTmp[entryIndex] = {
+          entry_size: teReq.data.entry_value.length,
+          entry_value: teReq.data.entry_value
+        };
+      }
+      setCache(cacheTmp);
+      if (cache[entryIndex].entry_size > viewCharLimit) {
+        setTruncationFlag(true);
+      } else {
+        setTruncationFlag(false);
+      }
+      setTeContent(cache[entryIndex].entry_value);
+    }
+
     if (cache[entryIndex] && cache[entryIndex].entry_value) {
       if (cache[entryIndex].entry_size > viewCharLimit) {
         setTruncationFlag(true);
@@ -29,40 +60,7 @@ const TextEntryView = props => {
       }
       setTeContent(cache[entryIndex].entry_value);
     } else {
-      axios
-        .get(
-          `${server}/jobs/${encodeURIComponent(token)}/text-entry`,
-          {
-            params: {
-              length: viewCharLimit + 1,
-              entry_name: textEntries[entryIndex].entry_name
-            }
-          }
-        )
-        .then(res => {
-          const cacheTmp = cache;
-          if (res.data.entry_value == null) {
-            cacheTmp[entryIndex] = {
-              entry_size: 0,
-              entry_value: ""
-            };
-          } else {
-            cacheTmp[entryIndex] = {
-              entry_size: res.data.entry_value.length,
-              entry_value: res.data.entry_value
-            };
-          }
-          setCache(cacheTmp);
-          if (cache[entryIndex].entry_size > viewCharLimit) {
-            setTruncationFlag(true);
-          } else {
-            setTruncationFlag(false);
-          }
-          setTeContent(cache[entryIndex].entry_value);
-        })
-        .catch(err => {
-          setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`);
-        });
+      fetchTextEntry()
     }
   }, [entryIndex, server, cache, setCache, setTeContent, setAlertMsg, textEntries, token]);
 

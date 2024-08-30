@@ -39,21 +39,21 @@ const JobRespInfoTable = props => {
   const [textEntry, setTextEntry] = useState(isHcJob ? null : (job.text_entries[0] ? job.text_entries[0].entry_name : null));
 
   const deleteData = () => {
-    setIsSubmitting(true);
-    axios
-      .delete(
-        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${encodeURIComponent(job.token)}/result`
-      )
-      .then(() => {
-        setIsSubmitting(false);
-        setShowRemoveConfirmDialog(false);
-        setRefreshJob(refresh => refresh + 1);
-      })
-      .catch(err => {
-        setIsSubmitting(false);
-        setShowRemoveConfirmDialog(false);
-        setAlertMsg(`Problems deleting dataset. Error message: ${getResponseError(err)}`);
-      });
+    const deleteDataReq = async () => {
+      try {
+        await axios.delete(`${server}/${isHcJob ? 'hypercube' : 'jobs'}/${encodeURIComponent(job.token)}/result`)
+      } catch (err) {
+        setIsSubmitting(false)
+        setShowRemoveConfirmDialog(false)
+        setAlertMsg(`Problems deleting dataset. Error message: ${getResponseError(err)}`)
+        return
+      }
+      setIsSubmitting(false);
+      setShowRemoveConfirmDialog(false);
+      setRefreshJob(refresh => refresh + 1);
+    }
+    setIsSubmitting(true)
+    deleteDataReq()
   }
 
   return (

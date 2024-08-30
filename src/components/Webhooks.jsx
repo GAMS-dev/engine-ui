@@ -10,9 +10,10 @@ import { getEventsString, getResponseError } from "./util";
 import WebhooksActionsButtonGroup from "./WebhooksActionsButtonGroup";
 import { Button, Modal } from "react-bootstrap";
 import SubmitButton from "./SubmitButton";
+import { UserLink } from "./UserLink";
+import { ServerConfigContext } from "../ServerConfigContext";
 
-const Webhooks = props => {
-    const { webhookAccess, setWebhookAccess } = props;
+const Webhooks = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [refresh, setRefresh] = useState(0);
     const [webhooks, setWebhooks] = useState([]);
@@ -22,12 +23,14 @@ const Webhooks = props => {
     const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles }] = useContext(AuthContext);
+    const [serverConfig, setServerConfig] = useContext(ServerConfigContext);
     const [displayFields] = useState([
         {
             field: "username",
             column: "User",
             sorter: "alphabetical",
-            displayer: String
+            displayer: (user) =>
+                <UserLink user={user} />
         },
         {
             field: "url",
@@ -78,46 +81,40 @@ const Webhooks = props => {
         }
     ]);
 
-    const setWebhookAccessConfig = (accessConfig) => {
+    const setWebhookAccessConfig = async (accessConfig) => {
         setIsSubmitting(true);
         setSubmissionErrorMsg("");
-        const payload = new FormData();
-        payload.append('webhook_access', accessConfig);
-        axios
-            .patch(`${server}/configuration`, payload)
-            .then(() => {
-                setWebhookAccess(accessConfig);
-                setIsSubmitting(false);
-                setShowModalDialog(false);
-            })
-            .catch(err => {
-                setSubmissionErrorMsg(`Problems updating webhook access configuration. Error message: ${getResponseError(err)}`);
-                setIsSubmitting(false);
-            });
+        try {
+            await setServerConfig({ webhook_access: accessConfig });
+        } catch (err) {
+            setSubmissionErrorMsg(`Problems updating webhook access configuration. Error message: ${getResponseError(err)}`)
+            setIsSubmitting(false)
+            return
+        }
+        setIsSubmitting(false);
+        setShowModalDialog(false);
     }
 
     useEffect(() => {
-        if (webhookAccess === "DISABLED") {
+        if (serverConfig.webhook_access === "DISABLED") {
             setIsLoading(false);
             return;
         }
+        const fetchWebhook = async () => {
+            let wReq
+            try {
+                wReq = await axios.get(`${server}/users/webhooks`)
+            } catch (err) {
+                setAlertMsg(`Problems fetching webhooks. Error message: ${getResponseError(err)}`)
+                setIsLoading(false)
+                return
+            }
+            setWebhooks(wReq.data);
+            setIsLoading(false);
+        }
         setIsLoading(true);
-        axios
-            .get(`${server}/users/webhooks`)
-            .then(res => {
-                if (res.status !== 200) {
-                    setAlertMsg("Problems fetching webhooks.");
-                    setIsLoading(false);
-                    return;
-                }
-                setWebhooks(res.data);
-                setIsLoading(false);
-            })
-            .catch(err => {
-                setAlertMsg(`Problems fetching webhooks. Error message: ${getResponseError(err)}`);
-                setIsLoading(false);
-            });
-    }, [webhookAccess, jwt, server, roles, refresh, setAlertMsg]);
+        fetchWebhook()
+    }, [serverConfig, jwt, server, roles, refresh, setAlertMsg]);
 
     return (
         <div>
@@ -125,17 +122,17 @@ const Webhooks = props => {
                 <h1 className="h2">Webhooks</h1>
                 <div className="btn-toolbar mb-2 mb-md-0">
                     <div className="btn-group me-2">
-                        {roles && roles.includes('admin') && webhookAccess !== "ENABLED" &&
+                        {roles && roles.includes('admin') && serverConfig.webhook_access !== "ENABLED" &&
                             <button type="button" className="btn btn-sm btn-outline-primary h-100"
                                 onClick={() => setShowModalDialog('enable')} >
                                 Enable Webhooks
                             </button>}
-                        {roles && roles.includes('admin') && webhookAccess !== "DISABLED" &&
+                        {roles && roles.includes('admin') && serverConfig.webhook_access !== "DISABLED" &&
                             <button type="button" className="btn btn-sm btn-outline-primary h-100"
                                 onClick={() => setShowModalDialog('disable')} >
                                 Disable Webhooks
                             </button>}
-                        {webhookAccess === "ENABLED" || (webhookAccess === "ADMIN_ONLY" && (roles && roles.includes('admin'))) ?
+                        {serverConfig.webhook_access === "ENABLED" || (serverConfig.webhook_access === "ADMIN_ONLY" && (roles && roles.includes('admin'))) ?
                             <Link to="/webhooks/create">
                                 <button type="button" className="btn btn-sm btn-outline-primary h-100">
                                     New Webhook
@@ -173,7 +170,7 @@ const Webhooks = props => {
                     </div>
                 </div>
             </div>
-            {webhookAccess === "DISABLED" ? <p className="text-center">Webhooks/Web Push disabled</p> :
+            {serverConfig.webhook_access === "DISABLED" ? <p className="text-center">Webhooks/Web Push disabled</p> :
                 <Table
                     data={filterWebpush ? webhooks.filter(hook => hook.url != null) : webhooks}
                     noDataMsg="No Webhooks Found"
@@ -198,7 +195,7 @@ const Webhooks = props => {
                     <Button variant="secondary" onClick={() => setShowModalDialog(false)}>
                         Cancel
                     </Button>
-                    {webhookAccess !== "ADMIN_ONLY" && <SubmitButton isSubmitting={isSubmitting} onClick={() => setWebhookAccessConfig("ADMIN_ONLY")} className="btn-primary">
+                    {serverConfig.webhook_access !== "ADMIN_ONLY" && <SubmitButton isSubmitting={isSubmitting} onClick={() => setWebhookAccessConfig("ADMIN_ONLY")} className="btn-primary">
                         Enable for admins only
                     </SubmitButton>}
                     {showModalDialog === 'enable' ?

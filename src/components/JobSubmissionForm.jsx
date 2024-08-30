@@ -15,13 +15,14 @@ import { ServerInfoContext } from "../ServerInfoContext";
 import FileDropZone from "./FileDropZone";
 import { UserSettingsContext } from "./UserSettingsContext";
 import { quotaWarningThresholds } from "./constants";
+import { ServerConfigContext } from "../ServerConfigContext";
 
-const JobSubmissionForm = props => {
-    const { newHcJob } = props;
+const JobSubmissionForm = ({ newHcJob }) => {
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [serverInfo,] = useContext(ServerInfoContext);
     const [userSettings,] = useContext(UserSettingsContext);
+    const [serverConfig,] = useContext(ServerConfigContext);
 
     const [isLoading, setIsLoading] = useState(true);
     const [unableToSolve, setUnableToSolve] = useState(null);
@@ -59,9 +60,12 @@ const JobSubmissionForm = props => {
     const [tolerations, setTolerations] = useState("");
     const [nodeSelectors, setNodeSelectors] = useState("");
     const [instance, setInstance] = useState("");
+    const [priority, setPriority] = useState({ value: "medium", label: "medium" });
     const [jobPosted, setJobPosted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [accessGroups, setAccessGroups] = useState([]);
+
+    const prioritiesEnabled = serverInfo.in_kubernetes !== true && serverConfig.job_priorities_access === "ENABLED";
 
     useEffect(() => {
         const getData = async () => {
@@ -141,7 +145,7 @@ const JobSubmissionForm = props => {
             }
             try {
                 const instanceData = await getInstanceData(server, username);
-                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances);
+                const availableInstancesTmp = formatInstancesSelectInput(instanceData.instances, userSettings.multiplierUnit);
                 setAvailableInstances(availableInstancesTmp);
                 setRawResourceRequestsAllowed(instanceData.rawResourceRequestsAllowed);
                 setUseRawRequests(instanceData.rawResourceRequestsAllowed && availableInstancesTmp.length === 0);
@@ -165,7 +169,7 @@ const JobSubmissionForm = props => {
             }
         }
         loadInstanceData();
-    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota]);
+    }, [server, serverInfo, username, instancesLoaded, remainingVolumeQuota, userSettings]);
 
     useEffect(() => {
         if (submissionErrorMsg !== "") {
@@ -193,7 +197,7 @@ const JobSubmissionForm = props => {
         setIsSubmitting(true);
         const jobSubmissionForm = new FormData();
         jobSubmissionForm.append("namespace", namespace);
-        const promisesToAwait = [];
+        let modelPromise, dataPromise
 
         if (useRegisteredModel) {
             jobSubmissionForm.append("model", registeredModelName);
@@ -207,15 +211,7 @@ const JobSubmissionForm = props => {
             if (modelFiles.length > 1 ||
                 !modelFiles[0].name.toLowerCase().endsWith(".zip")) {
                 // we need to zip uploaded files first
-                try {
-                    promisesToAwait.push(zipAsync(modelFiles).then(zipFile => {
-                        jobSubmissionForm.append("model_data", zipFile, "model.zip");
-                        return;
-                    }));
-                } catch (err) {
-                    setSubmissionErrorMsg(err.message);
-                    return;
-                }
+                modelPromise = zipAsync(modelFiles)
             } else {
                 jobSubmissionForm.append("model_data", modelFiles[0], "model.zip");
             }
@@ -224,15 +220,7 @@ const JobSubmissionForm = props => {
             if (modelData.length > 1 ||
                 !modelData[0].name.toLowerCase().endsWith(".zip")) {
                 // we need to zip uploaded files first
-                try {
-                    promisesToAwait.push(zipAsync(modelData).then(zipFile => {
-                        jobSubmissionForm.append("data", zipFile, "data.zip");
-                        return;
-                    }));
-                } catch (err) {
-                    setSubmissionErrorMsg(err.message);
-                    return;
-                }
+                dataPromise = zipAsync(modelData)
             } else {
                 jobSubmissionForm.append("data", modelData[0], "data.zip");
             }
@@ -254,6 +242,9 @@ const JobSubmissionForm = props => {
         } else {
             optionalArgs = optionalArgs.concat([{ key: "text_entries", value: textEntries },
             { key: "stream_entries", value: streamEntries }]);
+            if (prioritiesEnabled) {
+                jobSubmissionForm.append("priority", priority.value);
+            }
         }
 
         optionalArgs.forEach(el => {
@@ -299,10 +290,19 @@ const JobSubmissionForm = props => {
             }
         }
         try {
-            await Promise.all(promisesToAwait);
+            (await Promise.all([modelPromise, dataPromise])).forEach((zipData, idx) => {
+                if (zipData == null) {
+                    return
+                }
+                if (idx === 0) {
+                    jobSubmissionForm.append("model_data", zipData, "model.zip")
+                } else {
+                    jobSubmissionForm.append("data", zipData, "data.zip")
+                }
+            })
         } catch (err) {
-            setSubmissionErrorMsg(`Problems posting job. Error message: ${err.message}`);
-            setIsSubmitting(false);
+            setSubmissionErrorMsg(`Problems posting job as data could not be zipped. Error message: ${err.message}`)
+            setIsSubmitting(false)
             return;
         }
         try {
@@ -314,7 +314,7 @@ const JobSubmissionForm = props => {
                 }
             );
             if (postJobResponse.data?.quota_warning?.length) {
-                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit));
+                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit, userSettings.quotaConversionFactor));
             } else {
                 setAlertMsg("success:Job successfully submitted!");
             }
@@ -673,6 +673,19 @@ const JobSubmissionForm = props => {
                                                     onChange={e => setJobDeps(e.target.value)}
                                                 />
                                             </div>
+                                            {!newHcJob && prioritiesEnabled && <div className="mb-3">
+                                                <label htmlFor="priority">
+                                                    Priority
+                                                </label>
+                                                <Select
+                                                    id="priority"
+                                                    isClearable={false}
+                                                    value={priority}
+                                                    isSearchable={true}
+                                                    onChange={selected => setPriority(selected)}
+                                                    options={[{ value: "low", label: "low" }, { value: "medium", label: "medium" }, { value: "high", label: "high" }]}
+                                                />
+                                            </div>}
                                             <JobAccessGroupsSelector namespace={namespace} value={accessGroups} onChange={setAccessGroups} hideIfNoGroupsAvailable={true} />
                                             <InexJSONSelector onChangeHandler={e => setInexJSON(e)} />
                                         </div>

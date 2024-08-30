@@ -30,28 +30,27 @@ const StreamEntryView = props => {
         if (!showStreamEntry) {
             return;
         }
-        const fetchStreamEntry = () => {
-            axios
-                .delete(
+        const fetchStreamEntry = async () => {
+            let seReq
+            try {
+                seReq = await axios.delete(
                     isStdOut ? `${server}/jobs/${encodeURIComponent(token)}/unread-logs` :
                         `${server}/jobs/${encodeURIComponent(token)}/stream-entry`,
                     isStdOut ? {} : { params: { entry_name: streamEntry } }
                 )
-                .then(res => {
-                    const entryValTmp = res.data[isStdOut ? "message" : "entry_value"];
-                    setErrorMsg('');
-                    if (entryValTmp !== '') {
-                        setEntryCache({ key: streamEntry, value: entryValTmp });
-                        setRefresh(curr => curr + 1);
-                    }
-                })
-                .catch(err => {
-                    if (err.response.status === 308) {
-                        setRefreshJob(refresh => refresh + 1);
-                    } else {
-                        setErrorMsg(`A problem occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
-                    }
-                });
+            } catch (err) {
+                if (err.response.status === 308) {
+                    setRefreshJob(refresh => refresh + 1);
+                } else {
+                    setErrorMsg(`A problem occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`);
+                }
+            }
+            const entryValTmp = seReq.data[isStdOut ? "message" : "entry_value"];
+            setErrorMsg('');
+            if (entryValTmp !== '') {
+                setEntryCache({ key: streamEntry, value: entryValTmp });
+                setRefresh(curr => curr + 1);
+            }
         }
         fetchStreamEntry();
         const streamEntryTimer = setInterval(() => {
