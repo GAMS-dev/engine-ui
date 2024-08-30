@@ -123,27 +123,31 @@ const AuthProviderForm = () => {
     useEffect(() => {
         const validateIssuerId = async (issuerIDToAssert) => {
             if (issuerIDModified === false) {
-                return true;
+                setIssuerValid(true);
+                return;
             }
             let issuerURL;
             try {
                 issuerURL = new URL(issuerIDToAssert);
             } catch (_) {
-                return false;
+                setIssuerValid(false);
+                return;
             }
             if (issuerURL.protocol !== "https:") {
                 setFormErrors(formErrors => {
                     formErrors.issuer = "Only HTTPS allowed";
                     return formErrors;
                 });
-                return false;
+                setIssuerValid(false);
+                return;
             }
             if (issuerURL.search !== "" || issuerURL.hash !== "") {
                 setFormErrors(formErrors => {
                     formErrors.issuer = "Issuer URL must not contain query string or fragment components";
                     return formErrors;
                 });
-                return false;
+                setIssuerValid(false);
+                return;
             }
             try {
                 await axios.get(`${issuerURL.href}/.well-known/openid-configuration`)
@@ -156,10 +160,10 @@ const AuthProviderForm = () => {
                     setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'manual')[0])
                 }
             }
-            return true;
+            setIssuerValid(true);
         }
         const updateIssuerID = setTimeout(() => {
-            setIssuerValid(validateIssuerId(issuerID))
+            validateIssuerId(issuerID)
         }, 1000);
         return () => clearTimeout(updateIssuerID)
     }, [issuerID, issuerIDModified])
