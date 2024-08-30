@@ -14,7 +14,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [userSettings] = useContext(UserSettingsContext);
     const [quotaParallel, setQuotaParallel] = useState(quotas != null && quotas.parallel != null ? quotas.parallel : '');
     const [validQuotaParallel, setValidQuotaParallel] = useState(true);
-    const [quotaVolume, setQuotaVolume] = useState(quotas != null && quotas.volume != null ? quotas.volume : '');
+    const [quotaVolume, setQuotaVolume] = useState(quotas != null && quotas.volume != null ? quotas.volume / userSettings.quotaConversionFactor : '');
     const [validQuotaVolume, setValidQuotaVolume] = useState(true);
     const [quotaDisk, setQuotaDisk] = useState(quotas != null && quotas.disk != null ? quotas.disk : '');
     const [maxQuotas, setMaxQuotas] = useState({ parallel: 0, volume: 0, disk: 0 });
@@ -97,13 +97,13 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             setQuotas({
                 parallel: quotaParallel === '' ? null : quotaParallel,
                 disk: quotaDisk === '' ? null : quotaDisk,
-                volume: quotaVolume === '' ? null : quotaVolume
+                volume: quotaVolume === '' ? null : quotaVolume * userSettings.quotaConversionFactor
             })
         } else {
             setQuotas(null)
         }
     }, [validQuotaParallel, validQuotaVolume, validQuotaDisk,
-        quotaParallel, quotaDisk, quotaVolume, setQuotas])
+        quotaParallel, quotaDisk, quotaVolume, setQuotas, userSettings])
 
     useEffect(() => {
         if (quotaDataInternal == null) {
@@ -177,7 +177,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 Volume Quota (in {userSettings.quotaUnit})
                 {isFinite(maxQuotas.volume) && <Button
                     onClick={() => {
-                        setQuotaVolume(maxQuotas.volume * userSettings.quotaConversionFactor);
+                        setQuotaVolume(maxQuotas.volume);
                         setValidQuotaVolume(true);
                     }}
                     size="sm"
@@ -193,7 +193,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     step="any"
                     min="0"
                     max={isFinite(maxQuotas.volume) ? maxQuotas.volume : ''}
-                    value={quotaVolume === '' ? '' : (quotaVolume / userSettings.quotaConversionFactor).toFixed(3)}
+                    value={quotaVolume === '' ? '' : quotaVolume}
                     onChange={e => {
                         if (e.target.value == null || e.target.value === '') {
                             setValidQuotaVolume(true);
@@ -203,11 +203,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                         const val = parseFloat(e.target.value);
                         if (isNaN(val) || !isFinite(val) || val < 0 || val > maxQuotas.volume) {
                             setValidQuotaVolume(false);
-                            setQuotaVolume(val * userSettings.quotaConversionFactor);
+                            setQuotaVolume(val);
                             return;
                         }
                         setValidQuotaVolume(true);
-                        setQuotaVolume(val * userSettings.quotaConversionFactor);
+                        setQuotaVolume(val);
                     }}
                 />
                 <div className="input-group-append">
