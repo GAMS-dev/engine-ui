@@ -144,7 +144,7 @@ const UserQuotaUpdateForm = () => {
                                     Update Quotas
                                 </SubmitButton>
                             </div>
-                            {userEdited && <Navigate to="/users" />}
+                            {userEdited && <Navigate to={`/users/${userToEdit}/usage`} />}
                         </form>)}
             </div>
         </>

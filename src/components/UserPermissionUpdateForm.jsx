@@ -228,7 +228,7 @@ const UserUpdateForm = () => {
                                         Update Permissions
                                     </SubmitButton>
                                 </div>
-                                {userEdited && <Navigate to="/users" />}
+                                {userEdited && <Navigate to={`/users/${userToEdit}/usage`} />}
                             </form>)}
                 </div>
             </>

@@ -59,7 +59,6 @@ const UserEditBundle = () => {
                         filter: "deleted=false"
                     }
                 });
-                console.log(userInfoReq)
                 if (userInfoReq.data?.length === 0) {
                     setInvalidUser(true)
                     return

@@ -95,7 +95,7 @@ const UserChangePassForm = ({ hideTitle }) => {
                             Change Password
                         </SubmitButton>
                     </div>
-                    {passwordUpdated && <Navigate to="/users" />}
+                    {passwordUpdated && <Navigate to={`/users/${userToEdit}/usage`} />}
                 </form>
             </div>
         </>
