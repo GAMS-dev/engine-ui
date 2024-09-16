@@ -90,7 +90,7 @@ const UserChangeNameForm = () => {
                                 Change Username
                             </SubmitButton>
                         </div>
-                        {usernameUpdated && <Navigate to={`/users/${userToEdit}/usage`} />}
+                        {usernameUpdated && <Navigate to={`/users/${user}/usage`} />}
                     </form>
                 </div>}
         </>
