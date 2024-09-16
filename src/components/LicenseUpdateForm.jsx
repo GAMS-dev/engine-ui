@@ -13,7 +13,7 @@ const LicenseUpdateForm = () => {
     const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
-    const [licenseErrorMsg, setlicenseErrorMsg] = useState("");
+    const [licenseErrorMsg, setLicenseErrorMsg] = useState("");
     const [registeredLicense, setRegisteredLicense] = useState("");
     const [license, setLicense] = useState("");
     const [licenseAction, setLicenseAction] = useState("update");
@@ -29,11 +29,11 @@ const LicenseUpdateForm = () => {
                     { params: { username: userToEdit } })
             } catch (err) {
                 if (err.response.status === 404) {
-                    setlicenseErrorMsg('User does not have and does not inherit any license');
+                    setLicenseErrorMsg('User does not have and does not inherit any license');
                     setIsLoading(false);
                 }
                 else {
-                    setlicenseErrorMsg(`Problems while while retrieving user license. Error message: ${getResponseError(err)}.`);
+                    setLicenseErrorMsg(`Problems while retrieving user license. Error message: ${getResponseError(err)}.`);
                     setIsLoading(false);
                 }
                 return
@@ -43,7 +43,7 @@ const LicenseUpdateForm = () => {
                 setRegisteredLicense(lReq.data[0].license);
                 setIsLoading(false);
             } else {
-                setlicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
+                setLicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
                 setIsLoading(false);
             }
         }
@@ -58,7 +58,7 @@ const LicenseUpdateForm = () => {
         if (licenseAction === "update") {
             const licenseModified = license.trim();
             if (licenseModified === "") {
-                setlicenseErrorMsg("Cannot submit empty license");
+                setLicenseErrorMsg("Cannot submit empty license");
                 setIsSubmitting(false);
                 return;
             }
@@ -69,7 +69,7 @@ const LicenseUpdateForm = () => {
                 setRegisteredLicense(licenseModified);
             }
             catch (err) {
-                setlicenseErrorMsg(`An error occurred while updating user license. Error message: ${getResponseError(err)}.`);
+                setLicenseErrorMsg(`An error occurred while updating user license. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
                 return;
             }
@@ -81,11 +81,11 @@ const LicenseUpdateForm = () => {
             }
             catch (err) {
                 if (err.response.status === 404) {
-                    setlicenseErrorMsg("User does not have a license");
+                    setLicenseErrorMsg("User does not have a license");
                     setIsSubmitting(false);
                     return;
                 } else {
-                    setlicenseErrorMsg(`An error occurred while deleting user license. Error message: ${getResponseError(err)}.`);
+                    setLicenseErrorMsg(`An error occurred while deleting user license. Error message: ${getResponseError(err)}.`);
                     setIsSubmitting(false);
                     return;
                 }
