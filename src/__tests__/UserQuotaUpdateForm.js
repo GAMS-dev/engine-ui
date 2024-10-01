@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { render, screen} from '@testing-library/react';
+import { MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom'
 import { AuthContext } from '../AuthContext';
 import { UserSettingsContext } from '../components/UserSettingsContext';
