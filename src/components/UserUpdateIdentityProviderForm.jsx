@@ -33,6 +33,8 @@ const UserUpdateIdentityProviderForm = () => {
     useEffect(() => {
         const fetchAvailableProviders = async () => {
             try {
+
+                // do both errors get caught?? in the tests it doesn't seem like it
                 const userInfoPromise = axios.get(`${server}/users/`, {
                     params: { username: userToEdit }
                 });
@@ -48,6 +50,7 @@ const UserUpdateIdentityProviderForm = () => {
                     availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0]);
                 setIdentityProviderSubject(userInfo.identity_provider_user_subject == null ? "" : userInfo.identity_provider_user_subject);
             } catch (err) {
+                // TODO
                 setSubmissionErrorMsg(`Problems while retrieving identity providers. Error message: ${getResponseError(err)}.`);
             }
         }
@@ -74,13 +77,15 @@ const UserUpdateIdentityProviderForm = () => {
             authProviderForm.append("identity_provider_name", identityProvider.value);
             if (identityProvider.value === "gams_engine") {
                 authProviderForm.append("password", enginePassword);
-            } else if (identityProvider.value !== "") {
+            }                 // TODO
+            else if (identityProvider.value !== "") {
                 authProviderForm.append("identity_provider_user_subject", identityProviderSubject);
             }
             await axios.put(`${server}/users/identity-provider`, authProviderForm);
             setAlertMsg("success:Identity provider successfully updated!");
             setProviderUpdated(true);
-        } catch (err) {
+        }                 // TODO
+        catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setFormErrors(err.response.data.errors);
                 setSubmissionErrorMsg('Problems trying to update the identity provider.');
@@ -111,6 +116,8 @@ const UserUpdateIdentityProviderForm = () => {
                             Identity provider
                         </label>
                         <Select
+                            // for testing
+                            id="identityProviderDropdown"
                             inputId="identityProvider"
                             value={identityProvider}
                             isSearchable={true}
@@ -169,9 +176,9 @@ const UserUpdateIdentityProviderForm = () => {
                         <Button variant="secondary" onClick={() => setShowBlockConfirmDialog(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={() => setShowBlockConfirmDialog(false)}>
+                        {/* <Button onClick={() => setShowBlockConfirmDialog(false)}>
                             Cancel
-                        </Button>
+                        </Button> */}
                         <SubmitButton isSubmitting={isSubmitting} onClick={() => {
                             handleUpdateIdentityProvider(true);
                             setShowBlockConfirmDialog(false);
