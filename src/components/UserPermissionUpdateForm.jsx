@@ -9,7 +9,7 @@ import NamespacePermissionSelector from "./NamespacePermissionSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 
-const UserUpdateForm = () => {
+const UserPermissionUpdateForm = () => {
     const [{ jwt, server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
     const { userToEdit } = useParams();
@@ -235,4 +235,4 @@ const UserUpdateForm = () => {
     );
 }
 
-export default UserUpdateForm;
+export default UserPermissionUpdateForm;
