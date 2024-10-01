@@ -36,12 +36,12 @@ const AuthProviderWrapperWithRoutes = ({ children }) => (
 );
 
 // to forbid some axios requests
-let testError = false;
+// let testError = false;
 
 describe('UserUpdateIdentityProviderForm', () => {
 
     beforeEach(() => {
-        testError = false;
+        // testError = false;
         jest.clearAllMocks()
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user1' })
         axios.get.mockImplementation((url, paramsRaw) => {
