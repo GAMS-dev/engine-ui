@@ -29,6 +29,7 @@ const AuthProviderWrapperWithRoutes = ({ children }) => (
         </AuthContext.Provider>
         <Routes>
             <Route path='/users/user1/usage' element={<p>after submit went back to usage</p>} />
+            <Route path='/' element={<p></p>} />
         </Routes>
     </MemoryRouter>
 );
