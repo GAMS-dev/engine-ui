@@ -45,7 +45,7 @@ const UserQuotaUpdateForm = () => {
                 }
             }
             catch (err) {
-                setErrorMsg(`Problems while while retrieving user quotas. Error message: ${getResponseError(err)}.`);
+                setErrorMsg(`Problems while retrieving user quotas. Error message: ${getResponseError(err)}.`);
             }
             finally {
                 setIsLoading(false);
