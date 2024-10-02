@@ -33,16 +33,12 @@ const UserUpdateIdentityProviderForm = () => {
     useEffect(() => {
         const fetchAvailableProviders = async () => {
             try {
-
-                // do both errors get caught?? in the tests it doesn't seem like it
-                const userInfoPromise = axios.get(`${server}/users/`, {
+                const [userInfoResponse, userIdpResponse] = await Promise.all([axios.get(`${server}/users/`, {
                     params: { username: userToEdit }
-                });
-                const response = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`);
-                const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
+                }), axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`)]);
+                const availableIdentityProvidersTmp = userIdpResponse.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
                     [{ value: "", label: "None (block user)" }]
                 );
-                const userInfoResponse = await userInfoPromise;
                 const userInfo = userInfoResponse.data[0];
                 setAvailableIdentityProviders(availableIdentityProvidersTmp);
                 setIdentityProvider(userInfo.identity_provider == null ?
@@ -50,7 +46,6 @@ const UserUpdateIdentityProviderForm = () => {
                     availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0]);
                 setIdentityProviderSubject(userInfo.identity_provider_user_subject == null ? "" : userInfo.identity_provider_user_subject);
             } catch (err) {
-                // TODO
                 setSubmissionErrorMsg(`Problems while retrieving identity providers. Error message: ${getResponseError(err)}.`);
             }
         }
@@ -77,14 +72,14 @@ const UserUpdateIdentityProviderForm = () => {
             authProviderForm.append("identity_provider_name", identityProvider.value);
             if (identityProvider.value === "gams_engine") {
                 authProviderForm.append("password", enginePassword);
-            }                 // TODO
+            }
             else if (identityProvider.value !== "") {
                 authProviderForm.append("identity_provider_user_subject", identityProviderSubject);
             }
             await axios.put(`${server}/users/identity-provider`, authProviderForm);
             setAlertMsg("success:Identity provider successfully updated!");
             setProviderUpdated(true);
-        }                 // TODO
+        }
         catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setFormErrors(err.response.data.errors);
@@ -176,9 +171,6 @@ const UserUpdateIdentityProviderForm = () => {
                         <Button variant="secondary" onClick={() => setShowBlockConfirmDialog(false)}>
                             Cancel
                         </Button>
-                        {/* <Button onClick={() => setShowBlockConfirmDialog(false)}>
-                            Cancel
-                        </Button> */}
                         <SubmitButton isSubmitting={isSubmitting} onClick={() => {
                             handleUpdateIdentityProvider(true);
                             setShowBlockConfirmDialog(false);
