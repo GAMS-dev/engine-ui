@@ -24,12 +24,13 @@ const AuthProviderWrapper = ({ children }) => (
 
 const AuthProviderWrapperWithRoutes = ({ children }) => (
     <MemoryRouter>
-        <AuthContext.Provider value={[{ server: "testserver", username: "admin" }]}>
-            {children}
-        </AuthContext.Provider>
         <Routes>
             <Route path='/users/user1/usage' element={<p>after submit went back to usage</p>} />
-            <Route path='/' element={<p></p>} />
+            <Route path='/' element={
+                <AuthContext.Provider value={[{ server: "testserver", username: "admin" }]}>
+                    {children}
+                </AuthContext.Provider>
+            } />
         </Routes>
     </MemoryRouter>
 );
