@@ -25,23 +25,21 @@ const AuthProviderWrapper = ({ children }) => (
 
 const AuthProviderWrapperWithRoutes = ({ children }) => (
     <MemoryRouter>
-        <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
-            {children}
-        </AuthContext.Provider>
         <Routes>
             <Route path='/users/user1/usage' element={<p>after submit went back to usage</p>} />
-            <Route path='/' element={<p></p>} />
+            <Route path='/' element={
+                <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
+                    {children}
+                </AuthContext.Provider>
+            } />
         </Routes>
     </MemoryRouter>
 );
 
-// to forbid some axios requests
-// let testError = false;
 
 describe('UserUpdateIdentityProviderForm', () => {
 
     beforeEach(() => {
-        // testError = false;
         jest.clearAllMocks()
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user1' })
         axios.get.mockImplementation((url, paramsRaw) => {
@@ -224,30 +222,59 @@ describe('UserUpdateIdentityProviderForm', () => {
         expect(screen.queryByText(/. This user will no longer be able to log in./)).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+        // make sure no put is called if it got canceled
         await expect(axios.put).toHaveBeenCalledTimes(0);
-        // TODO don't know what to wait for to check if the dialog is actually closed
-        // is it possible to waitFor something.toBeNull() ??
-
-
-        // await waitFor(() => aggregateDropdownEl.getByText('None (block user)'))
-        // expect(screen.queryByText(/You are about to remove the identity provider from the user:/)).toBeNull()
-        // expect(screen.queryByText(/user1/)).toBeNull()
-        // expect(screen.queryByText(/. This user will no longer be able to log in./)).toBeNull()
     })
 
-    // TODO do both errors get caught?? in the tests it doesn't seem like it
-    // it('handles errors while retrieving identity providers', async () => {
-    //     axios.get.mockRejectedValue({
-    //         response: {
-    //             status: 400,
-    //         }
-    //     })
-    //     render(<UserUpdateIdentityProviderForm/>, {
-    //         wrapper: AuthProviderWrapper
-    //     });
-    //     screen.debug()
+    it('handles errors while retrieving identity providers', async () => {
+        axios.get.mockRejectedValue({
+            response: {
+                status: 400,
+            }
+        })
+        render(<UserUpdateIdentityProviderForm />, {
+            wrapper: AuthProviderWrapper
+        });
 
-    // })
+        await waitFor(() => screen.findByText(/Problems while retrieving identity providers. Error message: undefined./))
+    })
 
+    it('handles errors while submission', async () => {
+        axios.put.mockRejectedValue({
+            response: {
+                status: 400
+            }
+        })
+        render(<UserUpdateIdentityProviderForm />, {
+            wrapper: AuthProviderWrapper
+        });
 
+        await waitFor(() => screen.findByText(/gams_engine/))
+        fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword' } })
+        fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword' } })
+        fireEvent.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
+        await waitFor(() => screen.findByText(/Some error occurred while trying to update the identity provider. Error message: undefined./))
+    })
+
+    it('handles errors while submission, with message in response', async () => {
+        axios.put.mockRejectedValue({
+            response: {
+                status: 400,
+                data:{
+                    errors:"test error"
+                }
+            }
+        })
+        render(<UserUpdateIdentityProviderForm />, {
+            wrapper: AuthProviderWrapper
+        });
+
+        await waitFor(() => screen.findByText(/gams_engine/))
+        fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword' } })
+        fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword' } })
+        fireEvent.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
+        await waitFor(() => screen.findByText(/Problems trying to update the identity provider./))
+    })
+
+    // TODO test for some different identity provider than engine
 })
