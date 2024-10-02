@@ -168,71 +168,69 @@ const UserPermissionUpdateForm = () => {
         setUserEdited(true);
     }
 
-    return (
-        requierDataError ?
+    return <>
+        {requierDataError ?
             <div className="alert alert-danger mt-3">
                 <p><strong>{requierDataErrorMessage}</strong></p>
             </div> :
-            <>
-                <div>
-                    {isLoading ? <ClipLoader /> :
-                        (errorMsg ?
-                            <div className="invalid-feedback text-center" style={{ display: "block" }
-                            } >
-                                {errorMsg}
-                            </div> :
-                            <form
-                                className="m-auto"
-                                onSubmit={e => {
-                                    e.preventDefault();
-                                    handleUserUpdateSubmission();
-                                    return false;
-                                }}
-                            >
-                                <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                                    {submissionErrorMsg}
+            <div>
+                {isLoading ? <ClipLoader /> :
+                    (errorMsg ?
+                        <div className="invalid-feedback text-center" style={{ display: "block" }
+                        } >
+                            {errorMsg}
+                        </div> :
+                        <form
+                            className="m-auto"
+                            onSubmit={e => {
+                                e.preventDefault();
+                                handleUserUpdateSubmission();
+                                return false;
+                            }}
+                        >
+                            <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                                {submissionErrorMsg}
+                            </div>
+                            <fieldset disabled={isSubmitting}>
+                                <div className="mb-3">
+                                    <label htmlFor="roleSelector">
+                                        {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
+                                    </label>
+                                    <select id="roleSelector" className="form-control form-select" value={newRole} onChange={updateNewRole}>
+                                        <option key="user" value="user">User</option>
+                                        <option key="inviter" value="inviter">Inviter</option>
+                                        {(roles.find(role => role === "admin") !== undefined) &&
+                                            <option key="admin" value="admin">Admin</option>}
+                                    </select>
                                 </div>
-                                <fieldset disabled={isSubmitting}>
-                                    <div className="mb-3">
-                                        <label htmlFor="roleSelector">
-                                            {`Specify a role for the user${newRole === currentRole ? "" : " (*)"}`}
+                                {newRole === "inviter" && availableIdentityProviders.length > 1 &&
+                                    (IDPLoading ? <ClipLoader /> : <div className="mb-3">
+                                        <label htmlFor="identityProvidersAllowed">
+                                            Identity providers user is allowed to invite with
                                         </label>
-                                        <select id="roleSelector" className="form-control form-select" value={newRole} onChange={updateNewRole}>
-                                            <option key="user" value="user">User</option>
-                                            <option key="inviter" value="inviter">Inviter</option>
-                                            {(roles.find(role => role === "admin") !== undefined) &&
-                                                <option key="admin" value="admin">Admin</option>}
-                                        </select>
-                                    </div>
-                                    {newRole === "inviter" && availableIdentityProviders.length > 1 &&
-                                        (IDPLoading ? <ClipLoader /> : <div className="mb-3">
-                                            <label htmlFor="identityProvidersAllowed">
-                                                Identity providers user is allowed to invite with
-                                            </label>
-                                            <Select
-                                                inputId="identityProvidersAllowed"
-                                                value={selectedIdentityProvidersAllowed}
-                                                isMulti={true}
-                                                isSearchable={true}
-                                                onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
-                                                options={availableIdentityProviders}
-                                            />
-                                        </div>)}
-                                    {newRole !== "admin" && <NamespacePermissionSelector
-                                        namespacePermissions={namespacePermissions}
-                                        setNamespacePermissions={setNamespacePermissions}
-                                    />}
-                                </fieldset>
-                                <div className="mt-3">
-                                    <SubmitButton isSubmitting={isSubmitting}>
-                                        Update Permissions
-                                    </SubmitButton>
-                                </div>
-                                {userEdited && <Navigate to={`/users/${userToEdit}/usage`} />}
-                            </form>)}
-                </div>
-            </>
-    );
+                                        <Select
+                                            inputId="identityProvidersAllowed"
+                                            value={selectedIdentityProvidersAllowed}
+                                            isMulti={true}
+                                            isSearchable={true}
+                                            onChange={selected => setSelectedIdentityProvidersAllowed(selected)}
+                                            options={availableIdentityProviders}
+                                        />
+                                    </div>)}
+                                {newRole !== "admin" && <NamespacePermissionSelector
+                                    namespacePermissions={namespacePermissions}
+                                    setNamespacePermissions={setNamespacePermissions}
+                                />}
+                            </fieldset>
+                            <div className="mt-3">
+                                <SubmitButton isSubmitting={isSubmitting}>
+                                    Update Permissions
+                                </SubmitButton>
+                            </div>
+                            {userEdited && <Navigate to={`/users/${userToEdit}/usage`} />}
+                        </form>)}
+            </div>
+        }</>
 }
 
 export default UserPermissionUpdateForm;
