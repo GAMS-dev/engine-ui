@@ -6,7 +6,6 @@ import { AuthContext } from '../AuthContext';
 import { UserSettingsContext } from '../components/UserSettingsContext';
 import axios from 'axios';
 import UserQuotaUpdateForm from '../components/UserQuotaUpdateForm';
-import { log } from 'console'
 
 jest.mock('axios');
 
@@ -31,12 +30,10 @@ describe('UserQuotaUpdateForm', () => {
         jest.clearAllMocks()
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user1' })
         axios.get.mockImplementation((url, paramsRaw) => {
-            log(url)
             let params
             if (paramsRaw != null) {
                 ({ params } = paramsRaw)
             }
-            log(params)
             switch (url) {
                 case 'testserver/usage/quota':
                     if (params?.username === "user1") {
@@ -77,8 +74,6 @@ describe('UserQuotaUpdateForm', () => {
 
     const originalError = console.error
     beforeAll(() => {
-        log('START')
-
         console.error = (...args) => {
             if (/Warning.*not wrapped in act/.test(args[0])) {
                 return
@@ -95,7 +90,6 @@ describe('UserQuotaUpdateForm', () => {
         render(<UserQuotaUpdateForm />, {
             wrapper: AuthProviderWrapper
         });
-        screen.debug()
     });
 
     // it('renders UserQuotaUpdateForm corectly', async () => {
