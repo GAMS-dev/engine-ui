@@ -10,6 +10,7 @@ import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
 import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
 import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
 import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
+import UserInviteesTree from "./UserInviteesTree";
 import LicenseUpdateForm from "./LicenseUpdateForm";
 import { AlertContext } from "./Alert";
 import { getResponseError } from "./util";
@@ -36,7 +37,7 @@ const UserEditBundle = () => {
         if (path.includes('/usage')) {
             setActiveTab('usage');
         } else {
-            ['change_pass', 'instances', 'quotas', 'identity_provider', 'permissions', 'licenses'].some((tabId) => {
+            ['change_pass', 'instances', 'quotas', 'identity_provider', 'permissions', 'licenses', 'invitees'].some((tabId) => {
                 if (path.endsWith(`/${tabId}`)) {
                     setActiveTab(tabId);
                     return true;
@@ -118,6 +119,9 @@ const UserEditBundle = () => {
                                     </Nav.Item>
                                 </>
                             )}
+                            <Nav.Item>
+                                <Nav.Link eventKey="invitees" as={NavLink} to="invitees">Invitees</Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </Tab.Container>
                     <Tab.Content className="pt-3">
@@ -134,6 +138,7 @@ const UserEditBundle = () => {
                             <Route path="quotas" element={<UserQuotaUpdateForm />} />
                             <Route path="identity_provider" element={<UserUpdateIdentityProviderForm />} />
                             <Route path="permissions" element={<UserPermissionUpdateForm />} />
+                            <Route path="invitees" element={<UserInviteesTree />} />
                         </Routes>
                     </Tab.Content>
                 </>
