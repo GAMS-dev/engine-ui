@@ -18,8 +18,8 @@ jest.mock('react-router-dom', () => ({
 const AuthProviderWrapper = ({ children }) => (
     <MemoryRouter>
         <Routes>
-            <Route path='/users/user1/usage' element={<p>after submit went back to usage</p>} />
-            <Route path='/users/user2/usage' element={<p>after submit went back to usage</p>} />
+            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
+            <Route path='/users/user2' element={<p>after submit went back to usage</p>} />
             <Route path='/'
                 element={
                     <UserSettingsContext.Provider value={[{ _version: 1, quotaUnit: '$', multiplierUnit: '¢/s', quotaConversionFactor: 100, tablePageLength: '10' }]}>
