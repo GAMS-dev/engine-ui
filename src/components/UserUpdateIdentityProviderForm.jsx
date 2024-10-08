@@ -33,14 +33,12 @@ const UserUpdateIdentityProviderForm = () => {
     useEffect(() => {
         const fetchAvailableProviders = async () => {
             try {
-                const userInfoPromise = axios.get(`${server}/users/`, {
+                const [userInfoResponse, userIdpResponse] = await Promise.all([axios.get(`${server}/users/`, {
                     params: { username: userToEdit }
-                });
-                const response = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`);
-                const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
+                }), axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`)]);
+                const availableIdentityProvidersTmp = userIdpResponse.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
                     [{ value: "", label: "None (block user)" }]
                 );
-                const userInfoResponse = await userInfoPromise;
                 const userInfo = userInfoResponse.data[0];
                 setAvailableIdentityProviders(availableIdentityProvidersTmp);
                 setIdentityProvider(userInfo.identity_provider == null ?
@@ -74,13 +72,15 @@ const UserUpdateIdentityProviderForm = () => {
             authProviderForm.append("identity_provider_name", identityProvider.value);
             if (identityProvider.value === "gams_engine") {
                 authProviderForm.append("password", enginePassword);
-            } else if (identityProvider.value !== "") {
+            }
+            else if (identityProvider.value !== "") {
                 authProviderForm.append("identity_provider_user_subject", identityProviderSubject);
             }
             await axios.put(`${server}/users/identity-provider`, authProviderForm);
             setAlertMsg("success:Identity provider successfully updated!");
             setProviderUpdated(true);
-        } catch (err) {
+        }
+        catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setFormErrors(err.response.data.errors);
                 setSubmissionErrorMsg('Problems trying to update the identity provider.');
@@ -111,6 +111,8 @@ const UserUpdateIdentityProviderForm = () => {
                             Identity provider
                         </label>
                         <Select
+                            // for testing
+                            id="identityProviderDropdown"
                             inputId="identityProvider"
                             value={identityProvider}
                             isSearchable={true}
@@ -169,9 +171,6 @@ const UserUpdateIdentityProviderForm = () => {
                         <Button variant="secondary" onClick={() => setShowBlockConfirmDialog(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={() => setShowBlockConfirmDialog(false)}>
-                            Cancel
-                        </Button>
                         <SubmitButton isSubmitting={isSubmitting} onClick={() => {
                             handleUpdateIdentityProvider(true);
                             setShowBlockConfirmDialog(false);
@@ -180,7 +179,7 @@ const UserUpdateIdentityProviderForm = () => {
                         </SubmitButton>
                     </Modal.Footer>
                 </Modal>
-                {providerUpdated && <Navigate to="/users" />}
+                {providerUpdated && <Navigate to={`/users/${userToEdit}`} />}
             </form>
         </div>
     );

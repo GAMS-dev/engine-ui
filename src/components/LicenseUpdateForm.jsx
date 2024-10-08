@@ -13,10 +13,9 @@ const LicenseUpdateForm = () => {
     const { userToEdit } = useParams();
 
     const [isLoading, setIsLoading] = useState(true);
-    const [licenseErrorMsg, setlicenseErrorMsg] = useState("");
+    const [licenseErrorMsg, setLicenseErrorMsg] = useState("");
     const [registeredLicense, setRegisteredLicense] = useState("");
     const [license, setLicense] = useState("");
-    const [licenseAction, setLicenseAction] = useState("update");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [userEdited, setUserEdited] = useState(false);
@@ -29,11 +28,11 @@ const LicenseUpdateForm = () => {
                     { params: { username: userToEdit } })
             } catch (err) {
                 if (err.response.status === 404) {
-                    setlicenseErrorMsg('User does not have and does not inherit any license');
+                    setLicenseErrorMsg('User does not have and does not inherit any license');
                     setIsLoading(false);
                 }
                 else {
-                    setlicenseErrorMsg(`Problems while while retrieving user license. Error message: ${getResponseError(err)}.`);
+                    setLicenseErrorMsg(`Problems while retrieving user license. Error message: ${getResponseError(err)}.`);
                     setIsLoading(false);
                 }
                 return
@@ -43,22 +42,39 @@ const LicenseUpdateForm = () => {
                 setRegisteredLicense(lReq.data[0].license);
                 setIsLoading(false);
             } else {
-                setlicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
+                setLicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
                 setIsLoading(false);
             }
         }
         fetchLicense()
     }, [server, jwt, userToEdit]);
 
-    const handleUserUpdateLicense = async () => {
+    const handleUserUpdateLicense = async (licenseAction) => {
         setIsSubmitting(true);
         const licenseUpdateForm = new FormData();
         licenseUpdateForm.append("username", userToEdit);
 
-        if (licenseAction === "update") {
+        if (licenseAction === "delete") {
+            try {
+                await axios.delete(`${server}/licenses/`, { data: licenseUpdateForm });
+            }
+            catch (err) {
+                if (err.response.status === 404) {
+                    setLicenseErrorMsg("User does not have a license");
+                    setIsSubmitting(false);
+                    return;
+                } else {
+                    setLicenseErrorMsg(`An error occurred while deleting user license. Error message: ${getResponseError(err)}.`);
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+            setAlertMsg("success:User license successfully deleted!");
+        } else {
+
             const licenseModified = license.trim();
             if (licenseModified === "") {
-                setlicenseErrorMsg("Cannot submit empty license");
+                setLicenseErrorMsg("Cannot submit empty license");
                 setIsSubmitting(false);
                 return;
             }
@@ -69,28 +85,11 @@ const LicenseUpdateForm = () => {
                 setRegisteredLicense(licenseModified);
             }
             catch (err) {
-                setlicenseErrorMsg(`An error occurred while updating user license. Error message: ${getResponseError(err)}.`);
+                setLicenseErrorMsg(`An error occurred while updating user license. Error message: ${getResponseError(err)}.`);
                 setIsSubmitting(false);
                 return;
             }
             setAlertMsg("success:User license successfully updated!");
-        } else {
-            setLicenseAction("update");
-            try {
-                await axios.delete(`${server}/licenses/`, { data: licenseUpdateForm });
-            }
-            catch (err) {
-                if (err.response.status === 404) {
-                    setlicenseErrorMsg("User does not have a license");
-                    setIsSubmitting(false);
-                    return;
-                } else {
-                    setlicenseErrorMsg(`An error occurred while deleting user license. Error message: ${getResponseError(err)}.`);
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
-            setAlertMsg("success:User license successfully deleted!");
         }
 
         setUserEdited(true);
@@ -105,7 +104,7 @@ const LicenseUpdateForm = () => {
                         className="m-auto"
                         onSubmit={e => {
                             e.preventDefault();
-                            handleUserUpdateLicense();
+                            handleUserUpdateLicense(e.nativeEvent.submitter?.name);
                             return false;
                         }}
                     >
@@ -130,12 +129,12 @@ const LicenseUpdateForm = () => {
                                 Update License
                             </SubmitButton>
                             {registeredLicense !== "" &&
-                                <button type="submit" className={`btn btn-lg btn-danger`}
-                                    disabled={isSubmitting} onClick={() => setLicenseAction("delete")}>
+                                <button type="submit" name="delete" className={`btn btn-lg btn-danger`}
+                                    disabled={isSubmitting}>
                                     {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
                                 </button>}
                         </div>
-                        {userEdited && <Navigate to="/users" />}
+                        {userEdited && <Navigate to={`/users/${userToEdit}`} />}
                     </form>
                 </div>}
         </>
