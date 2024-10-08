@@ -26,7 +26,7 @@ const AuthProviderWrapper = ({ children }) => (
 const AuthProviderWrapperWithRoutes = ({ children }) => (
     <MemoryRouter>
         <Routes>
-            <Route path='/users/user1/usage' element={<p>after submit went back to usage</p>} />
+            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
             <Route path='/' element={
                 <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
                     {children}
@@ -167,7 +167,6 @@ describe('UserUpdateIdentityProviderForm', () => {
             'testserver/users/identity-provider',
             requestValue
         );
-        // find a way to check that the submit worked, since setAlert is in Context and seems not the simplest solution
         await waitFor(() => screen.findByText(/after submit went back to usage/));
     });
 
@@ -198,7 +197,6 @@ describe('UserUpdateIdentityProviderForm', () => {
             'testserver/users/identity-provider',
             requestValue
         );
-        // find a way to check that the submit worked, since setAlert is in Context and seems not the simplest solution
         await waitFor(() => screen.findByText(/after submit went back to usage/));
     })
 
@@ -261,7 +259,7 @@ describe('UserUpdateIdentityProviderForm', () => {
             response: {
                 status: 400,
                 data:{
-                    errors:"test error"
+                    errors: {password: "test error"} // pragma: allowlist secret
                 }
             }
         })
@@ -274,6 +272,7 @@ describe('UserUpdateIdentityProviderForm', () => {
         fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword' } })
         fireEvent.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
         await waitFor(() => screen.findByText(/Problems trying to update the identity provider./))
+        await waitFor(() => screen.findByText(/test error/))
     })
 
     // TODO test for some different identity provider than engine
