@@ -179,7 +179,7 @@ const UserUpdateIdentityProviderForm = () => {
                         </SubmitButton>
                     </Modal.Footer>
                 </Modal>
-                {providerUpdated && <Navigate to={`/users/${userToEdit}/usage`} />}
+                {providerUpdated && <Navigate to={`/users/${userToEdit}`} />}
             </form>
         </div>
     );

@@ -134,7 +134,7 @@ const LicenseUpdateForm = () => {
                                     {isSubmitting ? <ClipLoader size={20} /> : 'Delete license'}
                                 </button>}
                         </div>
-                        {userEdited && <Navigate to={`/users/${userToEdit}/usage`} />}
+                        {userEdited && <Navigate to={`/users/${userToEdit}`} />}
                     </form>
                 </div>}
         </>
