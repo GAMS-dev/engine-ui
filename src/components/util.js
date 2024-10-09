@@ -48,11 +48,11 @@ const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
 })
 const getQuotaWarningMessage = (quotaWarningData, quotaUnit, quotaConversionFactor) => {
     const remainingQuota = calcRemainingQuota(quotaWarningData);
-    const remainingVolumeStr = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(remainingQuota.volume/quotaConversionFactor)} ${quotaUnit}`
+    const remainingVolumeStr = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(remainingQuota.volume / quotaConversionFactor)} ${quotaUnit}`
     const remainingDiskStr = formatFileSize(remainingQuota.disk);
-      return <><strong>Quota warning</strong>
-          {Number.isFinite(remainingQuota.volume) ? <div>Remaining <span className="fst-italic">volume</span> quota: {remainingVolumeStr}</div> : <></>}
-          {Number.isFinite(remainingQuota.disk) ? <>Remaining <span className="fst-italic">disk</span> quota: {remainingDiskStr}</>: <></>}
+    return <><strong>Quota warning</strong>
+        {Number.isFinite(remainingQuota.volume) ? <div>Remaining <span className="fst-italic">volume</span> quota: {remainingVolumeStr}</div> : <></>}
+        {Number.isFinite(remainingQuota.disk) ? <>Remaining <span className="fst-italic">disk</span> quota: {remainingDiskStr}</> : <></>}
     </>
 }
 const mergeSortedArrays = (arraysToMerge, comparisonFunction) => {
@@ -133,17 +133,17 @@ const formatInstancesSelectInput = (instances, multiplierUnit) => {
             label: instance.is_pool === true ? (
                 <>
                     <Layers size={12} />
-                    <span style={{ paddingLeft: "5px" }}>{formatInstanceSpecs(instance.label, instance.instance, multiplierUnit)}</span>
+                    <span style={{ paddingLeft: "5px" }}>{formatInstanceSpecs(Object.assign(instance.instance, { label: instance.label }), multiplierUnit)}</span>
                 </>
             ) : formatInstanceSpecs(instance, multiplierUnit)
         }))
         .sort((a, b) => ('' + a.label).localeCompare(b.label))
 }
 const formatDurationString = (duration) => {
-  if (duration > 3600) {
-    return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration / 3600)}h`
-  }
-  return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration)}s`
+    if (duration > 3600) {
+        return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration / 3600)}h`
+    }
+    return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration)}s`
 }
 const getEventsString = (events, parameterized_events) => {
     let eventsStr = events == null ? '' : events.join(',');
