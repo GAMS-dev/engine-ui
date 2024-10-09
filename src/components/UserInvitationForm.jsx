@@ -202,8 +202,8 @@ const UserInvitationForm = () => {
         setRole(e.target.value);
     }
 
-    return (
-        requiredDataError ?
+    return <>
+        {requiredDataError ?
             <div className="alert alert-danger mt-3">
                 <p><strong>{requiredDataErrorMessage}</strong></p>
             </div> :
@@ -237,6 +237,11 @@ const UserInvitationForm = () => {
                                                 {roles && roles.includes('admin') &&
                                                     <option key="admin" value="admin">Admin</option>}
                                             </select>
+                                        </div>
+                                    }
+                                    {role === "inviter" && availableIdentityProviders.length === 0 &&
+                                        <div className="invalid-feedback text-center" style={{ display: "block" }}>
+                                            There are no available identity providers you could give this user could invite with.
                                         </div>
                                     }
                                     {role !== "admin" &&
@@ -413,7 +418,7 @@ const UserInvitationForm = () => {
                     </Modal.Footer>
                 </Modal>
             </>
-    );
+        }</>
 }
 
 export default UserInvitationForm;
