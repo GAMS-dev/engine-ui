@@ -105,7 +105,7 @@ const UserPermissionUpdateForm = () => {
             }
         }
         fetchAvailableIDPs();
-    }, [server, jwt, userToEdit, currentRole, inviterName]);
+    }, [server, jwt, userToEdit, currentRole, inviterName, newRole]);
 
     const handleUserUpdateSubmission = async () => {
         setIsSubmitting(true);
@@ -217,13 +217,18 @@ const UserPermissionUpdateForm = () => {
                                             options={availableIdentityProviders}
                                         />
                                     </div>)}
+                                {newRole === "inviter" && availableIdentityProviders.length === 0 &&
+                                    <div className="invalid-feedback text-center" style={{ display:"block" }}>
+                                        There are no available identity providers this user could invite with.
+                                    </div>
+                                }
                                 {newRole !== "admin" && <NamespacePermissionSelector
                                     namespacePermissions={namespacePermissions}
                                     setNamespacePermissions={setNamespacePermissions}
                                 />}
                             </fieldset>
                             <div className="mt-3">
-                                <SubmitButton isSubmitting={isSubmitting}>
+                                <SubmitButton isSubmitting={isSubmitting} isDisabled={newRole === "inviter" && availableIdentityProviders.length === 0}>
                                     Update Permissions
                                 </SubmitButton>
                             </div>
