@@ -258,8 +258,8 @@ describe('UserUpdateIdentityProviderForm', () => {
         axios.put.mockRejectedValue({
             response: {
                 status: 400,
-                data:{
-                    errors: {password: "test error"} // pragma: allowlist secret
+                data: {
+                    errors: { password: "test error" } // pragma: allowlist secret
                 }
             }
         })
