@@ -33,12 +33,14 @@ const UserUpdateIdentityProviderForm = () => {
     useEffect(() => {
         const fetchAvailableProviders = async () => {
             try {
-                const [userInfoResponse, userIdpResponse] = await Promise.all([axios.get(`${server}/users/`, {
+                const userInfoPromise = axios.get(`${server}/users/`, {
                     params: { username: userToEdit }
-                }), axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`)]);
-                const availableIdentityProvidersTmp = userIdpResponse.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
+                });
+                const response = await axios.get(`${server}/users/inviters-providers/${encodeURIComponent(username)}`);
+                const availableIdentityProvidersTmp = response.data.map(provider => ({ value: provider.name, label: provider.name })).concat(
                     [{ value: "", label: "None (block user)" }]
                 );
+                const userInfoResponse = await userInfoPromise;
                 const userInfo = userInfoResponse.data[0];
                 setAvailableIdentityProviders(availableIdentityProvidersTmp);
                 setIdentityProvider(userInfo.identity_provider == null ?
@@ -72,15 +74,13 @@ const UserUpdateIdentityProviderForm = () => {
             authProviderForm.append("identity_provider_name", identityProvider.value);
             if (identityProvider.value === "gams_engine") {
                 authProviderForm.append("password", enginePassword);
-            }
-            else if (identityProvider.value !== "") {
+            } else if (identityProvider.value !== "") {
                 authProviderForm.append("identity_provider_user_subject", identityProviderSubject);
             }
             await axios.put(`${server}/users/identity-provider`, authProviderForm);
             setAlertMsg("success:Identity provider successfully updated!");
             setProviderUpdated(true);
-        }
-        catch (err) {
+        } catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setFormErrors(err.response.data.errors);
                 setSubmissionErrorMsg('Problems trying to update the identity provider.');
@@ -94,93 +94,97 @@ const UserUpdateIdentityProviderForm = () => {
 
     return (
         <div>
-            <form
-                className="m-auto"
-                onSubmit={e => {
-                    e.preventDefault();
-                    handleUpdateIdentityProvider(false);
-                    return false;
-                }}
-            >
-                <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                    {submissionErrorMsg}
-                </div>
-                <fieldset disabled={isSubmitting}>
-                    {availableIdentityProviders.length > 1 && <div className="mb-3">
-                        <label htmlFor="identityProvider">
-                            Identity provider
-                        </label>
-                        <Select
-                            // for testing
-                            id="identityProviderDropdown"
-                            inputId="identityProvider"
-                            value={identityProvider}
-                            isSearchable={true}
-                            onChange={selected => setIdentityProvider(selected)}
-                            options={availableIdentityProviders}
-                        />
-                    </div>}
-                    {["", "gams_engine"].includes(identityProvider.value) ? <></> :
-                        <div className="mb-3">
-                            <label htmlFor="identityProviderSubject" className="visually-hidden">
-                                Identity provider subject
+            {availableIdentityProviders.length > 0 ?
+                <form
+                    className="m-auto"
+                    onSubmit={e => {
+                        e.preventDefault();
+                        handleUpdateIdentityProvider(false);
+                        return false;
+                    }}
+                >
+                    <div className="invalid-feedback text-center" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+                        {submissionErrorMsg}
+                    </div>
+                    <fieldset disabled={isSubmitting}>
+                        {availableIdentityProviders.length > 1 && <div className="mb-3">
+                            <label htmlFor="identityProvider">
+                                Identity provider
                             </label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="identityProviderSubject"
-                                placeholder="Identity provider subject"
-                                value={identityProviderSubject}
-                                onChange={e => setIdentityProviderSubject(e.target.value)}
-                                required
+                            <Select
+                                inputId="identityProvider"
+                                value={identityProvider}
+                                isSearchable={true}
+                                onChange={selected => setIdentityProvider(selected)}
+                                options={availableIdentityProviders}
                             />
                         </div>}
-                    {identityProvider.value === "gams_engine" ?
-                        <>
-                            <ShowHidePasswordInput
-                                value={enginePassword}
-                                setValue={setEnginePassword}
-                                id="newPasswordConfirm"
-                                label="New password"
-                                invalidFeedback={formErrors.password}
-                                usePlaceholder={true}
-                                required={true} />
-                            <ShowHidePasswordInput
-                                value={enginePasswordConfirm}
-                                setValue={setEnginePasswordConfirm}
-                                id="enginePasswordConfirm"
-                                label="Confirm password"
-                                invalidFeedback={formErrors.password_confirm}
-                                usePlaceholder={true}
-                                required={true} />
-                        </> : <></>}
-                </fieldset>
-                <div className="mt-3">
-                    <SubmitButton isSubmitting={isSubmitting}>
-                        Change Identity Provider
-                    </SubmitButton>
-                </div>
-                <Modal show={showBlockConfirmDialog} onHide={() => setShowBlockConfirmDialog(false)}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Please Confirm</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        You are about to remove the identity provider from the user: <code>{userToEdit}</code>. This user will no longer be able to log in.
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setShowBlockConfirmDialog(false)}>
-                            Cancel
-                        </Button>
-                        <SubmitButton isSubmitting={isSubmitting} onClick={() => {
-                            handleUpdateIdentityProvider(true);
-                            setShowBlockConfirmDialog(false);
-                        }} className="btn-primary">
-                            Block User
+                        {["", "gams_engine"].includes(identityProvider.value) ? <></> :
+                            <div className="mb-3">
+                                <label htmlFor="identityProviderSubject" className="visually-hidden">
+                                    Identity provider subject
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="identityProviderSubject"
+                                    placeholder="Identity provider subject"
+                                    value={identityProviderSubject}
+                                    onChange={e => setIdentityProviderSubject(e.target.value)}
+                                    required
+                                />
+                            </div>}
+                        {identityProvider.value === "gams_engine" ?
+                            <>
+                                <ShowHidePasswordInput
+                                    value={enginePassword}
+                                    setValue={setEnginePassword}
+                                    id="newPasswordConfirm"
+                                    label="New password"
+                                    invalidFeedback={formErrors.password}
+                                    usePlaceholder={true}
+                                    required={true} />
+                                <ShowHidePasswordInput
+                                    value={enginePasswordConfirm}
+                                    setValue={setEnginePasswordConfirm}
+                                    id="enginePasswordConfirm"
+                                    label="Confirm password"
+                                    invalidFeedback={formErrors.password_confirm}
+                                    usePlaceholder={true}
+                                    required={true} />
+                            </> : <></>}
+                    </fieldset>
+                    <div className="mt-3">
+                        <SubmitButton isSubmitting={isSubmitting}>
+                            Change Identity Provider
                         </SubmitButton>
-                    </Modal.Footer>
-                </Modal>
-                {providerUpdated && <Navigate to={`/users/${userToEdit}/usage`} />}
-            </form>
+                    </div>
+                    <Modal show={showBlockConfirmDialog} onHide={() => setShowBlockConfirmDialog(false)}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Please Confirm</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            You are about to remove the identity provider from the user: <code>{userToEdit}</code>. This user will no longer be able to log in.
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowBlockConfirmDialog(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={() => setShowBlockConfirmDialog(false)}>
+                                Cancel
+                            </Button>
+                            <SubmitButton isSubmitting={isSubmitting} onClick={() => {
+                                handleUpdateIdentityProvider(true);
+                                setShowBlockConfirmDialog(false);
+                            }} className="btn-primary">
+                                Block User
+                            </SubmitButton>
+                        </Modal.Footer>
+                    </Modal>
+                    {providerUpdated && <Navigate to="/users" />}
+                </form> : <div className="alert alert-danger">
+                    There are no identity providers that you can assign.
+                </div>}
         </div>
     );
 }
