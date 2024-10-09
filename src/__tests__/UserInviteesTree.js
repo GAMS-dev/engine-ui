@@ -26,11 +26,7 @@ describe('UserQuotaUpdateForm', () => {
     beforeEach(() => {
         jest.clearAllMocks()
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'mainuser' })
-        axios.get.mockImplementation((url, paramsRaw) => {
-            let params
-            if (paramsRaw != null) {
-                ({ params } = paramsRaw)
-            }
+        axios.get.mockImplementation((url) => {
             switch (url) {
                 case 'testserver/users/':
                     return Promise.resolve({
