@@ -22,7 +22,8 @@ const UserEditBundle = () => {
     const [activeTab, setActiveTab] = useState('usage');
     const [userToEditIDP, setUserToEditIDP] = useState(null);
     const [userToEditRoles, setUserToEditRoles] = useState([]);
-    const [invalidUser, setInvalidUser] = useState(false);
+    const [invalidUserRequest, setInvalidUserRequest] = useState(false);
+    const [invalidUserMessage, setInvalidUserMessage] = useState('');
     const location = useLocation();
     const [, setAlertMsg] = useContext(AlertContext);
 
@@ -48,8 +49,6 @@ const UserEditBundle = () => {
     }, [location]);
 
 
-
-
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
@@ -61,67 +60,81 @@ const UserEditBundle = () => {
                     }
                 });
                 if (userInfoReq.data?.length === 0) {
-                    setInvalidUser(true)
+                    setInvalidUserRequest(true)
+                    setInvalidUserMessage(`No data for user: ${userToEdit} found.`)
                     return
                 }
                 setUserToEditIDP(userInfoReq.data[0].identity_provider);
                 setUserToEditRoles(userInfoReq.data[0].roles);
             } catch (err) {
-                setInvalidUser(true)
-                setAlertMsg(`Failed to fetch user information. Error message: ${getResponseError(err)}`);
+                if (err?.response?.status === 403) {
+                    setInvalidUserRequest(true)
+                    setInvalidUserMessage(`You do not have permission to view information about user: ${userToEdit}.`);
+                    setAlertMsg(`Unauthorized. Error message: ${getResponseError(err)}`);
+                } else {
+                    setInvalidUserRequest(true)
+                    setInvalidUserMessage(`Failed to fetch user information. Error message: ${getResponseError(err)}`);
+                    setAlertMsg(`Failed to fetch user information. Error message: ${getResponseError(err)}`);
+                }
             }
         }
         fetchUserInfo();
     }, [server, userToEdit, setAlertMsg]);
 
-    return invalidUser ?
+    return invalidUserRequest ?
         <div className="alert alert-danger mt-3">
-            <p><strong>You do not have permission to view information about user: {userToEdit}.</strong></p>
+            <p><strong>{invalidUserMessage}</strong></p>
         </div> :
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 className="h2">User: {userToEdit}</h1>
             </div>
-            {(isAdmin || (isInviter && username !== userToEdit)) ?
+            {(isAdmin || isInviter) ?
                 <>
                     <Tab.Container defaultActiveKey="quotas" activeKey={activeTab} onSelect={(key) => setActiveTab(key)}>
                         <Nav className="nav-tabs">
                             <Nav.Item>
                                 <Nav.Link eventKey="usage" as={NavLink} to="usage">Usage</Nav.Link>
                             </Nav.Item>
-                            {(userToEditIDP === "gams_engine") && (
-                                <Nav.Item>
-                                    <Nav.Link eventKey="change_pass" as={NavLink} to="change_pass">Change Password</Nav.Link>
-                                </Nav.Item>
-                            )}
-                            {(isAdmin) && (
-                                <Nav.Item>
-                                    <Nav.Link eventKey="licenses" as={NavLink} to="licenses">Change License</Nav.Link>
-                                </Nav.Item>
-                            )}
-                            {(serverInfo.in_kubernetes === true) && (
-                                <Nav.Item>
-                                    <Nav.Link eventKey="instances" as={NavLink} to="instances">Change Instances</Nav.Link>
-                                </Nav.Item>
-                            )}
-                            {!userToEditRoles.includes("admin") && (
-                                <Nav.Item>
-                                    <Nav.Link eventKey="quotas" as={NavLink} to="quotas">Change Quota</Nav.Link>
-                                </Nav.Item>
-                            )}
-                            {(userToEdit !== "admin") && (
+                            {!(isInviter && username === userToEdit) && (
                                 <>
-                                    <Nav.Item>
-                                        <Nav.Link eventKey="identity_provider" as={NavLink} to="identity_provider">Change Identity Provider</Nav.Link>
-                                    </Nav.Item>
-                                    <Nav.Item>
-                                        <Nav.Link eventKey="permissions" as={NavLink} to="permissions">Change Permissions</Nav.Link>
-                                    </Nav.Item>
+                                    {(userToEditIDP === "gams_engine") && (
+                                        <Nav.Item>
+                                            <Nav.Link eventKey="change_pass" as={NavLink} to="change_pass">Change Password</Nav.Link>
+                                        </Nav.Item>
+                                    )}
+                                    {(isAdmin) && (
+                                        <Nav.Item>
+                                            <Nav.Link eventKey="licenses" as={NavLink} to="licenses">Change License</Nav.Link>
+                                        </Nav.Item>
+                                    )}
+                                    {(serverInfo.in_kubernetes === true) && (
+                                        <Nav.Item>
+                                            <Nav.Link eventKey="instances" as={NavLink} to="instances">Change Instances</Nav.Link>
+                                        </Nav.Item>
+                                    )}
+                                    {!userToEditRoles.includes("admin") && (
+                                        <Nav.Item>
+                                            <Nav.Link eventKey="quotas" as={NavLink} to="quotas">Change Quota</Nav.Link>
+                                        </Nav.Item>
+                                    )}
+                                    {(userToEdit !== "admin") && (
+                                        <>
+                                            <Nav.Item>
+                                                <Nav.Link eventKey="identity_provider" as={NavLink} to="identity_provider">Change Identity Provider</Nav.Link>
+                                            </Nav.Item>
+                                            <Nav.Item>
+                                                <Nav.Link eventKey="permissions" as={NavLink} to="permissions">Change Permissions</Nav.Link>
+                                            </Nav.Item>
+                                        </>
+                                    )}
                                 </>
                             )}
-                            <Nav.Item>
-                                <Nav.Link eventKey="invitees" as={NavLink} to="invitees">Invitees</Nav.Link>
-                            </Nav.Item>
+                            {userToEditRoles.find(el => ["admin", "inviter"].includes(el)) && (
+                                <Nav.Item>
+                                    <Nav.Link eventKey="invitees" as={NavLink} to="invitees">Invitees</Nav.Link>
+                                </Nav.Item>
+                            )}
                         </Nav>
                     </Tab.Container>
                     <Tab.Content className="pt-3">
