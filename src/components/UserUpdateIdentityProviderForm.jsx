@@ -181,7 +181,7 @@ const UserUpdateIdentityProviderForm = () => {
                             </SubmitButton>
                         </Modal.Footer>
                     </Modal>
-                    {providerUpdated && <Navigate to="/users" />}
+                    {providerUpdated && <Navigate to={`/users/${userToEdit}`} />}
                 </form> : <div className="alert alert-danger">
                     There are no identity providers that you can assign.
                 </div>}

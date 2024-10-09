@@ -25,7 +25,7 @@ const AuthProviderWrapper = ({ children }) => (
 const AuthProviderWrapperWithRoutes = ({ children }) => (
     <MemoryRouter>
         <Routes>
-            <Route path='/users/user1/usage' element={<p>after submit went back to usage</p>} />
+            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
             <Route path='/' element={
                 <AuthContext.Provider value={[{ server: "testserver", username: "admin" }]}>
                     {children}
@@ -133,7 +133,6 @@ describe('UserChangePassForm', () => {
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'new' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'new' } })
         fireEvent.click(screen.getByRole("button"))
-        // find a way to check that the submit worked, since setAlert is in Context and seems not the simplest solution
         await waitFor(() => screen.findByText(/after submit went back to usage/));
     });
 })

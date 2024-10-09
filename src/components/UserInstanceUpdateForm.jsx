@@ -265,7 +265,7 @@ const UserInstanceUpdateForm = () => {
                                 </SubmitButton>
                             </div>
                         </form>)}
-                {userEdited && <Navigate to={`/users/${userToEdit}/usage`} />}
+                {userEdited && <Navigate to={`/users/${userToEdit}`} />}
             </div>
         </>
     );
