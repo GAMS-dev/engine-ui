@@ -378,7 +378,7 @@ const UserInvitationForm = () => {
                                         </div>}
                                 </fieldset>
                                 <div className="mt-3">
-                                    <SubmitButton isSubmitting={isSubmitting}>
+                                    <SubmitButton isSubmitting={isSubmitting} isDisabled={role === "inviter" && availableIdentityProviders.length === 0}>
                                         Create Invitation
                                     </SubmitButton>
                                 </div>
