@@ -103,7 +103,7 @@ const UserInviteesTree = () => {
         <div className="alert alert-danger mt-3">
             <p><strong>{invalidUserMessage}</strong></p>
         </div> :
-        <div className="container-md overflow-auto" style={{ paddingLeft: '0px' }}>
+        <div className="max-main-width">
             <ul style={{ listStyleType: 'none', paddingLeft: '0px' }}>
                 <TreeNode username={userToEdit} userRole={userToEditRole} userTreeData={userTreeData} isRootNode={true} />
             </ul>
