@@ -33,6 +33,13 @@ const UserEditBundle = () => {
     const isInviter = roles && roles.includes("inviter");
     const [serverInfo] = useContext(ServerInfoContext);
 
+    const getUserRoleFromArray = (roles) => {
+        if (roles == null || roles.length === 0) {
+            return "user"
+        }
+        return roles[0]
+    }
+
     useEffect(() => {
         const path = location.pathname;
         if (path.includes('/usage')) {
@@ -87,7 +94,9 @@ const UserEditBundle = () => {
         </div> :
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 className="h2">User: {userToEdit}</h1>
+                <h1 className="h2">User: {userToEdit}
+                    <sup><small><span className="badge rounded-pill bg-secondary ms-1">{getUserRoleFromArray(userToEditRoles)}</span></small></sup>
+                </h1>
             </div>
             {(isAdmin || isInviter) ?
                 <>
