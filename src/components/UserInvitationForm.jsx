@@ -241,7 +241,7 @@ const UserInvitationForm = () => {
                                     }
                                     {role === "inviter" && availableIdentityProviders.length === 0 &&
                                         <div className="invalid-feedback text-center" style={{ display: "block" }}>
-                                            There are no available identity providers you could give this user could invite with.
+                                            There are no available identity providers you could give this user to invite with.
                                         </div>
                                     }
                                     {role !== "admin" &&
