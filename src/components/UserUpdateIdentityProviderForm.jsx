@@ -41,9 +41,15 @@ const UserUpdateIdentityProviderForm = () => {
                 );
                 const userInfo = userInfoResponse.data[0];
                 setAvailableIdentityProviders(availableIdentityProvidersTmp);
-                setIdentityProvider(userInfo.identity_provider == null ?
+                const identityProviderTmp = userInfo.identity_provider == null ?
                     availableIdentityProvidersTmp[availableIdentityProvidersTmp.length - 1] :
-                    availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0]);
+                    availableIdentityProvidersTmp.filter(provider => provider.value === userInfo.identity_provider)[0];
+                if (identityProviderTmp == null) {
+                    setSubmissionErrorMsg(`User has: ${userInfo.identity_provider} as IDP, but you are not allowed to assign this IDP. An administrator has probably assigned this IDP to the user.`)
+                    setIdentityProvider(availableIdentityProvidersTmp[0])
+                } else {
+                    setIdentityProvider(identityProviderTmp)
+                }
                 setIdentityProviderSubject(userInfo.identity_provider_user_subject == null ? "" : userInfo.identity_provider_user_subject);
             } catch (err) {
                 setSubmissionErrorMsg(`Problems while retrieving identity providers. Error message: ${getResponseError(err)}.`);
@@ -72,15 +78,13 @@ const UserUpdateIdentityProviderForm = () => {
             authProviderForm.append("identity_provider_name", identityProvider.value);
             if (identityProvider.value === "gams_engine") {
                 authProviderForm.append("password", enginePassword);
-            }
-            else if (identityProvider.value !== "") {
+            } else if (identityProvider.value !== "") {
                 authProviderForm.append("identity_provider_user_subject", identityProviderSubject);
             }
             await axios.put(`${server}/users/identity-provider`, authProviderForm);
             setAlertMsg("success:Identity provider successfully updated!");
             setProviderUpdated(true);
-        }
-        catch (err) {
+        } catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setFormErrors(err.response.data.errors);
                 setSubmissionErrorMsg('Problems trying to update the identity provider.');
@@ -106,7 +110,7 @@ const UserUpdateIdentityProviderForm = () => {
                     {submissionErrorMsg}
                 </div>
                 <fieldset disabled={isSubmitting}>
-                    {availableIdentityProviders.length > 1 && <div className="mb-3">
+                    <div className="mb-3">
                         <label htmlFor="identityProvider">
                             Identity provider
                         </label>
@@ -119,7 +123,7 @@ const UserUpdateIdentityProviderForm = () => {
                             onChange={selected => setIdentityProvider(selected)}
                             options={availableIdentityProviders}
                         />
-                    </div>}
+                    </div>
                     {["", "gams_engine"].includes(identityProvider.value) ? <></> :
                         <div className="mb-3">
                             <label htmlFor="identityProviderSubject" className="visually-hidden">

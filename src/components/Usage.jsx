@@ -488,7 +488,7 @@ const Usage = ({ userToEditRoles }) => {
                     <Routes>
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard"
-                            element={<Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />} />
+                            element={isLoading ? <ClipLoader /> : <Quotas data={dataQuota} calcStartDate={startDate} calcEndTime={endDate} dataIsLoading={isLoading} />} />
                         <Route path="timeline"
                             element={
                                 <div className="mt-3">

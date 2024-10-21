@@ -25,7 +25,7 @@ const AdminContextsWrapper = ({ children }) => (
         tablePageLength: 10
     }, () => { }]}>
         <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin", "inviter"], server: "testserver" }]}>
+            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: "testserver" }]}>
                 {children}
             </AuthContext.Provider>
         </ServerInfoContext.Provider>
@@ -120,9 +120,10 @@ describe('UserEditBundle', () => {
                             ]
                         })
                     } else if (params.username === "admin" && !isAuthorized) {
-                        return Promise.resolve({
-                            status: 200,
-                            data: []
+                        return Promise.reject({
+                            response: {
+                                status: 403,
+                            }
                         })
                     } else if (params.username === "inviter1") {
                         return Promise.resolve({
@@ -157,6 +158,27 @@ describe('UserEditBundle', () => {
                                     "invitation_time": "2024-04-08T15:17:33.046930+00:00",
                                     "identity_provider": "gams_engine",
                                     "identity_provider_user_subject": "invited_by_inviter1"
+                                }
+                            ]
+                        })
+                    } else if (params.username === "notExisting") {
+                        return Promise.resolve({
+                            status: 200,
+                            data: []
+                        })
+                    } else if (!params.username) {
+                        return Promise.resolve({
+                            status: 200,
+                            data: [
+                                {
+                                    "username": "user1",
+                                    "roles": [],
+                                    "deleted": false,
+                                    "old_username": "test1",
+                                    "inviter_name": "admin",
+                                    "invitation_time": "2024-04-15T12:45:39.866973+00:00",
+                                    "identity_provider": "gams_engine",
+                                    "identity_provider_user_subject": "user1"
                                 }
                             ]
                         })
@@ -383,6 +405,18 @@ describe('UserEditBundle', () => {
         await waitFor(() => screen.findByText(/GAMS/));
     });
 
+    it('opens the correct tap, dependent on the given path: /invitees', async () => {
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
+        render(
+            <MemoryRouter initialEntries={['/invitees']}>
+                <UserEditBundle />
+            </MemoryRouter>
+            , {
+                wrapper: AdminContextsWrapper
+            });
+        await waitFor(() => screen.findByText(/user1/));
+    });
+
 
     // ------------------- test click opens correct tab --------------------
 
@@ -417,6 +451,9 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeInTheDocument();
         expect(screen.queryByText(/Identity Provider/)).toBeInTheDocument();
         expect(screen.queryByText(/Permissions/)).toBeInTheDocument();
+        // since user1 is no admin or inviter
+        // since on the usage page 'Show Invitees?' look for 'Invitees' as the whole text
+        expect(screen.queryByText('Invitees')).toBeNull();
     });
 
     it('admin can see fewer options on the own page', async () => {
@@ -435,6 +472,7 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeNull();
         expect(screen.queryByText(/Identity Provider/)).toBeNull();
         expect(screen.queryByText(/Permissions/)).toBeNull();
+        expect(screen.queryByText('Invitees')).toBeInTheDocument();
     });
 
     it('admin can see fewer options on inviter page with different provider', async () => {
@@ -453,13 +491,14 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeInTheDocument();
         expect(screen.queryByText(/Identity Provider/)).toBeInTheDocument();
         expect(screen.queryByText(/Permissions/)).toBeInTheDocument();
+        expect(screen.queryByText('Invitees')).toBeInTheDocument();
     });
 
-    it('inviter only sees usage on his own page', async () => {
+    it('inviter only sees usage and invitees on his own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'inviter1' })
         render(
             // /usage only added if other tabs are visible, otherwise only /dashboard and /timeline possible
-            <MemoryRouter initialEntries={['/dashboard']}>
+            <MemoryRouter initialEntries={['/usage']}>
                 <UserEditBundle />
             </MemoryRouter>
             , {
@@ -472,6 +511,7 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeNull();
         expect(screen.queryByText(/Identity Provider/)).toBeNull();
         expect(screen.queryByText(/Permissions/)).toBeNull();
+        expect(screen.queryByText('Invitees')).toBeInTheDocument();
     });
 
     it('inviter can not see admin page', async () => {
@@ -492,9 +532,10 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeNull();
         expect(screen.queryByText(/Identity Provider/)).toBeNull();
         expect(screen.queryByText(/Permissions/)).toBeNull();
+        expect(screen.queryByText('Invitees')).toBeNull();
     });
 
-    it('inviter can see user page for an invited user', async () => {
+    it('inviter can see user page for an invited inviter', async () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'invited_by_inviter1' })
         render(
@@ -512,6 +553,7 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeInTheDocument();
         expect(screen.queryByText(/Identity Provider/)).toBeInTheDocument();
         expect(screen.queryByText(/Permissions/)).toBeInTheDocument();
+        expect(screen.queryByText('Invitees')).toBeInTheDocument();
     });
 
     it('user only sees usage on his own page', async () => {
@@ -531,6 +573,7 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeNull();
         expect(screen.queryByText(/Identity Provider/)).toBeNull();
         expect(screen.queryByText(/Permissions/)).toBeNull();
+        expect(screen.queryByText('Invitees')).toBeNull();
     });
 
     it('user can not see admin page', async () => {
@@ -551,5 +594,45 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeNull();
         expect(screen.queryByText(/Identity Provider/)).toBeNull();
         expect(screen.queryByText(/Permissions/)).toBeNull();
+        expect(screen.queryByText('Invitees')).toBeNull();
     });
+
+    it('user can not see page of unexisting user', async () => {
+        isAuthorized = false
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'notExisting' })
+        render(
+            <MemoryRouter initialEntries={['/dashboard']}>
+                <UserEditBundle />
+            </MemoryRouter>
+            , {
+                wrapper: UserContextsWrapper
+            });
+        await waitFor(() => screen.findByText(/No data for user: notExisting found./));
+        expect(screen.queryByText(/Usage/)).toBeNull();
+        expect(screen.queryByText(/Password/)).toBeNull();
+        expect(screen.queryByText(/License/)).toBeNull();
+        expect(screen.queryByText(/Instances/)).toBeNull();
+        expect(screen.queryByText(/Change Quota/)).toBeNull();
+        expect(screen.queryByText(/Identity Provider/)).toBeNull();
+        expect(screen.queryByText(/Permissions/)).toBeNull();
+        expect(screen.queryByText('Invitees')).toBeNull();
+    });
+
+    // ------------------- test axios errrors --------------------
+
+    it('handles errors while retrieving', async () => {
+        axios.get.mockRejectedValue({
+            response: {
+                status: 400,
+            }
+        })
+        render(
+            <MemoryRouter initialEntries={['/usage']}>
+                <UserEditBundle />
+            </MemoryRouter>
+            , {
+                wrapper: AdminContextsWrapper
+            });
+        await waitFor(() => screen.findByText(/Failed to fetch user information./))
+    })
 })

@@ -154,12 +154,21 @@ body {
   display: flex;
 }
 
+.max-main-width {
+  max-width: calc(100vw - 220px);
+  overflow: auto;
+}
+
 @media only screen and (max-width: 767px) {
   .sidebar-container {
     width: 100%;
     position: fixed;
     z-index: 999;
     bottom: 0;
+  }
+
+  .max-main-width {
+    max-width: 100vw;
   }
 
   [role="main"] {
