@@ -99,7 +99,7 @@ const UserInviteesTree = () => {
         fetchUsersInfo();
     }, [server, userToEdit, setAlertMsg]);
 
-    return invalidUserRequest ?
+    return <>{invalidUserRequest ?
         <div className="alert alert-danger mt-3">
             <p><strong>{invalidUserMessage}</strong></p>
         </div> :
@@ -108,6 +108,7 @@ const UserInviteesTree = () => {
                 <TreeNode username={userToEdit} userRole={userToEditRole} userTreeData={userTreeData} isRootNode={true} />
             </ul>
         </div>
+    }</>
 }
 
 export default UserInviteesTree;
