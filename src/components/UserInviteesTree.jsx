@@ -17,7 +17,7 @@ const getUserRoleFromArray = (roles) => {
 const TreeNode = ({ username, userRole, userTreeData, isRootNode }) => {
     const [isOpen, setIsOpen] = useState(true);
 
-    const toggleOpen = () => setIsOpen(!isOpen);
+    const toggleOpen = () => setIsOpen(prevIsOpen => !prevIsOpen);
 
     if (userTreeData == null) {
         return
