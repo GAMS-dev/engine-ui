@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:lts AS builder
+FROM --platform=linux/amd64 node:20 AS builder
 WORKDIR /app
 RUN apt-get update && \
     apt-get -y install build-essential libcairo2-dev \
