@@ -6,7 +6,6 @@ import axios from "axios";
 import { UserLink } from "./UserLink";
 import { getResponseError } from "./util";
 
-
 const getUserRoleFromArray = (roles) => {
     if (roles == null || roles.length === 0) {
         return "user"
@@ -14,10 +13,22 @@ const getUserRoleFromArray = (roles) => {
     return roles[0]
 }
 
-const TreeNode = ({ username, userRole, userTreeData, isRootNode }) => {
+const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, beforeUserToEdit = true }) => {
     const [isOpen, setIsOpen] = useState(true);
-
+    const { userToEdit } = useParams();
     const toggleOpen = () => setIsOpen(prevIsOpen => !prevIsOpen);
+
+    useEffect(() => {
+        // rootNode is open, if we are in the inviterList it is open,
+        // but if we are behind the userToEdit it should also be open (beforeUserToEdit=false)
+        if (!isRootNode && !inviterList.includes(username) && beforeUserToEdit) {
+            setIsOpen(false);
+        }
+    }, [isRootNode, inviterList, username, beforeUserToEdit]);
+
+    if (username === userToEdit) {
+        beforeUserToEdit = false
+    }
 
     if (userTreeData == null) {
         return
@@ -26,20 +37,28 @@ const TreeNode = ({ username, userRole, userTreeData, isRootNode }) => {
     return (
         <li>
             <div style={{ marginLeft: '20px', display: 'flex', alignItems: 'center' }}>
-                {userTreeData[username] || isRootNode === true ? (
-                    <span onClick={toggleOpen} style={{ cursor: 'pointer', width: '20px' }}>
-                        {isOpen ? '▼' : '►'}
-                    </span>
-                ) : <span style={{ width: '20px' }}> </span>
+                {isRootNode === true ? <></> :
+                    userTreeData[username] ? (
+                        <span onClick={toggleOpen} style={{ cursor: 'pointer', width: '20px' }}>
+                            {isOpen ? '▼' : '►'}
+                        </span>
+                    ) : <span style={{ width: '20px' }}> </span>
                 }
-                <div>{isRootNode === true ? username : <UserLink user={username} />}<sup>
-                    <span className="badge rounded-pill bg-secondary ms-1">{userRole}</span></sup></div>
+                <div>{userRole === "" ?
+                    username :
+                    (
+                        username === userToEdit ? <strong className="text-primary">{username}</strong> : <UserLink user={username} />
+                    )}
+                    <sup>
+                        <span className="badge rounded-pill bg-secondary ms-1">{userRole}</span>
+                    </sup>
+                </div>
             </div>
 
             {isOpen && userTreeData[username] && (
                 <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
-                    {userTreeData[username].map((child, index) => (
-                        <TreeNode key={index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} />
+                    {userTreeData[username].map((child) => (
+                        <TreeNode username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} beforeUserToEdit={beforeUserToEdit} />
                     ))}
                 </ul>
             )}
@@ -57,12 +76,14 @@ const TreeNode = ({ username, userRole, userTreeData, isRootNode }) => {
 
 const UserInviteesTree = () => {
     const { userToEdit } = useParams();
-    const [userToEditRole, setUserToEditRole] = useState("");
     const [userTreeData, setUserTreeData] = useState(null);
     const [, setAlertMsg] = useContext(AlertContext);
     const [{ server }] = useContext(AuthContext);
     const [invalidUserRequest, setInvalidUserRequest] = useState(false);
     const [invalidUserMessage, setInvalidUserMessage] = useState('');
+    const [rootInviter, setRootInviter] = useState(userToEdit);
+    const [rootInviterRole, setRootInviterRole] = useState("");
+    const [inviterList, setInviterList] = useState([]);
 
     useEffect(() => {
         const fetchUsersInfo = async () => {
@@ -74,11 +95,9 @@ const UserInviteesTree = () => {
                     }
                 });
                 const userTreeDataTmp = {}
+                const inviterInfoTmp = {}
                 userInfoReq.data.forEach(user => {
-                    if (user.username === userToEdit) {
-                        setUserToEditRole(getUserRoleFromArray(user.roles))
-                        return
-                    }
+                    inviterInfoTmp[user.username] = user.inviter_name
                     if (user.inviter_name == null) {
                         return
                     }
@@ -87,9 +106,25 @@ const UserInviteesTree = () => {
                     } else {
                         userTreeDataTmp[user.inviter_name] = [user]
                     }
-
                 })
-                setUserTreeData(userTreeDataTmp)
+                setUserTreeData(userTreeDataTmp);
+                let rootInviterNameTmp = userToEdit;
+                let inviterListTmp = [userToEdit]
+                while (true) {
+                    if (inviterInfoTmp.hasOwnProperty(rootInviterNameTmp)) {
+                        if (inviterInfoTmp[rootInviterNameTmp] != null) {
+                            rootInviterNameTmp = inviterInfoTmp[rootInviterNameTmp]
+                            inviterListTmp.push(rootInviterNameTmp)
+                            continue
+                        }
+                    }
+                    break
+                }
+                setInviterList(inviterListTmp);
+                setRootInviter(rootInviterNameTmp)
+                let inviterRoleTmp = userInfoReq.data.find(user => user.username === rootInviterNameTmp)
+                inviterRoleTmp = inviterRoleTmp ? getUserRoleFromArray(inviterRoleTmp.roles) : ""
+                setRootInviterRole(inviterRoleTmp);
             } catch (err) {
                 setAlertMsg(`Failed to fetch users information. Error message: ${getResponseError(err)}`);
                 setInvalidUserRequest(true)
@@ -105,7 +140,7 @@ const UserInviteesTree = () => {
         </div> :
         <div className="max-main-width">
             <ul style={{ listStyleType: 'none', paddingLeft: '0px' }}>
-                <TreeNode username={userToEdit} userRole={userToEditRole} userTreeData={userTreeData} isRootNode={true} />
+                <TreeNode username={rootInviter} userRole={rootInviterRole} userTreeData={userTreeData} isRootNode={true} inviterList={inviterList} />
             </ul>
         </div>
     }</>
