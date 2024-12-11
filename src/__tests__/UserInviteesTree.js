@@ -97,7 +97,7 @@ describe('UserQuotaUpdateForm', () => {
         console.error = originalError
     })
 
-    it('renders UserInviteesTree corectly', async () => {
+    it('renders UserInviteesTree correctly', async () => {
         render(<UserInviteesTree />, {
             wrapper: AuthProviderWrapper
         });
@@ -121,13 +121,17 @@ describe('UserQuotaUpdateForm', () => {
         expect(screen.getAllByText('user')).toHaveLength(2);
     });
 
-    it('shows "No Invitees" if no exisit', async () => {
+    it('shows "No Invitees" if no exist', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
         render(<UserInviteesTree />, {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/user2/))
         expect(screen.getByText('No invitees')).toBeInTheDocument();
+        expect(screen.queryByText('mainuser')).toBeInTheDocument();
+        expect(screen.queryByText('user1')).toBeInTheDocument();
+        // user1 should be closed
+        expect(screen.queryByText('user3')).toBeNull();
     })
 
     it('closes the list if triangle is clicked ', async () => {
@@ -135,13 +139,25 @@ describe('UserQuotaUpdateForm', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/mainuser/))
-        screen.debug()
         fireEvent.click(screen.getAllByText('▼')[0])
-        screen.debug()
 
         expect(screen.queryByText('user1')).toBeInTheDocument();
         expect(screen.queryByText('user2')).toBeInTheDocument();
         expect(screen.queryByText('user3')).toBeNull();
+    })
+
+    it('shows whole subtree', async () => {
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user3' })
+        render(<UserInviteesTree />, {
+            wrapper: AuthProviderWrapper
+        });
+        await waitFor(() => screen.findByText(/mainuser/))
+        // "No invitees" should be their since no we directly look at user3
+        expect(screen.getByText('No invitees')).toBeInTheDocument();
+        // here expect both users before since the response is the same
+        expect(screen.queryByText('mainuser')).toBeInTheDocument();
+        expect(screen.queryByText('user1')).toBeInTheDocument();
+
     })
 
     it('handles errors while retrieving', async () => {
