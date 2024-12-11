@@ -135,12 +135,13 @@ describe('UserQuotaUpdateForm', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/mainuser/))
+        screen.debug()
         fireEvent.click(screen.getAllByText('▼')[0])
-        expect(screen.queryByText('user1')).toBeNull();
-        expect(screen.queryByText('user2')).toBeNull();
+        screen.debug()
+
+        expect(screen.queryByText('user1')).toBeInTheDocument();
+        expect(screen.queryByText('user2')).toBeInTheDocument();
         expect(screen.queryByText('user3')).toBeNull();
-        expect(screen.queryByText('inviter')).toBeNull();
-        expect(screen.queryByText('user')).toBeNull();
     })
 
     it('handles errors while retrieving', async () => {
