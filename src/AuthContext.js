@@ -72,22 +72,26 @@ export const AuthProvider = props => {
           async function (error) {
             let _error = error;
             if (!axios.isCancel(error) &&
-              (login.server.startsWith('/') || error.request.responseURL.startsWith(login.server)) &&
-              error?.response?.status === 401
-            ) {
-              const config = error.config;
-              if (login.refreshTokenData != null && !config?.sent) {
-                config.sent = true;
-                const result = await refreshToken();
-                if (result != null) {
-                  config.headers = {
-                    ...config.headers,
-                    Authorization: `Bearer ${result.accessToken}`,
-                  };
-                  return axios(config);
+              (login.server.startsWith('/') || error.request.responseURL.startsWith(login.server))) {
+              if (error?.response?.status === 401) {
+                const config = error.config;
+                if (login.refreshTokenData != null && !config?.sent) {
+                  config.sent = true;
+                  const result = await refreshToken();
+                  if (result != null) {
+                    config.headers = {
+                      ...config.headers,
+                      Authorization: `Bearer ${result.accessToken}`,
+                    };
+                    return axios(config);
+                  }
                 }
+                setLogin(false);
+              } else if (error?.response?.status === 503 &&
+                error?.response?.data?.maintenance_mode === true &&
+                ['GET', 'HEAD'].includes(error.config.method.toUpperCase())) {
+                setLogin(false);
               }
-              setLogin(false);
             }
             return Promise.reject(_error);
           }

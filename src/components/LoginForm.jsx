@@ -42,6 +42,7 @@ const LoginForm = ({ showRegistrationForm }) => {
 
   const [OAuthConfig, setOAuthConfig] = useState([]);
   const [ldapConfig, setLDAPConfig] = useState([]);
+  const [inMaintenanceMode, setInMaintenanceMode] = useState(false);
 
   const [selectedAuthProvider, setSelectedAuthProvider] = useState("gams_engine");
 
@@ -303,6 +304,9 @@ const LoginForm = ({ showRegistrationForm }) => {
       try {
         response = await axios.get(`${server}/auth/providers`);
       } catch (err) {
+        if (err?.response?.data?.maintenance_mode === true) {
+          setInMaintenanceMode(true)
+        }
         setLoginErrorMsg(`Problems retrieving identity providers. Error message: ${getResponseError(err)}.`);
         return;
       }
@@ -534,177 +538,196 @@ const LoginForm = ({ showRegistrationForm }) => {
   }, [server, OAuthToken, loginUser]);
 
   return (
-    <div className="text-center d-flex h-100">
-      <form
-        className="form-signin m-auto"
-        onSubmit={e => {
-          e.preventDefault();
-          if (register) {
-            handleRegistration();
-          } else {
-            handleLogin();
-          }
-          return false;
-        }}
-      >
-        <img
-          src={logo}
-          className="bg-dark p-4 mb-4 rounded w-100"
-          alt="GAMS Logo"
-        />
-        {isOAuthProcessing ?
-          <ClipLoader /> :
-          <>
-            {isNativeClientLogin ? (ncRedirectUri !== "" ?
-              <><Alert variant="success">
-                Authentication successful. You can now close this window.
-              </Alert>
-                {window.location.replace(ncRedirectUri)}
-              </> : (loginErrorMsg ? <></> : <div
-                className="modal show"
-                style={{ display: 'block', position: 'initial' }}
-              >
-                <Modal.Dialog>
-                  <Modal.Header>
-                    <Modal.Title>Please Confirm</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <p>Please confirm that you are trying to log in with {VALID_NATIVE_CLIENT_IDS[OAuthLoginConfig?.nativeClientParams?.id]}.</p>
-                  </Modal.Body>
+    <>{inMaintenanceMode === true ?
+      <>
+        <div className="text-center d-flex h-100">
+          <form
+            className="form-signin m-auto"
+          >
+            <img
+              src={logo}
+              className="bg-dark p-4 mb-4 rounded w-100"
+              alt="GAMS Logo"
+            />
+            <Alert variant="danger">
+              GAMS Engine is under maintenance. Please try again later or contact support for more information.
+            </Alert>
+          </form>
+        </div>
+      </> :
+      <div className="text-center d-flex h-100">
+        <form
+          className="form-signin m-auto"
+          onSubmit={e => {
+            e.preventDefault();
+            if (register) {
+              handleRegistration();
+            } else {
+              handleLogin();
+            }
+            return false;
+          }}
+        >
+          <img
+            src={logo}
+            className="bg-dark p-4 mb-4 rounded w-100"
+            alt="GAMS Logo"
+          />
+          {isOAuthProcessing ?
+            <ClipLoader /> :
+            <>
+              {isNativeClientLogin ? (ncRedirectUri !== "" ?
+                <><Alert variant="success">
+                  Authentication successful. You can now close this window.
+                </Alert>
+                  {window.location.replace(ncRedirectUri)}
+                </> : (loginErrorMsg ? <></> : <div
+                  className="modal show"
+                  style={{ display: 'block', position: 'initial' }}
+                >
+                  <Modal.Dialog>
+                    <Modal.Header>
+                      <Modal.Title>Please Confirm</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <p>Please confirm that you are trying to log in with {VALID_NATIVE_CLIENT_IDS[OAuthLoginConfig?.nativeClientParams?.id]}.</p>
+                    </Modal.Body>
 
-                  <Modal.Footer>
-                    <Button variant="secondary" onClick={() => window.location.replace('/')}>Cancel</Button>
-                    <Button variant="primary" onClick={() => setNativeClientLoginConfirmed(true)}>Confirm</Button>
-                  </Modal.Footer>
-                </Modal.Dialog>
-              </div>)) : (login ? <Navigate replace to="/" /> :
-                <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
-            <div className="invalid-feedback" style={{ display: loginErrorMsg ? "block" : "none" }}>
-              {loginErrorMsg}
-            </div>
-            {showRegistrationSuccessAlert && <Alert variant="success">
-              Registration successful, you can log in now!
-            </Alert>}
-            {!isNativeClientLogin &&
-              <>
-                <fieldset disabled={isSubmitting}>
-                  {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
-                    <div className="mb-3">
-                      <label htmlFor="inputServer" className="visually-hidden">
-                        Server
+                    <Modal.Footer>
+                      <Button variant="secondary" onClick={() => window.location.replace('/')}>Cancel</Button>
+                      <Button variant="primary" onClick={() => setNativeClientLoginConfirmed(true)}>Confirm</Button>
+                    </Modal.Footer>
+                  </Modal.Dialog>
+                </div>)) : (login ? <Navigate replace to="/" /> :
+                  <h1 className="h3 mb-3 fw-normal">{register ? "Register" : "Please sign in"}</h1>)}
+              <div className="invalid-feedback" style={{ display: loginErrorMsg ? "block" : "none" }}>
+                {loginErrorMsg}
+              </div>
+              {showRegistrationSuccessAlert && <Alert variant="success">
+                Registration successful, you can log in now!
+              </Alert>}
+              {!isNativeClientLogin &&
+                <>
+                  <fieldset disabled={isSubmitting}>
+                    {!SERVER_NAME.startsWith("/") && !SERVER_NAME.startsWith("http") &&
+                      <div className="mb-3">
+                        <label htmlFor="inputServer" className="visually-hidden">
+                          Server
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="inputServer"
+                          placeholder="Server"
+                          autoComplete="on"
+                          value={server}
+                          onChange={e => setServer(e.target.value)}
+                          required
+                        />
+                      </div>
+                    }
+                    {register ? <div className="mb-3">
+                      <label htmlFor="inputInvitationCode" className="visually-hidden">
+                        Invitation Code
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        id="inputServer"
-                        placeholder="Server"
-                        autoComplete="on"
-                        value={server}
-                        onChange={e => setServer(e.target.value)}
+                        id="inputInvitationCode"
+                        placeholder="Invitation code"
+                        value={invitationCode}
+                        onChange={e => setInvitationCode(e.target.value)}
                         required
                       />
-                    </div>
-                  }
-                  {register ? <div className="mb-3">
-                    <label htmlFor="inputInvitationCode" className="visually-hidden">
-                      Invitation Code
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="inputInvitationCode"
-                      placeholder="Invitation code"
-                      value={invitationCode}
-                      onChange={e => setInvitationCode(e.target.value)}
-                      required
-                    />
-                  </div> :
-                    (ldapConfig.length > 0 ?
-                      <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
-                        <Nav.Item>
-                          <Nav.Link eventKey="gams_engine" title="Standard">Standard</Nav.Link>
-                        </Nav.Item>
-                        {ldapConfig.map(config =>
-                          <Nav.Item key={config.name}>
-                            <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
+                    </div> :
+                      (ldapConfig.length > 0 ?
+                        <Nav variant="tabs" className="mb-3" activeKey={selectedAuthProvider} onSelect={k => setSelectedAuthProvider(k)}>
+                          <Nav.Item>
+                            <Nav.Link eventKey="gams_engine" title="Standard">Standard</Nav.Link>
                           </Nav.Item>
-                        )}
-                      </Nav> : <></>)}
-                  {(!register || isValidInvitationCode) && <div className="mb-3">
-                    <label htmlFor="username" className="visually-hidden">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      className={"form-control" + (usernameError ? " is-invalid" : "")}
-                      id="username"
-                      placeholder="Username"
-                      autoComplete="username"
-                      name="username"
-                      value={username}
-                      onChange={e => setUsername(e.target.value)}
-                      required
-                    />
-                    <div className="invalid-feedback"> {usernameError} </div>
-                  </div>}
-                  {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) &&
-                    <ShowHidePasswordInput
-                      value={password}
-                      setValue={setPassword}
-                      id="inputPassword"
-                      label="Password"
-                      invalidFeedback={passwordError}
-                      autoComplete="current-password"
-                      usePlaceholder={true}
-                      required={true}
-                      additionalAddons={
-                        register ? <OverlayTrigger placement="bottom"
-                          overlay={<Tooltip id="tooltip">
-                            {passwordPolicyHelper}
-                          </Tooltip>}>
-                          <span className="input-group-text"><Info /></span>
-                        </OverlayTrigger> : null} />}
-                  {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
-                    <ShowHidePasswordInput
-                      value={confirmPassword}
-                      setValue={setConfirmPassword}
-                      id="confirmPassword"
-                      label="Confirm Password"
-                      invalidFeedback={confirmPasswordError}
-                      usePlaceholder={true}
-                      required={true} />}
-                </fieldset>
-                <div className="d-grid gap-2">
-                  <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
-                    {register ? "Register" : "Login"}
-                  </SubmitButton>
-                  {register ? <></> : OAuthConfig.map((config, idx) => {
-                    return <button key={`oauth_button_${idx}`} type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
-                      onClick={() => setOAuthLoginConfig(config)}>
-                      {config.label}
-                    </button>
-                  })}
-                </div>
-                <div className="mt-2">
-                  <small>
-                    <Link to={register ? "/login" : "/register"} onClick={() => {
-                      clearRegisterErrors();
-                      setRegister(current => !current);
-                    }}>{register ? "Login" : "Register"}</Link>
-                  </small>
-                </div>
-              </>}
-          </>
-        }
-        {redirectToRoot ? <Navigate replace to="/" /> : ""}
-      </form>
-      {OAuthLoginConfig?.nativeClientParams && nativeClientLoginConfirmed !== true ? <></> :
-        <OAuth2Login
-          server={server}
-          loginConfig={OAuthLoginConfig}
-          setAuthToken={setOAuthToken}
-          setErrorMsg={setOAuthErrorMsg} />}
-    </div>
+                          {ldapConfig.map(config =>
+                            <Nav.Item key={config.name}>
+                              <Nav.Link eventKey={config.name} title={config.label}>{config.label}</Nav.Link>
+                            </Nav.Item>
+                          )}
+                        </Nav> : <></>)}
+                    {(!register || isValidInvitationCode) && <div className="mb-3">
+                      <label htmlFor="username" className="visually-hidden">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        className={"form-control" + (usernameError ? " is-invalid" : "")}
+                        id="username"
+                        placeholder="Username"
+                        autoComplete="username"
+                        name="username"
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        required
+                      />
+                      <div className="invalid-feedback"> {usernameError} </div>
+                    </div>}
+                    {(!register || (isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine")) &&
+                      <ShowHidePasswordInput
+                        value={password}
+                        setValue={setPassword}
+                        id="inputPassword"
+                        label="Password"
+                        invalidFeedback={passwordError}
+                        autoComplete="current-password"
+                        usePlaceholder={true}
+                        required={true}
+                        additionalAddons={
+                          register ? <OverlayTrigger placement="bottom"
+                            overlay={<Tooltip id="tooltip">
+                              {passwordPolicyHelper}
+                            </Tooltip>}>
+                            <span className="input-group-text"><Info /></span>
+                          </OverlayTrigger> : null} />}
+                    {register && isValidInvitationCode && invitationCodeIdentityProvider === "gams_engine" &&
+                      <ShowHidePasswordInput
+                        value={confirmPassword}
+                        setValue={setConfirmPassword}
+                        id="confirmPassword"
+                        label="Confirm Password"
+                        invalidFeedback={confirmPasswordError}
+                        usePlaceholder={true}
+                        required={true} />}
+                  </fieldset>
+                  <div className="d-grid gap-2">
+                    <SubmitButton isSubmitting={isSubmitting} isDisabled={register && !isValidInvitationCode}>
+                      {register ? "Register" : "Login"}
+                    </SubmitButton>
+                    {register ? <></> : OAuthConfig.map((config, idx) => {
+                      return <button key={`oauth_button_${idx}`} type="button" disabled={isSubmitting} className='btn btn-sm btn-secondary'
+                        onClick={() => setOAuthLoginConfig(config)}>
+                        {config.label}
+                      </button>
+                    })}
+                  </div>
+                  <div className="mt-2">
+                    <small>
+                      <Link to={register ? "/login" : "/register"} onClick={() => {
+                        clearRegisterErrors();
+                        setRegister(current => !current);
+                      }}>{register ? "Login" : "Register"}</Link>
+                    </small>
+                  </div>
+                </>}
+            </>
+          }
+          {redirectToRoot ? <Navigate replace to="/" /> : ""}
+        </form>
+        {OAuthLoginConfig?.nativeClientParams && nativeClientLoginConfirmed !== true ? <></> :
+          <OAuth2Login
+            server={server}
+            loginConfig={OAuthLoginConfig}
+            setAuthToken={setOAuthToken}
+            setErrorMsg={setOAuthErrorMsg} />}
+      </div>
+    }
+    </>
   );
 };
 

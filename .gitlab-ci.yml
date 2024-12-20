@@ -15,8 +15,7 @@ build_build_image:
   stage: prepare
   before_script:
     # this is to be able to pull and push images
-    - mkdir -p $HOME/.docker
-    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
     - cd .ci
     - docker build -t $CI_REGISTRY_IMAGE/buildimage:latest .
