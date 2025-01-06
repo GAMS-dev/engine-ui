@@ -14,21 +14,9 @@ const getUserRoleFromArray = (roles) => {
 }
 
 const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, beforeUserToEdit = true }) => {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(isRootNode || inviterList.includes(username) || beforeUserToEdit);
     const { userToEdit } = useParams();
     const toggleOpen = () => setIsOpen(prevIsOpen => !prevIsOpen);
-
-    useEffect(() => {
-        // rootNode is open, if we are in the inviterList it is open,
-        // but if we are behind the userToEdit it should also be open (beforeUserToEdit=false)
-        if (!isRootNode && !inviterList.includes(username) && beforeUserToEdit) {
-            setIsOpen(false);
-        }
-    }, [isRootNode, inviterList, username, beforeUserToEdit]);
-
-    if (username === userToEdit) {
-        beforeUserToEdit = false
-    }
 
     if (userTreeData == null) {
         return
