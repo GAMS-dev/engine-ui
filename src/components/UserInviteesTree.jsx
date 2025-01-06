@@ -5,6 +5,7 @@ import { AlertContext } from "./Alert";
 import axios from "axios";
 import { UserLink } from "./UserLink";
 import { getResponseError } from "./util";
+import { ClipLoader } from "react-spinners";
 
 const getUserRoleFromArray = (roles) => {
     if (roles == null || roles.length === 0) {
@@ -50,12 +51,12 @@ const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, b
             {isOpen && userTreeData[username] && (
                 <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
                     {userTreeData[username].map((child, index) => (
-                        <TreeNode key= {index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} behindUserToEdit={behindUserToEdit} />
+                        <TreeNode key={index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} behindUserToEdit={behindUserToEdit} />
                     ))}
                 </ul>
             )}
 
-            {isOpen && username===userToEdit && !userTreeData[username] && (
+            {isOpen && username === userToEdit && !userTreeData[username] && (
                 <div style={{ paddingLeft: '20px' }}>
                     <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
                         <div className="text-muted" ><em><small>No invitees</small></em></div>
@@ -76,6 +77,7 @@ const UserInviteesTree = () => {
     const [rootInviter, setRootInviter] = useState(userToEdit);
     const [rootInviterRole, setRootInviterRole] = useState("");
     const [inviterList, setInviterList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchUsersInfo = async () => {
@@ -117,6 +119,7 @@ const UserInviteesTree = () => {
                 let inviterRoleTmp = userInfoReq.data.find(user => user.username === rootInviterNameTmp)
                 inviterRoleTmp = inviterRoleTmp ? getUserRoleFromArray(inviterRoleTmp.roles) : ""
                 setRootInviterRole(inviterRoleTmp);
+                setIsLoading(false)
             } catch (err) {
                 setAlertMsg(`Failed to fetch users information. Error message: ${getResponseError(err)}`);
                 setInvalidUserRequest(true)
@@ -126,16 +129,23 @@ const UserInviteesTree = () => {
         fetchUsersInfo();
     }, [server, userToEdit, setAlertMsg]);
 
-    return <>{invalidUserRequest ?
-        <div className="alert alert-danger mt-3">
-            <p><strong>{invalidUserMessage}</strong></p>
-        </div> :
-        <div className="max-main-width">
-            <ul style={{ listStyleType: 'none', paddingLeft: '0px' }}>
-                <TreeNode username={rootInviter} userRole={rootInviterRole} userTreeData={userTreeData} isRootNode={true} inviterList={inviterList} />
-            </ul>
-        </div>
-    }</>
+    return (
+        <>
+            <div>
+                {isLoading ? <ClipLoader /> :
+                    (invalidUserRequest ?
+                        <div className="alert alert-danger mt-3">
+                            <p><strong>{invalidUserMessage}</strong></p>
+                        </div> :
+                        <div className="max-main-width">
+                            <ul style={{ listStyleType: 'none', paddingLeft: '0px' }}>
+                                <TreeNode username={rootInviter} userRole={rootInviterRole} userTreeData={userTreeData} isRootNode={true} inviterList={inviterList} />
+                            </ul>
+                        </div>
+                    )}
+            </div>
+        </>
+    );
 }
 
 export default UserInviteesTree;
