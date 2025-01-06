@@ -8,6 +8,7 @@ import { formatInstancesSelectInput, getInstanceData, getResponseError } from ".
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import { UserSettingsContext } from "./UserSettingsContext";
+import { UserLink } from "./UserLink";
 
 const UserInstanceUpdateForm = () => {
     const [{ jwt, server, username, roles }] = useContext(AuthContext);
@@ -158,7 +159,6 @@ const UserInstanceUpdateForm = () => {
             setSubmissionErrorMsg(`An error occurred while updating user instances. Error message: ${getResponseError(err)}.`);
         }
     }
-
     return (
         <>
             <div>
@@ -188,9 +188,14 @@ const UserInstanceUpdateForm = () => {
                                             }}
                                                 id="inheritInstances" />
                                             <label className="form-check-label" htmlFor="inheritInstances">{inviterHasInstancesAssigned ?
-                                                `Inherit instances from ${instancesInheritedFrom == null || instancesInheritedFrom === userToEdit ?
-                                                    (inviterName === username ? "you" : inviterName) :
-                                                    (instancesInheritedFrom === username ? "you" : instancesInheritedFrom)}` : "Allowed to use any instance/raw resource requests"}</label>
+                                                <>
+                                                    Inherit instances from {instancesInheritedFrom == null || instancesInheritedFrom === userToEdit ?
+                                                    // TODO I am not sure why we make this distinction? 
+                                                    // Anyways the you is not needed anymore, since the UserLink will add the me badge
+                                                    // Just need to figure out which is the correct inviter name?
+                                                        (inviterName === username ? "you" : <UserLink user={inviterName} />) :
+                                                        (instancesInheritedFrom === username ? "you" : <UserLink user={instancesInheritedFrom} />)}
+                                                </> : "Allowed to use any instance/raw resource requests"}</label>
                                         </div>
                                         {!inheritInstances &&
                                             <>
@@ -237,9 +242,15 @@ const UserInstanceUpdateForm = () => {
                                             }}
                                                 id="inheritDefault" />
                                             <label className="form-check-label" htmlFor="inheritDefault">
-                                                {`Inherit default instance from ${defaultInheritedFrom == null || defaultInheritedFrom === userToEdit ?
-                                                    (inviterName === username ? "you" : inviterName) :
-                                                    (defaultInheritedFrom === username ? "you" : defaultInheritedFrom)}`}</label>
+                                                <>
+                                                    Inherit default instance from {defaultInheritedFrom == null || defaultInheritedFrom === userToEdit ?
+                                                    // Same TODO I am not sure why we make this distinction? 
+                                                    // Anyways the you is not needed anymore, since the UserLink will add the me badge
+                                                    // Just need to figure out which is the correct inviter name?
+                                                        (inviterName === username ? "you" : <UserLink user={inviterName} />) :
+                                                        (defaultInheritedFrom === username ? "you" : <UserLink user={defaultInheritedFrom} />)}
+                                                </>
+                                            </label>
                                         </div>}
                                         {(!inheritDefault || !inheritInstances || (inheritInstances && !inviterHasInstancesAssigned)) && <div className="mb-3">
                                             <label htmlFor="instancesDefault">
