@@ -13,10 +13,14 @@ const getUserRoleFromArray = (roles) => {
     return roles[0]
 }
 
-const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, beforeUserToEdit = true }) => {
-    const [isOpen, setIsOpen] = useState(isRootNode || inviterList.includes(username) || beforeUserToEdit);
+const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, behindUserToEdit = false }) => {
+    const [isOpen, setIsOpen] = useState(isRootNode || inviterList.includes(username) || behindUserToEdit);
     const { userToEdit } = useParams();
     const toggleOpen = () => setIsOpen(prevIsOpen => !prevIsOpen);
+
+    if (username === userToEdit) {
+        behindUserToEdit = true
+    }
 
     if (userTreeData == null) {
         return
@@ -46,7 +50,7 @@ const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, b
             {isOpen && userTreeData[username] && (
                 <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
                     {userTreeData[username].map((child, index) => (
-                        <TreeNode key= {index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} beforeUserToEdit={beforeUserToEdit} />
+                        <TreeNode key= {index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} behindUserToEdit={behindUserToEdit} />
                     ))}
                 </ul>
             )}
