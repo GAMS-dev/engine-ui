@@ -52,7 +52,7 @@ const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, b
                 </ul>
             )}
 
-            {isOpen && username === userToEdit && !userTreeData[username] && (
+            {isOpen && username === userToEdit && !userTreeData[username] && userRole !== "user" && (
                 <div style={{ paddingLeft: '20px' }}>
                     <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
                         <div className="text-muted" ><em><small>No invitees</small></em></div>
