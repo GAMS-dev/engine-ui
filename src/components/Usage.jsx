@@ -418,7 +418,7 @@ const Usage = ({ userToEditRoles }) => {
             }
         }
         getRemainingQuota()
-    }, [server, setAlertMsg, userToEdit, remainingQuota, quotaConversionFactor]);
+    }, [server, setAlertMsg, userToEdit, quotaConversionFactor]);
     return (
         <>
             <div>
