@@ -134,7 +134,7 @@ const UserInviteesTree = () => {
                             <p><strong>{invalidUserMessage}</strong></p>
                         </div> :
                         <div className="max-main-width">
-                            <ul style={{ listStyleType: 'none', paddingLeft: '0px' }}>
+                            <ul className="pt-3" style={{ listStyleType: 'none', paddingLeft: '0px' }}>
                                 <TreeNode username={rootInviter} userRole={rootInviterRole} userTreeData={userTreeData} isRootNode={true} inviterList={inviterList} />
                             </ul>
                         </div>
