@@ -115,12 +115,12 @@ const UserInviteesTree = () => {
                 let inviterRoleTmp = userInfoReq.data.find(user => user.username === rootInviterNameTmp)
                 inviterRoleTmp = inviterRoleTmp ? getUserRoleFromArray(inviterRoleTmp.roles) : ""
                 setRootInviterRole(inviterRoleTmp);
-                setIsLoading(false)
             } catch (err) {
                 setAlertMsg(`Failed to fetch users information. Error message: ${getResponseError(err)}`);
                 setInvalidUserRequest(true)
                 setInvalidUserMessage(`Failed to fetch users information. Error message: ${getResponseError(err)}`)
             }
+            setIsLoading(false)
         }
         fetchUsersInfo();
     }, [server, userToEdit, setAlertMsg]);
