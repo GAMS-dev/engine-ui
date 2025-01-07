@@ -296,16 +296,19 @@ const Usage = ({ userToEditRoles }) => {
                 "rgba(139,30,63,0.2)", "rgba(62,114,29,0.2)"];
             let chartEvents = {};
             // first, we build the array of events for each user
-            const getEvents = (el, multiplier) => {
+            const getEvents = (el, multiplier, wholeJobFinished) => {
                 if (el.length === 0) {
                     // job did not start yet
                     return [];
                 }
                 const t = el[el.length - 1];
+                // new Date() takes the current time as Date
                 let finished = new Date();
                 if (t.finish != null) {
                     // job finished
                     finished = new Date(t.finish);
+                } else if (wholeJobFinished != null) {
+                    finished = new Date(wholeJobFinished);
                 }
                 return [{
                     isArrival: true,
@@ -325,7 +328,7 @@ const Usage = ({ userToEditRoles }) => {
                 const multiplier = (selectedWeightingOption && dataDisaggregatedTmp[i].labels?.multiplier != null) ? dataDisaggregatedTmp[i].labels.multiplier : 1;
                 if ('times' in dataDisaggregatedTmp[i]) {
                     // normal job
-                    chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier));
+                    chartEvents[dataDisaggregatedTmp[i].username].push(...getEvents(dataDisaggregatedTmp[i].times, multiplier, dataDisaggregatedTmp[i].finished));
 
                 } else if ('jobs' in dataDisaggregatedTmp[i]) {
                     // Hypercube job
@@ -415,7 +418,7 @@ const Usage = ({ userToEditRoles }) => {
             }
         }
         getRemainingQuota()
-    }, [server, setAlertMsg, userToEdit, remainingQuota, quotaConversionFactor]);
+    }, [server, setAlertMsg, userToEdit, quotaConversionFactor]);
     return (
         <>
             <div>
