@@ -307,7 +307,7 @@ const Usage = ({ userToEditRoles }) => {
                 if (t.finish != null) {
                     // job finished
                     finished = new Date(t.finish);
-                } else {
+                } else if (wholeJobFinished != null) {
                     finished = new Date(wholeJobFinished);
                 }
                 return [{
