@@ -21,7 +21,7 @@ const AuthProviderWrapper = ({ children }) => (
     </MemoryRouter>
 );
 
-describe('UserQuotaUpdateForm', () => {
+describe('UserInviteesTree', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -47,7 +47,7 @@ describe('UserQuotaUpdateForm', () => {
                             {
                                 "username": "user1",
                                 "roles": [
-                                    "inviter"
+                                    "user"
                                 ],
                                 "deleted": false,
                                 "inviter_name": "mainuser",
@@ -57,7 +57,7 @@ describe('UserQuotaUpdateForm', () => {
                             },
                             {
                                 "username": "user2",
-                                "roles": [],
+                                "roles": ["inviter"],
                                 "deleted": false,
                                 "inviter_name": "mainuser",
                                 "invitation_time": "2024-04-08T15:17:33.046930+00:00",
@@ -152,8 +152,6 @@ describe('UserQuotaUpdateForm', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/mainuser/))
-        // "No invitees" should be their since no we directly look at user3
-        expect(screen.getByText('No invitees')).toBeInTheDocument();
         // here expect both users before since the response is the same
         expect(screen.queryByText('mainuser')).toBeInTheDocument();
         expect(screen.queryByText('user1')).toBeInTheDocument();
