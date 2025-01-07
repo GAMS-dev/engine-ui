@@ -139,11 +139,9 @@ const UserEditBundle = () => {
                                     )}
                                 </>
                             )}
-                            {userToEditRoles.find(el => ["admin", "inviter"].includes(el)) && (
-                                <Nav.Item>
-                                    <Nav.Link eventKey="invitees" as={NavLink} to="invitees">Invitees</Nav.Link>
-                                </Nav.Item>
-                            )}
+                            <Nav.Item>
+                                <Nav.Link eventKey="invitees" as={NavLink} to="invitees">Invitees</Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </Tab.Container>
                     <Tab.Content className="pt-3">
