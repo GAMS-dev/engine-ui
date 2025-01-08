@@ -23,6 +23,14 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [remainingLive, setRemainingLive] = useState(null);
     const [validQuotaDisk, setValidQuotaDisk] = useState(true);
 
+    useEffect(() => {
+        if (quotas != null) {
+            setQuotaParallel(quotas.parallel);
+            setQuotaVolume(quotas.volume);
+            setQuotaDisk(quotas.disk);
+        }
+    }, [quotas])
+
     const getBindingQuotas = (quotaArray) => {
         const maxQuotasTmp = { parallel_quota: Infinity, volume_quota: Infinity, disk_quota: Infinity };
         quotaArray.forEach(quotaObj => {

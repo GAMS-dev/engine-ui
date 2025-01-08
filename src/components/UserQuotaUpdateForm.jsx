@@ -7,6 +7,7 @@ import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import UserQuotaSelector from "./UserQuotaSelector";
+import { UserLink } from "./UserLink";
 
 const UserQuotaUpdateForm = () => {
     const [{ jwt, server }] = useContext(AuthContext);
@@ -21,11 +22,13 @@ const UserQuotaUpdateForm = () => {
     const [inheritQuotas, setInheritQuotas] = useState(true);
     const [quotas, setQuotas] = useState({});
     const [quotaData, setQuotaData] = useState({});
+    const [quotaInheritedFrom, setQuotaInheritedFrom] = useState("");
+    const [quotaFromInviter, setQuotaFromInviter] = useState({});
 
     const [userEdited, setUserEdited] = useState(false);
 
     useEffect(() => {
-        setInheritQuotas(true);
+        setInheritQuotas(false);
         const fetchRequiredData = async () => {
             try {
                 const res = await axios
@@ -34,14 +37,62 @@ const UserQuotaUpdateForm = () => {
                     });
                 const quotasUser = res.data.filter(el => el.username === userToEdit)[0];
                 setQuotaData(res.data);
+                // userToEdit already has a quota
                 if (quotasUser) {
-                    setInheritQuotas(quotasUser.parallel_quota == null &&
-                        quotasUser.disk_quota == null && quotasUser.volume_quota == null);
-                    setQuotas({
-                        parallel: quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota,
-                        disk: quotasUser.disk_quota == null ? '' : quotasUser.disk_quota,
-                        volume: quotasUser.volume_quota == null ? '' : quotasUser.volume_quota
-                    });
+                    // inviters are listed -> inviter has a quota assigned
+                    if (res.data.length > 1) {
+                        let quotaInviterTmp = res.data.slice(-1)[0]
+                        setQuotaInheritedFrom(quotaInviterTmp.username);
+                        quotaInviterTmp = {
+                            parallel: quotaInviterTmp.parallel_quota == null ? '' : quotaInviterTmp.parallel_quota,
+                            disk: quotaInviterTmp.disk_quota == null ? '' : quotaInviterTmp.disk_quota,
+                            volume: quotaInviterTmp.volume_quota == null ? '' : quotaInviterTmp.volume_quota
+                        };
+                        setQuotaFromInviter(quotaInviterTmp);
+                        if (quotasUser.parallel_quota == null && quotasUser.disk_quota == null
+                            && quotasUser.volume_quota == null) {
+                            setInheritQuotas(true);
+                            setQuotas(quotaInviterTmp);
+                        } else {
+                            setQuotas({
+                                parallel: quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota,
+                                disk: quotasUser.disk_quota == null ? '' : quotasUser.disk_quota,
+                                volume: quotasUser.volume_quota == null ? '' : quotasUser.volume_quota
+                            });
+                        }
+                    }
+                    // Only on entry in return, which is for userToEdit -> inviter has no quota
+                    else {
+                        setQuotas({
+                            parallel: quotasUser.parallel_quota == null ? '' : quotasUser.parallel_quota,
+                            disk: quotasUser.disk_quota == null ? '' : quotasUser.disk_quota,
+                            volume: quotasUser.volume_quota == null ? '' : quotasUser.volume_quota
+                        });
+                        setQuotaFromInviter({ parallel: Infinity, volume: Infinity, disk: Infinity });
+                        // TODO get the inviter name
+                        setQuotaInheritedFrom("need to add");
+                    }
+                    // userToEdit is not listed
+                } else {
+                    if (res.data.length > 0) {
+                        // user not yet has quota but inviter has
+                        setQuotas({ parallel: 0, volume: 0, disk: 0 });
+                        let quotaInviterTmp = res.data.slice(-1)[0]
+                        setQuotaInheritedFrom(quotaInviterTmp.username);
+                        quotaInviterTmp = {
+                            parallel: quotaInviterTmp.parallel_quota == null ? '' : quotaInviterTmp.parallel_quota,
+                            disk: quotaInviterTmp.disk_quota == null ? '' : quotaInviterTmp.disk_quota,
+                            volume: quotaInviterTmp.volume_quota == null ? '' : quotaInviterTmp.volume_quota
+                        };
+                        setQuotaFromInviter(quotaInviterTmp);
+                    } else {
+                        // inviter also has no quota... admin is the person we would inherit from -> need to get inviter name from else where
+                        setQuotas({ parallel: 0, volume: 0, disk: 0 });
+                        // TODO this can't be displayed, how should this be handled?
+                        setQuotaFromInviter({ parallel: Infinity, volume: Infinity, disk: Infinity });
+                        // TODO get the inviter name
+                        setQuotaInheritedFrom("need to add");
+                    }
                 }
             }
             catch (err) {
@@ -53,6 +104,18 @@ const UserQuotaUpdateForm = () => {
         };
         fetchRequiredData();
     }, [server, jwt, userToEdit]);
+
+    useEffect(() => {
+        if (inheritQuotas) {
+            setQuotas(quotaFromInviter);
+        } else {
+            setQuotas({
+                parallel: 0,
+                disk: 0,
+                volume: 0
+            });
+        }
+    }, [inheritQuotas, quotaFromInviter, quotaInheritedFrom]);
 
     const handleUserUpdateQuotaSubmission = async () => {
         if (quotas == null) {
@@ -131,14 +194,14 @@ const UserQuotaUpdateForm = () => {
                                     id="inheritQuotas" />
                                 <label className="form-check-label" htmlFor="inheritQuotas">Inherit quotas from inviter?</label>
                             </div>
-                            {inheritQuotas !== true &&
-                                <fieldset disabled={isSubmitting}>
-                                    <UserQuotaSelector
-                                        quotas={quotas}
-                                        quotaData={quotaData}
-                                        userToEdit={userToEdit}
-                                        setQuotas={setQuotas} />
-                                </fieldset>}
+                            <fieldset disabled={isSubmitting || inheritQuotas}>
+                                <UserQuotaSelector
+                                    quotas={quotas}
+                                    quotaData={quotaData}
+                                    userToEdit={userToEdit}
+                                    setQuotas={setQuotas} />
+                            </fieldset>
+                            {inheritQuotas === true && <>Inherited from: <UserLink user={quotaInheritedFrom} /></>}
                             <div className="mt-3">
                                 <SubmitButton isSubmitting={isSubmitting}>
                                     Update Quotas
