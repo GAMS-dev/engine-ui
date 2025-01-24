@@ -369,7 +369,7 @@ describe('UserEditBundle', () => {
             , {
                 wrapper: AdminContextsWrapper
             });
-        await waitFor(() => screen.findByText(/Inherit/));
+        await waitFor(() => screen.findByText(/Inherit quotas from inviter?/));
     });
 
     it('opens the correct tap, dependent on the given path: /identity_provider', async () => {
@@ -451,9 +451,8 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText(/Change Quota/)).toBeInTheDocument();
         expect(screen.queryByText(/Identity Provider/)).toBeInTheDocument();
         expect(screen.queryByText(/Permissions/)).toBeInTheDocument();
-        // since user1 is no admin or inviter
-        // since on the usage page 'Show Invitees?' look for 'Invitees' as the whole text
-        expect(screen.queryByText('Invitees')).toBeNull();
+        // since now also for users
+        expect(screen.queryByText('Invitees')).toBeInTheDocument();
     });
 
     it('admin can see fewer options on the own page', async () => {
