@@ -120,7 +120,7 @@ describe('LicenseUpdateForm', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/User inherits the license from/));
-        expect(screen.getByRole("link", { name: 'admin me' })).toHaveAttribute(
+        expect(screen.getByRole("link", { name: 'admin' })).toHaveAttribute(
             'href',
             '/users/admin'
         )
