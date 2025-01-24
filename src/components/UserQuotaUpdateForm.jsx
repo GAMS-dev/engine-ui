@@ -28,6 +28,20 @@ const UserQuotaUpdateForm = () => {
     const [userEdited, setUserEdited] = useState(false);
 
     useEffect(() => {
+        const fetchInviterName = async () => {
+            try {
+                const userInfoReq = await axios.get(`${server}/users/`, {
+                    params: {
+                        username: userToEdit,
+                        everyone: true,
+                        filter: "deleted=false"
+                    }
+                });
+                setQuotaInheritedFrom(userInfoReq.data[0].inviter_name)
+            } catch (err) {
+                setErrorMsg(`Problems while retrieving user info. Error message: ${getResponseError(err)}.`);
+            }
+        }
         setInheritQuotas(false);
         const fetchRequiredData = async () => {
             try {
@@ -69,13 +83,13 @@ const UserQuotaUpdateForm = () => {
                             volume: quotasUser.volume_quota == null ? '' : quotasUser.volume_quota
                         });
                         setQuotaFromInviter({ parallel: Infinity, volume: Infinity, disk: Infinity });
-                        // TODO get the inviter name
-                        setQuotaInheritedFrom("need to add");
+                        fetchInviterName();
                     }
-                    // userToEdit is not listed
-                } else {
+                }
+                // userToEdit is not listed
+                else {
+                    // user not yet has quota but inviter has
                     if (res.data.length > 0) {
-                        // user not yet has quota but inviter has
                         setQuotas({ parallel: 0, volume: 0, disk: 0 });
                         let quotaInviterTmp = res.data.slice(-1)[0]
                         setQuotaInheritedFrom(quotaInviterTmp.username);
@@ -85,13 +99,13 @@ const UserQuotaUpdateForm = () => {
                             volume: quotaInviterTmp.volume_quota == null ? '' : quotaInviterTmp.volume_quota
                         };
                         setQuotaFromInviter(quotaInviterTmp);
-                    } else {
-                        // inviter also has no quota... admin is the person we would inherit from -> need to get inviter name from else where
+                    }
+                    // inviter also has no quota... admin is the person we would inherit from -> need to get inviter name from else where
+                    else {
                         setQuotas({ parallel: 0, volume: 0, disk: 0 });
                         // TODO this can't be displayed, how should this be handled?
-                        setQuotaFromInviter({ parallel: Infinity, volume: Infinity, disk: Infinity });
-                        // TODO get the inviter name
-                        setQuotaInheritedFrom("need to add");
+                        setQuotaFromInviter({ parallel: 'Infinity', volume: 'Infinity', disk: 'Infinity' });
+                        fetchInviterName();
                     }
                 }
             }
