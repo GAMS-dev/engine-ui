@@ -190,8 +190,8 @@ const UserInstanceUpdateForm = () => {
                                             <label className="form-check-label" htmlFor="inheritInstances">{inviterHasInstancesAssigned ?
                                                 <>
                                                     Inherit instances from {instancesInheritedFrom == null || instancesInheritedFrom === userToEdit ?
-                                                        (inviterName === username ? "you" : <UserLink user={inviterName} />) :
-                                                        (instancesInheritedFrom === username ? "you" : <UserLink user={instancesInheritedFrom} />)}
+                                                        <UserLink user={inviterName} /> :
+                                                        <UserLink user={instancesInheritedFrom} />}
                                                 </> : "Allowed to use any instance/raw resource requests"}</label>
                                         </div>
                                         {!inheritInstances &&
@@ -241,8 +241,8 @@ const UserInstanceUpdateForm = () => {
                                             <label className="form-check-label" htmlFor="inheritDefault">
                                                 <>
                                                     Inherit default instance from {defaultInheritedFrom == null || defaultInheritedFrom === userToEdit ?
-                                                        (inviterName === username ? "you" : <UserLink user={inviterName} />) :
-                                                        (defaultInheritedFrom === username ? "you" : <UserLink user={defaultInheritedFrom} />)}
+                                                        <UserLink user={inviterName} /> :
+                                                        <UserLink user={defaultInheritedFrom} />}
                                                 </>
                                             </label>
                                         </div>}
