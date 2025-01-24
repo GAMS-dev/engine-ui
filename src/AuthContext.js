@@ -27,7 +27,7 @@ export const AuthProvider = props => {
         throw new Error("Invalid response when trying to refresh token")
       }
 
-      const newLogin = login;
+      const newLogin = {...login};
       newLogin.jwt = res.data.access_token;
 
       if (res.data.refresh_token != null) {

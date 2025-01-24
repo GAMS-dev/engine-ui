@@ -190,9 +190,6 @@ const UserInstanceUpdateForm = () => {
                                             <label className="form-check-label" htmlFor="inheritInstances">{inviterHasInstancesAssigned ?
                                                 <>
                                                     Inherit instances from {instancesInheritedFrom == null || instancesInheritedFrom === userToEdit ?
-                                                    // TODO I am not sure why we make this distinction? 
-                                                    // Anyways the you is not needed anymore, since the UserLink will add the me badge
-                                                    // Just need to figure out which is the correct inviter name?
                                                         (inviterName === username ? "you" : <UserLink user={inviterName} />) :
                                                         (instancesInheritedFrom === username ? "you" : <UserLink user={instancesInheritedFrom} />)}
                                                 </> : "Allowed to use any instance/raw resource requests"}</label>
@@ -244,9 +241,6 @@ const UserInstanceUpdateForm = () => {
                                             <label className="form-check-label" htmlFor="inheritDefault">
                                                 <>
                                                     Inherit default instance from {defaultInheritedFrom == null || defaultInheritedFrom === userToEdit ?
-                                                    // Same TODO I am not sure why we make this distinction? 
-                                                    // Anyways the you is not needed anymore, since the UserLink will add the me badge
-                                                    // Just need to figure out which is the correct inviter name?
                                                         (inviterName === username ? "you" : <UserLink user={inviterName} />) :
                                                         (defaultInheritedFrom === username ? "you" : <UserLink user={defaultInheritedFrom} />)}
                                                 </>
