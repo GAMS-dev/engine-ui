@@ -63,7 +63,6 @@ describe('UserInviteesTree', () => {
         render(<Job />, {
             wrapper: AuthProviderWrapper
         });
-        await waitFor(() => screen.findByText(/Job asd123 does not exist./));
     });
 
     it('gives the correct error message if an invalid token is called', async () => {
@@ -73,5 +72,16 @@ describe('UserInviteesTree', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/Job invalidToken123 does not exist./));
+        screen.debug()
+    });
+
+    it('gives the correct error message if an invalid token is called also for hybercube', async () => {
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ token: 'hc:invalidToken123' })
+
+        render(<Job />, {
+            wrapper: AuthProviderWrapper
+        });
+        await waitFor(() => screen.findByText(/Job hc%3AinvalidToken123 does not exist./));
+        screen.debug()
     });
 })

@@ -72,6 +72,11 @@ const Job = () => {
           jobData = jobData.data.results[0]
         } catch (err) {
           if (!axios.isCancel(err)) {
+            if (err.status === 404) {
+              setInvalidUserRequest(true)
+              console.log(`Job ${encodeURIComponent(token)} does not exist.`)
+              setInvalidUserMessage(`Job ${encodeURIComponent(token)} does not exist.`)
+            }
             setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
             setIsLoading(false)
           }
@@ -91,7 +96,6 @@ const Job = () => {
             if (err.status === 404) {
               setInvalidUserRequest(true)
               setInvalidUserMessage(`Job ${encodeURIComponent(token)} does not exist.`)
-              setIsLoading(false)
             }
             setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
             setIsLoading(false)
