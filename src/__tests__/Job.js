@@ -72,7 +72,6 @@ describe('UserInviteesTree', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/Job invalidToken123 does not exist./));
-        screen.debug()
     });
 
     it('gives the correct error message if an invalid token is called also for hybercube', async () => {
@@ -82,6 +81,5 @@ describe('UserInviteesTree', () => {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/Job hc%3AinvalidToken123 does not exist./));
-        screen.debug()
     });
 })

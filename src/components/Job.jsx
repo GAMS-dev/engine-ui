@@ -74,7 +74,6 @@ const Job = () => {
           if (!axios.isCancel(err)) {
             if (err.status === 404) {
               setInvalidUserRequest(true)
-              console.log(`Job ${encodeURIComponent(token)} does not exist.`)
               setInvalidUserMessage(`Job ${encodeURIComponent(token)} does not exist.`)
             }
             setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
