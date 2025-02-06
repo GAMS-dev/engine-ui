@@ -63,20 +63,20 @@ describe('LicenseUpdateForm', () => {
         console.error = originalError
     })
 
-    it('renders LicenseUpdateForm corectly', async () => {
+    it('renders LicenseUpdateForm correctly', async () => {
         render(<LicenseUpdateForm />, {
             wrapper: AuthProviderWrapper
         });
     });
 
-    it('shows error corectly if no license exists', async () => {
+    it('shows error correctly if no license exists', async () => {
         render(<LicenseUpdateForm />, {
             wrapper: AuthProviderWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
     });
 
-    it('shows error corectly if other problems occure in get', async () => {
+    it('shows error correctly if other problems occur in get', async () => {
         axios.get.mockRejectedValue({
             response: {
                 data: {
@@ -119,7 +119,11 @@ describe('LicenseUpdateForm', () => {
         render(<LicenseUpdateForm />, {
             wrapper: AuthProviderWrapper
         });
-        await waitFor(() => screen.findByText(/User inherits the license from admin/));
+        await waitFor(() => screen.findByText(/User inherits the license from/));
+        expect(screen.getByRole("link", { name: 'admin' })).toHaveAttribute(
+            'href',
+            '/users/admin'
+        )
     });
 
     it('updates license correctly', async () => {
