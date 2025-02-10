@@ -369,7 +369,7 @@ describe('UserEditBundle', () => {
             , {
                 wrapper: AdminContextsWrapper
             });
-        await waitFor(() => screen.findByText(/Inherit quotas from inviter?/));
+        await waitFor(() => screen.findByText(/Parallel Quota/));
     });
 
     it('opens the correct tap, dependent on the given path: /identity_provider', async () => {
