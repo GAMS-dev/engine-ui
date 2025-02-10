@@ -7,6 +7,7 @@ import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { calcRemainingQuota, getResponseError } from "./util";
 import { UserSettingsContext } from "./UserSettingsContext";
+import { UserLink } from "./UserLink";
 
 const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [{ server, roles, username }] = useContext(AuthContext);
@@ -22,14 +23,18 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [quotaDataInternal, setQuotaDataInternal] = useState(quotaData);
     const [remainingLive, setRemainingLive] = useState(null);
     const [validQuotaDisk, setValidQuotaDisk] = useState(true);
+    const [quotaInheritedFrom, setQuotaInheritedFrom] = useState({ parallel: null, volume: null, disk: null });
 
     useEffect(() => {
-        if (quotas != null) {
-            setQuotaParallel(quotas.parallel);
-            setQuotaVolume(quotas.volume);
-            setQuotaDisk(quotas.disk);
-        }
-    }, [quotas])
+        setQuotaParallel(quotas?.parallel ?? '');
+        setQuotaVolume(quotas?.volume == null ? '' : quotas.volume / userSettings.quotaConversionFactor);
+        setQuotaDisk(quotas?.disk ?? '');
+        setQuotaInheritedFrom({
+            parallel: quotaData.find(el => el.parallel_quota != null && el.username !== userToEdit)?.username,
+            volume: quotaData.find(el => el.volume_quota != null && el.username !== userToEdit)?.username,
+            disk: quotaData.find(el => el.disk_quota != null && el.username !== userToEdit)?.username
+        })
+    }, [quotas, userSettings, userToEdit, quotaData])
 
     const getBindingQuotas = (quotaArray) => {
         const maxQuotasTmp = { parallel_quota: Infinity, volume_quota: Infinity, disk_quota: Infinity };
@@ -157,6 +162,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     min="0"
                     max={isFinite(maxQuotas.parallel) ? maxQuotas.parallel : ''}
                     value={quotaParallel}
+                    aria-describedby="quotaParallelInherited"
                     onChange={e => {
                         if (!e.target.value) {
                             setValidQuotaParallel(true);
@@ -179,6 +185,9 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     </span>
                 </div>
             </div>
+            <small id="quotaParallelInherited" className="form-text text-muted">
+                {quotaParallel === '' && quotaInheritedFrom.parallel != null ? <>Inherited from <UserLink user={quotaInheritedFrom.parallel} /> </> : ''}
+            </small>
         </div>
         <div className="mb-3">
             <label htmlFor="quotaVolume">
@@ -201,7 +210,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     step="any"
                     min="0"
                     max={isFinite(maxQuotas.volume) ? maxQuotas.volume : ''}
-                    value={quotaVolume === '' ? '' : quotaVolume}
+                    value={quotaVolume}
+                    aria-describedby="quotaVolumeInherited"
                     onChange={e => {
                         if (e.target.value == null || e.target.value === '') {
                             setValidQuotaVolume(true);
@@ -225,6 +235,9 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     </span>
                 </div>
             </div>
+            <small id="quotaVolumeInherited" className="form-text text-muted">
+                {quotaVolume === '' && quotaInheritedFrom.volume != null ? <>Inherited from <UserLink user={quotaInheritedFrom.volume} /> </> : ''}
+            </small>
         </div>
         <div className="mb-3">
             <label htmlFor="quotaDisk">
@@ -246,6 +259,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     id="quotaDisk"
                     step="any"
                     value={quotaDisk === '' ? '' : Math.round(quotaDisk / 1e3) / 1000}
+                    aria-describedby="quotaDiskInherited"
                     min="0"
                     max={isFinite(maxQuotas.disk) ? maxQuotas.disk : '100000000'}
                     onChange={e => {
@@ -271,6 +285,9 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     </span>
                 </div>
             </div>
+            <small id="quotaDiskInherited" className="form-text text-muted">
+                {quotaDisk === '' && quotaInheritedFrom.disk != null ? <>Inherited from <UserLink user={quotaInheritedFrom.disk} /> </> : ''}
+            </small>
         </div>
     </>
 }
