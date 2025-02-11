@@ -29,11 +29,14 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         setQuotaParallel(quotas?.parallel ?? '');
         setQuotaVolume(quotas?.volume == null ? '' : quotas.volume / userSettings.quotaConversionFactor);
         setQuotaDisk(quotas?.disk ?? '');
-        setQuotaInheritedFrom({
-            parallel: quotaData.find(el => el.parallel_quota != null && el.username !== userToEdit)?.username,
-            volume: quotaData.find(el => el.volume_quota != null && el.username !== userToEdit)?.username,
-            disk: quotaData.find(el => el.disk_quota != null && el.username !== userToEdit)?.username
-        })
+        // if UserInvitationForm calls the selector it only provides setQuotas
+        if (userToEdit != null) {
+            setQuotaInheritedFrom({
+                parallel: quotaData.find(el => el.parallel_quota != null && el.username !== userToEdit)?.username,
+                volume: quotaData.find(el => el.volume_quota != null && el.username !== userToEdit)?.username,
+                disk: quotaData.find(el => el.disk_quota != null && el.username !== userToEdit)?.username
+            })
+        }
     }, [quotas, userSettings, userToEdit, quotaData])
 
     const getBindingQuotas = (quotaArray) => {
