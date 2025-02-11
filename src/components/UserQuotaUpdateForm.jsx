@@ -54,7 +54,6 @@ const UserQuotaUpdateForm = () => {
         }
         setIsSubmitting(true);
         const quotaUpdateParams = {};
-        let needUpdate = true;
         const quotasToDelete = [];
 
         if (quotas.parallel != null) {
@@ -75,7 +74,7 @@ const UserQuotaUpdateForm = () => {
 
         try {
             let updateRequest;
-            if (needUpdate) {
+            if (Object.keys(quotaUpdateParams).length > 0) {
                 quotaUpdateParams["username"] = userToEdit;
                 updateRequest = axios.put(`${server}/usage/quota`, null, {
                     params: quotaUpdateParams
