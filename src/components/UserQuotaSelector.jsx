@@ -26,9 +26,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [quotaInheritedFrom, setQuotaInheritedFrom] = useState({ parallel: null, volume: null, disk: null });
 
     useEffect(() => {
-        setQuotaParallel(quotas?.parallel ?? '');
-        setQuotaVolume(quotas?.volume == null ? '' : quotas.volume / userSettings.quotaConversionFactor);
-        setQuotaDisk(quotas?.disk ?? '');
+        if (quotas != null) {
+            setQuotaParallel(quotas?.parallel ?? '');
+            setQuotaVolume(quotas?.volume == null ? '' : quotas.volume / userSettings.quotaConversionFactor);
+            setQuotaDisk(quotas?.disk ?? '');
+        }
         // if UserInvitationForm calls the selector it only provides setQuotas
         if (userToEdit != null) {
             setQuotaInheritedFrom({
@@ -75,6 +77,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                         volume: maxQuotasTmp.volume_quota / userSettings.quotaConversionFactor,
                         disk: maxQuotasTmp.disk_quota / 1e6
                     });
+                    setQuotaInheritedFrom({
+                        parallel: resQuotas.data.find(el => el.parallel_quota != null && el.username !== username)?.username,
+                        volume: resQuotas.data.find(el => el.volume_quota != null && el.username !== username)?.username,
+                        disk: resQuotas.data.find(el => el.disk_quota != null && el.username !== username)?.username
+                    })
                     setMaxQuotasInitialized(true);
                 } else {
                     setMaxQuotas({ parallel: Infinity, volume: Infinity, disk: Infinity });
