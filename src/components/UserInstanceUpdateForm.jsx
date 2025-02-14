@@ -183,9 +183,13 @@ const UserInstanceUpdateForm = () => {
                                 {!userToEditIsAdmin &&
                                     <>
                                         <div className="form-check mb-3">
-                                            <input type="checkbox" className="form-check-input" checked={inheritInstances} onChange={e => {
-                                                setInheritInstances(e.target.checked);
-                                            }}
+                                            <input type="checkbox"
+                                                className="form-check-input"
+                                                checked={inheritInstances}
+                                                aria-describedby="inheritedInstances"
+                                                onChange={e => {
+                                                    setInheritInstances(e.target.checked);
+                                                }}
                                                 id="inheritInstances" />
                                             <label className="form-check-label" htmlFor="inheritInstances">{inviterHasInstancesAssigned ?
                                                 <>
@@ -193,6 +197,11 @@ const UserInstanceUpdateForm = () => {
                                                         <UserLink user={inviterName} /> :
                                                         <UserLink user={instancesInheritedFrom} />}
                                                 </> : "Allowed to use any instance/raw resource requests"}</label>
+                                            {inheritInstances &&
+                                                <small id="inheritedInstances" className="form-text text-muted">
+                                                    ({instancesAllowed.map(instance => instance.value).join(', ')})
+                                                </small>
+                                            }
                                         </div>
                                         {!inheritInstances &&
                                             <>
@@ -234,9 +243,13 @@ const UserInstanceUpdateForm = () => {
                                 {(selectedInstancesAllowed.length > 0 || inheritInstances) &&
                                     <>
                                         {inheritInstances && inviterHasInstancesAssigned && <div className="form-check mb-3">
-                                            <input type="checkbox" className="form-check-input" checked={inheritDefault} onChange={e => {
-                                                setInheritDefault(e.target.checked);
-                                            }}
+                                            <input type="checkbox"
+                                                className="form-check-input"
+                                                aria-describedby="inheritedDefaultInstances"
+                                                checked={inheritDefault}
+                                                onChange={e => {
+                                                    setInheritDefault(e.target.checked);
+                                                }}
                                                 id="inheritDefault" />
                                             <label className="form-check-label" htmlFor="inheritDefault">
                                                 <>
@@ -245,6 +258,11 @@ const UserInstanceUpdateForm = () => {
                                                         <UserLink user={defaultInheritedFrom} />}
                                                 </>
                                             </label>
+                                            {inheritDefault &&
+                                                <small id="inheritedDefaultInstances" className="form-text text-muted">
+                                                    ({defaultInstance.value})
+                                                </small>
+                                            }
                                         </div>}
                                         {(!inheritDefault || !inheritInstances || (inheritInstances && !inviterHasInstancesAssigned)) && <div className="mb-3">
                                             <label htmlFor="instancesDefault">
