@@ -25,7 +25,7 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
-describe('UserInviteesTree', () => {
+describe('Job', () => {
 
     beforeEach(() => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ token: 'asd123' })
