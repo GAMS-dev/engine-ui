@@ -20,9 +20,10 @@ export const UserMenu = () => {
                         <span className="username-container">{username}</span>
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
+                        <Dropdown.Item as={Link} to={`/users/${username}/usage`}><small>Usage</small></Dropdown.Item>
                         <Dropdown.Item as={Link} to='/settings'><small>Settings</small></Dropdown.Item>
                         <Dropdown.Item as={Link} to='/auth-token'><small>Create auth token</small></Dropdown.Item>
-                        {isIDPManaged !== true && <Dropdown.Item as={Link} to={`/users/${username}/change-pass`}>
+                        {isIDPManaged !== true && <Dropdown.Item as={Link} to={`/users/${username}/change_pass`}>
                             <small>Change password</small>
                         </Dropdown.Item>}
                         <Dropdown.Item as={Link} to='/logout'>

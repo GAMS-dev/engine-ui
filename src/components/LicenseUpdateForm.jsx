@@ -6,6 +6,7 @@ import axios from "axios";
 import { getResponseError } from "./util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
+import { UserLink } from "./UserLink";
 
 const LicenseUpdateForm = () => {
     const [{ jwt, server, roles }] = useContext(AuthContext);
@@ -16,6 +17,7 @@ const LicenseUpdateForm = () => {
     const [licenseErrorMsg, setLicenseErrorMsg] = useState("");
     const [registeredLicense, setRegisteredLicense] = useState("");
     const [license, setLicense] = useState("");
+    const [inheritedFrom, setInheritedFrom] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [userEdited, setUserEdited] = useState(false);
@@ -42,7 +44,8 @@ const LicenseUpdateForm = () => {
                 setRegisteredLicense(lReq.data[0].license);
                 setIsLoading(false);
             } else {
-                setLicenseErrorMsg(`User inherits the license from ${lReq.data[0].inherited_from}`);
+                setLicenseErrorMsg(`User inherits the license from`);
+                setInheritedFrom(lReq.data[0].inherited_from)
                 setIsLoading(false);
             }
         }
@@ -109,7 +112,7 @@ const LicenseUpdateForm = () => {
                         }}
                     >
                         <div className="invalid-feedback text-center" style={{ display: licenseErrorMsg !== "" ? "block" : "none" }}>
-                            {licenseErrorMsg}
+                            {inheritedFrom === ""? licenseErrorMsg : <>{licenseErrorMsg} <UserLink user={inheritedFrom} /></>}
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <label htmlFor="licenseBox">
