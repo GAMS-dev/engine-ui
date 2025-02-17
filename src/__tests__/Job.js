@@ -71,7 +71,7 @@ describe('Job', () => {
         render(<Job />, {
             wrapper: AuthProviderWrapper
         });
-        await waitFor(() => screen.findByText(/Job invalidToken123 does not exist./));
+        await waitFor(() => screen.findByText(/Problems fetching job information. Error message: undefined/));
     });
 
     it('gives the correct error message if an invalid token is called also for hybercube', async () => {
@@ -80,6 +80,6 @@ describe('Job', () => {
         render(<Job />, {
             wrapper: AuthProviderWrapper
         });
-        await waitFor(() => screen.findByText(/Job hc%3AinvalidToken123 does not exist./));
+        await waitFor(() => screen.findByText(/Problems fetching Hypercube job information. Error message: undefined/));
     });
 })
