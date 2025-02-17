@@ -20,6 +20,7 @@ const Job = () => {
   const [{ jwt, server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const [serverInfo,] = useContext(ServerInfoContext);
+  const [invalidUserMessage, setInvalidUserMessage] = useState('');
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
@@ -70,7 +71,7 @@ const Job = () => {
           jobData = jobData.data.results[0]
         } catch (err) {
           if (!axios.isCancel(err)) {
-            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
+            setInvalidUserMessage(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
             setIsLoading(false)
           }
           return
@@ -86,7 +87,7 @@ const Job = () => {
           jobData = jobData.data
         } catch (err) {
           if (!axios.isCancel(err)) {
-            setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
+            setInvalidUserMessage(`Problems fetching job information. Error message: ${getResponseError(err)}`)
             setIsLoading(false)
           }
           return
@@ -153,34 +154,38 @@ const Job = () => {
   return (
     <>
       {isLoading ? <ClipLoader /> :
-        <div className="mt-4">
-          <div className="row">
-            <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
-              <JobReqInfoTable
-                job={job}
-                isHcJob={isHcJob}
-                inKubernetes={serverInfo.in_kubernetes === true}
-                setRefreshJob={setRefresh} />
-            </div>
-            <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
-              <JobRespInfoTable
-                job={job}
-                statusCodes={statusCodes}
-                isHcJob={isHcJob}
-                setRefreshJob={setRefresh}
-                server={server}
-              />
-            </div>
-            {job.text_entries && job.text_entries.length > 0 && job.status >= 10 &&
-              <div className="col-md-12 col-xl-4">
-                <TextEntryView
-                  textEntries={job.text_entries && job.text_entries.length > 0 ?
-                    job.text_entries.sort((a, b) => a.entry_name.localeCompare(b.entry_name)) : null}
+        invalidUserMessage !== '' ?
+          <div className="alert alert-danger mt-3">
+            <p><strong>{invalidUserMessage}</strong></p>
+          </div> :
+          <div className="mt-4">
+            <div className="row">
+              <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
+                <JobReqInfoTable
+                  job={job}
+                  isHcJob={isHcJob}
+                  inKubernetes={serverInfo.in_kubernetes === true}
+                  setRefreshJob={setRefresh} />
+              </div>
+              <div className={`col-md-6 ${isHcJob ? "" : "col-xl-4"}`}>
+                <JobRespInfoTable
+                  job={job}
+                  statusCodes={statusCodes}
+                  isHcJob={isHcJob}
+                  setRefreshJob={setRefresh}
                   server={server}
                 />
-              </div>}
-          </div>
-        </div>}
+              </div>
+              {job.text_entries && job.text_entries.length > 0 && job.status >= 10 &&
+                <div className="col-md-12 col-xl-4">
+                  <TextEntryView
+                    textEntries={job.text_entries && job.text_entries.length > 0 ?
+                      job.text_entries.sort((a, b) => a.entry_name.localeCompare(b.entry_name)) : null}
+                    server={server}
+                  />
+                </div>}
+            </div>
+          </div>}
     </>
   );
 };
