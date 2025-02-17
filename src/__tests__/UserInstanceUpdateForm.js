@@ -69,6 +69,8 @@ describe('UserInstanceUpdateForm', () => {
                                 }
                             ]
                         })
+                    } else {
+                        return Promise.reject(new Error('not found'))
                     }
                 case 'testserver/usage/pools/user1':
                     return Promise.resolve({
