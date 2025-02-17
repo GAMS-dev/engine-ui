@@ -3,7 +3,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
 import { AuthContext } from '../AuthContext';
-import { ServerInfoContext } from "../ServerInfoContext";
 import axios from 'axios';
 import { UserSettingsContext } from '../components/UserSettingsContext';
 
@@ -38,10 +37,10 @@ describe('UserInstanceUpdateForm', () => {
             if (paramsRaw != null) {
                 ({ params } = paramsRaw)
             }
+            // user 2 inherits instances from user1 and default from admin
+            // user1 doesn't
             switch (url) {
                 case 'testserver/users/':
-                    // user 2 inherits instances from user1 and default from admin
-                    // user1 doesn't
                     if (params?.username === "user1") {
                         return Promise.resolve({
                             status: 200,
