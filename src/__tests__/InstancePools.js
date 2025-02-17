@@ -75,7 +75,7 @@ describe('InstancePools Component', () => {
         await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2))
     })
 
-    test('clicking enable instance pools opens modal', async () => {
+    it('clicking enable instance pools opens modal', async () => {
         axios.get.mockResolvedValueOnce({
             status: 200,
             data: { instance_pools_available: [] },
@@ -92,7 +92,7 @@ describe('InstancePools Component', () => {
             )
         )
     })
-    test('Instance pool table renders', async () => {
+    it('Instance pool table renders', async () => {
         axios.get.mockResolvedValueOnce({
             status: 200,
             data: {

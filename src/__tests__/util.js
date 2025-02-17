@@ -6,7 +6,7 @@ describe('zipAsync', () => {
         global.JSZip = JSZip
     })
 
-    test('should reject if JSZip does not support blobs', async () => {
+    it('should reject if JSZip does not support blobs', async () => {
         global.JSZip.support = { blob: false }
 
         await expect(zipAsync([])).rejects.toThrow(EvalError)
@@ -15,7 +15,7 @@ describe('zipAsync', () => {
         )
     })
 
-    test('should reject if more than 200 files are provided', async () => {
+    it('should reject if more than 200 files are provided', async () => {
         global.JSZip.support = { blob: true }
         const files = Array.from({ length: 201 }, (_, i) => ({
             name: `file${i}.txt`,
@@ -28,7 +28,7 @@ describe('zipAsync', () => {
         )
     })
 
-    test('should reject if total file size exceeds 100MB', async () => {
+    it('should reject if total file size exceeds 100MB', async () => {
         global.JSZip.support = { blob: true }
         const files = [{ name: 'bigfile.txt', size: 100e6 + 1 }]
 
@@ -38,7 +38,7 @@ describe('zipAsync', () => {
         )
     })
 
-    test('should successfully zip files when within limits', async () => {
+    it('should successfully zip files when within limits', async () => {
         global.JSZip.support = { blob: true }
         const files = [
             new File(['Hello World'], 'file1.txt', { type: 'text/plain' }),
@@ -49,7 +49,7 @@ describe('zipAsync', () => {
         expect(zipBlob).toBeInstanceOf(Blob)
     })
 
-    test('should call generateAsync with correct options', async () => {
+    it('should call generateAsync with correct options', async () => {
         global.JSZip.support = { blob: true }
         const files = [
             new File(['Hello World'], 'test.txt', { type: 'text/plain' }),
