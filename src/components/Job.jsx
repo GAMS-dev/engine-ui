@@ -20,7 +20,6 @@ const Job = () => {
   const [{ jwt, server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const [serverInfo,] = useContext(ServerInfoContext);
-  const [invalidUserRequest, setInvalidUserRequest] = useState(false);
   const [invalidUserMessage, setInvalidUserMessage] = useState('');
 
   useEffect(() => {
@@ -72,11 +71,7 @@ const Job = () => {
           jobData = jobData.data.results[0]
         } catch (err) {
           if (!axios.isCancel(err)) {
-            if (err.status === 404) {
-              setInvalidUserRequest(true)
-              setInvalidUserMessage(`Job ${encodeURIComponent(token)} does not exist.`)
-            }
-            setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
+            setInvalidUserMessage(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
             setIsLoading(false)
           }
           return
@@ -92,11 +87,7 @@ const Job = () => {
           jobData = jobData.data
         } catch (err) {
           if (!axios.isCancel(err)) {
-            if (err.status === 404) {
-              setInvalidUserRequest(true)
-              setInvalidUserMessage(`Job ${encodeURIComponent(token)} does not exist.`)
-            }
-            setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
+            setInvalidUserMessage(`Problems fetching job information. Error message: ${getResponseError(err)}`)
             setIsLoading(false)
           }
           return
@@ -163,7 +154,7 @@ const Job = () => {
   return (
     <>
       {isLoading ? <ClipLoader /> :
-        invalidUserRequest ?
+        invalidUserMessage !== '' ?
           <div className="alert alert-danger mt-3">
             <p><strong>{invalidUserMessage}</strong></p>
           </div> :
