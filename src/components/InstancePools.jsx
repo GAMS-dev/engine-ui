@@ -30,67 +30,6 @@ const InstancePools = () => {
         (['INVITER_ONLY', 'ADMIN_ONLY'].includes(serverConfig.instance_pool_access) && roles?.includes('admin') === true) ||
         (serverConfig.instance_pool_access === 'INVITER_ONLY' && roles?.includes('inviter') === true);
 
-    const [displayFieldsPools] = useState([
-        {
-            field: "label",
-            column: "Instance Label",
-            sorter: "alphabetical",
-            displayer: String
-        },
-        {
-            field: "owner",
-            column: "Owner",
-            sorter: "alphabetical",
-            displayer: user => user.deleted ?
-                <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
-                <UserLink user={user.username} />
-        },
-        {
-            field: "instance",
-            column: "Instance",
-            sorter: "alphabetical",
-            displayer: (instance) =>
-                formatInstancesSelectInput([{
-                    'label': instance.label,
-                    'cpu_request': instance.cpu_request,
-                    'memory_request': instance.memory_request,
-                    'multiplier': instance.multiplier
-                }], userSettings.multiplierUnit)[0].label
-        },
-        {
-            field: "size",
-            column: "Size",
-            sorter: "numerical",
-            displayer: Number
-        },
-        {
-            field: "size_active",
-            column: "Active Workers",
-            sorter: "numerical",
-            displayer: Number
-        },
-        {
-            field: "size_busy",
-            column: "Busy Workers",
-            sorter: "numerical",
-            displayer: Number
-        },
-        {
-            field: "id,label,owner,size,size_active,cancelling",
-            column: "Actions",
-            displayer: (_, label, owner, size, currentSize, isCanceling) => <InstancePoolsActionsButtonGroup
-                server={server}
-                label={label}
-                isPool={true}
-                hasPoolWritePerm={roles?.includes('admin') === true || userInvitees.includes(owner.username)}
-                poolSize={size}
-                poolSizeCurrent={currentSize}
-                poolIsCanceling={isCanceling}
-                instancePoolsEnabled={instancePoolsEnabled}
-                setRefresh={setRefresh} />
-        }
-    ]);
-
     useEffect(() => {
         const fetchInstances = async () => {
             setIsLoading(true);
@@ -167,7 +106,66 @@ const InstancePools = () => {
                 data={instancePools}
                 noDataMsg="No Instance Pools Found"
                 isLoading={isLoading}
-                displayFields={displayFieldsPools}
+                displayFields={[
+                    {
+                        field: "label",
+                        column: "Instance Label",
+                        sorter: "alphabetical",
+                        displayer: String
+                    },
+                    {
+                        field: "owner",
+                        column: "Owner",
+                        sorter: "alphabetical",
+                        displayer: user => user.deleted ?
+                            <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
+                            <UserLink user={user.username} />
+                    },
+                    {
+                        field: "instance",
+                        column: "Instance",
+                        sorter: "alphabetical",
+                        displayer: (instance) =>
+                            formatInstancesSelectInput([{
+                                'label': instance.label,
+                                'cpu_request': instance.cpu_request,
+                                'memory_request': instance.memory_request,
+                                'multiplier': instance.multiplier
+                            }], userSettings.multiplierUnit)[0].label
+                    },
+                    {
+                        field: "size",
+                        column: "Size",
+                        sorter: "numerical",
+                        displayer: Number
+                    },
+                    {
+                        field: "size_active",
+                        column: "Active Workers",
+                        sorter: "numerical",
+                        displayer: Number
+                    },
+                    {
+                        field: "size_busy",
+                        column: "Busy Workers",
+                        sorter: "numerical",
+                        displayer: Number
+                    },
+                    {
+                        field: "id,label,owner,size,size_active,cancelling",
+                        column: "Actions",
+                        displayer: (_, label, owner, size, currentSize, isCanceling) => <InstancePoolsActionsButtonGroup
+                            server={server}
+                            label={label}
+                            isPool={true}
+                            hasPoolWritePerm={roles?.includes('admin') === true || userInvitees.includes(owner.username)}
+                            poolSize={size}
+                            poolSizeCurrent={currentSize}
+                            poolIsCanceling={isCanceling}
+                            instancePoolsEnabled={instancePoolsEnabled}
+                            setRefresh={setRefresh} />
+                    }
+                ]}
                 idFieldName="label"
                 sortedAsc={true}
                 sortedCol="label"
