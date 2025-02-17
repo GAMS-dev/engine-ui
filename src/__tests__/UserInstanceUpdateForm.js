@@ -277,7 +277,7 @@ describe('UserInstanceUpdateForm', () => {
         });
 
         await waitFor(() => screen.findByText(/Inherit instances from/));
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Inherit instances from user1' }));
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Inherit instances from user1 (Test2, TestInstance)' }));
         expect(screen.queryByText("(Test2, TestInstance)")).toBeNull();
         expect(screen.queryByText("(TestInstance)")).toBeNull();
     });

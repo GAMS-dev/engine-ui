@@ -196,12 +196,12 @@ const UserInstanceUpdateForm = () => {
                                                     Inherit instances from {instancesInheritedFrom == null || instancesInheritedFrom === userToEdit ?
                                                         <UserLink user={inviterName} /> :
                                                         <UserLink user={instancesInheritedFrom} />}
+                                                    {inheritInstances &&
+                                                        <small id="inheritedInstances" className="form-text text-muted">
+                                                            ({instancesAllowed.map(instance => instance.value).join(', ')})
+                                                        </small>
+                                                    }
                                                 </> : "Allowed to use any instance/raw resource requests"}</label>
-                                            {inheritInstances &&
-                                                <small id="inheritedInstances" className="form-text text-muted">
-                                                    ({instancesAllowed.map(instance => instance.value).join(', ')})
-                                                </small>
-                                            }
                                         </div>
                                         {!inheritInstances &&
                                             <>
