@@ -134,8 +134,38 @@ describe('UserInviteesTree', () => {
         // here expect both users before since the response is the same
         expect(screen.queryByText('mainuser')).toBeInTheDocument();
         expect(screen.queryByText('user1')).toBeInTheDocument();
-
     })
+
+    it('places the user you are looking at at the top', async () => {
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
+        render(<UserInviteesTree />, {
+            wrapper: AuthProviderWrapper
+        });
+        await waitFor(() => screen.findByText(/mainuser/))
+        const userElements = screen.getAllByText(/user\d/);
+
+        const expectedOrder = ['user2', ' user1'];
+
+        userElements.forEach((userElement, index) => {
+            expect(userElement.textContent).toBe(expectedOrder[index]);
+        });
+    })
+
+    it('places the subtree to the user you are looking at at the top', async () => {
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user3' })
+        render(<UserInviteesTree />, {
+            wrapper: AuthProviderWrapper
+        });
+        await waitFor(() => screen.findByText(/mainuser/))
+        const userElements = screen.getAllByText(/user\d/);
+
+        const expectedOrder = [' user1', 'user3', ' user2'];
+
+        userElements.forEach((userElement, index) => {
+            expect(userElement.textContent).toBe(expectedOrder[index]);
+        });
+    })
+
 
     it('handles errors while retrieving', async () => {
         axios.get.mockRejectedValue({
