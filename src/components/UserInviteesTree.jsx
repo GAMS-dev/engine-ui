@@ -47,7 +47,7 @@ const TreeNode = ({ username, userRole, userTreeData, isRootNode, inviterList, b
             {isOpen && userTreeData[username] && (
                 <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
                     {userTreeData[username].map((child, index) => (
-                        <TreeNode key={index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} behindUserToEdit={username === userToEdit? true: behindUserToEdit}/>
+                        <TreeNode key={index} username={child.username} userRole={getUserRoleFromArray(child.roles)} userTreeData={userTreeData} inviterList={inviterList} behindUserToEdit={username === userToEdit ? true : behindUserToEdit} />
                     ))}
                 </ul>
             )}
@@ -92,24 +92,37 @@ const UserInviteesTree = () => {
                         return
                     }
                     if (userTreeDataTmp.hasOwnProperty(user.inviter_name)) {
-                        userTreeDataTmp[user.inviter_name].push(user)
+                        if (user.username === userToEdit) {
+                            userTreeDataTmp[user.inviter_name].unshift(user)
+                        } else {
+                            userTreeDataTmp[user.inviter_name].push(user)
+                        }
                     } else {
                         userTreeDataTmp[user.inviter_name] = [user]
                     }
                 })
-                setUserTreeData(userTreeDataTmp);
                 let rootInviterNameTmp = userToEdit;
                 let inviterListTmp = [userToEdit]
                 while (true) {
                     if (inviterInfoTmp.hasOwnProperty(rootInviterNameTmp)) {
                         if (inviterInfoTmp[rootInviterNameTmp] != null) {
-                            rootInviterNameTmp = inviterInfoTmp[rootInviterNameTmp]
+                            const nextInviterTmp = inviterInfoTmp[rootInviterNameTmp]
+                            // have to skip the first loop
+                            if (rootInviterNameTmp !== userToEdit) {
+                                const findRootInviterTmp = rootInviterNameTmp
+                                const index = userTreeDataTmp[nextInviterTmp].findIndex(user => user.username === findRootInviterTmp);
+                                const userInTheFront = userTreeDataTmp[nextInviterTmp][index]
+                                userTreeDataTmp[nextInviterTmp].splice(index, 1);
+                                userTreeDataTmp[nextInviterTmp].unshift(userInTheFront)
+                            }
+                            rootInviterNameTmp = nextInviterTmp
                             inviterListTmp.push(rootInviterNameTmp)
                             continue
                         }
                     }
                     break
                 }
+                setUserTreeData(userTreeDataTmp);
                 setInviterList(inviterListTmp);
                 setRootInviter(rootInviterNameTmp)
                 let inviterRoleTmp = userInfoReq.data.find(user => user.username === rootInviterNameTmp)
