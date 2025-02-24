@@ -179,9 +179,9 @@ const LicUpdateButton = props => {
                         </div>
                         {settings.id === "engineLicense" && usi != null ? <small>
                             Unique System Identifier (USI): <b className="text-monospace">{usi}</b>
-                            <Button className="p-0" variant="link" ref={copyUsiButton} onClick={copyUSIToClipboard} title="Copy to clipboard">
+                            {window.isSecureContext && <Button className="p-0" variant="link" ref={copyUsiButton} onClick={copyUSIToClipboard} title="Copy to clipboard">
                                 <Clipboard size="16" />
-                            </Button>
+                            </Button>}
                             <Overlay target={copyUsiButton.current} show={showCopyUsiToolTip} placement="top">
                                 {(props) => (
                                     <Tooltip id="overlay-example" {...props}>
