@@ -110,8 +110,8 @@ const UserInviteesTree = () => {
                             // already did that above
                             if (rootInviterNameTmp !== userToEdit) {
                                 const findRootInviterTmp = rootInviterNameTmp
-                                const index = userTreeDataTmp[nextInviterTmp].findIndex(user => user.username === findRootInviterTmp);
-                                const rootInviterObject = userTreeDataTmp[nextInviterTmp][index]
+                                const rootInviterIndex = userTreeDataTmp[nextInviterTmp].findIndex(user => user.username === findRootInviterTmp);
+                                const rootInviterObject = userTreeDataTmp[nextInviterTmp][rootInviterIndex]
                                 userTreeDataTmp[nextInviterTmp].splice(rootInviterIndex, 1);
                                 userTreeDataTmp[nextInviterTmp].unshift(rootInviterObject)
                             }
