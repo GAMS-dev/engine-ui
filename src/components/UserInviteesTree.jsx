@@ -107,13 +107,13 @@ const UserInviteesTree = () => {
                     if (inviterInfoTmp.hasOwnProperty(rootInviterNameTmp)) {
                         if (inviterInfoTmp[rootInviterNameTmp] != null) {
                             const nextInviterTmp = inviterInfoTmp[rootInviterNameTmp]
-                            // have to skip the first loop
+                            // already did that above
                             if (rootInviterNameTmp !== userToEdit) {
                                 const findRootInviterTmp = rootInviterNameTmp
                                 const index = userTreeDataTmp[nextInviterTmp].findIndex(user => user.username === findRootInviterTmp);
-                                const userInTheFront = userTreeDataTmp[nextInviterTmp][index]
-                                userTreeDataTmp[nextInviterTmp].splice(index, 1);
-                                userTreeDataTmp[nextInviterTmp].unshift(userInTheFront)
+                                const rootInviterObject = userTreeDataTmp[nextInviterTmp][index]
+                                userTreeDataTmp[nextInviterTmp].splice(rootInviterIndex, 1);
+                                userTreeDataTmp[nextInviterTmp].unshift(rootInviterObject)
                             }
                             rootInviterNameTmp = nextInviterTmp
                             inviterListTmp.push(rootInviterNameTmp)
