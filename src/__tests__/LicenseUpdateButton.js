@@ -16,7 +16,7 @@ jest.mock('axios');
 describe('LicUpdateButton', () => {
 
     beforeEach(() => {
-        axios.get.mockImplementation((url, paramsRaw) => {
+        axios.get.mockImplementation((url) => {
             switch (url) {
                 case 'testserver/licenses/engine':
                     return Promise.resolve({
