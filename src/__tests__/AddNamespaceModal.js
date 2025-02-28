@@ -17,7 +17,7 @@ const AuthProviderWrapper = ({ children }) => (
 
 jest.mock('axios');
 
-describe('Job', () => {
+describe('AddNamespaceModal', () => {
 
     const originalError = console.error
     beforeAll(() => {
