@@ -49,7 +49,7 @@ describe('AuthProviderForm', () => {
                             "port": 0,
                             "uid": "string",
                             "bind_dn": "string",
-                            "password": "string",
+                            "password": "string", // pragma: allowlist secret
                             "encryption": "string",
                             "active_directory": true,
                             "base": "string",
