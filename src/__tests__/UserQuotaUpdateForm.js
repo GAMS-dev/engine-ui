@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import axios from 'axios';
 import UserQuotaUpdateForm from '../components/UserQuotaUpdateForm';
-import { AllProvidersWrapperDefault } from './utils/testUtils';
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils';
 
 jest.mock('axios');
 
@@ -22,6 +22,7 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('UserQuotaUpdateForm', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -73,20 +74,6 @@ describe('UserQuotaUpdateForm', () => {
                     return Promise.reject(new Error('not found'))
             }
         })
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('renders UserQuotaUpdateForm correctly', async () => {

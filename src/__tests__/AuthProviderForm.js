@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 import axios from 'axios';
 
 import AuthProviderForm from '../components/AuthProviderForm'
@@ -9,6 +9,7 @@ import AuthProviderForm from '../components/AuthProviderForm'
 jest.mock('axios');
 
 describe('AuthProviderForm', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {
@@ -57,20 +58,6 @@ describe('AuthProviderForm', () => {
                     return Promise.reject(new Error('not found'))
             }
         })
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('renders AuthProviderForm correctly', async () => {

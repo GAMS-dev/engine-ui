@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 import axios from 'axios';
 import LicenseUpdateForm from '../components/LicenseUpdateForm';
 
@@ -21,6 +21,7 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('LicenseUpdateForm', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -30,21 +31,6 @@ describe('LicenseUpdateForm', () => {
                 status: 404,
             }
         })
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('renders LicenseUpdateForm correctly', async () => {

@@ -1,12 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 import LicUpdateButton from '../components/LicenseUpdateButton';
 import axios from 'axios';
 
 jest.mock('axios');
 
 describe('LicUpdateButton', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {
@@ -24,22 +25,6 @@ describe('LicUpdateButton', () => {
             }
         })
     })
-
-    const originalError = console.error
-    beforeAll(() => {
-
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
-    })
-
 
     it('renders LicUpdateButton correctly', async () => {
         render(<LicUpdateButton type="engine" />, {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 import { testDatax } from './utils/testData';
 import axios from 'axios';
 
@@ -27,6 +27,7 @@ jest.mock('react-router-dom', () => ({
 let isAuthorized = true;
 
 describe('UserEditBundle', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         isAuthorized = true;
@@ -246,21 +247,6 @@ describe('UserEditBundle', () => {
             }
         })
 
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('provides expected UserSettingsContext obj to child elements', async () => {

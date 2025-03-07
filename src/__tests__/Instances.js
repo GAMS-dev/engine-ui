@@ -4,22 +4,16 @@ import '@testing-library/jest-dom'
 import axios from 'axios';
 import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 
-import InstancePoolSubmissionForm from '../components/InstancePoolSubmissionForm'
+import Instances from '../components/Instances'
 
 jest.mock('axios');
 
-describe('InstancePoolSubmissionForm', () => {
+describe('Instances', () => {
     suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {
             switch (url) {
-                case 'testserver/usage/pools/admin':
-                    return Promise.resolve({
-                        status: 200, data: {
-                            "instance_pools_available": []
-                        }
-                    })
                 case 'testserver/usage/instances/admin':
                     return Promise.resolve({
                         status: 200, data: {
@@ -59,27 +53,17 @@ describe('InstancePoolSubmissionForm', () => {
                             }
                         }
                     })
-                case 'testserver/usage/instances/admin/default':
-                    return Promise.resolve({
-                        status: 200, data: {
-                            "default_instance": {
-                                "label": "TestInstance",
-                                "resource_type": "instance"
-                            },
-                            "default_inherited_from": "admin"
-                        }
-                    })
                 default:
                     return Promise.reject(new Error('not found'))
             }
         })
     })
 
-    it('renders InstancePoolSubmissionForm correctly', async () => {
-        render(<InstancePoolSubmissionForm />, {
+    it('renders Instances correctly', async () => {
+        render(<Instances />, {
             wrapper: AllProvidersWrapperDefault
         });
-        await waitFor(() => screen.findByText(/Pool Label/));
+        await waitFor(() => screen.findByText(/New Instance/));
     });
 
 })

@@ -4,10 +4,12 @@ import '@testing-library/jest-dom';
 
 import DownloadLink from '../components/DownloadLink'
 import axios from 'axios';
+import { suppressActWarnings } from './utils/testUtils';
 
 jest.mock('axios');
 
 describe('DownloadLink', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockResolvedValue({
@@ -24,20 +26,6 @@ describe('DownloadLink', () => {
             token: { cancel },
             cancel,
         }));
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('renders DownloadLink correctly', async () => {

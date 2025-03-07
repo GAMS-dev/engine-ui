@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import axios from 'axios'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 
 import InstancePools from '../components/InstancePools'
 
@@ -20,6 +20,8 @@ const AllProvidersWrapperEnabled = ({ children }) => (
 );
 
 describe('InstancePools Component', () => {
+    suppressActWarnings()
+
     it('renders InstancePools correctly', async () => {
         axios.get.mockResolvedValueOnce({
             status: 200,

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import axios from 'axios';
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 
 import UserInviteesTree from '../components/UserInviteesTree';
 
@@ -14,6 +14,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('UserInviteesTree', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -73,20 +74,6 @@ describe('UserInviteesTree', () => {
                     return Promise.reject(new Error('not found'))
             }
         })
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('renders UserInviteesTree correctly', async () => {

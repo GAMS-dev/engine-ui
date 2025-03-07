@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 
 import UserSettingsForm from '../components/UserSettingsForm'
 
@@ -12,6 +12,8 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('UserSettingsForm', () => {
+    suppressActWarnings()
+
     it('renders UserSettingsForm', () => {
         render(<UserSettingsForm />, {
             wrapper: AllProvidersWrapper

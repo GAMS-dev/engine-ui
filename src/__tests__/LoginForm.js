@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 import axios from 'axios';
 import LoginForm from '../components/LoginForm';
 
@@ -19,21 +19,7 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('LoginForm', () => {
-
-    const originalError = console.error
-    beforeAll(() => {
-
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
-    })
+    suppressActWarnings()
 
     it('displays maintenance alert correctly', async () => {
         axios.get.mockRejectedValueOnce({

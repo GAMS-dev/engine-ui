@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import axios from 'axios';
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 
 import UserInstanceUpdateForm from '../components/UserInstanceUpdateForm';
 
@@ -14,6 +14,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('UserInstanceUpdateForm', () => {
+    suppressActWarnings()
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -215,20 +216,6 @@ describe('UserInstanceUpdateForm', () => {
             }
         })
 
-    })
-
-    const originalError = console.error
-    beforeAll(() => {
-        console.error = (...args) => {
-            if (/Warning.*not wrapped in act/.test(args[0])) {
-                return
-            }
-            originalError.call(console, ...args)
-        }
-    })
-
-    afterAll(() => {
-        console.error = originalError
     })
 
     it('renders UserInstanceUpdateForm correctly', async () => {

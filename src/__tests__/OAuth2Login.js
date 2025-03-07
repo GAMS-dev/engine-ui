@@ -3,7 +3,7 @@ import axios from 'axios';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TextEncoder, TextDecoder } from 'util';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils';
+import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils';
 
 import LoginForm from '../components/LoginForm';
 import { OAuthClient } from './utils/oauth'
@@ -24,6 +24,8 @@ Object.defineProperty(window, "crypto", {
 Object.assign(global, { TextDecoder, TextEncoder });
 
 describe('LoginForm with OAuth2 flow', () => {
+    suppressActWarnings()
+
     it('prints error with invalid native client id', async () => {
         axios.get.mockImplementation((url) => {
             if (url.endsWith('/auth/password-policy')) {
