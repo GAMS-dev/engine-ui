@@ -1,47 +1,23 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import InstancePools from '../components/InstancePools'
-import { AuthContext } from '../AuthContext'
-import { AlertContext } from '../components/Alert'
-import { ServerConfigContext } from '../ServerConfigContext'
-import { UserSettingsContext } from '../components/UserSettingsContext'
 import axios from 'axios'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
+
+import InstancePools from '../components/InstancePools'
 
 jest.mock('axios')
 
-const mockAuthContext = {
-    jwt: 'test-jwt',
-    server: 'http://test-server',
-    username: 'test-user',
-    roles: ['admin'],
-}
+const AllProvidersWrapperDisabled = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ instance_pool_access: 'DISABLED' }}>
+        {children}
+    </AllProvidersWrapperDefault>
+);
 
-const RouterWrapper = (options) => {
-    return ({ children }) => (
-        <MemoryRouter>
-            <AuthContext.Provider value={[mockAuthContext]}>
-                <AlertContext.Provider value={[jest.fn()]}>
-                    <ServerConfigContext.Provider
-                        value={[
-                            {
-                                instance_pool_access:
-                                    options?.instance_pool_access ?? 'DISABLED',
-                            },
-                            jest.fn(),
-                        ]}
-                    >
-                        <UserSettingsContext.Provider
-                            value={[{ tablePageLength: 10 }]}
-                        >
-                            {children}
-                        </UserSettingsContext.Provider>
-                    </ServerConfigContext.Provider>
-                </AlertContext.Provider>
-            </AuthContext.Provider>
-        </MemoryRouter>
-    )
-}
+const AllProvidersWrapperEnabled = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ instance_pool_access: 'ENABLED' }}>
+        {children}
+    </AllProvidersWrapperDefault>
+);
 
 describe('InstancePools Component', () => {
     it('renders InstancePools correctly', async () => {
@@ -51,7 +27,7 @@ describe('InstancePools Component', () => {
         })
 
         render(<InstancePools />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapperDisabled,
         })
         await waitFor(() => screen.findByText('Instance pools disabled'))
         await waitFor(() => screen.findByText('Instance Pools'))
@@ -65,7 +41,7 @@ describe('InstancePools Component', () => {
         })
 
         render(<InstancePools />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapperDisabled,
         })
 
         const refreshButton = screen.getByText('Refresh')
@@ -81,7 +57,7 @@ describe('InstancePools Component', () => {
             data: { instance_pools_available: [] },
         })
         render(<InstancePools />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapperDisabled,
         })
 
         fireEvent.click(screen.getByText('Enable Instance Pools'))
@@ -123,7 +99,7 @@ describe('InstancePools Component', () => {
             },
         })
         render(<InstancePools />, {
-            wrapper: RouterWrapper({ instance_pool_access: 'ENABLED' }),
+            wrapper: AllProvidersWrapperEnabled,
         })
 
         await waitFor(() => screen.findByText('Change Size'))

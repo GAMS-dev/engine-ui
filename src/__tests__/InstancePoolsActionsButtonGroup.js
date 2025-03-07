@@ -5,7 +5,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import InstancePoolsActionsButtonGroup from '../components/InstancePoolsActionsButtonGroup'
 
-
 jest.mock('axios');
 
 describe('InstancePoolsActionsButtonGroup', () => {

@@ -1,11 +1,9 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { UserSettingsContext } from '../components/UserSettingsContext';
 import axios from 'axios';
 import UserQuotaUpdateForm from '../components/UserQuotaUpdateForm';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 jest.mock('axios');
 
@@ -14,29 +12,13 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
-const AuthProviderWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{ _version: 1, quotaUnit: "$", multiplierUnit: "¢/s", quotaConversionFactor: 100, tablePageLength: "10" }]}>
-        <MemoryRouter>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-                {children}
-            </AuthContext.Provider>
-        </MemoryRouter>
-    </UserSettingsContext.Provider>
-);
+const routes = [
+    { path: '/users/user1', element: <p>after submit went back to usage</p> }]
 
-const AuthProviderWrapperWithRoutes = ({ children }) => (
-    <MemoryRouter>
-        <Routes>
-            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
-            <Route path='/' element={
-                <UserSettingsContext.Provider value={[{ _version: 1, quotaUnit: "$", multiplierUnit: "¢/s", quotaConversionFactor: 100, tablePageLength: "10" }]}>
-                    <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-                        {children}
-                    </AuthContext.Provider>
-                </UserSettingsContext.Provider>
-            } />
-        </Routes>
-    </MemoryRouter>
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ routes: routes }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
 
 describe('UserQuotaUpdateForm', () => {
@@ -109,13 +91,13 @@ describe('UserQuotaUpdateForm', () => {
 
     it('renders UserQuotaUpdateForm correctly', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
     });
 
     it('displays everything correctly', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Parallel Quota /));
 
@@ -156,7 +138,7 @@ describe('UserQuotaUpdateForm', () => {
 
     it('set to max buttons work', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Parallel Quota /));
 
@@ -180,7 +162,7 @@ describe('UserQuotaUpdateForm', () => {
 
     it('submits correctly if everything is updated', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Parallel Quota /));
 
@@ -208,7 +190,7 @@ describe('UserQuotaUpdateForm', () => {
 
     it('submits correctly if everything is deleted', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Parallel Quota /));
 
@@ -238,7 +220,7 @@ describe('UserQuotaUpdateForm', () => {
 
     it('submits correctly if some are changed and some are deleted', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Parallel Quota /));
 
@@ -269,7 +251,7 @@ describe('UserQuotaUpdateForm', () => {
 
     it('selector does not accept invalid input', async () => {
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Parallel Quota /));
 
@@ -297,7 +279,7 @@ describe('UserQuotaUpdateForm', () => {
             message: "get failed"
         })
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Problems while retrieving user quotas. Error message: get failed./))
@@ -308,7 +290,7 @@ describe('UserQuotaUpdateForm', () => {
             message: "put failed"
         })
         render(<UserQuotaUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Parallel Quota /));
@@ -326,7 +308,7 @@ describe('UserQuotaUpdateForm', () => {
         axios.put.mockResolvedValue({})
         render(<UserQuotaUpdateForm />
             , {
-                wrapper: AuthProviderWrapperWithRoutes
+                wrapper: AllProvidersWrapper
             });
         await waitFor(() => screen.findByText(/Parallel Quota /));
         const parallelSpinButton = screen.getByRole('spinbutton', { name: "Parallel Quota (in ¢/s) Set to max" });

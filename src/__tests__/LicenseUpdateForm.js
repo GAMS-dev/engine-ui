@@ -1,8 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
 import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 import LicenseUpdateForm from '../components/LicenseUpdateForm';
@@ -14,20 +12,12 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
+const routes = [{ path: '/users/user1', element: <p>after submit went back to usage</p> }]
 
-
-const AuthProviderWrapperWithRoutes = ({ children }) => (
-    <MemoryRouter>
-        <Routes>
-            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
-            <Route path='/'
-                element={
-                    <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
-                        {children}
-                    </AuthContext.Provider>
-                } />
-        </Routes>
-    </MemoryRouter>
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ routes: routes }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
 
 describe('LicenseUpdateForm', () => {
@@ -59,13 +49,13 @@ describe('LicenseUpdateForm', () => {
 
     it('renders LicenseUpdateForm correctly', async () => {
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
     });
 
     it('shows error correctly if no license exists', async () => {
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
     });
@@ -79,7 +69,7 @@ describe('LicenseUpdateForm', () => {
             }
         })
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Problems while retrieving user license. Error message: some error./));
     });
@@ -95,7 +85,7 @@ describe('LicenseUpdateForm', () => {
         })
         axios.put.mockResolvedValue([])
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/license12345/));
 
@@ -111,7 +101,7 @@ describe('LicenseUpdateForm', () => {
             }]
         })
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User inherits the license from/));
         expect(screen.getByRole("link", { name: 'admin' })).toHaveAttribute(
@@ -122,7 +112,7 @@ describe('LicenseUpdateForm', () => {
 
     it('updates license correctly', async () => {
         render(<LicenseUpdateForm />, {
-            wrapper: AuthProviderWrapperWithRoutes
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
         fireEvent.change(screen.getByRole('textbox'), { target: { value: 'new license' } })
@@ -132,7 +122,7 @@ describe('LicenseUpdateForm', () => {
 
     it('shows error if empty license is given', async () => {
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
         fireEvent.click(screen.getByRole('button'))
@@ -149,7 +139,7 @@ describe('LicenseUpdateForm', () => {
             }
         })
         render(<LicenseUpdateForm />, {
-            wrapper: AllProvidersWrapperDefault
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
         fireEvent.change(screen.getByRole('textbox'), { target: { value: 'new license' } })

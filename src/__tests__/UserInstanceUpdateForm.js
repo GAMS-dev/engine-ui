@@ -1,10 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
 import axios from 'axios';
-import { UserSettingsContext } from '../components/UserSettingsContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import UserInstanceUpdateForm from '../components/UserInstanceUpdateForm';
 
@@ -14,17 +12,6 @@ jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
     useParams: jest.fn(),
 }));
-
-const AuthProviderWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{ _version: 1, quotaUnit: "$", multiplierUnit: "¢/s", quotaConversionFactor: 100, tablePageLength: "10" }]}>
-        <MemoryRouter>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-                {children}
-            </AuthContext.Provider>
-        </MemoryRouter>
-    </UserSettingsContext.Provider>
-);
-
 
 describe('UserInstanceUpdateForm', () => {
 
@@ -246,7 +233,7 @@ describe('UserInstanceUpdateForm', () => {
 
     it('renders UserInstanceUpdateForm correctly', async () => {
         render(<UserInstanceUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         await waitFor(() => screen.findByText(/raw resource /));
@@ -256,7 +243,7 @@ describe('UserInstanceUpdateForm', () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
 
         render(<UserInstanceUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         await waitFor(() => screen.findByText(/Inherit instances from/));
@@ -273,7 +260,7 @@ describe('UserInstanceUpdateForm', () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
 
         render(<UserInstanceUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         await waitFor(() => screen.findByText(/Inherit instances from/));
@@ -286,7 +273,7 @@ describe('UserInstanceUpdateForm', () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
 
         render(<UserInstanceUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         await waitFor(() => screen.findByText(/Inherit instances from/));

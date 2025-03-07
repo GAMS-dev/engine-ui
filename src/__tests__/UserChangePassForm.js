@@ -1,8 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 import UserChangePassForm from '../components/UserChangePassForm';
 
@@ -13,26 +12,12 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
+const routes = [{ path: '/users/user1', element: <p>after submit went back to usage</p> }]
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ server: "testserver", username: "user1" }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
-);
-
-const AuthProviderWrapperWithRoutes = ({ children }) => (
-    <MemoryRouter>
-        <Routes>
-            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
-            <Route path='/' element={
-                <AuthContext.Provider value={[{ server: "testserver", username: "admin" }]}>
-                    {children}
-                </AuthContext.Provider>
-            } />
-        </Routes>
-    </MemoryRouter>
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ routes: routes }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
 
 describe('UserChangePassForm', () => {
@@ -58,13 +43,13 @@ describe('UserChangePassForm', () => {
 
     it('renders UserChangePassForm corectly', () => {
         render(<UserChangePassForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
     });
 
     it('throws error if confirm password differs', async () => {
         render(<UserChangePassForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'newpassword1' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'newpassword2' } })
@@ -74,7 +59,7 @@ describe('UserChangePassForm', () => {
 
     it('sends the correct put request', async () => {
         render(<UserChangePassForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'new' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'new' } })
@@ -94,7 +79,7 @@ describe('UserChangePassForm', () => {
             }
         })
         render(<UserChangePassForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'new' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'new' } })
@@ -115,7 +100,7 @@ describe('UserChangePassForm', () => {
             }
         })
         render(<UserChangePassForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'new' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'new' } })
@@ -128,7 +113,7 @@ describe('UserChangePassForm', () => {
         axios.put.mockResolvedValue({})
         render(<UserChangePassForm />
             , {
-                wrapper: AuthProviderWrapperWithRoutes
+                wrapper: AllProvidersWrapper
             });
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'new' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'new' } })

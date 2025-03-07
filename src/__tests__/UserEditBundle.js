@@ -1,13 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { ServerInfoContext } from "../ServerInfoContext";
-import { UserSettingsContext } from '../components/UserSettingsContext';
-import UserEditBundle from '../components/UserEditBundle';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import { testDatax } from './utils/testData';
 import axios from 'axios';
+
+import UserEditBundle from '../components/UserEditBundle';
 
 jest.mock('axios');
 
@@ -18,46 +16,6 @@ window.ResizeObserver = function () {
         disconnect: jest.fn(),
     };
 };
-
-const AdminContextsWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: "testserver" }]}>
-                {children}
-            </AuthContext.Provider>
-        </ServerInfoContext.Provider>
-    </UserSettingsContext.Provider>
-);
-
-const UserContextsWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <AuthContext.Provider value={[{ username: "user1", roles: [], server: "testserver" }]}>
-                {children}
-            </AuthContext.Provider>
-        </ServerInfoContext.Provider>
-    </UserSettingsContext.Provider>
-);
-
-const InviterContextsWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <AuthContext.Provider value={[{ username: "inviter1", roles: ["inviter"], server: "testserver" }]}>
-                {children}
-            </AuthContext.Provider>
-        </ServerInfoContext.Provider>
-    </UserSettingsContext.Provider>
-);
-
 
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
@@ -306,114 +264,114 @@ describe('UserEditBundle', () => {
     })
 
     it('provides expected UserSettingsContext obj to child elements', async () => {
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
     });
 
     // ------------------- test path opens correct tab --------------------
 
     it('opens the correct tap, dependent on the given path: /usage/dashboard', async () => {
-        render(
-            <MemoryRouter initialEntries={['/usage/dashboard']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/dashboard'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Aggregate/));
     });
 
     it('opens the correct tap, dependent on the given path: /usage/timeline', async () => {
-        render(
-            <MemoryRouter initialEntries={['/usage/timeline']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/timeline'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Show disaggregated data/));
     });
 
     it('opens the correct tap, dependent on the given path: /change_pass', async () => {
-        render(
-            <MemoryRouter initialEntries={['/change_pass']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/change_pass'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Confirm/));
     });
 
     it('opens the correct tap, dependent on the given path: /instances', async () => {
-        render(
-            <MemoryRouter initialEntries={['/instances']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/instances'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/raw resource/));
     });
 
     it('opens the correct tap, dependent on the given path: /quotas', async () => {
-        render(
-            <MemoryRouter initialEntries={['/quotas']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/quotas'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Parallel Quota/));
     });
 
     it('opens the correct tap, dependent on the given path: /identity_provider', async () => {
-        render(
-            <MemoryRouter initialEntries={['/identity_provider']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/identity_provider'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/gams_engine/));
     });
 
     it('opens the correct tap, dependent on the given path: /permissions', async () => {
-        render(
-            <MemoryRouter initialEntries={['/permissions']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/permissions'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Namespace/));
     });
 
     it('opens the correct tap, dependent on the given path: /licenses', async () => {
-        render(
-            <MemoryRouter initialEntries={['/licenses']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/licenses'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/GAMS/));
     });
 
     it('opens the correct tap, dependent on the given path: /invitees', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
-        render(
-            <MemoryRouter initialEntries={['/invitees']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/invitees'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/user1/));
     });
 
@@ -421,13 +379,13 @@ describe('UserEditBundle', () => {
     // ------------------- test click opens correct tab --------------------
 
     it('opens the correct tap after click', async () => {
-        render(
-            <MemoryRouter initialEntries={['/usage/timeline']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/timeline'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Password/));
         fireEvent.click(screen.getByText(/Password/));
         await waitFor(() => screen.findByText(/Confirm/));
@@ -437,13 +395,13 @@ describe('UserEditBundle', () => {
     // ------------------- test only allowed tabs visible --------------------
 
     it('admin can see all options for user', async () => {
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeInTheDocument();
         expect(screen.queryByText(/License/)).toBeInTheDocument();
@@ -457,13 +415,13 @@ describe('UserEditBundle', () => {
 
     it('admin can see fewer options on the own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeInTheDocument();
         expect(screen.queryByText(/License/)).toBeInTheDocument();
@@ -476,13 +434,13 @@ describe('UserEditBundle', () => {
 
     it('admin can see fewer options on inviter page with different provider', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'inviter1' })
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeNull();
         expect(screen.queryByText(/License/)).toBeInTheDocument();
@@ -495,14 +453,13 @@ describe('UserEditBundle', () => {
 
     it('inviter only sees usage and invitees on his own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'inviter1' })
-        render(
-            // /usage only added if other tabs are visible, otherwise only /dashboard and /timeline possible
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: InviterContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'], username: "inviter1", roles: ["inviter"] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Remaining Quota/));
         expect(screen.queryByText(/Password/)).toBeNull();
         expect(screen.queryByText(/License/)).toBeNull();
@@ -516,13 +473,13 @@ describe('UserEditBundle', () => {
     it('inviter can not see admin page', async () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: InviterContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'], username: "inviter1", roles: ["inviter"] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/You do not have permission to view information about user: admin./));
         expect(screen.queryByText(/Usage/)).toBeNull();
         expect(screen.queryByText(/Password/)).toBeNull();
@@ -537,13 +494,13 @@ describe('UserEditBundle', () => {
     it('inviter can see user page for an invited inviter', async () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'invited_by_inviter1' })
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: InviterContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'], username: "inviter1", roles: ["inviter"] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeInTheDocument();
         // inviter is not admin
@@ -557,14 +514,13 @@ describe('UserEditBundle', () => {
 
     it('user only sees usage on his own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user1' })
-        render(
-            // /usage only added if other tabs are visible, otherwise only /dashboard and /timeline possible
-            <MemoryRouter initialEntries={['/dashboard']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: UserContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/dashboard'], username: "user1", roles: [] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Remaining Quota/));
         expect(screen.queryByText(/Password/)).toBeNull();
         expect(screen.queryByText(/License/)).toBeNull();
@@ -578,13 +534,13 @@ describe('UserEditBundle', () => {
     it('user can not see admin page', async () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
-        render(
-            <MemoryRouter initialEntries={['/dashboard']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: UserContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/dashboard'], username: "user1", roles: [] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/You do not have permission to view information about user: admin./));
         expect(screen.queryByText(/Usage/)).toBeNull();
         expect(screen.queryByText(/Password/)).toBeNull();
@@ -596,16 +552,16 @@ describe('UserEditBundle', () => {
         expect(screen.queryByText('Invitees')).toBeNull();
     });
 
-    it('user can not see page of unexisting user', async () => {
+    it('user can not see page of non existing user', async () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'notExisting' })
-        render(
-            <MemoryRouter initialEntries={['/dashboard']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: UserContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/dashboard'], username: "user1", roles: [] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/No data for user: notExisting found./));
         expect(screen.queryByText(/Usage/)).toBeNull();
         expect(screen.queryByText(/Password/)).toBeNull();
@@ -625,13 +581,13 @@ describe('UserEditBundle', () => {
                 status: 400,
             }
         })
-        render(
-            <MemoryRouter initialEntries={['/usage']}>
-                <UserEditBundle />
-            </MemoryRouter>
-            , {
-                wrapper: AdminContextsWrapper
-            });
+        render(<UserEditBundle />, {
+            wrapper: AllProvidersWrapper = ({ children }) => (
+                <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
         await waitFor(() => screen.findByText(/Failed to fetch user information./))
     })
 })

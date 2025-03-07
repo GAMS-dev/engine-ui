@@ -1,12 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { UserSettingsContext } from '../components/UserSettingsContext';
 import axios from 'axios';
 import UserPermissionUpdateForm from '../components/UserPermissionUpdateForm';
 import userEvent from '@testing-library/user-event';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 jest.mock('axios');
 
@@ -15,21 +13,14 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <Routes>
-            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
-            <Route path='/users/user2' element={<p>after submit went back to usage</p>} />
-            <Route path='/'
-                element={
-                    <UserSettingsContext.Provider value={[{ _version: 1, quotaUnit: '$', multiplierUnit: '¢/s', quotaConversionFactor: 100, tablePageLength: '10' }]}>
-                        <AuthContext.Provider value={[{ username: 'admin', roles: ['admin'], server: 'testserver' }]}>
-                            {children}
-                        </AuthContext.Provider>
-                    </UserSettingsContext.Provider>
-                } />
-        </Routes>
-    </MemoryRouter>
+const routes = [
+    { path: '/users/user1', element: <p>after submit went back to usage</p> },
+    { path: '/users/user2', element: <p>after submit went back to usage</p> }]
+
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ routes: routes }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
 
 describe('UserPermissionUpdateForm', () => {
@@ -190,13 +181,13 @@ describe('UserPermissionUpdateForm', () => {
 
     it('renders UserPermissionUpdateForm corectly', async () => {
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
     });
 
     it('sends no request but redirects if nothing is changed', async () => {
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
         fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
@@ -206,7 +197,7 @@ describe('UserPermissionUpdateForm', () => {
 
     it('changes role to admin correctly', async () => {
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
         // userEvent works better for selects
@@ -225,7 +216,7 @@ describe('UserPermissionUpdateForm', () => {
     it('changes role from inviter to user correctly', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
         // userEvent works better for selects
@@ -248,7 +239,7 @@ describe('UserPermissionUpdateForm', () => {
         axios.put.mockImplementation((url, data) => {
             switch (url) {
                 case 'testserver/users/role':
-                    if (JSON.stringify(data) === JSON.stringify({'username': 'user1', 'roles': ['inviter']})) {
+                    if (JSON.stringify(data) === JSON.stringify({ 'username': 'user1', 'roles': ['inviter'] })) {
                         roleGetWasCalled = true
                     }
                     return
@@ -265,7 +256,7 @@ describe('UserPermissionUpdateForm', () => {
 
         })
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
         // userEvent works better for selects
@@ -281,7 +272,7 @@ describe('UserPermissionUpdateForm', () => {
 
     it('fails if changes role from user to inviter with no provider specified', async () => {
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
         // userEvent works better for selects
@@ -297,7 +288,7 @@ describe('UserPermissionUpdateForm', () => {
 
     it('changes namespace permissions from inviter', async () => {
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
         const readCheckbox = screen.getByRole('checkbox', { name: 'Read' });
@@ -334,7 +325,7 @@ describe('UserPermissionUpdateForm', () => {
             }
         })
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Problems while retrieving user roles. Error message: undefined./))
@@ -359,7 +350,7 @@ describe('UserPermissionUpdateForm', () => {
             ]
         });
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Problems while retrieving namespaces. Error message: not found./))
     })
@@ -399,7 +390,7 @@ describe('UserPermissionUpdateForm', () => {
         });
         axios.get.mockRejectedValueOnce(new Error('not found'));
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Problems while retrieving identity providers. Error message: not found./))
     });
@@ -411,7 +402,7 @@ describe('UserPermissionUpdateForm', () => {
             }
         })
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Specify/))
@@ -430,7 +421,7 @@ describe('UserPermissionUpdateForm', () => {
             }
         })
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Specify/))
@@ -445,7 +436,7 @@ describe('UserPermissionUpdateForm', () => {
             }
         })
         render(<UserPermissionUpdateForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Specify/))

@@ -6,7 +6,6 @@ import axios from 'axios';
 
 import AddUserGroupModal from '../components/AddUserGroupModal'
 
-
 jest.mock('axios');
 
 describe('AddUserGroupModal', () => {

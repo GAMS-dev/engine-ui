@@ -5,8 +5,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import Header from '../components/Header'
 
-
-
 jest.mock('axios');
 
 describe('Header', () => {

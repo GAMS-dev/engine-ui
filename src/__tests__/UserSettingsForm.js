@@ -1,67 +1,27 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
-import { UserSettingsContext } from '../components/UserSettingsContext'
-import { ServerInfoContext } from '../ServerInfoContext'
-import { AuthContext } from '../AuthContext'
 import UserSettingsForm from '../components/UserSettingsForm'
-import { ServerConfigContext } from '../ServerConfigContext'
 
-const RouterWrapper = (options) => {
-    const quotaUnit = options?.quotaUnit == null ? 'h' : options.quotaUnit
-    const quotaConversionFactor =
-        options?.quotaConversionFactor == null
-            ? 3600
-            : options.quotaConversionFactor
-    const tablePageLength =
-        options?.tablePageLength == null ? '10' : options.tablePageLength
-
-    return ({ children }) => (
-        <MemoryRouter>
-            <AuthContext.Provider
-                value={[{ server: 'http://localhost', roles: ['admin'] }]}
-            >
-                <ServerInfoContext.Provider value={[{}, () => {}]}>
-                    <ServerConfigContext.Provider
-                        value={[
-                            options?.config ? options.config : {},
-                            () => {},
-                        ]}
-                    >
-                        <UserSettingsContext.Provider
-                            value={[
-                                {
-                                    quotaConversionFactor:
-                                        quotaConversionFactor,
-                                    quotaUnit: quotaUnit,
-                                    tablePageLength: tablePageLength,
-                                },
-                                () => {},
-                            ]}
-                        >
-                            {children}
-                        </UserSettingsContext.Provider>
-                    </ServerConfigContext.Provider>
-                </ServerInfoContext.Provider>
-            </AuthContext.Provider>
-        </MemoryRouter>
-    )
-}
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ in_kubernetes: false }}>
+        {children}
+    </AllProvidersWrapperDefault>
+);
 
 describe('UserSettingsForm', () => {
     it('renders UserSettingsForm', () => {
         render(<UserSettingsForm />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapper
         })
     })
 
     it('shows correct options for multiplier unit and table page length', async () => {
         render(<UserSettingsForm />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapper
         })
-
         fireEvent.keyDown(document.getElementById('selectMultUnit'), {
             key: 'ArrowDown',
         })
@@ -77,7 +37,7 @@ describe('UserSettingsForm', () => {
 
     it('userSettingsContext is correctly updated when settings change', async () => {
         render(<UserSettingsForm />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapper,
         })
 
         fireEvent.keyDown(document.getElementById('selectMultUnit'), {
@@ -99,7 +59,7 @@ describe('UserSettingsForm', () => {
 
     it('Cant edit notifications if webhooks not enabled', async () => {
         render(<UserSettingsForm />, {
-            wrapper: RouterWrapper(),
+            wrapper: AllProvidersWrapper,
         })
 
         fireEvent.click(screen.getByText('Notifications'))
@@ -111,9 +71,15 @@ describe('UserSettingsForm', () => {
     })
 
     it('Cant edit notifications if push notifications not supported by browser', async () => {
-        render(<UserSettingsForm />, {
-            wrapper: RouterWrapper({ config: { webhook_access: 'ENABLED' } }),
-        })
+        render(<UserSettingsForm />,
+            {
+                wrapper: AllProvidersWrapperConfig = ({ children }) => (
+                    <AllProvidersWrapperDefault options={{ in_kubernetes: false, serverConfig: { webhook_access: 'ENABLED' } }}>
+                        {children}
+                    </AllProvidersWrapperDefault>
+                )
+            }
+        )
 
         fireEvent.click(screen.getByText('Notifications'))
         await waitFor(() =>

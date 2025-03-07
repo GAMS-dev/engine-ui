@@ -1,11 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { within } from '@testing-library/dom'
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
 import axios from 'axios';
 import UserUpdateIdentityProviderForm from '../components/UserUpdateIdentityProviderForm';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 jest.mock('axios');
 
@@ -14,28 +13,14 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
+const routes = [
+    { path: '/users/user1', element: <p>after submit went back to usage</p> }]
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ routes: routes }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
-
-const AuthProviderWrapperWithRoutes = ({ children }) => (
-    <MemoryRouter>
-        <Routes>
-            <Route path='/users/user1' element={<p>after submit went back to usage</p>} />
-            <Route path='/' element={
-                <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
-                    {children}
-                </AuthContext.Provider>
-            } />
-        </Routes>
-    </MemoryRouter>
-);
-
 
 describe('UserUpdateIdentityProviderForm', () => {
 
@@ -120,13 +105,13 @@ describe('UserUpdateIdentityProviderForm', () => {
 
     it('renders UserUpdateIdentityProviderForm corectly', async () => {
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
     });
 
     it('shows all identity providers in dropdown', async () => {
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
         fireEvent.keyDown(document.getElementById('identityProviderDropdown'), {
@@ -141,7 +126,7 @@ describe('UserUpdateIdentityProviderForm', () => {
 
     it('fails if the passwords do not match', async () => {
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
         fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword1' } })
@@ -152,7 +137,7 @@ describe('UserUpdateIdentityProviderForm', () => {
 
     it('sends the correct put request and redirects back to usage', async () => {
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapperWithRoutes
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
         fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword' } })
@@ -172,7 +157,7 @@ describe('UserUpdateIdentityProviderForm', () => {
 
     it('blocks user if none is selected and submitted', async () => {
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapperWithRoutes
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
         fireEvent.keyDown(document.getElementById('identityProviderDropdown'), {
@@ -202,7 +187,7 @@ describe('UserUpdateIdentityProviderForm', () => {
 
     it('cancles correctly if cancel is pressed in block user', async () => {
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapperWithRoutes
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
         fireEvent.keyDown(document.getElementById('identityProviderDropdown'), {
@@ -231,7 +216,7 @@ describe('UserUpdateIdentityProviderForm', () => {
             }
         })
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/Problems while retrieving identity providers. Error message: undefined./))
@@ -244,7 +229,7 @@ describe('UserUpdateIdentityProviderForm', () => {
             }
         })
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/gams_engine/))
@@ -264,7 +249,7 @@ describe('UserUpdateIdentityProviderForm', () => {
             }
         })
         render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
 
         await waitFor(() => screen.findByText(/gams_engine/))

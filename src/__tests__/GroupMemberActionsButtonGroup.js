@@ -5,7 +5,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import GroupMemberActionsButtonGroup from '../components/GroupMemberActionsButtonGroup'
 
-
 jest.mock('axios');
 
 describe('GroupMemberActionsButtonGroup', () => {

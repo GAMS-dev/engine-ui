@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
 import axios from 'axios';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
+
 import UserInviteesTree from '../components/UserInviteesTree';
 
 jest.mock('axios');
@@ -12,14 +12,6 @@ jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
     useParams: jest.fn(),
 }));
-
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
-);
 
 describe('UserInviteesTree', () => {
 
@@ -99,13 +91,13 @@ describe('UserInviteesTree', () => {
 
     it('renders UserInviteesTree correctly', async () => {
         render(<UserInviteesTree />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
     });
 
     it('shows all invitees', async () => {
         render(<UserInviteesTree />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/mainuser/))
         // check all users ar listed
@@ -124,7 +116,7 @@ describe('UserInviteesTree', () => {
     it('shows "No Invitees" if no exist', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user2' })
         render(<UserInviteesTree />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/user2/))
         expect(screen.getByText('No invitees')).toBeInTheDocument();
@@ -136,7 +128,7 @@ describe('UserInviteesTree', () => {
 
     it('closes the list if triangle is clicked ', async () => {
         render(<UserInviteesTree />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/mainuser/))
         fireEvent.click(screen.getAllByText('▼')[0])
@@ -149,7 +141,7 @@ describe('UserInviteesTree', () => {
     it('shows whole subtree', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user3' })
         render(<UserInviteesTree />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/mainuser/))
         // here expect both users before since the response is the same
@@ -165,7 +157,7 @@ describe('UserInviteesTree', () => {
             }
         })
         render(<UserInviteesTree />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Failed to fetch users information. Error message: undefined/))
     })

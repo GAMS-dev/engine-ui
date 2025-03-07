@@ -6,7 +6,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 import CreateAuthTokenForm from '../components/CreateAuthTokenForm'
 import axios from 'axios';
 
-
 jest.mock('axios');
 
 describe('CreateAuthTokenForm', () => {

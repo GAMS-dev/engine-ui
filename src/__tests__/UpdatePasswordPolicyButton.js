@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import UpdatePasswordPolicyButton from '../components/UpdatePasswordPolicyButton';
 import axios from 'axios';
 
@@ -20,13 +20,6 @@ jest.doMock("../AuthContext", () => ({
     default: React.createContext()
 }));
 
-const AuthProviderWrapper = ({ children }) => (
-    <AuthContext.Provider value={[{ server: "http://localhost" }]}>
-        {children}
-    </AuthContext.Provider>
-);
-
-
 describe('test UpdatePasswordPolicyButton', () => {
     beforeEach(() => {
         const passwordPlociy = {
@@ -42,14 +35,14 @@ describe('test UpdatePasswordPolicyButton', () => {
 
     it('renders Button corectly', () => {
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
     });
 
     it('display default passwordPolicy on first use', async () => {
 
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         fireEvent.click(screen.getByText('Update password policy'))
         await waitFor(() => screen.getByText('Include at least one number?'));
@@ -76,7 +69,7 @@ describe('test UpdatePasswordPolicyButton', () => {
         }
         axios.get.mockImplementation(() => Promise.resolve({ status: 200, data: passwordPlociy }));
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         fireEvent.click(screen.getByText('Update password policy'))
@@ -92,7 +85,7 @@ describe('test UpdatePasswordPolicyButton', () => {
 
     it('can click every checkbox', async () => {
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         fireEvent.click(screen.getByText('Update password policy'))
@@ -115,7 +108,7 @@ describe('test UpdatePasswordPolicyButton', () => {
 
     it('pasword policy updates correctly', async () => {
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         fireEvent.click(screen.getByText('Update password policy'))
@@ -125,7 +118,7 @@ describe('test UpdatePasswordPolicyButton', () => {
         await waitFor(() => screen.getByText('Update password policy'));
 
         expect(axios.put).toBeCalledWith(
-            'http://localhost/auth/password-policy', {
+            'testserver/auth/password-policy', {
             min_password_length: 10,
             must_include_uppercase: false,
             must_include_lowercase: false,
@@ -139,7 +132,7 @@ describe('test UpdatePasswordPolicyButton', () => {
 
     it('handles error while updating the password policy correctly (put)', async () => {
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         axios.put.mockImplementation(() => Promise.reject(new Error('Test error')));
@@ -151,7 +144,7 @@ describe('test UpdatePasswordPolicyButton', () => {
 
     it('close and cancle work', async () => {
         render(<UpdatePasswordPolicyButton />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
 
         fireEvent.click(screen.getByText('Update password policy'))

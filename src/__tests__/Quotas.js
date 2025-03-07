@@ -1,41 +1,14 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { within } from '@testing-library/dom'
-import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import Quotas from '../components/Quotas'
 import { testDatax } from './utils/testData'
-import { UserSettingsContext } from '../components/UserSettingsContext'
-import { AuthContext } from '../AuthContext'
 
 let startDate = new Date('2020-08-03T17:10:15.000000+00:00')
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00')
-
-const RouterAuthContextWrapper = (options) => {
-    const quotaUnit = options?.quotaUnit == null ? '$' : options.quotaUnit
-    const quotaConversionFactor = quotaUnit === 'h' ? 3600 : 100
-    const multiplierUnit = quotaUnit === 'h' ? 's/s' : '¢/s'
-
-    return ({ children }) => (
-        <MemoryRouter>
-            <AuthContext.Provider value={[{ username: 'testuser' }]}>
-                <UserSettingsContext.Provider
-                    value={[
-                        {
-                            quotaUnit: quotaUnit,
-                            quotaConversionFactor: quotaConversionFactor,
-                            multiplierUnit: multiplierUnit,
-                            tablePageLength: '10',
-                        },
-                    ]}
-                >
-                    {children}
-                </UserSettingsContext.Provider>
-            </AuthContext.Provider>
-        </MemoryRouter>
-    )
-}
 
 window.ResizeObserver = function () {
     return {
@@ -56,7 +29,7 @@ describe('Quotas with single job', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
     })
@@ -69,7 +42,7 @@ describe('Quotas with single job', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -122,7 +95,7 @@ describe('Quotas with single job', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -140,7 +113,7 @@ describe('Quotas with single job', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -163,7 +136,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
     })
@@ -176,7 +149,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -214,7 +187,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -254,7 +227,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
             })
         ).toBeInTheDocument()
 
-        expect(tableJobs.getAllByRole('link')).toHaveLength(4)
+        // 4 * jobs + users
+        expect(tableJobs.getAllByRole('link')).toHaveLength(8)
 
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
@@ -277,7 +251,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -299,7 +273,8 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
             tableJobs.getByRole('row', { name: 'hc_2 0 1 0:0:20 0.4' })
         ).toBeInTheDocument()
 
-        expect(tableJobs.queryByRole('link')).toBeNull()
+        // 3 users
+        expect(tableJobs.getAllByRole('link')).toHaveLength(3)
 
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
@@ -320,7 +295,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -373,7 +348,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -422,7 +397,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -536,7 +511,7 @@ describe('charts cut of correctly when to many parts are given', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
 
@@ -567,7 +542,7 @@ describe('test cases in calculateQuota', () => {
                 calcEndTime={new Date('2021-08-05T17:10:15.000000+00:00')}
             />,
             {
-                wrapper: RouterAuthContextWrapper(),
+                wrapper: AllProvidersWrapperDefault,
             }
         )
         expect(screen.getAllByRole('img')).toHaveLength(3)
@@ -585,7 +560,11 @@ describe('test h also works', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: RouterAuthContextWrapper({ quotaUnit: 'h' }),
+                wrapper: AllProvidersWrapper = ({ children }) => (
+                    <AllProvidersWrapperDefault options={{ quotaUnit: 'h' }}>
+                        {children}
+                    </AllProvidersWrapperDefault>
+                )
             }
         )
 

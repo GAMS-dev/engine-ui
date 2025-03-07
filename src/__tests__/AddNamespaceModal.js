@@ -6,7 +6,6 @@ import axios from 'axios';
 
 import AddNamespaceModal from '../components/AddNamespaceModal'
 
-
 jest.mock('axios');
 
 describe('AddNamespaceModal', () => {

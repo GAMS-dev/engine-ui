@@ -1,23 +1,19 @@
 import React from 'react';
 import axios from 'axios';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { TextEncoder, TextDecoder } from 'util';
 import '@testing-library/jest-dom'
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import { AuthContext } from '../AuthContext';
 import LoginForm from '../components/LoginForm';
 import { OAuthClient } from './utils/oauth'
 
 const { Crypto } = require("@peculiar/webcrypto");
 
-
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ server: "http://localhost", login: false }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ login: false, server: "http://localhost" }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
 
 jest.mock('axios');
@@ -55,7 +51,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         render(
             <LoginForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => {
             expect(screen.getByText('Invalid native client id: toString')).toBeInTheDocument();
@@ -89,7 +85,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         render(
             <LoginForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => {
             expect(screen.getByText('Missing native client parameters')).toBeInTheDocument();
@@ -123,7 +119,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         render(
             <LoginForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => {
             expect(screen.getByText('Missing native client parameters')).toBeInTheDocument();
@@ -178,7 +174,7 @@ describe('LoginForm with OAuth2 flow', () => {
         });
         render(
             <LoginForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => {
             expect(screen.getByText('Please confirm that you are trying to log in with', { exact: false })).toBeInTheDocument();
@@ -272,7 +268,7 @@ describe('LoginForm with OAuth2 flow', () => {
             }) : null))
         render(
             <LoginForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => {
             expect(axios.post).toBeCalledWith(

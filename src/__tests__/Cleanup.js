@@ -6,7 +6,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 import Cleanup from '../components/Cleanup'
 import axios from 'axios';
 
-
 jest.mock('axios');
 
 describe('Cleanup', () => {

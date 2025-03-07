@@ -6,13 +6,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import InstancePoolSubmissionForm from '../components/InstancePoolSubmissionForm'
 
-
-const AllProvidersWrapper = ({ children }) => (
-    <AllProvidersWrapperDefault options={{ username: 'testuser' }}>
-        {children}
-    </AllProvidersWrapperDefault>
-);
-
 jest.mock('axios');
 
 describe('InstancePoolSubmissionForm', () => {
@@ -20,17 +13,17 @@ describe('InstancePoolSubmissionForm', () => {
     beforeEach(() => {
         axios.get.mockImplementation((url) => {
             switch (url) {
-                case 'testserver/usage/pools/testuser':
+                case 'testserver/usage/pools/admin':
                     return Promise.resolve({
                         status: 200, data: {
                             "instance_pools_available": []
                         }
                     })
-                case 'testserver/usage/instances/testuser':
+                case 'testserver/usage/instances/admin':
                     return Promise.resolve({
                         status: 200, data: {
                             "instances_inherited_from": null,
-                            "default_inherited_from": "testuser",
+                            "default_inherited_from": "admin",
                             "instances_available": [
                                 {
                                     "label": "TestInstance",
@@ -65,14 +58,14 @@ describe('InstancePoolSubmissionForm', () => {
                             }
                         }
                     })
-                case 'testserver/usage/instances/testuser/default':
+                case 'testserver/usage/instances/admin/default':
                     return Promise.resolve({
                         status: 200, data: {
                             "default_instance": {
                                 "label": "TestInstance",
                                 "resource_type": "instance"
                             },
-                            "default_inherited_from": "testuser"
+                            "default_inherited_from": "admin"
                         }
                     })
                 default:
@@ -97,7 +90,7 @@ describe('InstancePoolSubmissionForm', () => {
 
     it('renders InstancePoolSubmissionForm correctly', async () => {
         render(<InstancePoolSubmissionForm istestuser={true} licenseExpiration={'perpetual'} />, {
-            wrapper: AllProvidersWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Pool Label/));
     });

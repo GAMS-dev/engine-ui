@@ -1,8 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 import LoginForm from '../components/LoginForm';
 
@@ -13,15 +12,11 @@ jest.mock('react-router-dom', () => ({
     useParams: jest.fn(),
 }));
 
-
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[false, () => {}]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ login: false }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
-
 
 describe('LoginForm', () => {
 
@@ -51,7 +46,7 @@ describe('LoginForm', () => {
             }
         })
         render(<LoginForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/GAMS Engine is under maintenance./));
     });

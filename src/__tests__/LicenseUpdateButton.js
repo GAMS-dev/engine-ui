@@ -4,8 +4,6 @@ import { AllProvidersWrapperDefault } from './utils/testUtils'
 import LicUpdateButton from '../components/LicenseUpdateButton';
 import axios from 'axios';
 
-
-
 jest.mock('axios');
 
 describe('LicUpdateButton', () => {

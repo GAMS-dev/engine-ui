@@ -6,7 +6,6 @@ import axios from 'axios';
 
 import Job from '../components/Job'
 
-
 jest.mock('axios');
 
 jest.mock('react-router-dom', () => ({
