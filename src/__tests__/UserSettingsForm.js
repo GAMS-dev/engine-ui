@@ -73,7 +73,7 @@ describe('UserSettingsForm', () => {
     it('Cant edit notifications if push notifications not supported by browser', async () => {
         render(<UserSettingsForm />,
             {
-                wrapper: AllProvidersWrapperConfig = ({ children }) => (
+                wrapper: ({ children }) => (
                     <AllProvidersWrapperDefault options={{ in_kubernetes: false, serverConfig: { webhook_access: 'ENABLED' } }}>
                         {children}
                     </AllProvidersWrapperDefault>

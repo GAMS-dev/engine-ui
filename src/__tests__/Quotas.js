@@ -560,7 +560,7 @@ describe('test h also works', () => {
                 calcEndTime={endDate}
             />,
             {
-                wrapper: AllProvidersWrapper = ({ children }) => (
+                wrapper: ({ children }) => (
                     <AllProvidersWrapperDefault options={{ quotaUnit: 'h' }}>
                         {children}
                     </AllProvidersWrapperDefault>

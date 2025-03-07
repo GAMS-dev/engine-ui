@@ -265,7 +265,7 @@ describe('UserEditBundle', () => {
 
     it('provides expected UserSettingsContext obj to child elements', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -277,7 +277,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /usage/dashboard', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/dashboard'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -288,7 +288,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /usage/timeline', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/timeline'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -299,7 +299,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /change_pass', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/change_pass'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -310,7 +310,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /instances', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/instances'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -321,7 +321,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /quotas', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/quotas'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -332,7 +332,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /identity_provider', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/identity_provider'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -343,7 +343,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /permissions', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/permissions'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -354,7 +354,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap, dependent on the given path: /licenses', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/licenses'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -366,7 +366,7 @@ describe('UserEditBundle', () => {
     it('opens the correct tap, dependent on the given path: /invitees', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/invitees'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -380,7 +380,7 @@ describe('UserEditBundle', () => {
 
     it('opens the correct tap after click', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/timeline'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -396,7 +396,7 @@ describe('UserEditBundle', () => {
 
     it('admin can see all options for user', async () => {
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -416,7 +416,7 @@ describe('UserEditBundle', () => {
     it('admin can see fewer options on the own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -435,7 +435,7 @@ describe('UserEditBundle', () => {
     it('admin can see fewer options on inviter page with different provider', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'inviter1' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -454,7 +454,7 @@ describe('UserEditBundle', () => {
     it('inviter only sees usage and invitees on his own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'inviter1' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'], username: "inviter1", roles: ["inviter"] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -474,7 +474,7 @@ describe('UserEditBundle', () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'], username: "inviter1", roles: ["inviter"] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -495,7 +495,7 @@ describe('UserEditBundle', () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'invited_by_inviter1' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'], username: "inviter1", roles: ["inviter"] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -515,7 +515,7 @@ describe('UserEditBundle', () => {
     it('user only sees usage on his own page', async () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user1' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/dashboard'], username: "user1", roles: [] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -535,7 +535,7 @@ describe('UserEditBundle', () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'admin' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/dashboard'], username: "user1", roles: [] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -556,7 +556,7 @@ describe('UserEditBundle', () => {
         isAuthorized = false
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'notExisting' })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/dashboard'], username: "user1", roles: [] }}>
                     {children}
                 </AllProvidersWrapperDefault>
@@ -582,7 +582,7 @@ describe('UserEditBundle', () => {
             }
         })
         render(<UserEditBundle />, {
-            wrapper: AllProvidersWrapper = ({ children }) => (
+            wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage'] }}>
                     {children}
                 </AllProvidersWrapperDefault>
