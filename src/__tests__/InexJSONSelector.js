@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'
 
 import InexJSONSelector from '../components/InexJSONSelector'
+import { suppressActWarnings } from './utils/testUtils';
 
 jest.mock('axios');
 
