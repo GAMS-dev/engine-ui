@@ -1,21 +1,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { ServerInfoContext } from '../ServerInfoContext';
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import InstancePoolsActionsButtonGroup from '../components/InstancePoolsActionsButtonGroup'
 
-const AuthProviderWrapper = ({ children }) => (
-    <AuthContext.Provider value={[{ username: 'admin', roles: ['admin'], server: 'testserver' }]}>
-        <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <MemoryRouter>
-                {children}
-            </MemoryRouter>
-        </ServerInfoContext.Provider>
-    </AuthContext.Provider>
-);
 
 jest.mock('axios');
 
@@ -37,7 +26,7 @@ describe('InstancePoolsActionsButtonGroup', () => {
 
     it('renders InstancePoolsActionsButtonGroup correctly', async () => {
         render(<InstancePoolsActionsButtonGroup isAdmin={true} licenseExpiration={'perpetual'} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         fireEvent.click(screen.getByRole("button", { name: 'Delete' }));
 

@@ -1,25 +1,11 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
-import { AuthContext } from '../AuthContext';
-import { UserSettingsContext } from '../components/UserSettingsContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import Cleanup from '../components/Cleanup'
 import axios from 'axios';
 
-const AuthProviderWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <MemoryRouter>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-                {children}
-            </AuthContext.Provider>
-        </MemoryRouter>
-    </UserSettingsContext.Provider>
-);
 
 jest.mock('axios');
 
@@ -70,7 +56,7 @@ describe('Cleanup', () => {
 
     it('renders Cleanup correctly', async () => {
         render(<Cleanup />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Total File Size/));
     });

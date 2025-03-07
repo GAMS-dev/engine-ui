@@ -1,22 +1,11 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { ServerInfoContext } from "../ServerInfoContext";
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import Job from '../components/Job'
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-                {children}
-            </AuthContext.Provider>
-        </ServerInfoContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -61,7 +50,7 @@ describe('Job', () => {
 
     it('renders Job correctly', async () => {
         render(<Job />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
     });
 
@@ -69,7 +58,7 @@ describe('Job', () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ token: 'invalidToken123' })
 
         render(<Job />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Problems fetching job information. Error message: undefined/));
     });
@@ -78,7 +67,7 @@ describe('Job', () => {
         jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ token: 'hc:invalidToken123' })
 
         render(<Job />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Problems fetching Hypercube job information. Error message: undefined/));
     });

@@ -1,22 +1,11 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AuthContext } from '../AuthContext';
-import { UserSettingsContext } from '../components/UserSettingsContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import DefaultInstanceSelector from '../components/DefaultInstanceSelector'
 import axios from 'axios';
 
-const AuthProviderWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </UserSettingsContext.Provider>
-);
 
 jest.mock('axios');
 
@@ -102,7 +91,7 @@ describe('DefaultInstanceSelector', () => {
 
     it('renders DefaultInstanceSelector correctly', async () => {
         render(<DefaultInstanceSelector className={"form-group mt-3 mb-3"} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText("Default instance"));
     });

@@ -1,25 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { UserSettingsContext } from '../components/UserSettingsContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import GroupMembers from '../components/GroupMembers'
 import axios from 'axios';
-
-const AuthProviderWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <MemoryRouter>
-            <AuthContext.Provider value={[{ username: 'admin', roles: ['admin'], server: 'testserver' }]}>
-                {children}
-            </AuthContext.Provider>
-        </MemoryRouter>
-    </UserSettingsContext.Provider>
-);
 
 jest.mock('axios');
 
@@ -93,7 +78,7 @@ describe('GroupMembers', () => {
 
     it('renders GroupMembers correctly', async () => {
         render(<GroupMembers namespace='global' label='group1' />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         expect(screen.getByRole('row', { name: 'Username Added Added By Actions' })).toBeInTheDocument()
     });

@@ -1,21 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { ServerInfoContext } from '../ServerInfoContext';
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import Header from '../components/Header'
 
-const AuthProviderWrapper = ({ children }) => (
-    <AuthContext.Provider value={[{ username: 'admin', roles: ['admin'], server: 'testserver' }]}>
-        <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-            <MemoryRouter>
-                {children}
-            </MemoryRouter>
-        </ServerInfoContext.Provider>
-    </AuthContext.Provider>
-);
+
 
 jest.mock('axios');
 
@@ -37,7 +27,7 @@ describe('Header', () => {
 
     it('renders Header correctly', async () => {
         render(<Header isAdmin={true} licenseExpiration={'perpetual'} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         expect(screen.getByText('Perpetual license')).toBeInTheDocument()
     });

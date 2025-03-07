@@ -1,19 +1,11 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import AddNamespaceModal from '../components/AddNamespaceModal'
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -35,7 +27,7 @@ describe('AddNamespaceModal', () => {
 
     it('renders AddNamespaceModal correctly', async () => {
         render(<AddNamespaceModal showDialog="true" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Namespace Name/));
     });
@@ -44,7 +36,7 @@ describe('AddNamespaceModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Namespace Name/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Namespace Name' }), { target: { value: 'newNamespace' } });
@@ -57,7 +49,7 @@ describe('AddNamespaceModal', () => {
         const existingNamespaces = ['thisNamespaceAlreadyExists']
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} existingNamespaces={existingNamespaces} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Namespace Name/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Namespace Name' }), { target: { value: 'thisNamespaceAlreadyExists' } });
@@ -70,7 +62,7 @@ describe('AddNamespaceModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Namespace Name/));
         fireEvent.click(screen.getByRole("button", { name: 'Cancel' }));
@@ -82,7 +74,7 @@ describe('AddNamespaceModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Namespace Name/));
         fireEvent.click(screen.getByRole("button", { name: 'Close' }));
@@ -104,7 +96,7 @@ describe('AddNamespaceModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Namespace Name/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Namespace Name' }), { target: { value: 'newNamespace' } });

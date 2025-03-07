@@ -1,21 +1,16 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { UserSettingsContext } from '../components/UserSettingsContext';
+import axios from 'axios';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import InstancePoolSubmissionForm from '../components/InstancePoolSubmissionForm'
-import axios from 'axios';
 
-const AuthProviderWrapper = ({ children }) => (
-    <UserSettingsContext.Provider value={[{
-        quotaUnit: 'mults',
-        tablePageLength: 10
-    }, () => { }]}>
-        <AuthContext.Provider value={[{ username: 'admin', roles: ['admin'], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </UserSettingsContext.Provider>
+
+const AllProvidersWrapper = ({ children }) => (
+    <AllProvidersWrapperDefault options={{ username: 'testuser' }}>
+        {children}
+    </AllProvidersWrapperDefault>
 );
 
 jest.mock('axios');
@@ -25,17 +20,17 @@ describe('InstancePoolSubmissionForm', () => {
     beforeEach(() => {
         axios.get.mockImplementation((url) => {
             switch (url) {
-                case 'testserver/usage/pools/admin':
+                case 'testserver/usage/pools/testuser':
                     return Promise.resolve({
                         status: 200, data: {
                             "instance_pools_available": []
                         }
                     })
-                case 'testserver/usage/instances/admin':
+                case 'testserver/usage/instances/testuser':
                     return Promise.resolve({
                         status: 200, data: {
                             "instances_inherited_from": null,
-                            "default_inherited_from": "admin",
+                            "default_inherited_from": "testuser",
                             "instances_available": [
                                 {
                                     "label": "TestInstance",
@@ -70,14 +65,14 @@ describe('InstancePoolSubmissionForm', () => {
                             }
                         }
                     })
-                case 'testserver/usage/instances/admin/default':
+                case 'testserver/usage/instances/testuser/default':
                     return Promise.resolve({
                         status: 200, data: {
                             "default_instance": {
                                 "label": "TestInstance",
                                 "resource_type": "instance"
                             },
-                            "default_inherited_from": "admin"
+                            "default_inherited_from": "testuser"
                         }
                     })
                 default:
@@ -101,8 +96,8 @@ describe('InstancePoolSubmissionForm', () => {
     })
 
     it('renders InstancePoolSubmissionForm correctly', async () => {
-        render(<InstancePoolSubmissionForm isAdmin={true} licenseExpiration={'perpetual'} />, {
-            wrapper: AuthProviderWrapper
+        render(<InstancePoolSubmissionForm istestuser={true} licenseExpiration={'perpetual'} />, {
+            wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Pool Label/));
     });

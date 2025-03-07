@@ -1,18 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import GroupMemberActionsButtonGroup from '../components/GroupMemberActionsButtonGroup'
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -34,7 +26,7 @@ describe('GroupMemberActionsButtonGroup', () => {
 
     it('renders GroupMemberActionsButtonGroup correctly', async () => {
         render(<GroupMemberActionsButtonGroup namespace={{ permission: 10 }} roles={["admin"]} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         fireEvent.click(screen.getByText(/Remove/));
         expect(screen.getByRole('button', { name: "Delete" })).toBeInTheDocument()

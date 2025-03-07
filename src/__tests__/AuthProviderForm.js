@@ -1,22 +1,10 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
-import { ServerConfigContext } from "../ServerConfigContext";
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import AuthProviderForm from '../components/AuthProviderForm'
-
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <ServerConfigContext.Provider value={[{}, () => { }]}>
-            <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-                {children}
-            </AuthContext.Provider>
-        </ServerConfigContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -87,7 +75,7 @@ describe('AuthProviderForm', () => {
 
     it('renders AuthProviderForm correctly', async () => {
         render(<AuthProviderForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add New Identity Provider/));
     });

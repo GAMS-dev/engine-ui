@@ -1,19 +1,11 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import CreateAuthTokenForm from '../components/CreateAuthTokenForm'
 import axios from 'axios';
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -60,7 +52,7 @@ describe('CreateAuthTokenForm', () => {
 
     it('renders CreateAuthTokenForm correctly', async () => {
         render(<CreateAuthTokenForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText("Expiration date"));
     });

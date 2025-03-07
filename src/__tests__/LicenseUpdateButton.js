@@ -1,15 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import LicUpdateButton from '../components/LicenseUpdateButton';
 import axios from 'axios';
 
 
-const AuthProviderWrapper = ({ children }) => (
-    <AuthContext.Provider value={[{ server: 'testserver', username: 'admin', roles: ['admin'] }]}>
-        {children}
-    </AuthContext.Provider>
-);
 
 jest.mock('axios');
 
@@ -50,7 +45,7 @@ describe('LicUpdateButton', () => {
 
     it('renders LicUpdateButton correctly', async () => {
         render(<LicUpdateButton type="engine" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
     });
 
@@ -62,7 +57,7 @@ describe('LicUpdateButton', () => {
         });
 
         render(<LicUpdateButton type="engine" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Update Engine license/));
         fireEvent.click(screen.getByText(/Update Engine license/));
@@ -77,7 +72,7 @@ describe('LicUpdateButton', () => {
         });
 
         render(<LicUpdateButton type="engine" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Update Engine license/));
         fireEvent.click(screen.getByText(/Update Engine license/));

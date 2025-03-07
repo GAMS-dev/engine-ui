@@ -1,25 +1,9 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { ServerInfoContext } from "../ServerInfoContext";
-import { ServerConfigContext } from "../ServerConfigContext";
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import AdministrationForm from '../components/AdministrationForm'
-
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <ServerConfigContext.Provider value={[{}, () => { }]}>
-            <ServerInfoContext.Provider value={[{ in_kubernetes: true }, () => { }]}>
-                <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-
-                    {children}
-                </AuthContext.Provider>
-            </ServerInfoContext.Provider>
-        </ServerConfigContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -41,7 +25,7 @@ describe('AdministrationForm', () => {
 
     it('renders AdministrationForm correctly', async () => {
         render(<AdministrationForm />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Administration/));
     });

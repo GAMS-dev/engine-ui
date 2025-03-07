@@ -1,19 +1,11 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom'
-import { AuthContext } from '../AuthContext';
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import AddUserGroupModal from '../components/AddUserGroupModal'
 
-const AuthProviderWrapper = ({ children }) => (
-    <MemoryRouter>
-        <AuthContext.Provider value={[{ username: "admin", roles: ["admin"], server: 'testserver' }]}>
-            {children}
-        </AuthContext.Provider>
-    </MemoryRouter>
-);
 
 jest.mock('axios');
 
@@ -35,7 +27,7 @@ describe('AddUserGroupModal', () => {
 
     it('renders AddUserGroupModal correctly', async () => {
         render(<AddUserGroupModal showDialog="true" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
     });
@@ -44,7 +36,7 @@ describe('AddUserGroupModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} namespace="testNamespace" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
@@ -59,7 +51,7 @@ describe('AddUserGroupModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
         fireEvent.click(screen.getByRole("button", { name: 'Cancel' }));
@@ -71,7 +63,7 @@ describe('AddUserGroupModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
         fireEvent.click(screen.getByRole("button", { name: 'Close' }));
@@ -93,7 +85,7 @@ describe('AddUserGroupModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} namespace="testNamespace" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
@@ -122,7 +114,7 @@ describe('AddUserGroupModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} namespace="testNamespace" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
@@ -150,7 +142,7 @@ describe('AddUserGroupModal', () => {
         const mockSetShowDialog = jest.fn();
 
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} namespace="testNamespace" />, {
-            wrapper: AuthProviderWrapper
+            wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
         fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
