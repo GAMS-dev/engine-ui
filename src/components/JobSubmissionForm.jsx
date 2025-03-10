@@ -74,9 +74,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
                     .get(`${server}/namespaces/`, {
                         headers: { "X-Fields": "name,permissions" }
                     }),
-                axios({
-                    url: `${server}/usage/quota`,
-                    method: "GET",
+                axios.get(`${server}/usage/quota`, {
                     params: { username: username }
                 })
             ])
