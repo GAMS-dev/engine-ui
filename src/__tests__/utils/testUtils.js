@@ -35,7 +35,7 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
                         <ServerConfigContext.Provider value={[serverConfig, setServerConfig]}>
                             <ServerInfoContext.Provider value={[{ in_kubernetes: in_kubernetes }, setServerInfo]}>
                                 <UserSettingsContext.Provider value={[{ quotaUnit, quotaConversionFactor, multiplierUnit, tablePageLength }, updateUserSettings]}>
-                                    <AuthContext.Provider value={login ? [{ username, roles, server }] : [login, setLogin]}>
+                                    <AuthContext.Provider value={login ? [{ username, roles, server }, setLogin] : [login, setLogin]}>
                                         {children}
                                     </AuthContext.Provider>
                                 </UserSettingsContext.Provider>

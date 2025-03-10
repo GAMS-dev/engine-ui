@@ -16,3 +16,5 @@ export const UserLink = ({ user, hideMeBadge, children }) => {
         </> : <>{user}</>
     );
 };
+
+export default UserLink;
