@@ -6,6 +6,8 @@ import Select from 'react-select';
 import { AuthContext } from "../AuthContext";
 import { AlertContext } from "./Alert";
 import { getResponseError } from "./util";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Info } from "react-feather";
 
 function generateDesc(name, perm, groups) {
     return `${name}${(perm && perm > 0) ?
@@ -115,9 +117,19 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                         </select>
                     </div>
                     <div>
-                        <label>
-                            Permissions
-                        </label>
+                        Permissions
+                        <OverlayTrigger placement="top"
+                            overlay={<Tooltip id="tooltip">
+                                <div >
+                                    Admin role required for namespace creation, deletion, and quota management.
+                                    Read allows model data download.
+                                    Write allows model registration.
+                                    Execute runs registered model jobs.
+                                    Combine Write and Execute to run any model.
+                                </div>
+                            </Tooltip>}>
+                            <Info size="20" />
+                        </OverlayTrigger>
                     </div>
                     <div className="form-check form-check-inline">
                         <input className="form-check-input" type="checkbox" id="cbReadAccess"
