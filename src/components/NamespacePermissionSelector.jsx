@@ -119,12 +119,12 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                     <div>
                         Permissions
                         <OverlayTrigger placement="top"
-                            overlay={<Tooltip id="tooltip">
+                            overlay={<Tooltip id="tooltip" >
                                 <div >
-                                    Admin role required for namespace creation, deletion, and quota management.
-                                    Read allows model data download.
-                                    Write allows model registration.
-                                    Execute runs registered model jobs.
+                                    Admin role required for namespace creation, deletion, and quota management.<br />
+                                    Read allows model data download.<br />
+                                    Write allows model registration.<br />
+                                    Execute runs registered model jobs.<br />
                                     Combine Write and Execute to run any model.
                                 </div>
                             </Tooltip>}>

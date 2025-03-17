@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
 
@@ -51,6 +51,25 @@ describe('NamespacePermissionSelector', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText('Namespace'));
+    });
+
+    it('should display the tooltip on hover', async () => {
+        render(<NamespacePermissionSelector namespacePermissions={[{ name: 'global', permission: 110 }]} />, {
+            wrapper: AllProvidersWrapperDefault
+        });
+        const infoIcon = screen.getByText('Permissions').querySelector('svg');
+        fireEvent.mouseEnter(infoIcon);
+        expect(
+            screen.getByText(
+                new RegExp(
+                    `Admin role required for namespace creation, deletion, and quota management.` +
+                    `Read allows model data download.` +
+                    `Write allows model registration.` +
+                    `Execute runs registered model jobs.` +
+                    `Combine Write and Execute to run any model.`
+                )
+            )
+        ).toBeInTheDocument();
     });
 
 })
