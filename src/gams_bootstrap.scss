@@ -415,3 +415,8 @@ body {
   max-width: 600px;
   overflow: auto;
 }
+
+.tooltip-inner {
+  max-width: 300px !important; //constrained to max width
+  width: max-content !important; //uses the content as a guide of default length
+}
