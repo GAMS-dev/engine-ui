@@ -402,13 +402,13 @@ const LoginForm = ({ showRegistrationForm }) => {
             } else if (i < mustInclude.length - 1) {
               passwordPolicyStringTmp += `${elem} `
             } else {
-              passwordPolicyStringTmp = `and ${elem}.`
+              passwordPolicyStringTmp += `and ${elem}.`
             }
           })
         }
 
         if (passwordPolicy.not_in_popular_passwords) {
-          passwordPolicyStringTmp = ' It is checked against commonly used passwords.'
+          passwordPolicyStringTmp += ' It is checked against commonly used passwords.'
         }
 
         setPasswordPolicyHelper(passwordPolicyStringTmp)
