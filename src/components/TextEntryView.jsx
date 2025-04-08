@@ -4,10 +4,9 @@ import axios from "axios";
 import { getResponseError } from "./util";
 import { AlertContext } from "./Alert";
 
-const TextEntryView = props => {
+const TextEntryView = ({ textEntries, server }) => {
   const [, setAlertMsg] = useContext(AlertContext);
 
-  const { textEntries, server } = props;
   const [cache, setCache] = useState([]);
   const [teContent, setTeContent] = useState("")
   const { token } = useParams();
