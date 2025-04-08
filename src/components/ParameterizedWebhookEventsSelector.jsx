@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import Select from 'react-select';
 import { Button } from "react-bootstrap";
+import { UserSettingsContext } from "./UserSettingsContext";
 
 const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameterizedEvents,
     setIsValid, isSubmitting, validationErrors }) => {
+
+    const [userSettings,] = useContext(UserSettingsContext)
 
     const allParameterizedEvents = [{ value: 'VOLUME_QUOTA_THRESHOLD', label: 'Volume quota threshold reached' },
     { value: 'JOB_DURATION_THRESHOLD', label: 'Job duration threshold reached' },
@@ -28,7 +31,8 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                             isDisabled={isSubmitting}
                             onChange={el => {
                                 const newEvents = [...parameterizedEvents];
-                                newEvents[idx] = `${el.value}=${eventParameter}`;
+                                newEvents[idx] = `${el.value}=`;
+                                setIsValid(false);
                                 setParameterizedEvents(newEvents);
                             }}
                             value={allParameterizedEvents.filter(event => event.value === eventType)[0]}
@@ -40,12 +44,20 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                             type="number"
                             min="0"
                             className={"form-control" + (isNaN(eventParameter) ? " is-invalid" : "")}
-                            placeholder={"Event trigger (in seconds)"}
-                            value={isNaN(eventParameter) ? '' : eventParameter}
+                            placeholder={`Event trigger (in ${eventType === 'VOLUME_QUOTA_THRESHOLD' ? userSettings.quotaUnit : 'h'})`}
+                            value={isNaN(eventParameter) ? '' : (eventType === 'VOLUME_QUOTA_THRESHOLD' ? eventParameter / userSettings.quotaConversionFactor : eventParameter / 3600)}
                             onChange={el => {
-                                const newParam = el.target.value;
+                                let newParam = parseFloat(el.target.value);
                                 setIsValid(!isNaN(newParam));
                                 const newEvents = [...parameterizedEvents];
+                                if (!isNaN(newParam)) {
+                                    if (eventType === 'VOLUME_QUOTA_THRESHOLD') {
+                                        newParam *= userSettings.quotaConversionFactor;
+                                    } else {
+                                        newParam *= 3600;
+                                    }
+                                }
+
                                 newEvents[idx] = `${eventType}=${newParam}`;
                                 setParameterizedEvents(newEvents);
                             }}
