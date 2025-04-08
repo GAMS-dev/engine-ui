@@ -143,8 +143,8 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
     {
       field: "jobs",
       column: "Number Jobs",
-      sorter: "alphabetical",
-      displayer: String
+      sorter: "numerical",
+      displayer: Number
     },
     {
       field: "times",
