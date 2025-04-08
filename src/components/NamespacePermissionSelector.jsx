@@ -121,7 +121,7 @@ export const NamespacePermissionSelector = ({ namespacePermissions, setNamespace
                         <OverlayTrigger placement="top"
                             overlay={<Tooltip id="tooltip" >
                                 <div >
-                                    Admin role required for namespace creation, deletion, and quota management.<br />
+                                    Admin role required for namespace creation, deletion, and license management.<br />
                                     Read allows model data download.<br />
                                     Write allows model registration.<br />
                                     Execute runs registered model jobs.<br />
