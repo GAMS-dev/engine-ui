@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Package, Users, Play, Archive, Settings, ExternalLink, Server } from "react-feather";
 import { useLocation } from 'react-router-dom';
 import { Link } from "react-router-dom";
@@ -6,39 +6,13 @@ import { AuthContext } from "../AuthContext";
 import UserMenu from "./UserMenu";
 import { ServerConfigContext } from "../ServerConfigContext";
 import { ServerInfoContext } from "../ServerInfoContext";
-import { getInstanceData } from "./util";
 
 const Sidebar = () => {
-  const [{ server, roles, username }] = useContext(AuthContext);
+  const [{ roles }] = useContext(AuthContext);
   const [serverInfo] = useContext(ServerInfoContext);
   const [serverConfig,] = useContext(ServerConfigContext);
   const pathname = useLocation().pathname;
-  const [instancesVisible, setInstancesVisible] = useState(false);
 
-  useEffect(() => {
-    const determineInstanceVisibility = async () => {
-      const instancePoolAccessTmp = serverInfo.instance_pool_access;
-      if (serverInfo.in_kubernetes !== true) {
-        setInstancesVisible(false);
-        return;
-      }
-      if (roles.includes("admin")) {
-        setInstancesVisible(true);
-        return;
-      }
-      if (instancePoolAccessTmp === "ENABLED" || (roles.includes("inviter") && instancePoolAccessTmp === "INVITER_ONLY")) {
-        setInstancesVisible(true);
-        return;
-      }
-      const instanceData = await getInstanceData(server, username);
-      if (instanceData.instances.find(instance => instance.is_pool === true) != null) {
-        setInstancesVisible(true);
-        return;
-      }
-      setInstancesVisible(false);
-    }
-    determineInstanceVisibility()
-  }, [serverInfo, server, username, roles])
   return (
     <nav className="sidebar bg-light">
       <div className="sidebar-sticky">
@@ -66,7 +40,10 @@ const Sidebar = () => {
               <span className="nav-link-text">Users</span>
             </Link>
           </li>
-          {instancesVisible === true &&
+          {(serverInfo.in_kubernetes === true && (
+            serverConfig.instance_pool_access === "ENABLED" ||
+            roles?.includes('admin') ||
+            (serverConfig.instance_pool_access === 'INVITER_ONLY' && roles?.includes('inviter')))) &&
             <li className="nav-item">
               <Link to="/pools" className={`nav-link nav-block${pathname.startsWith("/pools") ? " active" : ""}`}>
                 <Server className="feather" />
