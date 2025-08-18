@@ -162,7 +162,7 @@ const Usage = ({ userToEditRoles }) => {
                             to_datetime: endDate
                         },
                         headers: {
-                            "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}}"
+                            "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}"
                         }
                     })).data
             } catch (err) {
