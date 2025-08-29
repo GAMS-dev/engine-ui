@@ -233,7 +233,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'User Pool Label Instance Number Crashes Solve Time Multiplier $',
+                name: 'User Pool Label Instance Number Crashes Idle Time Multiplier $',
             })
         ).toBeInTheDocument()
         expect(
@@ -279,7 +279,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'User Number Crashes Number Pools Solve Time $',
+                name: 'User Number Crashes Number Pools Idle Time $',
             })
         ).toBeInTheDocument()
         expect(
@@ -332,7 +332,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'Instance Number Crashes Number Pools Solve Time $',
+                name: 'Instance Number Crashes Number Pools Idle Time $',
             })
         ).toBeInTheDocument()
         expect(
@@ -381,7 +381,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'Pool Label Number Crashes Number Pools Solve Time $',
+                name: 'Pool Label Number Crashes Number Pools Idle Time $',
             })
         ).toBeInTheDocument()
         expect(

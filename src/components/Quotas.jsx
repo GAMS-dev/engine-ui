@@ -200,7 +200,7 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
     },
     {
       field: "times",
-      column: "Solve Time",
+      column: "Idle Time",
       sorter: "numerical",
       displayer: formatTime
     },

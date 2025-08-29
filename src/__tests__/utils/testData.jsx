@@ -170,7 +170,11 @@ const testDatax = {
     "pool_usage": [
       {
         "label": "pool_1",
-        "owner": "string",
+        "owner": {
+          "username": "string",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -228,7 +232,11 @@ const testDatax = {
       },
       {
         "label": "pool_2",
-        "owner": "test_workers_in_before_after_over_timeframe",
+        "owner": {
+          "username": "test_workers_in_before_after_over_timeframe",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -378,7 +386,11 @@ const testDatax = {
     "pool_usage": [
       {
         "label": "pool_1",
-        "owner": "string",
+        "owner": {
+          "username": "string",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -430,7 +442,11 @@ const testDatax = {
       },
       {
         "label": "pool_1",
-        "owner": "test_workers_in_before_after_over_timeframe",
+        "owner": {
+          "username": "test_workers_in_before_after_over_timeframe",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -654,7 +670,11 @@ const testDatax = {
     "pool_usage": [
       {
         "label": "pool_1",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -702,7 +722,11 @@ const testDatax = {
     "pool_usage": [
       {
         "label": "pool_1",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -742,7 +766,11 @@ const testDatax = {
       },
       {
         "label": "pool_2",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -782,7 +810,11 @@ const testDatax = {
       },
       {
         "label": "pool_3",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -822,7 +854,11 @@ const testDatax = {
       },
       {
         "label": "pool_4",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -862,7 +898,11 @@ const testDatax = {
       },
       {
         "label": "pool_5",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -902,7 +942,11 @@ const testDatax = {
       },
       {
         "label": "pool_6",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -942,7 +986,11 @@ const testDatax = {
       },
       {
         "label": "pool_7",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -982,7 +1030,11 @@ const testDatax = {
       },
       {
         "label": "pool_8",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1022,7 +1074,11 @@ const testDatax = {
       },
       {
         "label": "pool_9",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1062,7 +1118,11 @@ const testDatax = {
       },
       {
         "label": "pool_10",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1102,7 +1162,11 @@ const testDatax = {
       },
       {
         "label": "pool_11",
-        "owner": "pool_user",
+        "owner": {
+          "username": "pool_user",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1384,7 +1448,11 @@ const testDatax = {
     "pool_usage": [
       {
         "label": "pool_1",
-        "owner": "multiple_worker",
+        "owner": {
+          "username": "multiple_worker",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1442,7 +1510,11 @@ const testDatax = {
       },
       {
         "label": "pool_2",
-        "owner": "both_worker_crashed_but_pool_finished",
+        "owner": {
+          "username": "both_worker_crashed_but_pool_finished",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1488,7 +1560,11 @@ const testDatax = {
       },
       {
         "label": "pool_3",
-        "owner": "pool_still_running",
+        "owner": {
+          "username": "pool_still_running",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,
@@ -1528,7 +1604,11 @@ const testDatax = {
       },
       {
         "label": "pool_3",
-        "owner": "worker_in_and_out_of_timeframe",
+        "owner": {
+          "username": "worker_in_and_out_of_timeframe",
+          "deleted": false,
+          "old_username": null
+        },
         "instance": {
           "label": "pool_instance",
           "cpu_request": 0,

@@ -13,7 +13,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaConversionFa
         {
             pool_label: pool['label'],
             instance: pool['instance']['label'],
-            user: pool['owner'],
+            user: pool['owner']['username'],
             multiplier: pool['instance']['multiplier_idle'],
             times: pool['times'],
             fails: 0,
