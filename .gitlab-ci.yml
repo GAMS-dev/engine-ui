@@ -31,7 +31,7 @@ lint:
   image: $CI_REGISTRY_IMAGE/buildimage:latest
   stage: lint
   before_script:
-    - npm install
+    - npm ci
   script:
     - pre-commit run --all-files
     - npm run lint
@@ -48,7 +48,7 @@ test:
   image: $CI_REGISTRY_IMAGE/buildimage:latest
   stage: test
   before_script:
-    - npm install
+    - npm ci
   script:
     - npm run test:ci
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
