@@ -31,7 +31,7 @@ lint:
   image: $CI_REGISTRY_IMAGE/buildimage:latest
   stage: lint
   before_script:
-    - npm ci
+    - npm ci --ignore-scripts
   script:
     - pre-commit run --all-files
     - npm run lint
