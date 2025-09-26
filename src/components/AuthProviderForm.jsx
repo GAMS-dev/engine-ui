@@ -78,6 +78,7 @@ const AuthProviderForm = () => {
     const [requestScopeAUTH, setRequestScopeAUTH] = useState("AUTH");
     const [extraClientIds, setExtraClientIds] = useState("");
     const [oidcScopes, setOidcScopes] = useState("openid,profile,email");
+    const [oidcUid, setOidcUid] = useState("sub");
 
     const [ldapHost, setLdapHost] = useState("");
     const [ldapPort, setLdapPort] = useState(389);
@@ -213,6 +214,7 @@ const AuthProviderForm = () => {
             setLdapUserFilter('');
             setExtraClientIds('');
             setOidcScopes('openid,profile,email');
+            setOidcUid('sub');
         } else {
             const providerConfig = authProviders.filter(config => config.name === selectedAuthProvider);
             if (providerConfig.length !== 1) {
@@ -245,9 +247,11 @@ const AuthProviderForm = () => {
                 if (providerConfig[0].oidc != null) {
                     setExtraClientIds(oAuthProviderConfig.extra_client_ids == null ? '' : oAuthProviderConfig.extra_client_ids.join(","));
                     setOidcScopes(oAuthProviderConfig.scopes.join(","));
+                    setOidcUid(oAuthProviderConfig.uid);
                 } else {
                     setExtraClientIds('');
                     setOidcScopes('');
+                    setOidcUid('');
                     setResponseTypesSupported(oAuthProviderConfig.response_types_supported.join(","));
                     setGrantTypesSupported(oAuthProviderConfig.grant_types_supported.join(","));
                     setRequestScopeREADONLY(oAuthProviderConfig.scopes.filter(scope => scope.scope === "READONLY")[0].request_scope);
@@ -381,6 +385,7 @@ const AuthProviderForm = () => {
                         authProviderForm.append("scopes", oidcScope.trim());
                     }
                 });
+                authProviderForm.append("uid", oidcUid);
             }
         } else if (providerType === "ldap") {
             authURI = `${server}/auth/ldap-providers`;
@@ -830,6 +835,22 @@ const AuthProviderForm = () => {
                                             />
                                             <div className="invalid-feedback">
                                                 {formErrors.scopes ? formErrors.scopes : ""}
+                                            </div>
+                                        </div>
+                                        <div className="mt-3 mb-3">
+                                            <label htmlFor="oidcUid">
+                                                The claim from the OIDC ID token to use as the user's unique identifier. The <kbd>sub</kbd> claim is the default and recommended value.
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className={"form-control" + (formErrors.uid ? " is-invalid" : "")}
+                                                id="oidcUid"
+                                                autoComplete="on"
+                                                value={oidcUid}
+                                                onChange={e => setOidcUid(e.target.value)}
+                                            />
+                                            <div className="invalid-feedback">
+                                                {formErrors.uid ? formErrors.uid : ""}
                                             </div>
                                         </div>
                                         <div className="mt-3 mb-3">
