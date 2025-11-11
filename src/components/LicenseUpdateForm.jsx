@@ -112,7 +112,7 @@ const LicenseUpdateForm = () => {
                         }}
                     >
                         <div className="invalid-feedback text-center" style={{ display: licenseErrorMsg !== "" ? "block" : "none" }}>
-                            {inheritedFrom === ""? licenseErrorMsg : <>{licenseErrorMsg} <UserLink user={inheritedFrom} /></>}
+                            {inheritedFrom === "" ? licenseErrorMsg : <>{licenseErrorMsg} <UserLink user={inheritedFrom} /></>}
                         </div>
                         <fieldset disabled={isSubmitting}>
                             <label htmlFor="licenseBox">
@@ -120,7 +120,7 @@ const LicenseUpdateForm = () => {
                             </label>
                             <textarea
                                 id="licenseBox"
-                                rows="6"
+                                rows="8"
                                 cols="50"
                                 className="form-control monospace no-resize"
                                 value={license}

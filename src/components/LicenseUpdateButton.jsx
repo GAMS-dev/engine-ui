@@ -39,7 +39,7 @@ const LicUpdateButton = props => {
         settings.fontSize = "8pt";
         settings.buttonLabel = "Update GAMS license";
         settings.successMsg = "GAMS license successfully updated!";
-        settings.noRows = 6;
+        settings.noRows = 8;
         b64enc = true;
     }
 

@@ -305,7 +305,7 @@ const InstanceSubmissionForm = () => {
                                         </label>
                                         <textarea
                                             id="licenseBox"
-                                            rows="6"
+                                            rows="8"
                                             cols="50"
                                             className={"form-control monospace no-resize" + (formErrors.gams_license ? " is-invalid" : "")}
                                             value={GAMSLicense}
