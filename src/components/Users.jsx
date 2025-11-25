@@ -114,7 +114,7 @@ const Users = () => {
       setIsLoading(true);
       const queryParamsUsersQuery = roles?.length ? {} : { username: username };
       queryParamsUsersQuery['filter'] = 'deleted=false';
-      const queryParamsInvitationsQuery = roles?.length ? {} : { everyone: roles?.includes("admin") };
+      const queryParamsInvitationsQuery = { everyone: roles?.includes("admin") === true };
       queryParamsInvitationsQuery['filter'] = 'used=false';
 
       try {
@@ -147,7 +147,15 @@ const Users = () => {
             }));
         }
         setUsers(userDataTmp
-          .sort((a, b) => (moment.utc(b.created) - moment.utc(a.created))));
+          .sort((a, b) => {
+            if (a.created == null) {
+              return 1;
+            }
+            if (b.created == null) {
+              return -1;
+            }
+            return (moment.utc(b.created) - moment.utc(a.created));
+          }));
       } catch (err) {
         setAlertMsg(`Problems fetching user information. Error message: ${getResponseError(err)}`);
       } finally {
