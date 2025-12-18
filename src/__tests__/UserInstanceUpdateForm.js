@@ -384,21 +384,21 @@ describe('UserInstanceUpdateForm', () => {
         const defaultInstanceDropdown = within(
             document.getElementById('instancesDefaultDD')
         )
-        expect(instancesAllowedDropdown.getByText(/small/)).not.toBeNull();
-        expect(instancesAllowedDropdown.getByText(/medium/)).not.toBeNull();
-        expect(instancesAllowedDropdown.getByText(/test_pool/)).not.toBeNull();
-        expect(defaultInstanceDropdown.getByText(/small/)).not.toBeNull();
+        expect(instancesAllowedDropdown.getByText(/small/)).toBeInTheDocument();
+        expect(instancesAllowedDropdown.getByText(/medium/)).toBeInTheDocument();
+        expect(instancesAllowedDropdown.getByText(/test_pool/)).toBeInTheDocument();
+        expect(defaultInstanceDropdown.getByText(/small/)).toBeInTheDocument();
         expect(screen.queryByText(/Delete all pools/)).toBeNull();
 
         fireEvent.click(instancesAllowedDropdown.getByLabelText(/Remove medium/i));
         expect(instancesAllowedDropdown.queryByText(/medium/)).toBeNull();
-        expect(defaultInstanceDropdown.getByText(/small/)).not.toBeNull();
+        expect(defaultInstanceDropdown.getByText(/small/)).toBeInTheDocument();
         expect(screen.queryByText(/Delete all pools/)).toBeInTheDocument();
 
         fireEvent.click(instancesAllowedDropdown.getByLabelText(/Remove small/i));
         expect(instancesAllowedDropdown.queryByText(/medium/)).toBeNull();
         expect(defaultInstanceDropdown.queryByText(/small/)).toBeNull();
-        expect(defaultInstanceDropdown.getByText(/test_pool/)).not.toBeNull();
+        expect(defaultInstanceDropdown.getByText(/test_pool/)).toBeInTheDocument();
     })
 
 })
