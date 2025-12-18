@@ -210,6 +210,7 @@ const UserInstanceUpdateForm = () => {
                                                         Instances user is allowed to use
                                                     </label>
                                                     <Select
+                                                        id="instancesAllowedDD"
                                                         inputId="instancesAllowed"
                                                         value={selectedInstancesAllowed}
                                                         isMulti={true}
@@ -219,7 +220,7 @@ const UserInstanceUpdateForm = () => {
                                                         onChange={selected => {
                                                             setSelectedInstancesAllowed(selected);
                                                             if (defaultInstance == null ||
-                                                                !selected.map(el => el.value).includes(selected.value)) {
+                                                                !selected.map(el => el.value).includes(defaultInstance.value)) {
                                                                 setDefaultInstance(selected[0]);
                                                             }
                                                         }}
@@ -272,6 +273,7 @@ const UserInstanceUpdateForm = () => {
                                                 No default instance is currently assigned to the user
                                             </div>
                                             <Select
+                                                id="instancesDefaultDD"
                                                 inputId="instancesDefault"
                                                 isClearable={false}
                                                 value={defaultInstance}

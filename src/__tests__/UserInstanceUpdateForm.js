@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { within } from '@testing-library/dom'
 import '@testing-library/jest-dom'
 import axios from 'axios';
 import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
@@ -57,6 +58,20 @@ describe('UserInstanceUpdateForm', () => {
                                 }
                             ]
                         })
+                    } else if (params.username === "user3") {
+                        return Promise.resolve({
+                            status: 200,
+                            data: [
+                                {
+                                    "username": "user3",
+                                    "roles": [],
+                                    "deleted": false,
+                                    "inviter_name": "admin",
+                                    "identity_provider": "gams_engine",
+                                    "identity_provider_user_subject": "user3"
+                                }
+                            ]
+                        })
                     } else {
                         return Promise.reject(new Error('not found'))
                     }
@@ -70,6 +85,35 @@ describe('UserInstanceUpdateForm', () => {
                     return Promise.resolve({
                         status: 200, data: {
                             "instance_pools_available": []
+                        }
+                    })
+                case 'testserver/usage/pools/user3':
+                    return Promise.resolve({
+                        status: 200, data: {
+                            "instance_pools_available": [
+                                {
+                                    "label": "test_pool",
+                                    "owner": {
+                                        "username": "user3",
+                                        "deleted": false,
+                                        "old_username": null
+                                    },
+                                    "instance": {
+                                        "label": "medium",
+                                        "cpu_request": 1,
+                                        "memory_request": 100,
+                                        "workspace_request": 100,
+                                        "node_selectors": [],
+                                        "tolerations": [],
+                                        "multiplier": 1,
+                                        "multiplier_idle": 1
+                                    },
+                                    "size": 0,
+                                    "size_active": 0,
+                                    "size_busy": 0,
+                                    "cancelling": false
+                                }
+                            ]
                         }
                     })
                 case 'testserver/usage/pools/admin':
@@ -156,6 +200,45 @@ describe('UserInstanceUpdateForm', () => {
                             }
                         }
                     })
+                case 'testserver/usage/instances/user3':
+                    return Promise.resolve({
+                        status: 200, data: {
+                            "instances_inherited_from": "user3",
+                            "default_inherited_from": "user3",
+                            "instances_available": [
+                                {
+                                    "label": "small",
+                                    "cpu_request": 1,
+                                    "memory_request": 100,
+                                    "workspace_request": 100,
+                                    "node_selectors": [],
+                                    "tolerations": [],
+                                    "multiplier": 1,
+                                    "multiplier_idle": 1
+                                },
+                                {
+                                    "label": "medium",
+                                    "cpu_request": 1,
+                                    "memory_request": 100,
+                                    "workspace_request": 100,
+                                    "node_selectors": [],
+                                    "tolerations": [],
+                                    "multiplier": 1,
+                                    "multiplier_idle": 1
+                                }
+                            ],
+                            "default_instance": {
+                                "label": "small",
+                                "cpu_request": 1,
+                                "memory_request": 100,
+                                "workspace_request": 100,
+                                "node_selectors": [],
+                                "tolerations": [],
+                                "multiplier": 1,
+                                "multiplier_idle": 1
+                            }
+                        }
+                    })
                 case 'testserver/usage/instances/user1/default':
                     return Promise.resolve({
                         status: 200, data: {
@@ -188,12 +271,32 @@ describe('UserInstanceUpdateForm', () => {
                             "default_inherited_from": "admin"
                         }
                     })
+                case 'testserver/usage/instances/user3/default':
+                    return Promise.resolve({
+                        status: 200, data: {
+                            "default_instance": {
+                                "label": "small",
+                                "resource_type": "instance"
+                            },
+                            "default_inherited_from": "user3"
+                        }
+                    })
                 case 'testserver/usage/instances/admin':
                     return Promise.resolve({
                         status: 200, data: {
                             "instances_inherited_from": null,
                             "instances_available": [{
                                 "label": "test",
+                                "cpu_request": 1,
+                                "memory_request": 100,
+                                "workspace_request": 100,
+                                "node_selectors": [],
+                                "tolerations": [],
+                                "multiplier": 1,
+                                "multiplier_idle": 1
+                            },
+                            {
+                                "label": "small",
                                 "cpu_request": 1,
                                 "memory_request": 100,
                                 "workspace_request": 100,
@@ -268,5 +371,34 @@ describe('UserInstanceUpdateForm', () => {
         expect(screen.queryByText("(Test2, TestInstance)")).toBeInTheDocument();
         expect(screen.queryByText("(TestInstance)")).toBeNull();
     });
+
+    it('works to remove instance updates default instance selector', async () => {
+        jest.spyOn(require('react-router-dom'), 'useParams').mockReturnValue({ userToEdit: 'user3' })
+        render(<UserInstanceUpdateForm />, {
+            wrapper: AllProvidersWrapperDefault
+        });
+        await waitFor(() => screen.findByText(/Instances user is allowed to use/));
+        const instancesAllowedDropdown = within(
+            document.getElementById('instancesAllowedDD')
+        )
+        const defaultInstanceDropdown = within(
+            document.getElementById('instancesDefaultDD')
+        )
+        expect(instancesAllowedDropdown.getByText(/small/)).not.toBeNull();
+        expect(instancesAllowedDropdown.getByText(/medium/)).not.toBeNull();
+        expect(instancesAllowedDropdown.getByText(/test_pool/)).not.toBeNull();
+        expect(defaultInstanceDropdown.getByText(/small/)).not.toBeNull();
+        expect(screen.queryByText(/Delete all pools/)).toBeNull();
+
+        fireEvent.click(instancesAllowedDropdown.getByLabelText(/Remove medium/i));
+        expect(instancesAllowedDropdown.queryByText(/medium/)).toBeNull();
+        expect(defaultInstanceDropdown.getByText(/small/)).not.toBeNull();
+        expect(screen.queryByText(/Delete all pools/)).toBeInTheDocument();
+
+        fireEvent.click(instancesAllowedDropdown.getByLabelText(/Remove small/i));
+        expect(instancesAllowedDropdown.queryByText(/medium/)).toBeNull();
+        expect(defaultInstanceDropdown.queryByText(/small/)).toBeNull();
+        expect(defaultInstanceDropdown.getByText(/test_pool/)).not.toBeNull();
+    })
 
 })
