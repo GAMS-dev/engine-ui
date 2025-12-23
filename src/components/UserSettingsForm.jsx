@@ -1,17 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Select from "react-select";
 import { UserSettingsContext, availableTablePageLengths } from "./UserSettingsContext";
 import DefaultInstanceSelector from "./DefaultInstanceSelector";
 import { ServerInfoContext } from "../ServerInfoContext";
 import { AuthContext } from "../AuthContext";
-import { Alert, Form, Nav, OverlayTrigger, Tab, Tooltip } from "react-bootstrap";
+import { Alert, Form, Nav, Tab } from "react-bootstrap";
 import { Route, Routes, NavLink, useLocation, Navigate } from "react-router-dom";
 import { allEvents, getPushSubscription, subscribe, unsubscribe, webpushSupported } from "./webpush";
 import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
 import SubmitButton from "./SubmitButton";
 import { AlertContext } from "./Alert";
 import { isMobileDevice } from "./util";
-import { Info, Share } from "react-feather";
+import { Share } from "react-feather";
 import { ServerConfigContext } from "../ServerConfigContext";
 
 const UserSettingsForm = () => {
@@ -21,8 +21,6 @@ const UserSettingsForm = () => {
     const [serverConfig,] = useContext(ServerConfigContext);
     const [, setAlertMsg] = useContext(AlertContext);
 
-    const availableMultUnits = [{ value: "¢/s", label: "¢/s" }, { value: "s/s", label: "s/s" }]
-    const [selectedMultUnit, setSelectedMultUnit] = useState(userSettings.multiplierUnit ?? availableMultUnits[0].value)
     const [selectedTablePageLength, setSelectedTablePageLength] = useState(userSettings.tablePageLength)
     const [webPushIsSubmitting, setWebPushIsSubmitting] = useState(false)
     const [webpushSettingsJSON, setWebpushSettingsJSON] = useState(userSettings.webPush)
@@ -89,13 +87,10 @@ const UserSettingsForm = () => {
 
     useEffect(() => {
         setUserSettings({
-            quotaUnit: selectedMultUnit === "¢/s" ? "$" : "h",
-            multiplierUnit: selectedMultUnit,
-            quotaConversionFactor: selectedMultUnit === "¢/s" ? 100 : 3600,
             tablePageLength: selectedTablePageLength,
             webPush: webpushSettingsJSON
         })
-    }, [selectedMultUnit, selectedTablePageLength, setUserSettings, webpushSettingsJSON])
+    }, [selectedTablePageLength, setUserSettings, webpushSettingsJSON])
 
     return (
         <div>
@@ -116,26 +111,6 @@ const UserSettingsForm = () => {
                 <Routes>
                     <Route index element={<Navigate to="general" replace />} />
                     <Route path="general" element={<form>
-                        <label htmlFor="selectMultUnitInput">
-                            Select multiplier unit
-                            <span className="ms-1" >
-                                <OverlayTrigger placement="bottom"
-                                    overlay={<Tooltip id="tooltip">
-                                        If ¢/s is selected (cent per second), all quota values are divided by 100 and displayed in $ (U.S. Dollars). If s/s (second per second) is selected, quota values are divided by 3600 and displayed in hours.
-                                    </Tooltip>}>
-                                    <Info />
-                                </OverlayTrigger>
-                            </span>
-                        </label>
-                        <Select
-                            id="selectMultUnit"
-                            inputId="selectMultUnitInput"
-                            isClearable={false}
-                            value={availableMultUnits.find(type => type.value === selectedMultUnit)}
-                            isSearchable={true}
-                            onChange={selected => setSelectedMultUnit(selected.value)}
-                            options={availableMultUnits}
-                        />
                         <div className="form-group mt-3 mb-3">
                             <label htmlFor="tablePageLengthInput">
                                 Default table page length

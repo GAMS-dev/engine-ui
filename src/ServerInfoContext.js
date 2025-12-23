@@ -12,7 +12,7 @@ export const ServerInfoProvider = props => {
     );
     const serverInfoState = [serverInfo, setServerInfo];
     useLayoutEffect(() => {
-        if (!serverInfo || (serverInfo.timestamp + 1000 * 3600 * 24 < new Date().getTime())) {
+        if (serverInfo?.is_saas == null || (serverInfo.timestamp + 1000 * 3600 * 24 < new Date().getTime())) {
             axios
                 .get(
                     `${SERVER_NAME}/version`,
@@ -20,6 +20,7 @@ export const ServerInfoProvider = props => {
                 .then(res => {
                     const serverInfoTmp = res.data;
                     serverInfoTmp.timestamp = new Date().getTime();
+                    serverInfoTmp.is_saas = ["engine.gams.com", "engine-eu.gams.com"∂].includes(window.location.hostname);
                     setServerInfo(serverInfoTmp);
                     localStorage.setItem("serverInfo", JSON.stringify(serverInfoTmp));
                 })
