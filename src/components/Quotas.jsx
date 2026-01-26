@@ -5,15 +5,15 @@ import 'chartjs-adapter-date-fns';
 import computeTimes from './calculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select';
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { UserSettingsContext } from "./UserSettingsContext";
 import { ClipLoader } from 'react-spinners';
 import { UserLink } from './UserLink.jsx';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
-
+const Quotas = () => {
+  const { data, startDate: calcStartDate, endDate: calcEndTime, isLoading: dataIsLoading } = useOutletContext();
   const [userSettings,] = useContext(UserSettingsContext)
   const quotaConversionFactor = userSettings.quotaConversionFactor
   const quotaUnit = userSettings.quotaUnit
@@ -300,82 +300,84 @@ const Quotas = ({ data, calcStartDate, calcEndTime, dataIsLoading }) => {
   }, [ungroupedDataJobs, ungroupedDataPools, numUser, numInstances, numPools])
 
   return (
-    <div className="App">
-      <div className="form-group mt-3 mb-3">
-        <label htmlFor="aggregateDropdownInput">
-          Aggregate
-        </label>
-        <Select
-          id="aggregateDropdown"
-          inputId="aggregateDropdownInput"
-          isClearable={false}
-          value={availableAggregateTypes.find(type => type.value === selectedAggregateType)}
-          isSearchable={true}
-          onChange={selected => setSelectedAggregateType(selected.value)}
-          options={availableAggregateTypes}
-        />
-      </div>
-      {isLoading ? (
-        <ClipLoader />
-      ) : (
-        <>
-          <h2 className="text-end">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
-          {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
-            {truncateWarning}
-          </div>}
-          <div className='row'>
-            {(numCharts > 0) ? (
-              <div className={'col-xl-' + ((numCharts === 3) ? '12' : '3') + ' col-lg-3 col-md-12 col-12'}>
-                <div className='row'>
-                  {(numUser > 1) ? (
-                    <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
-                      ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                      <h3>Users</h3>
-                      <Pie data={userChartData} />
-                    </div>
-                  ) : null}
-                  {(numInstances > 1) ? (
-                    <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
-                      ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                      <h3>Instances</h3>
-                      <Pie data={instanceChartData} />
-                    </div>
-                  ) : null}
-                  {(numPools > 1) ? (
-                    <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
-                      ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
-                      <h3>Pools *</h3>
-                      <Pie data={poolLabelChartData} />
-                    </div>
-                  ) : null}
+    <>
+      {dataIsLoading ? <ClipLoader /> : <div className="App">
+        <div className="form-group mt-3 mb-3">
+          <label htmlFor="aggregateDropdownInput">
+            Aggregate
+          </label>
+          <Select
+            id="aggregateDropdown"
+            inputId="aggregateDropdownInput"
+            isClearable={false}
+            value={availableAggregateTypes.find(type => type.value === selectedAggregateType)}
+            isSearchable={true}
+            onChange={selected => setSelectedAggregateType(selected.value)}
+            options={availableAggregateTypes}
+          />
+        </div>
+        {isLoading ? (
+          <ClipLoader />
+        ) : (
+          <>
+            <h2 className="text-end">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
+            {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
+              {truncateWarning}
+            </div>}
+            <div className='row'>
+              {(numCharts > 0) ? (
+                <div className={'col-xl-' + ((numCharts === 3) ? '12' : '3') + ' col-lg-3 col-md-12 col-12'}>
+                  <div className='row'>
+                    {(numUser > 1) ? (
+                      <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
+                        ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+                        <h3>Users</h3>
+                        <Pie data={userChartData} />
+                      </div>
+                    ) : null}
+                    {(numInstances > 1) ? (
+                      <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
+                        ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+                        <h3>Instances</h3>
+                        <Pie data={instanceChartData} />
+                      </div>
+                    ) : null}
+                    {(numPools > 1) ? (
+                      <div className={'col-xl-' + ((numCharts === 3) ? '4' : '12') +
+                        ' col-lg-12 col-md-6 col-sm-' + (12 / numCharts).toString() + ' col-12'}>
+                        <h3>Pools *</h3>
+                        <Pie data={poolLabelChartData} />
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+              <div className={'col-xl-' + ((numCharts === 3) ? '12' : ((numCharts > 0) ? '9' : '12')) +
+                ' col-lg-' + (((numCharts > 0) ? '9' : '12')) + ' col-md-12 col-12'}>
+                <h3>Jobs</h3>
+                <div data-testid="tableJobs" >
+                  <Table data={tableDataJobs}
+                    noDataMsg="No Usage data found"
+                    displayFields={displayFieldsJobs}
+                    isLoading={false}
+                    idFieldName={'unique_id'} />
+                </div>
+                <h3>Idle Pool Times</h3>
+                <div data-testid="tableIdlePool" >
+                  <Table data={tableDataPools}
+                    noDataMsg="No Usage data found"
+                    displayFields={displayFieldsPools}
+                    isLoading={false}
+                    idFieldName={'unique_id'} />
                 </div>
               </div>
-            ) : null}
-            <div className={'col-xl-' + ((numCharts === 3) ? '12' : ((numCharts > 0) ? '9' : '12')) +
-              ' col-lg-' + (((numCharts > 0) ? '9' : '12')) + ' col-md-12 col-12'}>
-              <h3>Jobs</h3>
-              <div data-testid="tableJobs" >
-                <Table data={tableDataJobs}
-                  noDataMsg="No Usage data found"
-                  displayFields={displayFieldsJobs}
-                  isLoading={false}
-                  idFieldName={'unique_id'} />
-              </div>
-              <h3>Idle Pool Times</h3>
-              <div data-testid="tableIdlePool" >
-                <Table data={tableDataPools}
-                  noDataMsg="No Usage data found"
-                  displayFields={displayFieldsPools}
-                  isLoading={false}
-                  idFieldName={'unique_id'} />
-              </div>
             </div>
-          </div>
-          {(numPools > 1) ? (
-            <div>* includes Idle Times</div>
-          ) : null}
-        </>)}
-    </div>
+            {(numPools > 1) ? (
+              <div>* includes Idle Times</div>
+            ) : null}
+          </>)}
+      </div>}
+    </>
   );
 }
 

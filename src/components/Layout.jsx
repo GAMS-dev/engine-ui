@@ -14,7 +14,7 @@ import Models from "./Models";
 import NamespaceQuotaUpdateForm from "./NamespaceQuotaUpdateForm";
 import Users from "./Users";
 import { AlertContext, Alert } from "./Alert";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Cleanup from "./Cleanup";
 import { getResponseError } from "./util";
 import Webhooks from "./Webhooks";
@@ -28,6 +28,20 @@ import UserSettingsForm from "./UserSettingsForm";
 import { UserSettingsProvider } from "./UserSettingsContext";
 import UserEditBundle from "./UserEditBundle";
 import { ServerConfigProvider } from "../ServerConfigContext";
+import UserSettingsFormGeneral from "./UserSettingsFormGeneral";
+import UserSettingsFormWebPush from "./UserSettingsFormWebPush";
+import Usage from "./Usage";
+import LicenseUpdateForm from "./LicenseUpdateForm";
+import UserInstanceUpdateForm from "./UserInstanceUpdateForm";
+import UserQuotaUpdateForm from "./UserQuotaUpdateForm";
+import UserUpdateIdentityProviderForm from "./UserUpdateIdentityProviderForm";
+import UserPermissionUpdateForm from "./UserPermissionUpdateForm";
+import UserInviteesTree from "./UserInviteesTree";
+import UsageTimeline from "./UsageTimelines";
+import Quotas from "./Quotas";
+import InstanceSubmissionForm from "./InstanceSubmissionForm";
+import AuthProviderForm from "./AuthProviderForm";
+import Instances from "./Instances";
 
 const Layout = () => {
   const [{ server, roles, username }] = useContext(AuthContext);
@@ -62,7 +76,7 @@ const Layout = () => {
         <ServerConfigProvider>
           <UserSettingsProvider>
             <Header
-              isAdmin={roles.includes("admin")}
+              isAdmin={roles?.includes("admin")}
               licenseExpiration={licenseExpiration} />
             <div className="container-fluid scroll-content">
               <div className="row flex-nowrap">
@@ -86,18 +100,48 @@ const Layout = () => {
                     <Route path="/groups/:selectedNs" element={<Models />} />
                     <Route path="/selectedNs" element={<Models />} />
                     <Route path="/nsusers/:selectedNs" element={<Models />} />
-                    <Route path="/settings/*" element={<UserSettingsForm />} />
+                    <Route path="/settings" element={<UserSettingsForm />}>
+                      <Route path="general" element={<UserSettingsFormGeneral />} />
+                      <Route path="notifications" element={<UserSettingsFormWebPush />} />
+                      <Route index element={<Navigate to="general" replace />} />
+                    </Route>
                     {(roles && roles.includes('admin')) &&
                       <Route exact path="/quotas/:namespace" element={<NamespaceQuotaUpdateForm />} />
                     }
                     <Route path="/users" element={<Users />} />
-                    <Route path="/users/:userToEdit/*" element={<UserEditBundle />} />
-                    <Route path="/users/:userToEdit/change-pass" element={<UserChangePassForm />} />
-
+                    <Route path="/users/:userToEdit" element={<UserEditBundle />}>
+                      <Route index element={<Navigate to="usage" replace />} />
+                      <Route path="usage" element={<Usage />} >
+                        <Route index element={<Navigate to="dashboard" replace />} />
+                        <Route path="dashboard" element={<Quotas />} />
+                        <Route path="timeline" element={<UsageTimeline />} />
+                      </Route>
+                      <Route path="change_pass" element={<UserChangePassForm hideTitle={true} />} />
+                      <Route path="change-pass" element={<UserChangePassForm />} />
+                      {(roles?.includes("admin")) && (
+                        <Route path="licenses" element={<LicenseUpdateForm />} />
+                      )}
+                      {(serverInfo.in_kubernetes === true) && (
+                        <Route path="instances" element={<UserInstanceUpdateForm />} />
+                      )}
+                      <Route path="quotas" element={<UserQuotaUpdateForm />} />
+                      <Route path="identity_provider" element={<UserUpdateIdentityProviderForm />} />
+                      <Route path="permissions" element={<UserPermissionUpdateForm />} />
+                      <Route path="invitees" element={<UserInviteesTree />} />
+                    </Route>
                     <Route path="/cleanup" element={<Cleanup />} />
                     <Route path="/auth-token" element={<CreateAuthTokenForm />} />
                     {roles && roles.includes('admin') &&
-                      <Route path="/administration/*" element={<AdministrationForm setLicenseExpiration={setLicenseExpiration} />} />
+                      <Route path="/administration" element={<AdministrationForm setLicenseExpiration={setLicenseExpiration} />}>
+                        <Route index element={<Navigate to="authproviders" replace />} />
+                        <Route path="authproviders" element={<AuthProviderForm />} />
+                        <Route path="instances">
+                          <Route path="update" element={<InstanceSubmissionForm />}>
+                            <Route path=":label" element={<InstanceSubmissionForm />} />
+                          </Route>
+                          <Route index element={<Instances />} />
+                        </Route>
+                      </Route>
                     }
                     <Route path="/webhooks" element={<Webhooks />} />
                     <Route path="/webhooks/create" element={<WebhookSubmissionForm />} />
