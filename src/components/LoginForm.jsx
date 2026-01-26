@@ -17,7 +17,7 @@ import ShowHidePasswordInput from "./ShowHidePasswordInput";
 import { Info } from "react-feather";
 import { encryptRSA } from "./oauth";
 
-const SERVER_NAME = process.env.REACT_APP_ENGINE_URL ? process.env.REACT_APP_ENGINE_URL : "/api";
+const SERVER_NAME = import.meta.env.VITE_ENGINE_URL ? import.meta.env.VITE_ENGINE_URL : "/api";
 const VALID_NATIVE_CLIENT_IDS = { "com.gams.miro": "GAMS MIRO" }
 
 const LoginForm = ({ showRegistrationForm }) => {

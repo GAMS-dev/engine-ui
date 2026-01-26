@@ -1,89 +1,83 @@
 {
-  "name": "gams-engine-ui",
-  "version": "0.1.0",
-  "license": "MIT",
-  "private": true,
-  "homepage": ".",
-  "proxy": "http://localhost:80",
-  "jest": {
-    "transformIgnorePatterns": [
-      "node_modules/(?!axios|memoize|mimic-function)"
-    ],
-    "moduleNameMapper": {
-      "\\.(css)$": "<rootDir>/src/__tests__/utils/styleMock.js"
+    "name": "gams-engine-ui",
+    "version": "0.1.0",
+    "license": "MIT",
+    "private": true,
+    "proxy": "http://localhost:80",
+    "devDependencies": {
+        "@babel/plugin-transform-private-property-in-object": "^7.28.6",
+        "@peculiar/webcrypto": "^1.5.0",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.1",
+        "@testing-library/user-event": "^14.6.1",
+        "@vitejs/plugin-react": "^5.1.2",
+        "@vitest/coverage-v8": "^4.0.17",
+        "canvas": "^3.2.1",
+        "eslint-plugin-no-unsanitized": "^4.1.4",
+        "jsdom": "^27.4.0",
+        "react-select-event": "^5.5.1",
+        "sass": "^1.97.2",
+        "vite": "^7.3.1",
+        "vitest": "^4.0.17"
+    },
+    "dependencies": {
+        "axios": "^1.13.2",
+        "bootstrap": "^5.3.8",
+        "chart.js": "^4.5.1",
+        "chartjs-adapter-date-fns": "^3.0.0",
+        "chartjs-plugin-zoom": "^2.2.0",
+        "date-fns": "^4.1.0",
+        "jszip": "^3.10.1",
+        "memoize": "^10.2.0",
+        "moment": "^2.30.1",
+        "react": "^19.2.3",
+        "react-bootstrap": "^2.10.10",
+        "react-chartjs-2": "^5.3.1",
+        "react-datepicker": "^9.1.0",
+        "react-dom": "^19.2.3",
+        "react-dropzone": "^14.3.8",
+        "react-feather": "^2.0.10",
+        "react-router-dom": "^7.12.0",
+        "react-select": "^5.10.2",
+        "react-spinners": "^0.17.0"
+    },
+    "scripts": {
+        "start": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "test": "vitest",
+        "test:coverage": "vitest run --coverage",
+        "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=test-report.xml",
+        "lint": "eslint src --ext=\".js,.jsx\" --max-warnings 0"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app"
+        ],
+        "plugins": [
+            "no-unsanitized",
+            "react"
+        ],
+        "rules": {
+            "react/no-danger": "error",
+            "react/no-find-dom-node": "error",
+            "react/jsx-no-script-url": "error",
+            "react/jsx-no-target-blank": "error",
+            "react/no-unknown-property": "error",
+            "no-unsanitized/method": "error",
+            "no-unsanitized/property": "error"
+        }
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
     }
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@peculiar/webcrypto": "^1.4.5",
-    "@testing-library/jest-dom": "^6.4.8",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/user-event": "^14.5.2",
-    "canvas": "^3.0.1",
-    "eslint-plugin-no-unsanitized": "^4.0.2",
-    "jest-junit": "^16.0.0",
-    "react-scripts": "^5.0.1",
-    "react-select-event": "^5.5.1",
-    "sass": "^1.54.9"
-  },
-  "dependencies": {
-    "axios": "^1.6.1",
-    "bootstrap": "^5.3.1",
-    "chart.js": "^3.9.1",
-    "chartjs-adapter-date-fns": "^2.0.0",
-    "chartjs-plugin-zoom": "^1.2.1",
-    "date-fns": "^2.29.3",
-    "jszip": "^3.10.1",
-    "memoize": "^10.0.0",
-    "moment": "^2.29.4",
-    "react": "^18.2.0",
-    "react-bootstrap": "^2.8.0",
-    "react-chartjs-2": "^4.3.1",
-    "react-datepicker": "^4.8.0",
-    "react-dom": "^18.2.0",
-    "react-dropzone": "^14.2.3",
-    "react-feather": "^2.0.10",
-    "react-router-dom": "^6.4.0",
-    "react-select": "^5.4.0",
-    "react-spinners": "^0.13.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --testPathIgnorePatterns=src/__tests__/utils",
-    "eject": "react-scripts eject",
-    "test:coverage": "react-scripts test --env=jsdom --watchAll=false --coverage",
-    "test:ci": "npm run test -- --testResultsProcessor=\"jest-junit\" --watchAll=false --ci --coverage",
-    "lint": "node_modules/.bin/eslint src --ext=\".js,.jsx\" --max-warnings 0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ],
-    "plugins": [
-      "no-unsanitized",
-      "react"
-    ],
-    "rules": {
-      "react/no-danger": "error",
-      "react/no-find-dom-node": "error",
-      "react/jsx-no-script-url": "error",
-      "react/jsx-no-target-blank": "error",
-      "react/no-unknown-property": "error",
-      "no-unsanitized/method": "error",
-      "no-unsanitized/property": "error"
-    }
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
 }

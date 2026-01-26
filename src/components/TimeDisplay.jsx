@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ToggleLeft, ToggleRight } from "react-feather";
 
-const moment = require("moment");
+import moment from "moment";
 
 const TimeDisplay = ({ time }) => {
   const [rel, setRel] = useState(true);
