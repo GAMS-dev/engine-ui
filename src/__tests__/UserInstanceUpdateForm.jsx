@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event'
 import { within } from '@testing-library/dom'
 import '@testing-library/jest-dom'
@@ -380,7 +379,7 @@ describe('UserInstanceUpdateForm', () => {
         await waitFor(() => screen.findByText(/Inherit instances from/));
 
         const checkbox = screen.getByRole('checkbox', {
-            name: (content, element) => {
+            name: (content) => {
                 return content.includes('Inherit default instance') && content.includes('admin');
             }
         });

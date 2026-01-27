@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import Select from 'react-select';
 import { Button } from "react-bootstrap";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameterizedEvents,
     setIsValid, isSubmitting, validationErrors }) => {
@@ -65,7 +65,7 @@ const ParameterizedWebhookEventsSelector = ({ parameterizedEvents, setParameteri
                     </div>
                     <div className="col-1">
                         <button type="button" className="btn-close" aria-label="Close"
-                            onClick={_ => {
+                            onClick={() => {
                                 const newEvents = [...parameterizedEvents];
                                 newEvents.splice(idx, 1);
                                 setParameterizedEvents(newEvents);

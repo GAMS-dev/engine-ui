@@ -60,4 +60,5 @@ const quotaWarningThresholds = {
     volume: 100 * 3600,
     disk: 500 * 1e6
 }
-export { GAMSRcMap, sessionTokenExpirationSeconds, quotaWarningThresholds }
+const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }, { value: "50", label: "50" }, { value: "100", label: "100" }]
+export { GAMSRcMap, sessionTokenExpirationSeconds, quotaWarningThresholds, availableTablePageLengths }

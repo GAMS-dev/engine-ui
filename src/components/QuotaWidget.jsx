@@ -1,11 +1,11 @@
-import React, { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../AuthContext";
+import { useContext, useState, useEffect } from "react";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
-import { calcRemainingQuota, formatFileSize, getResponseError } from "./util";
+import { calcRemainingQuota, formatFileSize, getResponseError } from "../util/util";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Cpu, HardDrive } from "react-feather";
-import { quotaWarningThresholds } from "./constants";
-import { UserSettingsContext } from "./UserSettingsContext";
+import { quotaWarningThresholds } from "../util/constants";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 
 const QuotaWidget = ({ isVisible, className }) => {

@@ -1,16 +1,62 @@
-import { useEffect, useRef, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, Legend, Tooltip } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
-import computeTimes from './calculateQuota.js'
+import computeTimes from '../util/calculateQuota.js'
 import Table from './Table.jsx'
 import Select from 'react-select';
 import { Link, useOutletContext } from "react-router-dom";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 import { ClipLoader } from 'react-spinners';
 import { UserLink } from './UserLink.jsx';
+import { formatDecimal } from '../util/util.jsx';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const COLUMN_DEFS = {
+  user: {
+    field: "user",
+    column: "User",
+    sorter: "alphabetical",
+    displayer: (user) => <UserLink user={user} />
+  },
+  instance: {
+    field: "instance",
+    column: "Instance",
+    sorter: "alphabetical",
+    displayer: String
+  },
+  pool_label: {
+    field: "pool_label",
+    column: "Pool Label",
+    sorter: "alphabetical",
+    displayer: (val) => val ?? '-'
+  },
+  fails: {
+    field: "fails",
+    column: "Number Crashes",
+    sorter: "numerical",
+    displayer: Number
+  },
+  jobs: {
+    field: "jobs",
+    column: "Number Jobs",
+    sorter: "numerical",
+    displayer: Number
+  },
+  times: {
+    field: "times",
+    column: "Solve Time",
+    sorter: "numerical",
+    displayer: formatTime
+  },
+  multiplier: {
+    field: "multiplier",
+    column: "Multiplier",
+    sorter: "numerical",
+    displayer: formatDecimal
+  }
+};
 
 const Quotas = () => {
   const { data, startDate: calcStartDate, endDate: calcEndTime, isLoading: dataIsLoading } = useOutletContext();
@@ -103,100 +149,45 @@ const Quotas = () => {
     }
   }
 
-  const displayFieldJobsUngrouped = useRef([
-    {
-      field: "user",
-      column: "User",
-      sorter: "alphabetical",
-      displayer: (user) =>
-        <UserLink user={user} />
-    },
+  const displayFieldJobsUngrouped = useMemo(() => [
+    COLUMN_DEFS.user,
     {
       field: "token,is_hypercube",
       column: "Job token",
-      displayer: (name, job_count) => <>
-        {job_count === true ? <Link to={`/jobs/hc:${name}`}>{name}
-          <sup>
-            <span className="badge badge-pill badge-primary ml-1">HC</span>
-          </sup></Link> :
-          <Link to={`/jobs/${name}`}>{name}</Link>}
-      </>
+      displayer: (name, is_hypercube) => (
+        <Link to={`/jobs/${is_hypercube ? `hc:${name}` : name}`}>
+          {name}
+          {is_hypercube && (
+            <sup>
+              <span className="badge badge-pill badge-primary ml-1">HC</span>
+            </sup>
+          )}
+        </Link>
+      )
     },
-    {
-      field: "instance",
-      column: "Instance",
-      sorter: "alphabetical",
-      displayer: String
-    },
-    {
-      field: "pool_label",
-      column: "Pool Label",
-      sorter: "alphabetical",
-      displayer: (pool_label) => pool_label == null ? '-' : pool_label
-    },
-    {
-      field: "fails",
-      column: "Number Crashes",
-      sorter: "numerical",
-      displayer: Number
-    },
-    {
-      field: "jobs",
-      column: "Number Jobs",
-      sorter: "numerical",
-      displayer: Number
-    },
-    {
-      field: "times",
-      column: "Solve Time",
-      sorter: "numerical",
-      displayer: formatTime
-    },
-    {
-      field: "multiplier",
-      column: "Multiplier",
-      sorter: "numerical",
-      displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
-    },
+    COLUMN_DEFS.instance,
+    COLUMN_DEFS.pool_label,
+    COLUMN_DEFS.fails,
+    COLUMN_DEFS.jobs,
+    COLUMN_DEFS.times,
+    COLUMN_DEFS.multiplier,
     {
       field: "cost",
       column: quotaUnit,
       sorter: "numerical",
-      displayer: (cost) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(cost)
+      displayer: formatDecimal
     }
-  ])
+  ], [quotaUnit])
 
-  const displayFieldPoolsUngrouped = useRef([
-    {
-      field: "user",
-      column: "User",
-      sorter: "alphabetical",
-      displayer: (user) =>
-        <UserLink user={user} />
-    },
-    {
-      field: "pool_label",
-      column: "Pool Label",
-      sorter: "alphabetical",
-      displayer: (pool_label) => pool_label == null ? '-' : pool_label
-    },
-    {
-      field: "instance",
-      column: "Instance",
-      sorter: "alphabetical",
-      displayer: String
-    },
-    {
-      field: "fails",
-      column: "Number Crashes",
-      sorter: "numerical",
-      displayer: Number
-    },
+
+  const displayFieldPoolsUngrouped = useMemo(() => [
+    COLUMN_DEFS.user, COLUMN_DEFS.pool_label, COLUMN_DEFS.instance,
+    COLUMN_DEFS.fails,
     {
       field: "jobs",
       column: "Number Pools",
-      sorter: "alphabetical",
-      displayer: String
+      sorter: "numerical",
+      displayer: Number
     },
     {
       field: "times",
@@ -204,23 +195,18 @@ const Quotas = () => {
       sorter: "numerical",
       displayer: formatTime
     },
-    {
-      field: "multiplier",
-      column: "Multiplier",
-      sorter: "numerical",
-      displayer: (mult) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(mult)
-    },
+    COLUMN_DEFS.multiplier,
     {
       field: "cost",
       column: quotaUnit,
       sorter: "numerical",
-      displayer: (cost) => Intl.NumberFormat('en-US', { style: 'decimal' }).format(cost)
+      displayer: formatDecimal
     }
-  ])
+  ], [quotaUnit])
 
 
-  const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldJobsUngrouped.current);
-  const [displayFieldsPools, setDisplayFieldsPools] = useState(displayFieldPoolsUngrouped.current);
+  const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldJobsUngrouped);
+  const [displayFieldsPools, setDisplayFieldsPools] = useState(displayFieldPoolsUngrouped);
 
   const availableAggregateTypes = [{ value: '_', label: '_' }, { value: "username", label: 'User' }, { value: "instance", label: 'Instance' }, { value: "pool_label", label: 'Pool Label' }]
 
@@ -236,8 +222,8 @@ const Quotas = () => {
 
   useEffect(() => {
     if (selectedAggregateType === '_') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['jobs'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['jobs'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(el => !['jobs'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(el => !['jobs'].includes(el.field))
       setTableDataJobs(ungroupedDataJobs)
       setTableDataPools(ungroupedDataPools)
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
@@ -246,8 +232,8 @@ const Quotas = () => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'username') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'pool_label', 'multiplier'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(el => !['instance', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(el => !['instance', 'pool_label', 'multiplier'].includes(el.field))
       setTableDataJobs(groupByUser(ungroupedDataJobs))
       setTableDataPools(groupByUser(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
@@ -256,8 +242,8 @@ const Quotas = () => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'instance') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['user', 'pool_label', 'multiplier'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(el => !['user', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(el => !['user', 'pool_label', 'multiplier'].includes(el.field))
       setTableDataJobs(groupByInstance(ungroupedDataJobs))
       setTableDataPools(groupByInstance(ungroupedDataPools))
       let sumTmp = ungroupedDataJobs.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)
@@ -266,8 +252,8 @@ const Quotas = () => {
       setDisplayFieldsJobs(displayFieldsTmpJob)
       setDisplayFieldsPools(displayFieldsTmpPool)
     } else if (selectedAggregateType === 'pool_label') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.current.filter(el => !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(el.field))
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.current.filter(el => !['instance', 'user', 'multiplier'].includes(el.field))
+      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(el => !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(el.field))
+      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(el => !['instance', 'user', 'multiplier'].includes(el.field))
       setTableDataJobs(groupByPoolLabel(ungroupedDataJobs))
       setTableDataPools(groupByPoolLabel(ungroupedDataPools))
       let sumTmp2 = ungroupedDataJobs.filter(el => el.pool_label != null).reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)

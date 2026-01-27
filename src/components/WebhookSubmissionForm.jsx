@@ -1,13 +1,13 @@
 import axios from "axios";
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import Select from 'react-select';
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
-import { getResponseError } from "./util";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
-import { allEvents } from "./webpush";
+import { allEvents } from "../util/webpush";
 
 const WebhookSubmissionForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
@@ -69,7 +69,7 @@ const WebhookSubmissionForm = () => {
             if (err?.response?.data?.errors) {
                 const formErrorsTmp = {};
                 ['url', 'secret', 'events', 'parameterized_events'].forEach(key => {
-                    if (err.response.data.errors.hasOwnProperty(key)) {
+                    if (err.response.data.errors?.[key] != null) {
                         formErrorsTmp[key] = err.response.data.errors[key]
                     }
                 });
@@ -120,7 +120,7 @@ const WebhookSubmissionForm = () => {
                                             const url_validated = new URL(e.target.value);
                                             setUrlValid(['http:', 'https:'].includes(url_validated.protocol));
                                             setShowInsecureSslCheckbox(url_validated.protocol === 'https:');
-                                        } catch (err) {
+                                        } catch {
                                             setUrlValid(false);
                                             setShowInsecureSslCheckbox(false);
                                         }

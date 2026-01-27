@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
 
@@ -44,9 +44,9 @@ const UserChangePassForm = ({ hideTitle }) => {
                 setPasswordUpdated(true);
             }
         } catch (err) {
-            if (err.response == null || err.response.status !== 400 ||
-                err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('password')) {
-                setSubmissionErrorMsg(`Some error occurred while trying to changing the password. Error message: ${getResponseError(err)}.`);
+            if (err.response.status !== 400 ||
+                err.response.data?.errors?.password == null) {
+                setSubmissionErrorMsg(`Some error occurred while trying to change the password. Error message: ${getResponseError(err)}.`);
             } else {
                 setSubmissionErrorMsg(err.response.data.errors.password);
             }

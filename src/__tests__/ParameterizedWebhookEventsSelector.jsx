@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import {
@@ -9,13 +8,15 @@ import {
 import ParameterizedWebhookEventsSelector from '../components/ParameterizedWebhookEventsSelector'
 
 const AllProvidersWrapper =
-    (options) =>
-        ({ children }) =>
+    (options) => {
+        const Wrapper = ({ children }) =>
         (
             <AllProvidersWrapperDefault options={options}>
                 {children}
             </AllProvidersWrapperDefault>
         )
+        return Wrapper
+    }
 
 describe('UserSettingsForm', () => {
     suppressActWarnings()

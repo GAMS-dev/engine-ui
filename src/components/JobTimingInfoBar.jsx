@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { getResponseError } from "./util";
-import { AlertContext } from "./Alert";
+import { getResponseError } from "../util/util";
+import AlertContext from "../contexts/AlertContext";
 import { useContext } from "react";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Tooltip, OverlayTrigger } from "react-bootstrap";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
 
-const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setQueuePosition, setDelayedRefresh, isHcJob }) => {
+const JobTimingInfoBar = ({ token, jobOwner, setRefreshJob, setJobStatus, setQueuePosition, isHcJob }) => {
     const [{ jwt, server }] = useContext(AuthContext);
     const [serverInfo] = useContext(ServerInfoContext);
     const [, setAlertMsg] = useContext(AlertContext);

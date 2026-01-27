@@ -1,9 +1,9 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
-import { getResponseError } from "./util";
-import { AlertContext } from "./Alert";
+import { getResponseError } from "../util/util";
+import AlertContext from "../contexts/AlertContext";
 import { Link } from "react-router-dom";
 
 const GroupActionsButtonGroup = props => {

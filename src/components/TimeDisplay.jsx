@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ToggleLeft, ToggleRight } from "react-feather";
 
 import moment from "moment";

@@ -1,15 +1,15 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { RefreshCw, Send, Layers, ToggleLeft, ToggleRight } from "react-feather";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import JobActionsButtonGroup from "./JobActionsButtonGroup";
 import { Tab, Tabs } from "react-bootstrap";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 import { UserLink } from "./UserLink";
 
 const Jobs = () => {

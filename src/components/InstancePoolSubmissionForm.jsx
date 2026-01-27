@@ -1,13 +1,13 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
 import Select from 'react-select';
-import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
+import { formatInstancesSelectInput, getInstanceData, getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const InstancePoolSubmissionForm = () => {
     const [, setAlertMsg] = useContext(AlertContext);
@@ -66,7 +66,7 @@ const InstancePoolSubmissionForm = () => {
             if (err.response && err.response.data && err.response.data.errors) {
                 const formErrorsTmp = {};
                 ['label', 'instance', 'size'].forEach(key => {
-                    if (err.response.data.errors.hasOwnProperty(key)) {
+                    if (err.response.data?.errors?.[key] != null) {
                         formErrorsTmp[key] = err.response.data.errors[key]
                     }
                 });

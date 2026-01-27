@@ -1,15 +1,15 @@
 import { useContext, useEffect, useState } from "react";
 import Select from "react-select";
-import { UserSettingsContext } from "./UserSettingsContext";
-import { AuthContext } from "../AuthContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
+import AuthContext from "../contexts/AuthContext";
 import { Alert, Form } from "react-bootstrap";
-import { allEvents, getPushSubscription, subscribe, unsubscribe, webpushSupported } from "./webpush";
+import { allEvents, getPushSubscription, subscribe, unsubscribe, webpushSupported } from "../util/webpush";
 import ParameterizedWebhookEventsSelector from "./ParameterizedWebhookEventsSelector";
 import SubmitButton from "./SubmitButton";
-import { AlertContext } from "./Alert";
-import { isMobileDevice } from "./util";
+import AlertContext from "../contexts/AlertContext";
+import { isMobileDevice } from "../util/util";
 import { Share } from "react-feather";
-import { ServerConfigContext } from "../ServerConfigContext";
+import ServerConfigContext from "../contexts/ServerConfigContext";
 import { useOutletContext } from "react-router-dom";
 
 const UserSettingsFormWebPush = () => {
@@ -122,7 +122,7 @@ const UserSettingsFormWebPush = () => {
                     </fieldset>
                 </form> :
                     <Alert variant="danger" className="mt-3">Push notifications are not supported by your browser.
-                        {isMobileDevice() ? <> You may need to install the app first (e.g. on iOS by tapping the "Share" <Share size={14} /> button and selecting "Add to home screen).</> : ''}</Alert> :
+                        {isMobileDevice() ? <> You may need to install the app first (e.g.on iOS by tapping the &quot; Share&quot; <Share size={14} /> button and selecting &quot; Add to home screen&quot;).</> : ''}</Alert> :
                 <Alert variant="danger" className="mt-3">Push notifications require webhooks to be enabled.</Alert>}
         </>
     )

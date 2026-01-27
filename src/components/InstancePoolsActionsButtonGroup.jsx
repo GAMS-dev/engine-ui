@@ -1,11 +1,11 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import SubmitButton from "./SubmitButton";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { AlertContext } from "./Alert";
+import AlertContext from "../contexts/AlertContext";
 import { useEffect } from "react";
 
 const InstancePoolsActionsButtonGroup = props => {

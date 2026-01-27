@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import DownloadLink from "./DownloadLink";
 import TerminateJobButton from "./TerminateJobButton";
@@ -18,7 +17,7 @@ const JobActionsButtonGroup = props => {
           filename="results.zip"
           className="btn btn-sm btn-outline-info">
           Download
-      </DownloadLink>}
+        </DownloadLink>}
       <TerminateJobButton
         token={token}
         setRefresh={setRefresh}

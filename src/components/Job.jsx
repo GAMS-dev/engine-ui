@@ -1,13 +1,13 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import axios from "axios";
 import JobReqInfoTable from "./JobReqInfoTable";
 import JobRespInfoTable from "./JobRespInfoTable";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import TextEntryView from "./TextEntryView";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
 import ClipLoader from "react-spinners/ClipLoader";
 
 const Job = () => {

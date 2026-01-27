@@ -1,13 +1,13 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import Select from 'react-select';
 import { RefreshCw, Users } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useParams } from "react-router";

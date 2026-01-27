@@ -11,6 +11,7 @@ const getResponseError = err => {
     }
     return err.message
 }
+const formatDecimal = (val) => new Intl.NumberFormat('en-US', { style: 'decimal' }).format(val);
 
 const zipAsync = filesToZip => {
     if (!JSZip.support.blob) {
@@ -48,7 +49,7 @@ const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
 })
 const getQuotaWarningMessage = (quotaWarningData, quotaUnit, quotaConversionFactor) => {
     const remainingQuota = calcRemainingQuota(quotaWarningData);
-    const remainingVolumeStr = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(remainingQuota.volume / quotaConversionFactor)} ${quotaUnit}`
+    const remainingVolumeStr = `${formatDecimal(remainingQuota.volume / quotaConversionFactor)} ${quotaUnit}`
     const remainingDiskStr = formatFileSize(remainingQuota.disk);
     return <><strong>Quota warning</strong>
         {Number.isFinite(remainingQuota.volume) ? <div>Remaining <span className="fst-italic">volume</span> quota: {remainingVolumeStr}</div> : <></>}
@@ -122,7 +123,7 @@ const getInstanceData = async (server, username) => {
     }
 }
 const formatInstanceSpecs = (instance, multiplierUnit) => (
-    `${instance.label} (${instance.cpu_request} vCPU, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.memory_request)} MiB RAM, ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(instance.multiplier)}${multiplierUnit})`
+    `${instance.label} (${instance.cpu_request} vCPU, ${formatDecimal(instance.memory_request)} MiB RAM, ${formatDecimal(instance.multiplier)}${multiplierUnit})`
 )
 const formatInstancesSelectInput = (instances, multiplierUnit) => {
     return instances
@@ -141,9 +142,9 @@ const formatInstancesSelectInput = (instances, multiplierUnit) => {
 }
 const formatDurationString = (duration) => {
     if (duration > 3600) {
-        return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration / 3600)}h`
+        return `${formatDecimal(duration / 3600)}h`
     }
-    return `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(duration)}s`
+    return `${formatDecimal(duration)}s`
 }
 const getEventsString = (events, parameterized_events) => {
     let eventsStr = events == null ? '' : events.join(',');
@@ -177,5 +178,5 @@ export {
     zipAsync, isActiveJob, getResponseError, calcRemainingQuota, mergeSortedArrays,
     formatFileSize, getInstanceData, formatInstancesSelectInput, getEventsString,
     urlB64ToUint8Array, getRandomInt, isMobileDevice, getQuotaWarningMessage,
-    formatDurationString, formatInstanceSpecs
+    formatDurationString, formatInstanceSpecs, formatDecimal
 }

@@ -1,14 +1,14 @@
-import React, { useEffect, useContext, useState, useRef } from "react";
+import { useEffect, useContext, useState, useRef } from "react";
 import { Send, Folder, RefreshCw, Trash2, Save, Users } from "react-feather";
 import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
 import ModelActionsButtonGroup from "./ModelActionsButtonGroup";
 import AddNamespaceModal from "./AddNamespaceModal";
 import RemoveNamespaceModal from "./RemoveNamespaceModal";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 import AddUserGroupModal from "./AddUserGroupModal";
 import GroupActionsButtonGroup from "./GroupActionsButtonGroup";

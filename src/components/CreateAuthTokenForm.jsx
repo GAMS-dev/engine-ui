@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Select from 'react-select';
 import DatePicker from "react-datepicker";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import { useEffect } from "react";
 import { Button } from "react-bootstrap";

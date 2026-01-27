@@ -1,13 +1,13 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw } from "react-feather";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import axios from "axios";
 import Table from "./Table";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import InstancesActionsButtonGroup from "./InstancesActionsButtonGroup";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const Instances = () => {
 

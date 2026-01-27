@@ -30,7 +30,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaConversionFa
         const workerTimes = {};
         pool['times'].forEach((workerStats) => {
             // if a worker_id has already been added to workerTimes, update finish time
-            if (workerTimes.hasOwnProperty(workerStats['worker_id'])) {
+            if (Object.hasOwn(workerTimes, workerStats['worker_id'])) {
                 workerTimes[workerStats['worker_id']]['finish'] = workerStats['finish'];
                 pool.fails += 1;
             } else {
@@ -85,9 +85,9 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaConversionFa
     // extract the necessary job data
     let dataJobUsageNEW = dataJobUsage.map(job => {
         return {
-            instance: job?.labels?.instance??'default',
+            instance: job?.labels?.instance ?? 'default',
             user: job['username'],
-            multiplier: job?.labels?.multiplier??1,
+            multiplier: job?.labels?.multiplier ?? 1,
             times: job['times'],
             fails: 0,
             pool_label: null,

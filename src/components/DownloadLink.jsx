@@ -1,7 +1,7 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
-import { getResponseError } from "./util";
-import { AlertContext } from "./Alert";
+import { getResponseError } from "../util/util";
+import AlertContext from "../contexts/AlertContext";
 
 export default function DownloadLink({ url, filename, children, className, jsonSubkey }) {
   const [, setAlertMsg] = useContext(AlertContext);

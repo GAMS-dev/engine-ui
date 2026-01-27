@@ -1,18 +1,18 @@
-import React, { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import DownloadLink from "./DownloadLink";
 import TimeDisplay from "./TimeDisplay";
 import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
 import SubmitButton from "./SubmitButton";
 import { Button } from "react-bootstrap";
-import { formatInstanceSpecs, getResponseError } from "./util";
+import { formatInstanceSpecs, getResponseError } from "../util/util";
 import axios from "axios";
 import { Edit3 } from "react-feather";
 import { UserLink } from "./UserLink";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const JobReqInfoTable = props => {
   const [{ server }] = useContext(AuthContext);

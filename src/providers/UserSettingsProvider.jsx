@@ -1,12 +1,9 @@
-import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
-import { AuthContext } from "../AuthContext";
-import { ServerInfoContext } from "../ServerInfoContext";
+import { useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
+import AuthContext from "../contexts/AuthContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
-export const availableTablePageLengths = [{ value: "10", label: "10" }, { value: "20", label: "20" }, { value: "50", label: "50" }, { value: "100", label: "100" }]
-
-export const UserSettingsContext = createContext()
-
-export const UserSettingsProvider = (props) => {
+const UserSettingsProvider = (props) => {
     const [{ username }] = useContext(AuthContext);
     const [serverInfo] = useContext(ServerInfoContext);
 
@@ -55,3 +52,4 @@ export const UserSettingsProvider = (props) => {
         </UserSettingsContext.Provider>
     );
 };
+export default UserSettingsProvider;

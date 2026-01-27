@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
@@ -75,7 +74,7 @@ describe('UserChangePassForm', () => {
         fireEvent.change(screen.getByPlaceholderText("New password"), { target: { value: 'new' } })
         fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: 'new' } })
         fireEvent.click(screen.getByRole("button"))
-        await waitFor(() => screen.findByText(/Some error occurred while trying to changing the password. Error message: something else than the password policy went wrong./));
+        await waitFor(() => screen.findByText(/Some error occurred while trying to change the password. Error message: something else than the password policy went wrong./));
     });
 
     it('handles errors from the password policy correctly', async () => {

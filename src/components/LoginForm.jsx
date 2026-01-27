@@ -1,11 +1,11 @@
-import React, { useContext, useCallback, useState } from "react";
+import { useContext, useCallback, useState } from "react";
 import logo from "../assets/images/logo.svg";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
-import { sessionTokenExpirationSeconds } from "./constants";
+import { sessionTokenExpirationSeconds } from "../util/constants";
 import { Navigate, Link } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import { useEffect } from "react";
 import { Nav, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Alert from 'react-bootstrap/Alert';
@@ -15,7 +15,7 @@ import OAuth2Login from "./OAuth2Login";
 import { ClipLoader } from "react-spinners";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
 import { Info } from "react-feather";
-import { encryptRSA } from "./oauth";
+import { encryptRSA } from "../util/oauth";
 
 const SERVER_NAME = import.meta.env.VITE_ENGINE_URL ? import.meta.env.VITE_ENGINE_URL : "/api";
 const VALID_NATIVE_CLIENT_IDS = { "com.gams.miro": "GAMS MIRO" }
@@ -286,13 +286,11 @@ const LoginForm = ({ showRegistrationForm }) => {
         setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
       } else {
         setLoginErrorMsg(err.response.data.message);
-        if (err.response.data.hasOwnProperty('errors')) {
-          if (err.response.data.errors.hasOwnProperty('username')) {
-            setUsernameError(err.response.data.errors.username);
-          }
-          if (err.response.data.errors.hasOwnProperty('password')) {
-            setPasswordError(err.response.data.errors.password);
-          }
+        if (err.response.data?.errors?.username != null) {
+          setUsernameError(err.response.data.errors.username);
+        }
+        if (err.response.data?.errors?.password != null) {
+          setPasswordError(err.response.data.errors.password);
         }
       }
     }
@@ -358,7 +356,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     let nativeClientParams;
 
     if (nativeClientId != null) {
-      if (!VALID_NATIVE_CLIENT_IDS.hasOwnProperty(nativeClientId)) {
+      if (!Object.hasOwn(VALID_NATIVE_CLIENT_IDS, nativeClientId)) {
         setLoginErrorMsg(`Invalid native client id: ${nativeClientId}`)
         return;
       }
@@ -515,13 +513,11 @@ const LoginForm = ({ showRegistrationForm }) => {
             setLoginErrorMsg("Some error occurred while trying to connect to the Engine Server. Please try again later.");
           } else {
             setLoginErrorMsg(err.response.data.message);
-            if (err.response.data.hasOwnProperty('errors')) {
-              if (err.response.data.errors.hasOwnProperty('username')) {
-                setUsernameError(err.response.data.errors.username);
-              }
-              if (err.response.data.errors.hasOwnProperty('password')) {
-                setPasswordError(err.response.data.errors.password);
-              }
+            if (err.response.data?.errors?.username != null) {
+              setUsernameError(err.response.data.errors.username);
+            }
+            if (err.response.data?.errors?.password != null) {
+              setPasswordError(err.response.data.errors.password);
             }
           }
           setIsSubmitting(false);

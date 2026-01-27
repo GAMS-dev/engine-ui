@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import SubmitButton from "./SubmitButton";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 
 const RemoveNamespaceModal = props => {

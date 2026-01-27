@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { AlertContext } from "./Alert";
+import { useContext } from "react";
+import AlertContext from "../contexts/AlertContext";
 
 const UserActionsButtonGroup = props => {
   const { id, username, userroles, me, isAdmin, isInviter,

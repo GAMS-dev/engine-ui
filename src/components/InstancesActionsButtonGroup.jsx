@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import SubmitButton from "./SubmitButton";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 import { Link } from "react-router-dom";
 

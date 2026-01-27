@@ -3,8 +3,8 @@ import LoginForm from "./components/LoginForm";
 import LogOut from "./components/LogOut";
 
 import Layout from "./components/Layout";
-import { AuthContext } from "./AuthContext";
-import { ServerInfoProvider } from "./ServerInfoContext";
+import AuthContext from "./contexts/AuthContext";
+import ServerInfoProvider from "./providers/ServerInfoProvider";
 import {
   BrowserRouter as Router,
   Routes,

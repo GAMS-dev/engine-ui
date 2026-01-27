@@ -1,5 +1,5 @@
 import JSZip from 'jszip'
-import { zipAsync } from '../components/util.jsx'
+import { zipAsync } from '../util/util.jsx'
 
 describe('zipAsync', () => {
     beforeEach(() => {

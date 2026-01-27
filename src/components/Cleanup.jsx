@@ -1,19 +1,19 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw, Send } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import moment from "moment";
 import axios from "axios";
 import Table from "./Table";
-import { getResponseError, formatFileSize, calcRemainingQuota } from "./util";
+import { getResponseError, formatFileSize, calcRemainingQuota } from "../util/util";
 import TimeDisplay from "./TimeDisplay";
 import SubmitButton from "./SubmitButton";
 import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
 import { ClipLoader } from "react-spinners";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 import { UserLink } from "./UserLink";
 
 const Cleanup = () => {

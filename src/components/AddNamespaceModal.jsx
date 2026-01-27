@@ -1,8 +1,8 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AuthContext } from "../AuthContext";
-import { getResponseError } from "./util";
+import AuthContext from "../contexts/AuthContext";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import axios from "axios";
 

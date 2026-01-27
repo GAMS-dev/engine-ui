@@ -1,18 +1,16 @@
-import React, { useContext } from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-import {
-    UserSettingsContext,
-    UserSettingsProvider,
-} from '../components/UserSettingsContext'
-import { AuthContext } from '../AuthContext'
-import { ServerInfoContext } from '../ServerInfoContext'
+import AuthContext from '../contexts/AuthContext'
+import ServerInfoContext from '../contexts/ServerInfoContext'
 import UserSettingsForm from '../components/UserSettingsForm'
 import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { ServerConfigContext } from '../ServerConfigContext'
+import ServerConfigContext from '../contexts/ServerConfigContext'
 import UserSettingsFormGeneral from '../components/UserSettingsFormGeneral'
 import UserSettingsFormWebPush from '../components/UserSettingsFormWebPush'
+import { useContext } from 'react'
+import UserSettingsProvider from '../providers/UserSettingsProvider'
+import UserSettingsContext from '../contexts/UserSettingsContext'
 
 const AdminAuthProviderWrapper = ({ children }) => (
     <MemoryRouter initialEntries={['/']}>

@@ -1,11 +1,11 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Package, Users, Play, Archive, Settings, ExternalLink, Server } from "react-feather";
 import { useLocation } from 'react-router-dom';
 import { Link } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import UserMenu from "./UserMenu";
-import { ServerConfigContext } from "../ServerConfigContext";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerConfigContext from "../contexts/ServerConfigContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
 
 const Sidebar = () => {
   const [{ roles }] = useContext(AuthContext);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import moment from "moment";
 import { ArrowUp, ArrowDown } from "react-feather";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -8,8 +8,9 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { FormControl } from "react-bootstrap";
 import OverlayFilter from "./OverlayFilter";
-import { getRandomInt } from "./util";
-import { UserSettingsContext, availableTablePageLengths } from "./UserSettingsContext";
+import { getRandomInt } from "../util/util";
+import UserSettingsContext from "../contexts/UserSettingsContext";
+import { availableTablePageLengths } from "../util/constants";
 
 const Table = props => {
   const { noDataMsg, isLoading, onChange, total, resetPageNumber } = props;

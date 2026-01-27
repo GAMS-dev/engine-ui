@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 
 const UserChangeNameForm = () => {
@@ -30,8 +30,8 @@ const UserChangeNameForm = () => {
                     new_username: newUsername
                 })
         } catch (err) {
-            if (err.response == null || err.response.status !== 400 ||
-                err.response.data.errors == null || !err.response.data.errors.hasOwnProperty('new_username')) {
+            if (err.response.status !== 400 ||
+                err.response.data?.errors?.new_username == null) {
                 setSubmissionErrorMsg(`Some error occurred while trying to change the name of the user: ${user}. Error message: ${getResponseError(err)}.`);
             } else {
                 setSubmissionErrorMsg(err.response.data.errors.new_username);

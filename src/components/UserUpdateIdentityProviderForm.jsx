@@ -1,12 +1,12 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import Select from 'react-select';
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import { useEffect } from "react";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";

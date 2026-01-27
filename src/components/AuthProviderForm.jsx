@@ -1,18 +1,18 @@
-import React, { useEffect, useContext, useState, useRef } from "react";
+import { useEffect, useContext, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from 'react-select';
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { Trash2 } from "react-feather";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import RemoveAuthProviderModal from "./RemoveAuthProviderModal";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
 import SubmitButton from "./SubmitButton";
 import ShowHidePasswordInput from "./ShowHidePasswordInput";
-import { ServerConfigContext } from "../ServerConfigContext";
+import ServerConfigContext from "../contexts/ServerConfigContext";
 
 const availableProviderTypes = [{ value: 'oidc', label: 'OpenID Connect' },
 { value: 'ldap', label: 'LDAP' },
@@ -107,7 +107,7 @@ const AuthProviderForm = () => {
                     axios.get(`${server}/auth/oauth2-providers`)]);
                 try {
                     setExpectedConfigHostname(new URL(server).href);
-                } catch (_) {
+                } catch {
                     setExpectedConfigHostname(new URL(server, document.baseURI).href);
                 }
                 setAuthProviders(response.data.filter(config => config.is_main_identity_provider !== true));
@@ -130,7 +130,7 @@ const AuthProviderForm = () => {
             let issuerURL;
             try {
                 issuerURL = new URL(issuerIDToAssert);
-            } catch (_) {
+            } catch {
                 setIssuerValid(false);
                 return;
             }
@@ -153,11 +153,11 @@ const AuthProviderForm = () => {
             try {
                 await axios.get(`${issuerURL.href}/.well-known/openid-configuration`)
                 setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'oidc')[0])
-            } catch (_) {
+            } catch {
                 try {
                     await axios.get(`${issuerURL.href}/.well-known/oauth-authorization-server`)
                     setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'oauth2')[0])
-                } catch (_) {
+                } catch {
                     setAutoDiscoveryMode(autoDiscoveryModes.filter(mode => mode.value === 'manual')[0])
                 }
             }
@@ -652,7 +652,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeREADONLY">
-                                                Scope that the client should request from the OP to get 'READONLY' scope
+                                                {"Scope that the client should request from the OP to get 'READONLY' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -669,7 +669,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeCONFIGURATION">
-                                                Scope that the client should request from the OP to get 'CONFIGURATION' scope
+                                                {"Scope that the client should request from the OP to get 'CONFIGURATION' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -686,7 +686,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeNAMESPACES">
-                                                Scope that the client should request from the OP to get 'NAMESPACES' scope
+                                                {"Scope that the client should request from the OP to get 'NAMESPACES' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -703,7 +703,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeJOBS">
-                                                Scope that the client should request from the OP to get 'JOBS' scope
+                                                {"Scope that the client should request from the OP to get 'JOBS' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -720,7 +720,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeUSERS">
-                                                Scope that the client should request from the OP to get 'USERS' scope
+                                                {"Scope that the client should request from the OP to get 'USERS' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -737,7 +737,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeHYPERCUBE">
-                                                Scope that the client should request from the OP to get 'HYPERCUBE' scope
+                                                {"Scope that the client should request from the OP to get 'HYPERCUBE' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -754,7 +754,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeCLEANUP">
-                                                Scope that the client should request from the OP to get 'CLEANUP' scope
+                                                {"Scope that the client should request from the OP to get 'CLEANUP' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -771,7 +771,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeLICENSES">
-                                                Scope that the client should request from the OP to get 'LICENSES' scope
+                                                {"Scope that the client should request from the OP to get 'LICENSES' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -788,7 +788,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeUSAGE">
-                                                Scope that the client should request from the OP to get 'USAGE' scope
+                                                {"Scope that the client should request from the OP to get 'USAGE' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -805,7 +805,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="requestScopeAUTH">
-                                                Scope that the client should request from the OP to get 'AUTH' scope
+                                                {"Scope that the client should request from the OP to get 'AUTH' scope"}
                                             </label>
                                             <input
                                                 type="text"
@@ -839,7 +839,7 @@ const AuthProviderForm = () => {
                                         </div>
                                         <div className="mt-3 mb-3">
                                             <label htmlFor="oidcUid">
-                                                The claim from the OIDC ID token to use as the user's unique identifier. The <kbd>sub</kbd> claim is the default and recommended value.
+                                                The claim from the OIDC ID token to use as the user&apos;s unique identifier. The <kbd>sub</kbd> claim is the default and recommended value.
                                             </label>
                                             <input
                                                 type="text"
@@ -969,7 +969,7 @@ const AuthProviderForm = () => {
                                     </div>
                                     <div className="mt-3 mb-3">
                                         <label htmlFor="tokenAuthMethodsSupported">
-                                            List of client authentication methods that provider's token endpoint supports (comma-separated)
+                                            {"List of client authentication methods that provider's token endpoint supports (comma-separated)"}
                                         </label>
                                         <input
                                             type="text"

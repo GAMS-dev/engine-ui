@@ -1,12 +1,11 @@
-import React, { createContext, useState, useLayoutEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import axios from "axios";
-import { getResponseError } from "./components/util";
-
-export const ServerInfoContext = createContext();
+import { getResponseError } from "../util/util";
+import ServerInfoContext from "../contexts/ServerInfoContext";
 
 const SERVER_NAME = import.meta.env.VITE_ENGINE_URL ? import.meta.env.VITE_ENGINE_URL : "/api";
 
-export const ServerInfoProvider = props => {
+const ServerInfoProvider = props => {
     const [serverInfo, setServerInfo] = useState(
         JSON.parse(localStorage.getItem("serverInfo")) || false
     );
@@ -35,3 +34,5 @@ export const ServerInfoProvider = props => {
         </ServerInfoContext.Provider>
     );
 }
+
+export default ServerInfoProvider;

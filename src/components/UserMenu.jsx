@@ -1,8 +1,8 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { User } from "react-feather";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import QuotaWidget from "./QuotaWidget";
 
 

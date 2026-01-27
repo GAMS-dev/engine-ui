@@ -1,9 +1,8 @@
-import React from 'react';
-import { UserSettingsContext } from '../../components/UserSettingsContext';
-import { AuthContext } from '../../AuthContext';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { ServerInfoContext } from "../../ServerInfoContext";
-import { ServerConfigContext } from "../../ServerConfigContext";
+import UserSettingsContext from '../../contexts/UserSettingsContext';
+import AuthContext from '../../contexts/AuthContext';
+import ServerInfoContext from "../../contexts/ServerInfoContext";
+import ServerConfigContext from "../../contexts/ServerConfigContext";
 
 export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
 
@@ -17,7 +16,7 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
     const username = options.username ?? 'admin';
     const roles = options.roles ?? ['admin'];
     const server = options.server ?? 'testserver';
-    const serverConfig = options.serverConfig ?? {};
+    const baseServerConfig = options.serverConfig ?? {};
     const instance_pool_access = options.instance_pool_access ?? undefined;
     const setServerConfig = options.setServerConfig ?? vi.fn();
     const in_kubernetes = options.in_kubernetes ?? true;
@@ -25,7 +24,10 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
     const initialEntries = options.initialEntries ?? undefined;
     const routes = options.routes ?? [];
 
-    instance_pool_access && (serverConfig.instance_pool_access = instance_pool_access);
+    const serverConfig = {
+        ...baseServerConfig,
+        ...(instance_pool_access != null && { instance_pool_access })
+    };
 
     return (
         <MemoryRouter initialEntries={initialEntries}>

@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 
 export const UserLink = ({ user, hideMeBadge, children }) => {
 

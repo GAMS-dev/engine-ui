@@ -4,8 +4,10 @@
     "license": "MIT",
     "private": true,
     "proxy": "http://localhost:80",
+    "type": "module",
     "devDependencies": {
         "@babel/plugin-transform-private-property-in-object": "^7.28.6",
+        "@eslint/js": "^9.39.2",
         "@peculiar/webcrypto": "^1.5.0",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.1",
@@ -13,7 +15,12 @@
         "@vitejs/plugin-react": "^5.1.2",
         "@vitest/coverage-v8": "^4.0.17",
         "canvas": "^3.2.1",
+        "eslint": "^9.39.2",
         "eslint-plugin-no-unsanitized": "^4.1.4",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-refresh": "^0.4.26",
+        "globals": "^17.1.0",
         "jsdom": "^27.4.0",
         "react-select-event": "^5.5.1",
         "sass": "^1.97.2",
@@ -49,24 +56,6 @@
         "test:coverage": "vitest run --coverage",
         "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=test-report.xml",
         "lint": "eslint src --ext=\".js,.jsx\" --max-warnings 0"
-    },
-    "eslintConfig": {
-        "extends": [
-            "react-app"
-        ],
-        "plugins": [
-            "no-unsanitized",
-            "react"
-        ],
-        "rules": {
-            "react/no-danger": "error",
-            "react/no-find-dom-node": "error",
-            "react/jsx-no-script-url": "error",
-            "react/jsx-no-target-blank": "error",
-            "react/no-unknown-property": "error",
-            "no-unsanitized/method": "error",
-            "no-unsanitized/property": "error"
-        }
     },
     "browserslist": {
         "production": [

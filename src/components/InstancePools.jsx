@@ -1,17 +1,17 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
 import { Layers, RefreshCw } from "react-feather";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import Table from "./Table";
-import { formatInstancesSelectInput, getResponseError } from "./util";
+import { formatInstancesSelectInput, getResponseError } from "../util/util";
 import InstancePoolsActionsButtonGroup from "./InstancePoolsActionsButtonGroup";
 import axios from "axios";
 import SubmitButton from "./SubmitButton";
 import { UserLink } from "./UserLink";
-import { ServerConfigContext } from "../ServerConfigContext";
-import { UserSettingsContext } from "./UserSettingsContext";
+import ServerConfigContext from "../contexts/ServerConfigContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const InstancePools = () => {
     const [{ jwt, server, username, roles }] = useContext(AuthContext);

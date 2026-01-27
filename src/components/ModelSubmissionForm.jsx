@@ -1,10 +1,10 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
 import Select from 'react-select';
-import { zipAsync, getResponseError } from "./util";
+import { zipAsync, getResponseError } from "../util/util";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";

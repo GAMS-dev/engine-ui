@@ -1,4 +1,3 @@
-import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
@@ -14,8 +13,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
         useParams: vi.fn(),
     }
 })
-
-import { useParams } from 'react-router-dom'
 
 const AllProvidersWrapper = ({ children }) => (
     <AllProvidersWrapperDefault options={{ login: false }}>

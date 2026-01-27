@@ -1,5 +1,3 @@
-import React from "react";
-
 const TimeDiffDisplay = props => {
 
     const h = Math.floor(props.time / 3600);

@@ -1,10 +1,10 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import axios from "axios";
 import { UserLink } from "./UserLink";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import { ClipLoader } from "react-spinners";
 
 const getUserRoleFromArray = (roles) => {
@@ -91,7 +91,7 @@ const UserInviteesTree = () => {
                     if (user.inviter_name == null) {
                         return
                     }
-                    if (userTreeDataTmp.hasOwnProperty(user.inviter_name)) {
+                    if (Object.hasOwn(userTreeDataTmp, user.inviter_name)) {
                         if (user.username === userToEdit) {
                             userTreeDataTmp[user.inviter_name].unshift(user)
                         } else {
@@ -104,7 +104,7 @@ const UserInviteesTree = () => {
                 let rootInviterNameTmp = userToEdit;
                 let inviterListTmp = [userToEdit]
                 while (true) {
-                    if (inviterInfoTmp.hasOwnProperty(rootInviterNameTmp)) {
+                    if (Object.hasOwn(inviterInfoTmp, rootInviterNameTmp)) {
                         if (inviterInfoTmp[rootInviterNameTmp] != null) {
                             const nextInviterTmp = inviterInfoTmp[rootInviterNameTmp]
                             // already did that above

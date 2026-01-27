@@ -10,7 +10,7 @@ import Table from "./Table";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
 import UserLink from "./UserLink";
-import { mergeSortedArrays } from "./util";
+import { mergeSortedArrays } from "../util/util";
 
 ChartJS.register(
     LinearScale,
@@ -340,7 +340,7 @@ const UsageTimeline = () => {
             setIsLoading(false);
         }
         computeChartData();
-    }, [data])
+    }, [data, selectedWeightingOption])
 
     return (
         <>{dataIsLoading ? <ClipLoader /> : <div className="mt-3">

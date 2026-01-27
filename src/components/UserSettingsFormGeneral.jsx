@@ -1,9 +1,9 @@
 import { useContext } from "react";
 import Select from "react-select";
-import { availableTablePageLengths } from "./UserSettingsContext";
 import DefaultInstanceSelector from "./DefaultInstanceSelector";
 import { useOutletContext } from "react-router-dom";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
+import { availableTablePageLengths } from "../util/constants";
 
 const UserSettingsFormGeneral = () => {
     const [serverInfo] = useContext(ServerInfoContext);

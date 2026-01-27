@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
 import { Tab, Nav } from "react-bootstrap";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerInfoContext from "../contexts/ServerInfoContext.jsx";
 import LicUpdateButton from "./LicenseUpdateButton";
 import UpdatePasswordPolicyButton from "./UpdatePasswordPolicyButton";
 import ToggleConfigOptionButton from "./ToggleConfigOptionButton.jsx";

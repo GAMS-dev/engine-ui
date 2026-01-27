@@ -1,9 +1,9 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AlertContext } from "./Alert";
-import { isActiveJob, getResponseError } from "./util";
+import AlertContext from "../contexts/AlertContext";
+import { isActiveJob, getResponseError } from "../util/util";
 
 const TerminateJobButton = props => {
     const { token, status, server, setRefresh } = props;

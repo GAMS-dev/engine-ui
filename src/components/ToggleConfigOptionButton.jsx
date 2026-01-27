@@ -1,10 +1,10 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
-import { AlertContext } from "./Alert";
-import { ServerConfigContext } from "../ServerConfigContext";
+import AlertContext from "../contexts/AlertContext";
+import ServerConfigContext from "../contexts/ServerConfigContext";
 
 const ToggleConfigOptionButton = ({ configKey }) => {
     const [, setAlertMsg] = useContext(AlertContext);

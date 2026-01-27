@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'

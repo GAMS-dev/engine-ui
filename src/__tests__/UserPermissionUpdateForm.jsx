@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import axios from 'axios';
 import UserPermissionUpdateForm from '../components/UserPermissionUpdateForm';
@@ -233,20 +232,23 @@ describe('UserPermissionUpdateForm', () => {
         let providerGetWasCalled = false
         axios.put.mockImplementation((url, data) => {
             switch (url) {
-                case 'testserver/users/role':
+                case 'testserver/users/role': {
                     if (JSON.stringify(data) === JSON.stringify({ 'username': 'user1', 'roles': ['inviter'] })) {
                         roleGetWasCalled = true
                     }
                     return
-                case 'testserver/users/inviters-providers/user1':
+                }
+                case 'testserver/users/inviters-providers/user1': {
                     let requestValue = new FormData()
                     requestValue.append('name', 'some_provider');
                     if (JSON.stringify(data) === JSON.stringify(requestValue)) {
                         providerGetWasCalled = true
                     }
                     return
-                default:
+                }
+                default: {
                     return Promise.reject(new Error('not found'))
+                }
             }
 
         })

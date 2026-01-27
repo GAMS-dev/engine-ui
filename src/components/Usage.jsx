@@ -1,14 +1,14 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useParams, useLocation, useOutletContext, useNavigate, Outlet } from "react-router-dom";
 import { RefreshCw } from "react-feather";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { Nav, Tab } from "react-bootstrap";
-import { getResponseError, calcRemainingQuota } from "./util";
-import { UserSettingsContext } from "./UserSettingsContext";
+import { getResponseError, calcRemainingQuota } from "../util/util";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 
 const Usage = () => {

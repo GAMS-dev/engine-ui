@@ -1,17 +1,17 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw, ToggleLeft, ToggleRight } from "react-feather";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import axios from "axios";
 import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
-import { getEventsString, getResponseError } from "./util";
+import { getEventsString, getResponseError } from "../util/util";
 import WebhooksActionsButtonGroup from "./WebhooksActionsButtonGroup";
 import { Button, Modal } from "react-bootstrap";
 import SubmitButton from "./SubmitButton";
 import { UserLink } from "./UserLink";
-import { ServerConfigContext } from "../ServerConfigContext";
+import ServerConfigContext from "../contexts/ServerConfigContext";
 
 const Webhooks = () => {
     const [isLoading, setIsLoading] = useState(true);

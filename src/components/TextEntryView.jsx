@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { getResponseError } from "./util";
-import { AlertContext } from "./Alert";
+import { getResponseError } from "../util/util";
+import AlertContext from "../contexts/AlertContext";
 
 const TextEntryView = ({ textEntries, server }) => {
   const [, setAlertMsg] = useContext(AlertContext);
@@ -30,19 +30,20 @@ const TextEntryView = ({ textEntries, server }) => {
         setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`)
         return
       }
-      const cacheTmp = cache;
-      if (teReq.data.entry_value == null) {
-        cacheTmp[entryIndex] = {
-          entry_size: 0,
-          entry_value: ""
-        };
-      } else {
-        cacheTmp[entryIndex] = {
-          entry_size: teReq.data.entry_value.length,
-          entry_value: teReq.data.entry_value
-        };
-      }
-      setCache(cacheTmp);
+      setCache(currCache => {
+        if (teReq.data.entry_value == null) {
+          currCache[entryIndex] = {
+            entry_size: 0,
+            entry_value: ""
+          };
+        } else {
+          currCache[entryIndex] = {
+            entry_size: teReq.data.entry_value.length,
+            entry_value: teReq.data.entry_value
+          };
+        }
+        return currCache;
+      });
       if (cache[entryIndex].entry_size > viewCharLimit) {
         setTruncationFlag(true);
       } else {

@@ -1,11 +1,11 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { Nav, Tab } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
-import { ServerInfoContext } from "../ServerInfoContext";
-import { AlertContext } from "./Alert";
-import { getResponseError } from "./util";
+import AuthContext from "../contexts/AuthContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
+import AlertContext from "../contexts/AlertContext";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 
 const UserEditBundle = () => {
@@ -76,7 +76,7 @@ const UserEditBundle = () => {
             </div>
             {(isAdmin || isInviter) ?
                 <>
-                    <Tab.Container defaultActiveKey="usage" activeKey={location.pathname.includes('/usage')? 'usage' : location.pathname.split('/').pop()} onSelect={(key) => navigate(key)}>
+                    <Tab.Container defaultActiveKey="usage" activeKey={location.pathname.includes('/usage') ? 'usage' : location.pathname.split('/').pop()} onSelect={(key) => navigate(key)}>
                         <Nav className="nav-tabs">
                             <Nav.Item>
                                 <Nav.Link eventKey="usage">Usage</Nav.Link>
@@ -121,11 +121,11 @@ const UserEditBundle = () => {
                         </Nav>
                     </Tab.Container>
                     <Tab.Content className="pt-3">
-                        <Outlet context={{userToEditRoles}}/>
+                        <Outlet context={{ userToEditRoles }} />
                     </Tab.Content>
                 </>
                 :
-                <Outlet context={{userToEditRoles}}/>
+                <Outlet context={{ userToEditRoles }} />
             }
         </div>
 }

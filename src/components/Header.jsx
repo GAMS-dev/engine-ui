@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
 import UserMenu from "./UserMenu";
 
 const Header = props => {

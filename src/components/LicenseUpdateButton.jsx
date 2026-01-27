@@ -1,13 +1,13 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Overlay from "react-bootstrap/Overlay";
 import Tooltip from "react-bootstrap/Tooltip";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import SubmitButton from "./SubmitButton";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import { Clipboard } from "react-feather";
 
 
@@ -182,7 +182,7 @@ const LicUpdateButton = props => {
                             {window.isSecureContext && <Button className="p-0" variant="link" ref={copyUsiButton} onClick={copyUSIToClipboard} title="Copy to clipboard">
                                 <Clipboard size="16" />
                             </Button>}
-                            <Overlay target={copyUsiButton.current} show={showCopyUsiToolTip} placement="top">
+                            <Overlay target={copyUsiButton} show={showCopyUsiToolTip} placement="top">
                                 {(props) => (
                                     <Tooltip id="overlay-example" {...props}>
                                         Copied!

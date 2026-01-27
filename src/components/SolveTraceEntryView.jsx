@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LinearScale, CategoryScale, PointElement, LineElement, Tooltip, Legend } from "chart.js";
 
@@ -25,8 +25,7 @@ const SolveTraceEntryView = props => {
         const fetchStreamEntry = async () => {
             let seReq
             try {
-                seReq = await axios
-                [jobFinished ? 'get' : 'delete'](
+                seReq = await axios[jobFinished ? 'get' : 'delete'](
                     `${server}/jobs/${encodeURIComponent(token)}/${jobFinished ? 'text-entry' : 'stream-entry'}/${encodeURIComponent(solveTraceEntry)}`
                 )
             } catch (err) {

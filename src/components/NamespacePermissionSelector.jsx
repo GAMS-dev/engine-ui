@@ -1,11 +1,11 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useContext } from "react";
 import { useEffect } from "react";
 import Select from 'react-select';
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
-import { getResponseError } from "./util";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import { getResponseError } from "../util/util";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Info } from "react-feather";
 

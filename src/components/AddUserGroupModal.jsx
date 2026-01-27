@@ -1,8 +1,8 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AuthContext } from "../AuthContext";
-import { getResponseError } from "./util";
+import AuthContext from "../contexts/AuthContext";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import axios from "axios";
 
@@ -35,8 +35,7 @@ const AddUserGroupModal = props => {
                     setSubmissionErrorMsg(`Some error occurred. Error message: ${getResponseError(err)}.`);
                 } else {
                     setSubmissionErrorMsg(err.response.data.message);
-                    if (err.response.data.hasOwnProperty('errors') &&
-                        err.response.data.errors.hasOwnProperty('label')) {
+                    if (err.response.data?.errors?.label != null) {
                         setLabelError(err.response.data.errors.label);
                     }
                 }

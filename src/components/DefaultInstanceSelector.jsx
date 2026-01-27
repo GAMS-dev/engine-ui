@@ -1,11 +1,11 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import Select from 'react-select';
-import { AuthContext } from "../AuthContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
-import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
+import { formatInstancesSelectInput, getInstanceData, getResponseError } from "../util/util";
 import { ClipLoader } from "react-spinners";
-import { AlertContext } from "./Alert";
-import { UserSettingsContext } from "./UserSettingsContext";
+import AlertContext from "../contexts/AlertContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const DefaultInstanceSelector = ({ className }) => {
     const [{ username, server }] = useContext(AuthContext);

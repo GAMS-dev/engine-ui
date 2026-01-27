@@ -1,20 +1,18 @@
-import React, {
-    createContext,
+import {
     useState,
     useLayoutEffect,
     useContext,
 } from 'react'
 import axios from 'axios'
-import { getResponseError } from './components/util'
-import { AlertContext } from './components/Alert'
-
-export const ServerConfigContext = createContext()
+import { getResponseError } from '../util/util'
+import ServerConfigContext from '../contexts/ServerConfigContext'
+import AlertContext from '../contexts/AlertContext'
 
 const SERVER_NAME = import.meta.env.VITE_ENGINE_URL
     ? import.meta.env.VITE_ENGINE_URL
     : '/api'
 
-export const ServerConfigProvider = ({ children }) => {
+const ServerConfigProvider = ({ children }) => {
     const [serverConfig, setServerConfig] = useState({})
     const [updateConfigState, setUpdateConfigState] = useState(0)
     const [, setAlertMsg] = useContext(AlertContext)
@@ -31,9 +29,12 @@ export const ServerConfigProvider = ({ children }) => {
             patchConfigForm.append(key, value)
         }
         await axios.patch(`${SERVER_NAME}/configuration`, patchConfigForm)
-        for (const [key, value] of newConfigEntries) {
-            serverConfig[key] = value
-        }
+        setServerConfig(currentConfig => {
+            for (const [key, value] of newConfigEntries) {
+                currentConfig[key] = value
+            }
+            return currentConfig
+        })
     }
     const serverConfigState = [
         serverConfig,
@@ -62,3 +63,4 @@ export const ServerConfigProvider = ({ children }) => {
         </ServerConfigContext.Provider>
     )
 }
+export default ServerConfigProvider;

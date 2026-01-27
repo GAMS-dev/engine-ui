@@ -1,9 +1,9 @@
-import React, { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { RefreshCw, Send } from "react-feather";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
 import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import axios from "axios";
@@ -11,7 +11,7 @@ import Table from "./Table";
 import TimeDisplay from "./TimeDisplay";
 import UserActionsButtonGroup from "./UserActionsButtonGroup";
 import SubmitButton from "./SubmitButton";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import { UserLink } from "./UserLink";
 
 const Users = () => {

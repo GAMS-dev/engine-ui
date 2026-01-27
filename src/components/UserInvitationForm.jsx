@@ -1,16 +1,16 @@
-import React, { useState, useContext, useEffect } from "react";
-import { AuthContext } from "../AuthContext";
+import { useState, useContext, useEffect } from "react";
+import AuthContext from "../contexts/AuthContext";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
 import Select from 'react-select';
-import { formatInstancesSelectInput, getInstanceData, getResponseError } from "./util";
+import { formatInstancesSelectInput, getInstanceData, getResponseError } from "../util/util";
 import NamespacePermissionSelector from "./NamespacePermissionSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
 import UserQuotaSelector from "./UserQuotaSelector";
-import { ServerInfoContext } from "../ServerInfoContext";
-import { UserSettingsContext } from "./UserSettingsContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const UserInvitationForm = () => {
     const [{ jwt, server, roles, username }] = useContext(AuthContext);

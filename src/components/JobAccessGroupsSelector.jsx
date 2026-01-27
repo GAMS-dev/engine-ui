@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import Select from 'react-select';
 import axios from "axios";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
-import { getResponseError } from "./util";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
+import { getResponseError } from "../util/util";
 
 const JobAccessGroupsSelector = props => {
     const [{ jwt, server }] = useContext(AuthContext);

@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { generateRandomString, generatePKCEParams } from "./oauth";
-import { getResponseError } from "./util";
+import { generateRandomString, generatePKCEParams } from "../util/oauth";
+import { getResponseError } from "../util/util";
 import axios from "axios";
 
-const OAuth2Login = ({server, loginConfig, setAuthToken, setErrorMsg}) => {
+const OAuth2Login = ({ server, loginConfig, setAuthToken, setErrorMsg }) => {
     useEffect(() => {
         const initiateOAuthLogin = async (config) => {
             const state = generateRandomString(32);
@@ -117,7 +117,7 @@ const OAuth2Login = ({server, loginConfig, setAuthToken, setErrorMsg}) => {
             return;
         }
         if (window.location.search.includes('error=') &&
-        window.location.search.includes('error_description=')) {
+            window.location.search.includes('error_description=')) {
             const searchParams = new URLSearchParams(window.location.search);
             setErrorMsg(searchParams.get('error_description'));
             return;

@@ -1,12 +1,12 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useContext } from "react";
 import { useEffect } from "react";
 import { Button } from "react-bootstrap";
-import { AuthContext } from "../AuthContext";
-import { AlertContext } from "./Alert";
-import { calcRemainingQuota, getResponseError } from "./util";
-import { UserSettingsContext } from "./UserSettingsContext";
+import AuthContext from "../contexts/AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import { calcRemainingQuota, getResponseError } from "../util/util";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 import { UserLink } from "./UserLink";
 
 const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {

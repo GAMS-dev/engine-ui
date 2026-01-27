@@ -1,34 +1,33 @@
-import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
 
-import { ServerInfoContext } from '../ServerInfoContext'
-import { AuthContext } from '../AuthContext'
+import ServerInfoContext from '../contexts/ServerInfoContext'
+import AuthContext from '../contexts/AuthContext'
 import Sidebar from '../components/Sidebar'
-import { ServerConfigContext } from '../ServerConfigContext'
+import ServerConfigContext from '../contexts/ServerConfigContext'
 
 const RouterWrapper = (options) => {
-    return ({ children }) => (
+    const Wrapper = ({ children }) => (
         <MemoryRouter>
             <AuthContext.Provider
                 value={[{ server: 'http://localhost', roles: options?.roles }]}
             >
                 <ServerInfoContext.Provider
-                    value={[options?.info ? options.info : {}, () => {}]}
+                    value={[options?.info ? options.info : {}, () => { }]}
                 >
                     <ServerConfigContext.Provider
                         value={[
                             options?.config ? options.config : {},
-                            () => {},
+                            () => { },
                         ]}
                     >
                         {children}
                     </ServerConfigContext.Provider>
                 </ServerInfoContext.Provider>
             </AuthContext.Provider>
-        </MemoryRouter>
-    )
+        </MemoryRouter>)
+    return Wrapper;
 }
 
 describe('Sidebar', () => {

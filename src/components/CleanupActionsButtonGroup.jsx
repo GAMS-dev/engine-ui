@@ -1,4 +1,3 @@
-import React from "react";
 
 const HousekeepingActionsButtonGroup = props => {
   const { token, type, username, setDataToRemove, setShowDeleteConfirmDialog } = props;

@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-
-export const AlertContext = createContext(["", () => { }]);
+import { useContext, useEffect, useState } from "react";
+import AlertContext from "../contexts/AlertContext";
 
 export const Alert = () => {
   const [alertMsg, setAlertMsg] = useContext(AlertContext);

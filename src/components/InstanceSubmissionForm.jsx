@@ -1,12 +1,12 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
-import { getResponseError } from "./util";
+import { getResponseError } from "../util/util";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
-import { UserSettingsContext } from "./UserSettingsContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
 
 const InstanceSubmissionForm = () => {
     const { label } = useParams();
@@ -114,7 +114,7 @@ const InstanceSubmissionForm = () => {
                 ['label', 'cpu_request', 'memory_request',
                     'multiplier', 'multiplier_idle', 'workspace_request', 'tolerations',
                     'node_selectors', 'gams_license'].forEach(key => {
-                        if (err.response.data.errors.hasOwnProperty(key)) {
+                        if (err.response.data?.errors?.[key] != null) {
                             formErrorsTmp[key] = err.response.data.errors[key]
                         }
                     });

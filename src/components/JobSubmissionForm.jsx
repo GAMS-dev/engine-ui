@@ -3,19 +3,19 @@ import Select from 'react-select';
 import { Navigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
-import { AlertContext } from "./Alert";
-import { AuthContext } from "../AuthContext";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
-import { zipAsync, getResponseError, getInstanceData, formatInstancesSelectInput, getQuotaWarningMessage, formatDurationString, calcRemainingQuota, formatFileSize } from "./util";
+import { zipAsync, getResponseError, getInstanceData, formatInstancesSelectInput, getQuotaWarningMessage, formatDurationString, calcRemainingQuota, formatFileSize } from "../util/util";
 import JobAccessGroupsSelector from "./JobAccessGroupsSelector";
 import InexJSONSelector from "./InexJSONSelector";
 import SubmitButton from "./SubmitButton";
 import ClipLoader from "react-spinners/ClipLoader";
-import { ServerInfoContext } from "../ServerInfoContext";
+import ServerInfoContext from "../contexts/ServerInfoContext";
 import FileDropZone from "./FileDropZone";
-import { UserSettingsContext } from "./UserSettingsContext";
-import { quotaWarningThresholds } from "./constants";
-import { ServerConfigContext } from "../ServerConfigContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
+import { quotaWarningThresholds } from "../util/constants";
+import ServerConfigContext from "../contexts/ServerConfigContext";
 
 const JobSubmissionForm = ({ newHcJob }) => {
     const [, setAlertMsg] = useContext(AlertContext);
