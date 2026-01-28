@@ -51,14 +51,18 @@ test:
     - npm ci
   script:
     - npm run test:ci
-  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  coverage: /All files(?:[^|]*\|){4}\s*(\S+)/
   artifacts:
+    expire_in: 1 week
     paths:
       - coverage/
     when: always
     reports:
       junit:
         - junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
   cache:
     - key:
         files:

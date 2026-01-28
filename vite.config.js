@@ -37,5 +37,10 @@ export default defineConfig({
             'src/__tests__/setup.js',
         ],
         setupFiles: ['./src/__tests__/setup.js'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['cobertura', 'text', 'json', 'html'],
+            reportsDirectory: './coverage',
+        },
     },
 });

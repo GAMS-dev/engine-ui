@@ -13,7 +13,7 @@
         "@testing-library/react": "^16.3.1",
         "@testing-library/user-event": "^14.6.1",
         "@vitejs/plugin-react": "^5.1.2",
-        "@vitest/coverage-v8": "^4.0.17",
+        "@vitest/coverage-v8": "^4.0.18",
         "canvas": "^3.2.1",
         "eslint": "^9.39.2",
         "eslint-plugin-no-unsanitized": "^4.1.4",
@@ -54,7 +54,7 @@
         "preview": "vite preview",
         "test": "vitest",
         "test:coverage": "vitest run --coverage",
-        "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=test-report.xml",
+        "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=junit.xml",
         "lint": "eslint src --ext=\".js,.jsx\" --max-warnings 0"
     },
     "browserslist": {
