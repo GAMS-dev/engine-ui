@@ -144,7 +144,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     }
   }, [server, setLogin]);
 
-  const handleLogin = async () => {
+  const handleLogin = useCallback(async () => {
     setShowRegistrationSuccessAlert(false);
     setIsSubmitting(true);
     try {
@@ -178,7 +178,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [username, password, selectedAuthProvider, sessionTokenExpirationSeconds]);
 
 
   const handleRegistration = async () => {
