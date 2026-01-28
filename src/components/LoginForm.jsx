@@ -178,7 +178,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [username, password, selectedAuthProvider, sessionTokenExpirationSeconds]);
+  }, [username, password, selectedAuthProvider, loginUser, server]);
 
 
   const handleRegistration = async () => {
