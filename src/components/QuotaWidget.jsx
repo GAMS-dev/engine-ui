@@ -27,23 +27,21 @@ const QuotaWidget = ({ isVisible, className }) => {
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
                     const quotaFormatted = {
-                        volume: quotaRemaining.volume / userSettings.quotaConversionFactor,
+                        volume: userSettings.quotaFormattingFn(quotaRemaining.volume),
                         disk: formatFileSize(quotaRemaining.disk),
-                        unitVolume: userSettings.quotaUnit,
                     }
-                    quotaFormatted.volume = `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaFormatted.volume)}${quotaFormatted.unitVolume}`;
                     setData([{
                         key: 'volume',
                         title: 'Volume quota',
                         icon: <Cpu size={14} />,
-                        text: `: ${quotaRemaining.volume === Infinity ? 'unlimited' : quotaFormatted.volume}\n`,
-                        className: quotaRemaining.volume < quotaWarningThresholds.volume ? 'text-danger' : ''
+                        text: `: ${quotaFormatted.volume}\n`,
+                        className: quotaRemaining.volume < quotaWarningThresholds.volume[userSettings.quotaUnit] ? 'text-danger' : ''
                     },
                     {
                         key: 'disk',
                         title: 'Disk quota',
                         icon: <HardDrive size={14} />,
-                        text: `: ${quotaRemaining.disk === Infinity ? 'unlimited' : quotaFormatted.disk}`,
+                        text: `: ${quotaFormatted.disk}`,
                         className: quotaRemaining.disk < quotaWarningThresholds.disk ? 'text-danger' : ''
                     }]);
                 } else {

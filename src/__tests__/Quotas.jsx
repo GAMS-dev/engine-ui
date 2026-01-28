@@ -54,7 +54,7 @@ describe('Quotas with single job', () => {
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier $',
+                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier Cost',
             })
         ).toBeInTheDocument()
         expect(
@@ -73,7 +73,7 @@ describe('Quotas with single job', () => {
         ).toBeInTheDocument()
         expect(tableJobs.getByRole('cell', { name: '3' })).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('cell', { name: '2,592' })
+            tableJobs.getByRole('cell', { name: '$2,592.00' })
         ).toBeInTheDocument()
 
         expect(tableJobs.getByText('token1234').closest('a')).toHaveAttribute(
@@ -105,7 +105,7 @@ describe('Quotas with single job', () => {
         )
 
         expect(
-            screen.getByText('Total: 2,592 $', { selector: 'h2' })
+            screen.getByText('Total: $2,592.00', { selector: 'h2' })
         ).toBeInTheDocument()
 
         expect(screen.queryByRole('img')).toBeNull()
@@ -133,7 +133,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         )
 
         expect(
-            screen.getByText('Total: 2.2 $', { selector: 'h2' })
+            screen.getByText('Total: $2.20', { selector: 'h2' })
         ).toBeInTheDocument()
 
         expect(
@@ -178,27 +178,27 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier $',
+                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier Cost',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 0.6',
+                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 $0.60',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool token2 job_1 - 0 0:0:20 3 0.6',
+                name: 'job_not_on_pool token2 job_1 - 0 0:0:20 3 $0.60',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'hc_1 token3HC hypercube_instance1 - 1 0:0:20 1 0.2',
+                name: 'hc_1 token3HC hypercube_instance1 - 1 0:0:20 1 $0.20',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'hc_2 token4HC pool_instance pool_1 0 0:0:20 2 0.4',
+                name: 'hc_2 token4HC pool_instance pool_1 0 0:0:20 2 $0.40',
             })
         ).toBeInTheDocument()
 
@@ -208,12 +208,12 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'User Pool Label Instance Number Crashes Idle Time Multiplier $',
+                name: 'User Pool Label Instance Number Crashes Idle Time Multiplier Cost',
             })
         ).toBeInTheDocument()
         expect(
             tablePool.getByRole('row', {
-                name: 'pool_user pool_1 pool_instance 0 0:0:20 2 0.4',
+                name: 'pool_user pool_1 pool_instance 0 0:0:20 2 $0.40',
             })
         ).toBeInTheDocument()
     })
@@ -229,19 +229,19 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Number Crashes Number Jobs Solve Time $',
+                name: 'User Number Crashes Number Jobs Solve Time Cost',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool 0 2 0:0:40 1.2',
+                name: 'job_not_on_pool 0 2 0:0:40 $1.20',
             })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'hc_1 1 1 0:0:20 0.2' })
+            tableJobs.getByRole('row', { name: 'hc_1 1 1 0:0:20 $0.20' })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'hc_2 0 1 0:0:20 0.4' })
+            tableJobs.getByRole('row', { name: 'hc_2 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
 
         // 3 users
@@ -250,11 +250,11 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'User Number Crashes Number Pools Idle Time $',
+                name: 'User Number Crashes Number Pools Idle Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tablePool.getByRole('row', { name: 'pool_user 0 1 0:0:20 0.4' })
+            tablePool.getByRole('row', { name: 'pool_user 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
     })
 
@@ -273,19 +273,19 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'Instance Number Crashes Number Jobs Solve Time $',
+                name: 'Instance Number Crashes Number Jobs Solve Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'job_1 0 2 0:0:40 1.2' })
+            tableJobs.getByRole('row', { name: 'job_1 0 2 0:0:40 $1.20' })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'hypercube_instance1 1 1 0:0:20 0.2',
+                name: 'hypercube_instance1 1 1 0:0:20 $0.20',
             })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'pool_instance 0 1 0:0:20 0.4' })
+            tableJobs.getByRole('row', { name: 'pool_instance 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
 
         expect(tableJobs.queryByRole('link')).toBeNull()
@@ -293,11 +293,11 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'Instance Number Crashes Number Pools Idle Time $',
+                name: 'Instance Number Crashes Number Pools Idle Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tablePool.getByRole('row', { name: 'pool_instance 0 1 0:0:20 0.4' })
+            tablePool.getByRole('row', { name: 'pool_instance 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
     })
 
@@ -314,17 +314,17 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         await user.type(dropdown, 'Pool Label{enter}');
 
         expect(
-            screen.getByText('Total: 0.8 $', { selector: 'h2' })
+            screen.getByText('Total: $0.80', { selector: 'h2' })
         ).toBeInTheDocument()
 
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'Pool Label Number Crashes Number Jobs Solve Time $',
+                name: 'Pool Label Number Crashes Number Jobs Solve Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'pool_1 0 1 0:0:20 0.4' })
+            tableJobs.getByRole('row', { name: 'pool_1 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
 
         expect(tableJobs.queryByRole('link')).toBeNull()
@@ -332,11 +332,11 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         const tablePool = within(screen.getByTestId('tableIdlePool'))
         expect(
             tablePool.getByRole('row', {
-                name: 'Pool Label Number Crashes Number Pools Idle Time $',
+                name: 'Pool Label Number Crashes Number Pools Idle Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tablePool.getByRole('row', { name: 'pool_1 0 1 0:0:20 0.4' })
+            tablePool.getByRole('row', { name: 'pool_1 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
     })
 
@@ -355,12 +355,12 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         let tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier $',
+                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier Cost',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 0.6',
+                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 $0.60',
             })
         ).toBeInTheDocument()
         expect(tableJobs.getAllByRole('row')).toHaveLength(5)
@@ -368,16 +368,16 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
         await user.type(dropdown, 'Pool Label{enter}');
 
         expect(
-            screen.getByText('Total: 0.8 $', { selector: 'h2' })
+            screen.getByText('Total: $0.80', { selector: 'h2' })
         ).toBeInTheDocument()
 
         expect(
             tableJobs.getByRole('row', {
-                name: 'Pool Label Number Crashes Number Jobs Solve Time $',
+                name: 'Pool Label Number Crashes Number Jobs Solve Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'pool_1 0 1 0:0:20 0.4' })
+            tableJobs.getByRole('row', { name: 'pool_1 0 1 0:0:20 $0.40' })
         ).toBeInTheDocument()
         expect(tableJobs.getAllByRole('row')).toHaveLength(2)
 
@@ -387,11 +387,11 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
         expect(
             tableJobs.getByRole('row', {
-                name: 'Instance Number Crashes Number Jobs Solve Time $',
+                name: 'Instance Number Crashes Number Jobs Solve Time Cost',
             })
         ).toBeInTheDocument()
         expect(
-            tableJobs.getByRole('row', { name: 'job_1 0 2 0:0:40 1.2' })
+            tableJobs.getByRole('row', { name: 'job_1 0 2 0:0:40 $1.20' })
         ).toBeInTheDocument()
         expect(tableJobs.getAllByRole('row')).toHaveLength(4)
 
@@ -399,12 +399,12 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Number Crashes Number Jobs Solve Time $',
+                name: 'User Number Crashes Number Jobs Solve Time Cost',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool 0 2 0:0:40 1.2',
+                name: 'job_not_on_pool 0 2 0:0:40 $1.20',
             })
         ).toBeInTheDocument()
         expect(tableJobs.getAllByRole('row')).toHaveLength(4)
@@ -413,12 +413,12 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier $',
+                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier Cost',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 0.6',
+                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 $0.60',
             })
         ).toBeInTheDocument()
         expect(tableJobs.getAllByRole('row')).toHaveLength(5)
@@ -488,33 +488,33 @@ describe('test h also works', () => {
         await user.click(option);
 
         expect(
-            screen.getByText('Total: 0.061 h', { selector: 'h2' })
+            screen.getByText('Total: 0.061h', { selector: 'h2' })
         ).toBeInTheDocument()
 
         let tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
             tableJobs.getByRole('row', {
-                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier h',
+                name: 'User Job token Instance Pool Label Number Crashes Solve Time Multiplier Cost',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 0.017',
+                name: 'job_not_on_pool token1 job_1 - 0 0:0:20 3 0.017h',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'job_not_on_pool token2 job_1 - 0 0:0:20 3 0.017',
+                name: 'job_not_on_pool token2 job_1 - 0 0:0:20 3 0.017h',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'hc_1 token3HC hypercube_instance1 - 1 0:0:20 1 0.006',
+                name: 'hc_1 token3HC hypercube_instance1 - 1 0:0:20 1 0.006h',
             })
         ).toBeInTheDocument()
         expect(
             tableJobs.getByRole('row', {
-                name: 'hc_2 token4HC pool_instance pool_1 0 0:0:20 2 0.011',
+                name: 'hc_2 token4HC pool_instance pool_1 0 0:0:20 2 0.011h',
             })
         ).toBeInTheDocument()
     })

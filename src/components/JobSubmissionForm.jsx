@@ -312,7 +312,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
                 }
             );
             if (postJobResponse.data?.quota_warning?.length) {
-                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaUnit, userSettings.quotaConversionFactor));
+                setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaFormattingFn));
             } else {
                 setAlertMsg("success:Job successfully submitted!");
             }
@@ -381,7 +381,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
                                                     {isFinite(remainingDiskQuota) || isFinite(remainingWallTime) ?
                                                         <small className="form-text text-muted">
                                                             Remaining: {isFinite(remainingWallTime) ?
-                                                                <span className={remainingWallTime < quotaWarningThresholds.volume ? "text-danger fw-bold" : ""}>
+                                                                <span className={remainingWallTime < quotaWarningThresholds.volume['h'] ? "text-danger fw-bold" : ""}>
                                                                     {formatDurationString(remainingWallTime)}</span> : <></>}
                                                             {isFinite(remainingDiskQuota) ? <>{isFinite(remainingWallTime) ? "," : ""} <span className={remainingDiskQuota < quotaWarningThresholds.disk ? "text-danger fw-bold" : ""}>
                                                                 {formatFileSize(remainingDiskQuota)}</span></> : <></>}

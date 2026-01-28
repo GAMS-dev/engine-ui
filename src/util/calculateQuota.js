@@ -1,4 +1,4 @@
-function getComputationTimes(data, calcStartTime, calcEndTime, quotaConversionFactor) {
+function getComputationTimes(data, calcStartTime, calcEndTime) {
     const debug = false
 
     // extract the three different job types
@@ -202,7 +202,6 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaConversionFa
         job['unique_id'] = `el_${i}`;
         job['jobs'] = '1';
         job['cost'] = (job['times'] * job['multiplier']) / 1000;
-        job['cost'] = job['cost'] / quotaConversionFactor;
         return job
     })
 
@@ -210,7 +209,6 @@ function getComputationTimes(data, calcStartTime, calcEndTime, quotaConversionFa
         pool['unique_id'] = `el_${i}`;
         pool['jobs'] = '1';
         pool['cost'] = pool['times'] * pool['multiplier'] / 1000;
-        pool['cost'] = pool['cost'] / quotaConversionFactor;
         return pool
     })
 

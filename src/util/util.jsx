@@ -47,9 +47,9 @@ const calcRemainingQuota = (data, noQuotaVal = Infinity) => ({
     volume: calcRemainingQuotaInternal(data, "volume_quota", "volume_used", noQuotaVal),
     disk: calcRemainingQuotaInternal(data, "disk_quota", "disk_used", noQuotaVal)
 })
-const getQuotaWarningMessage = (quotaWarningData, quotaUnit, quotaConversionFactor) => {
+const getQuotaWarningMessage = (quotaWarningData, quotaFormattingFn) => {
     const remainingQuota = calcRemainingQuota(quotaWarningData);
-    const remainingVolumeStr = `${formatDecimal(remainingQuota.volume / quotaConversionFactor)} ${quotaUnit}`
+    const remainingVolumeStr = quotaFormattingFn(remainingQuota.volume)
     const remainingDiskStr = formatFileSize(remainingQuota.disk);
     return <><strong>Quota warning</strong>
         {Number.isFinite(remainingQuota.volume) ? <div>Remaining <span className="fst-italic">volume</span> quota: {remainingVolumeStr}</div> : <></>}
@@ -90,6 +90,9 @@ const mergeSortedArrays = (arraysToMerge, comparisonFunction) => {
 }
 
 const formatFileSize = (fileSize) => {
+    if (!Number.isFinite(fileSize)) {
+        return new Intl.NumberFormat('en-US', { style: 'decimal' }).format(fileSize)
+    }
     if (fileSize < 1e6) {
         return `${(fileSize / 1e3).toFixed(2)}KB`;
     }

@@ -12,7 +12,7 @@ const UserSettingsProvider = (props) => {
         return {
             ...saved,
             tablePageLength: saved?.tablePageLength || "10",
-            _version: saved?._version || 1
+            _version: saved?._version || 2
         };
     });
 
@@ -20,6 +20,9 @@ const UserSettingsProvider = (props) => {
         quotaUnit: serverInfo.is_saas ? "$" : "h",
         multiplierUnit: serverInfo.is_saas ? "¢/s" : "s/s",
         quotaConversionFactor: serverInfo.is_saas ? 100 : 3600,
+        quotaFormattingFn: serverInfo.is_saas ?
+            (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val / 100) :
+            (val) => `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(val / 3600)}${Number.isFinite(val) ? 'h' : ''}`
     }), [serverInfo.is_saas]);
 
     const userSettings = useMemo(() => ({

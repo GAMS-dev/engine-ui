@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import AuthContext from "../contexts/AuthContext";
 import AlertContext from "../contexts/AlertContext";
-import { calcRemainingQuota, getResponseError } from "../util/util";
+import { calcRemainingQuota, formatDecimal, formatFileSize, getResponseError } from "../util/util";
 import UserSettingsContext from "../contexts/UserSettingsContext";
 import { UserLink } from "./UserLink";
 
@@ -13,11 +13,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     const [{ server, roles, username }] = useContext(AuthContext);
     const [, setAlertMsg] = useContext(AlertContext);
     const [userSettings] = useContext(UserSettingsContext);
-    const [quotaParallel, setQuotaParallel] = useState(quotas != null && quotas.parallel != null ? quotas.parallel : '');
+    const [quotaParallel, setQuotaParallel] = useState(quotas?.parallel != null ? quotas.parallel : '');
     const [validQuotaParallel, setValidQuotaParallel] = useState(true);
-    const [quotaVolume, setQuotaVolume] = useState(quotas != null && quotas.volume != null ? quotas.volume / userSettings.quotaConversionFactor : '');
+    const [quotaVolume, setQuotaVolume] = useState(quotas?.volume != null ? quotas.volume : '');
     const [validQuotaVolume, setValidQuotaVolume] = useState(true);
-    const [quotaDisk, setQuotaDisk] = useState(quotas != null && quotas.disk != null ? quotas.disk : '');
+    const [quotaDisk, setQuotaDisk] = useState(quotas?.disk != null ? quotas.disk : '');
     const [maxQuotas, setMaxQuotas] = useState({ parallel: 0, volume: 0, disk: 0 });
     const [maxQuotasInitialized, setMaxQuotasInitialized] = useState(false);
     const [quotaDataInternal, setQuotaDataInternal] = useState(quotaData);
@@ -28,7 +28,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
     useEffect(() => {
         if (quotas != null) {
             setQuotaParallel(quotas?.parallel ?? '');
-            setQuotaVolume(quotas?.volume == null ? '' : quotas.volume / userSettings.quotaConversionFactor);
+            setQuotaVolume(quotas?.volume ?? '');
             setQuotaDisk(quotas?.disk ?? '');
         }
         // if UserInvitationForm calls the selector it only provides setQuotas
@@ -58,8 +58,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             const maxQuotasTmp = getBindingQuotas(quotaData.filter(quotaObj => quotaObj.username !== userToEdit));
             setMaxQuotas({
                 parallel: maxQuotasTmp.parallel_quota,
-                volume: maxQuotasTmp.volume_quota / userSettings.quotaConversionFactor,
-                disk: maxQuotasTmp.disk_quota / 1e6
+                volume: maxQuotasTmp.volume_quota,
+                disk: maxQuotasTmp.disk_quota
             });
             setMaxQuotasInitialized(true);
             return;
@@ -74,8 +74,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     const maxQuotasTmp = getBindingQuotas(resQuotas.data);
                     setMaxQuotas({
                         parallel: maxQuotasTmp.parallel_quota,
-                        volume: maxQuotasTmp.volume_quota / userSettings.quotaConversionFactor,
-                        disk: maxQuotasTmp.disk_quota / 1e6
+                        volume: maxQuotasTmp.volume_quota,
+                        disk: maxQuotasTmp.disk_quota
                     });
                     setQuotaInheritedFrom({
                         parallel: resQuotas.data.find(el => el.parallel_quota != null && el.username !== username)?.username,
@@ -111,8 +111,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             return !isNaN(quotaFloat) && isFinite(quotaFloat) && quotaFloat >= 0 && quotaFloat <= maxQuota;
         }
         setValidQuotaParallel(isValidQuota(quotas.parallel, maxQuotas.parallel));
-        setValidQuotaDisk(isValidQuota(quotas.disk, maxQuotas.disk * 1e6));
-        setValidQuotaVolume(isValidQuota(quotas.volume, maxQuotas.volume * userSettings.quotaConversionFactor));
+        setValidQuotaDisk(isValidQuota(quotas.disk, maxQuotas.disk));
+        setValidQuotaVolume(isValidQuota(quotas.volume, maxQuotas.volume));
     }, [quotas, maxQuotas, maxQuotasInitialized, userSettings])
 
     useEffect(() => {
@@ -120,7 +120,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             setQuotas({
                 parallel: quotaParallel === '' ? null : quotaParallel,
                 disk: quotaDisk === '' ? null : quotaDisk,
-                volume: quotaVolume === '' ? null : quotaVolume * userSettings.quotaConversionFactor
+                volume: quotaVolume === '' ? null : quotaVolume
             })
         } else {
             setQuotas(null)
@@ -144,8 +144,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         }
         const quotaRemaining = calcRemainingQuota(quotaDataNew);
         setRemainingLive({
-            disk: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.disk, quotaRemaining.disk / 1e6)),
-            volume: new Intl.NumberFormat('en-US', { style: 'decimal' }).format(Math.min(maxQuotas.volume, quotaRemaining.volume / userSettings.quotaConversionFactor))
+            disk: formatFileSize(Math.min(maxQuotas.disk, quotaRemaining.disk)),
+            volume: userSettings.quotaFormattingFn(Math.min(maxQuotas.volume, quotaRemaining.volume))
         })
     }, [quotaDataInternal, userToEdit, quotas, maxQuotas, userSettings])
 
@@ -191,7 +191,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 />
                 <div className="input-group-append">
                     <span className="input-group-text">
-                        max: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(maxQuotas.parallel)}
+                        max: {formatDecimal(maxQuotas.parallel)}
                     </span>
                 </div>
             </div>
@@ -219,8 +219,8 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     id="quotaVolume"
                     step="any"
                     min="0"
-                    max={isFinite(maxQuotas.volume) ? maxQuotas.volume : ''}
-                    value={quotaVolume}
+                    max={isFinite(maxQuotas.volume) ? (maxQuotas.volume / userSettings.quotaConversionFactor) : ''}
+                    value={quotaVolume === '' ? '' : quotaVolume / userSettings.quotaConversionFactor}
                     aria-describedby="quotaVolumeInherited"
                     onChange={e => {
                         if (e.target.value == null || e.target.value === '') {
@@ -229,19 +229,19 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                             return;
                         }
                         const val = parseFloat(e.target.value);
-                        if (isNaN(val) || !isFinite(val) || val < 0 || val > maxQuotas.volume) {
+                        if (isNaN(val) || !isFinite(val) || val < 0 || val > (maxQuotas.volume / userSettings.quotaConversionFactor)) {
                             setValidQuotaVolume(false);
-                            setQuotaVolume(val);
+                            setQuotaVolume(val * userSettings.quotaConversionFactor);
                             return;
                         }
                         setValidQuotaVolume(true);
-                        setQuotaVolume(val);
+                        setQuotaVolume(val * userSettings.quotaConversionFactor);
                     }}
                 />
                 <div className="input-group-append">
                     <span className="input-group-text">
                         {(remainingLive != null ? `remaining: ${remainingLive.volume}, ` : '') +
-                            `max: ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(maxQuotas.volume)}`}
+                            `max: ${userSettings.quotaFormattingFn(maxQuotas.volume)}`}
                     </span>
                 </div>
             </div>
@@ -254,7 +254,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 Disk Space Quota (in MB)
                 {isFinite(maxQuotas.disk) && <Button
                     onClick={() => {
-                        setQuotaDisk(maxQuotas.disk * 1e6);
+                        setQuotaDisk(maxQuotas.disk);
                         setValidQuotaDisk(true);
                     }}
                     size="sm"
@@ -271,7 +271,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                     value={quotaDisk === '' ? '' : Math.round(quotaDisk / 1e3) / 1000}
                     aria-describedby="quotaDiskInherited"
                     min="0"
-                    max={isFinite(maxQuotas.disk) ? maxQuotas.disk : '100000000'}
+                    max={isFinite(maxQuotas.disk) ? (maxQuotas.disk / 1e6) : '100000000'}
                     onChange={e => {
                         if (e.target.value == null || e.target.value === '') {
                             setValidQuotaDisk(true);
@@ -279,7 +279,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                             return;
                         }
                         const val = parseFloat(e.target.value);
-                        if (isNaN(val) || !isFinite(val) || val < 0 || val > maxQuotas.disk) {
+                        if (isNaN(val) || !isFinite(val) || val < 0 || val > (maxQuotas.disk / 1e6)) {
                             setValidQuotaDisk(false);
                             setQuotaDisk(val * 1e6);
                             return;
@@ -291,7 +291,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
                 <div className="input-group-append">
                     <span className="input-group-text">
                         {(remainingLive != null ? `remaining: ${remainingLive.disk}, ` : '') +
-                            `max: ${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(maxQuotas.disk)}`}
+                            `max: ${formatFileSize(maxQuotas.disk)}`}
                     </span>
                 </div>
             </div>

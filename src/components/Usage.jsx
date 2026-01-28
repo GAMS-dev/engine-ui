@@ -24,8 +24,7 @@ const Usage = () => {
     const [{ jwt, server }] = useContext(AuthContext);
     const [remainingQuota, setRemainingQuota] = useState(0)
     const [userSettings,] = useContext(UserSettingsContext)
-    const quotaUnit = userSettings.quotaUnit
-    const quotaConversionFactor = userSettings.quotaConversionFactor
+    const quotaFormattingFn = userSettings.quotaFormattingFn;
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -73,7 +72,7 @@ const Usage = () => {
                 });
                 if (result.data && result.data.length) {
                     const quotaRemaining = calcRemainingQuota(result.data);
-                    setRemainingQuota(new Intl.NumberFormat('en-US', { style: 'decimal' }).format(quotaRemaining.volume / quotaConversionFactor))
+                    setRemainingQuota(quotaFormattingFn(quotaRemaining.volume))
                 } else {
                     setRemainingQuota("unlimited")
                 }
@@ -82,14 +81,14 @@ const Usage = () => {
             }
         }
         getRemainingQuota()
-    }, [server, setAlertMsg, userToEdit, quotaConversionFactor]);
+    }, [server, setAlertMsg, userToEdit, quotaFormattingFn]);
     return (
         <>
             <div>
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <div className="h2">
                         <div className="h6 m-1">
-                            Remaining Quota: {remainingQuota} {((remainingQuota !== "unlimited") ? quotaUnit : null)}
+                            Remaining Quota: {remainingQuota}
                         </div>
                     </div>
 

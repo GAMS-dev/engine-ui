@@ -61,8 +61,7 @@ const COLUMN_DEFS = {
 const Quotas = () => {
   const { data, startDate: calcStartDate, endDate: calcEndTime, isLoading: dataIsLoading } = useOutletContext();
   const [userSettings,] = useContext(UserSettingsContext)
-  const quotaConversionFactor = userSettings.quotaConversionFactor
-  const quotaUnit = userSettings.quotaUnit
+  const quotaFormattingFn = userSettings.quotaFormattingFn
 
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
   const [ungroupedDataPools, setUngroupedDataPools] = useState([]);
@@ -72,13 +71,13 @@ const Quotas = () => {
   const [numCharts, setNumCharts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // if data, calcStartDate, calcEndTime, quotaConversionFactor changes:
+  // if data, calcStartDate, calcEndTime changes:
   useEffect(() => {
     if (dataIsLoading) {
       return;
     }
     setIsLoading(true)
-    const dataTmp = computeTimes(data, calcStartDate, calcEndTime, quotaConversionFactor)
+    const dataTmp = computeTimes(data, calcStartDate, calcEndTime)
     setUngroupedDataJobs(dataTmp.data_jobs)
     setUngroupedDataPools(dataTmp.data_pools)
     setNumUser(dataTmp.num_users)
@@ -92,7 +91,7 @@ const Quotas = () => {
 
     setNumCharts(numChartsTmp)
     setIsLoading(false)
-  }, [data, calcStartDate, calcEndTime, quotaConversionFactor, dataIsLoading])
+  }, [data, calcStartDate, calcEndTime, dataIsLoading])
 
 
   function getChartData(label, ungroupedData) {
@@ -173,11 +172,11 @@ const Quotas = () => {
     COLUMN_DEFS.multiplier,
     {
       field: "cost",
-      column: quotaUnit,
+      column: "Cost",
       sorter: "numerical",
-      displayer: formatDecimal
+      displayer: quotaFormattingFn
     }
-  ], [quotaUnit])
+  ], [quotaFormattingFn])
 
 
   const displayFieldPoolsUngrouped = useMemo(() => [
@@ -198,11 +197,11 @@ const Quotas = () => {
     COLUMN_DEFS.multiplier,
     {
       field: "cost",
-      column: quotaUnit,
+      column: "Cost",
       sorter: "numerical",
-      displayer: formatDecimal
+      displayer: quotaFormattingFn
     }
-  ], [quotaUnit])
+  ], [quotaFormattingFn])
 
 
   const [displayFieldsJobs, setDisplayFieldsJobs] = useState(displayFieldJobsUngrouped);
@@ -263,7 +262,7 @@ const Quotas = () => {
       setDisplayFieldsPools(displayFieldsTmpPool)
     }
 
-  }, [quotaUnit, selectedAggregateType, ungroupedDataJobs, ungroupedDataPools, displayFieldJobsUngrouped, displayFieldPoolsUngrouped, totalUsage])
+  }, [selectedAggregateType, ungroupedDataJobs, ungroupedDataPools, displayFieldJobsUngrouped, displayFieldPoolsUngrouped])
 
   useEffect(() => {
     setTruncateWarning('')
@@ -306,7 +305,7 @@ const Quotas = () => {
           <ClipLoader />
         ) : (
           <>
-            <h2 className="text-end">Total: {new Intl.NumberFormat('en-US', { style: 'decimal' }).format(totalUsage)} {quotaUnit} </h2>
+            <h2 className="text-end">Total: {quotaFormattingFn(totalUsage)} </h2>
             {truncateWarning !== '' && <div className='alert alert-warning' role='alert'>
               {truncateWarning}
             </div>}

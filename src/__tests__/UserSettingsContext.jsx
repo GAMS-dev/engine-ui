@@ -158,7 +158,7 @@ describe('UserSettingsContext', () => {
 
         expect(window.localStorage.getAll()).toEqual({
             userSettings:
-                '{"notAdmin":{"tablePageLength":"100","_version":1}}',
+                '{"notAdmin":{"tablePageLength":"100","_version":2}}',
         })
     })
 
@@ -193,7 +193,7 @@ describe('UserSettingsContext', () => {
         )
         expect(window.localStorage.getAll()).toEqual({
             userSettings:
-                '{"notAdmin":{"tablePageLength":"10","_version":1},"admin":{"tablePageLength":"10","_version":1}}',
+                '{"notAdmin":{"tablePageLength":"10","_version":2},"admin":{"tablePageLength":"10","_version":2}}',
         })
     })
 })

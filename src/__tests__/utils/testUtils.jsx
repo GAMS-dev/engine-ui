@@ -8,6 +8,8 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
 
     const quotaUnit = options.quotaUnit ?? '$';
     const quotaConversionFactor = quotaUnit === 'h' ? 3600 : 100
+    const quotaFormattingFn = quotaUnit === '$' ? (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val / 100) :
+        (val) => `${new Intl.NumberFormat('en-US', { style: 'decimal' }).format(val / 3600)}${Number.isFinite(val) ? 'h' : ''}`
     const multiplierUnit = quotaUnit === 'h' ? 's/s' : '¢/s'
     const tablePageLength = options.tablePageLength ?? '10';
     const updateUserSettings = options.updateUserSettings ?? vi.fn();
@@ -39,7 +41,7 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
                     element={
                         <ServerConfigContext.Provider value={[serverConfig, setServerConfig]}>
                             <ServerInfoContext.Provider value={[{ in_kubernetes: in_kubernetes }, setServerInfo]}>
-                                <UserSettingsContext.Provider value={[{ quotaUnit, quotaConversionFactor, multiplierUnit, tablePageLength }, updateUserSettings]}>
+                                <UserSettingsContext.Provider value={[{ quotaUnit, quotaConversionFactor, quotaFormattingFn, multiplierUnit, tablePageLength }, updateUserSettings]}>
                                     <AuthContext.Provider value={login ? [{ username, roles, server }, setLogin] : [login, setLogin]}>
                                         {children}
                                     </AuthContext.Provider>
