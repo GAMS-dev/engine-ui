@@ -91,7 +91,7 @@ describe('LoginForm', () => {
         const svgElements = inputGroup.querySelectorAll('svg');
         const infoIcon = svgElements[1];
         await user.hover(infoIcon);
-        const tooltipText = await screen.findByText(/The minimum password length is 20/);
+        await screen.findByText(/The minimum password length is 20/);
         expect(screen.getByText("The minimum password length is 20. Must contain at least one uppercase letter, lowercase letter, number and special character. It is checked against commonly used passwords.")).toBeInTheDocument();
     });
 })

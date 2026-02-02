@@ -1,6 +1,6 @@
 import { within } from '@testing-library/dom';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 
@@ -430,11 +430,6 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
 describe('charts cut of correctly when to many parts are given', () => {
     const testData = testDatax.test_too_many_pool_labels
-    let user;
-
-    beforeEach(() => {
-        user = userEvent.setup();
-    });
 
     it('displays only first 10 pool labels in chart', () => {
         render(
