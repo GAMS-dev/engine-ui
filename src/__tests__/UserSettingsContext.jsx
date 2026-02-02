@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import userEvent from '@testing-library/user-event';
 
 import AuthContext from '../contexts/AuthContext'
 import ServerInfoContext from '../contexts/ServerInfoContext'
@@ -92,7 +93,10 @@ const setLocalStorage = (id, data) => {
 }
 
 describe('UserSettingsContext', () => {
+    let user;
+
     beforeEach(() => {
+        user = userEvent.setup();
         window.localStorage.clear()
     })
 
@@ -152,9 +156,10 @@ describe('UserSettingsContext', () => {
             }
         )
         const select = await screen.findByLabelText(/Default table page length/i);
-        fireEvent.keyDown(select, { key: 'ArrowDown' });
+        await user.click(select);
+        await user.keyboard('{ArrowDown}');
         await waitFor(() => screen.getByText('100'))
-        fireEvent.click(screen.getByText('100'))
+        await user.click(screen.getByText('100'))
 
         expect(window.localStorage.getAll()).toEqual({
             userSettings:

@@ -1,9 +1,9 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {  render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import {
     AllProvidersWrapperDefault,
-    suppressActWarnings,
 } from './utils/testUtils'
+import userEvent from '@testing-library/user-event';
 
 import NamespacePermissionSelector from '../components/NamespacePermissionSelector'
 import axios from 'axios'
@@ -11,9 +11,12 @@ import axios from 'axios'
 vi.mock('axios')
 
 describe('NamespacePermissionSelector', () => {
-    suppressActWarnings()
+
+    let user;
 
     beforeEach(() => {
+        user = userEvent.setup();
+
         axios.get.mockImplementation((url) => {
             switch (url) {
                 case 'testserver/namespaces/global/user-groups':
@@ -71,7 +74,7 @@ describe('NamespacePermissionSelector', () => {
             }
         )
         const infoIcon = screen.getByText('Permissions').querySelector('svg')
-        fireEvent.mouseEnter(infoIcon)
+        await user.hover(infoIcon);
         expect(
             screen.getByText(
                 new RegExp(

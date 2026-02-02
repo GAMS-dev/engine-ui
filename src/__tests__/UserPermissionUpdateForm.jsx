@@ -1,8 +1,8 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import UserPermissionUpdateForm from '../components/UserPermissionUpdateForm';
-import userEvent from '@testing-library/user-event';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
@@ -14,7 +14,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
     }
 })
 
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
 
 const routes = [
     { path: '/users/user1', element: <p>after submit went back to usage</p> },
@@ -27,9 +27,11 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('UserPermissionUpdateForm', () => {
-    suppressActWarnings()
+    let user;
 
     beforeEach(() => {
+        user = userEvent.setup();
+
         vi.clearAllMocks()
         vi.mocked(useParams).mockReturnValue({
             userToEdit: 'user1',
@@ -175,6 +177,7 @@ describe('UserPermissionUpdateForm', () => {
         render(<UserPermissionUpdateForm />, {
             wrapper: AllProvidersWrapper
         });
+        await waitFor(() => screen.findByText(/Specify/))
     });
 
     it('sends no request but redirects if nothing is changed', async () => {
@@ -182,7 +185,7 @@ describe('UserPermissionUpdateForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/Specify/))
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         expect(axios.put).toHaveBeenCalledTimes(0);
         await waitFor(() => screen.findByText(/after submit went back to usage/));
     });
@@ -195,7 +198,7 @@ describe('UserPermissionUpdateForm', () => {
         // userEvent works better for selects
         const roleSelectorEl = screen.getByRole('combobox', { name: 'Specify a role for the user' });
         await userEvent.selectOptions(roleSelectorEl, 'Admin');
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         expect(axios.put).toBeCalledWith(
             'testserver/users/role',
             { 'roles': ['admin'], 'username': 'user1' }
@@ -217,7 +220,7 @@ describe('UserPermissionUpdateForm', () => {
         const roleSelectorEl = screen.getByRole('combobox', { name: 'Specify a role for the user' });
         await userEvent.selectOptions(roleSelectorEl, 'User');
 
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         expect(axios.put).toBeCalledWith(
             'testserver/users/role',
             { 'roles': [], 'username': 'user2' }
@@ -260,8 +263,8 @@ describe('UserPermissionUpdateForm', () => {
         const roleSelectorEl = screen.getByRole('combobox', { name: 'Specify a role for the user' });
         await userEvent.selectOptions(roleSelectorEl, 'Inviter');
         await waitFor(() => screen.findByText(/Identity providers user is allowed to invite with/))
-        fireEvent.click(screen.getByRole('button', { name: 'Remove gams_engine' }))
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Remove gams_engine' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         await waitFor(() => screen.findByText(/after submit went back to usage/));
         expect(roleGetWasCalled).toBeTruthy()
         expect(providerGetWasCalled).toBeTruthy()
@@ -276,15 +279,15 @@ describe('UserPermissionUpdateForm', () => {
         const roleSelectorEl = screen.getByRole('combobox', { name: 'Specify a role for the user' });
         await userEvent.selectOptions(roleSelectorEl, 'Inviter');
         await waitFor(() => screen.findByText(/Identity providers user is allowed to invite with/))
-        fireEvent.click(screen.getByRole('button', { name: 'Remove gams_engine' }))
-        fireEvent.click(screen.getByRole('button', { name: 'Remove some_provider' }))
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Remove gams_engine' }))
+        await user.click(screen.getByRole('button', { name: 'Remove some_provider' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         await waitFor(() => screen.findByText(/Please select at least one identity provider that the user is allowed to invite with, or select the "User" role./))
         expect(axios.put).toHaveBeenCalledTimes(0);
     });
 
     it('changes namespace permissions from inviter', async () => {
-        const user = userEvent.setup();
+        ;
         render(<UserPermissionUpdateForm />, {
             wrapper: AllProvidersWrapper
         });
@@ -409,7 +412,7 @@ describe('UserPermissionUpdateForm', () => {
         // userEvent works better for selects
         const roleSelectorEl = screen.getByRole('combobox', { name: 'Specify a role for the user' });
         await userEvent.selectOptions(roleSelectorEl, 'Inviter');
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         await waitFor(() => screen.findByText(/An error occurred while updating user roles. Error message: undefined./));
     });
 
@@ -427,7 +430,7 @@ describe('UserPermissionUpdateForm', () => {
         });
 
         await waitFor(() => screen.findByText(/Specify/))
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         await waitFor(() => screen.findByText(/An error occurred while updating available identity providers. Error message: undefined./));
     });
 
@@ -443,8 +446,8 @@ describe('UserPermissionUpdateForm', () => {
 
         await waitFor(() => screen.findByText(/Specify/))
         const writeCheckbox = screen.getByRole('checkbox', { name: 'Write' });
-        fireEvent.click(writeCheckbox)
-        fireEvent.click(screen.getByRole('button', { name: 'Update Permissions' }))
+        await user.click(writeCheckbox)
+        await user.click(screen.getByRole('button', { name: 'Update Permissions' }))
         await waitFor(() => screen.findByText(/An error occurred while updating user permissions. Error message: undefined./));
     });
 })

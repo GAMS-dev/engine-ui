@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import LicenseUpdateForm from '../components/LicenseUpdateForm';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
@@ -14,7 +15,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
     }
 })
 
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
 
 const routes = [{ path: '/users/user1', element: <p>after submit went back to usage</p> }]
 
@@ -25,9 +26,12 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('LicenseUpdateForm', () => {
-    suppressActWarnings()
+
+    let user;
 
     beforeEach(() => {
+        user = userEvent.setup();
+
         vi.clearAllMocks()
         vi.mocked(useParams).mockReturnValue({
             userToEdit: 'user1',
@@ -43,6 +47,7 @@ describe('LicenseUpdateForm', () => {
         render(<LicenseUpdateForm />, {
             wrapper: AllProvidersWrapper
         });
+        await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
     });
 
     it('shows error correctly if no license exists', async () => {
@@ -107,8 +112,9 @@ describe('LicenseUpdateForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
-        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'new license' } })
-        fireEvent.click(screen.getByRole('button'))
+        const input = screen.getByRole('textbox');
+        await user.type(input, 'new license')
+        await user.click(screen.getByRole('button'))
         await waitFor(() => screen.findByText(/after submit went back to usage/));
     });
 
@@ -117,7 +123,7 @@ describe('LicenseUpdateForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
-        fireEvent.click(screen.getByRole('button'))
+        await user.click(screen.getByRole('button'))
         await waitFor(() => screen.findByText(/Cannot submit empty license/));
     });
 
@@ -134,8 +140,9 @@ describe('LicenseUpdateForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/User does not have and does not inherit any license/));
-        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'new license' } })
-        fireEvent.click(screen.getByRole('button'))
+        const input = screen.getByRole('textbox');
+        await user.type(input,  'new license' );
+        await user.click(screen.getByRole('button'));
         await waitFor(() => screen.findByText(/An error occurred while updating user license. Error message: some error occurred./));
     });
 

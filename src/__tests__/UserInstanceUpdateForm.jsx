@@ -1,9 +1,9 @@
+import { within } from '@testing-library/dom';
+import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event'
-import { within } from '@testing-library/dom'
-import '@testing-library/jest-dom'
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 import UserInstanceUpdateForm from '../components/UserInstanceUpdateForm';
 
@@ -17,12 +17,13 @@ vi.mock('react-router-dom', async (importOriginal) => {
     }
 })
 
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
 
 describe('UserInstanceUpdateForm', () => {
-    suppressActWarnings()
+    let user;
 
     beforeEach(() => {
+        user = userEvent.setup();
         vi.clearAllMocks()
         vi.mocked(useParams).mockReturnValue({ userToEdit: 'user1' })
 
@@ -352,7 +353,7 @@ describe('UserInstanceUpdateForm', () => {
     });
 
     it('if inherit checkboxes uncheck do not show inheritance information', async () => {
-        const user = userEvent.setup()
+
         vi.mocked(useParams).mockReturnValue({ userToEdit: 'user2' })
 
         render(<UserInstanceUpdateForm />, {
@@ -369,7 +370,7 @@ describe('UserInstanceUpdateForm', () => {
     });
 
     it('if default inherit checkboxes uncheck do not show inheritance information', async () => {
-        const user = userEvent.setup()
+
         vi.mocked(useParams).mockReturnValue({ userToEdit: 'user2' })
 
         render(<UserInstanceUpdateForm />, {
@@ -389,7 +390,7 @@ describe('UserInstanceUpdateForm', () => {
     });
 
     it('works to remove instance updates default instance selector', async () => {
-        const user = userEvent.setup()
+
         vi.mocked(useParams).mockReturnValue({ userToEdit: 'user3' })
         render(<UserInstanceUpdateForm />, {
             wrapper: AllProvidersWrapperDefault

@@ -32,10 +32,7 @@ const zipAsync = filesToZip => {
         const f = filesToZip[i];
         dataZip.file(f.name, f);
     }
-    return dataZip.generateAsync({ type: "blob", platform: "UNIX" },
-        function updateCallback(metadata) {
-            console.log(metadata.percent.toFixed(2) + " %");
-        });
+    return dataZip.generateAsync({ type: "blob", platform: "UNIX" });
 }
 const isActiveJob = (status) => status < 10 && (status === -2 || status === -10 || status >= 0)
 

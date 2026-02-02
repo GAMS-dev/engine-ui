@@ -1,6 +1,6 @@
 import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import AuthProviderForm from '../components/AuthProviderForm'
@@ -8,7 +8,6 @@ import AuthProviderForm from '../components/AuthProviderForm'
 vi.mock('axios');
 
 describe('AuthProviderForm', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {

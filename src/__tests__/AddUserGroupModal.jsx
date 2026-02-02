@@ -1,6 +1,7 @@
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import userEvent from '@testing-library/user-event'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import AddUserGroupModal from '../components/AddUserGroupModal'
@@ -8,7 +9,12 @@ import AddUserGroupModal from '../components/AddUserGroupModal'
 vi.mock('axios');
 
 describe('AddUserGroupModal', () => {
-    suppressActWarnings()
+
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders AddUserGroupModal correctly', async () => {
         render(<AddUserGroupModal showDialog="true" />, {
@@ -23,9 +29,10 @@ describe('AddUserGroupModal', () => {
         render(<AddUserGroupModal showDialog={true} setShowDialog={mockSetShowDialog} namespace="testNamespace" />, {
             wrapper: AllProvidersWrapperDefault
         });
-        await waitFor(() => screen.findByText(/Add User Group/));
-        fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
-        fireEvent.click(screen.getByRole("button", { name: 'Add Group' }));
+        const input = screen.getByRole("textbox", { name: 'Group Label' });
+        await user.type(input, 'newGroup');
+        const addButton = screen.getByRole("button", { name: /add group/i });
+        await user.click(addButton);
         expect(axios.post).toBeCalledWith('testserver/namespaces/testNamespace/user-groups',
             null,
             { "params": { "label": "newGroup" } }
@@ -39,7 +46,7 @@ describe('AddUserGroupModal', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
-        fireEvent.click(screen.getByRole("button", { name: 'Cancel' }));
+        await user.click(screen.getByRole("button", { name: /cancel/i }));
         expect(mockSetShowDialog).toBeCalledWith(false);
         expect(axios.post).toHaveBeenCalledTimes(0);
     });
@@ -51,7 +58,7 @@ describe('AddUserGroupModal', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
-        fireEvent.click(screen.getByRole("button", { name: 'Close' }));
+        await user.click(screen.getByRole("button", { name: /close/i }));
         expect(mockSetShowDialog).toBeCalledWith(false);
         expect(axios.post).toHaveBeenCalledTimes(0);
     });
@@ -73,8 +80,10 @@ describe('AddUserGroupModal', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
-        fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
-        fireEvent.click(screen.getByRole("button", { name: 'Add Group' }));
+        const input = screen.getByRole("textbox", { name: /group label/i });
+        await user.type(input, 'newGroup');
+        await user.click(screen.getByRole("button", { name: /add group/i }));
+
         expect(axios.post).toBeCalledWith('testserver/namespaces/testNamespace/user-groups',
             null,
             { "params": { "label": "newGroup" } }
@@ -102,8 +111,10 @@ describe('AddUserGroupModal', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
-        fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
-        fireEvent.click(screen.getByRole("button", { name: 'Add Group' }));
+        const input = screen.getByRole("textbox", { name: /Group Label/ });
+        await user.type(input, 'newGroup');
+        await user.click(screen.getByRole("button", { name: /add group/i }));
+
         expect(axios.post).toBeCalledWith('testserver/namespaces/testNamespace/user-groups',
             null,
             { "params": { "label": "newGroup" } }
@@ -130,8 +141,9 @@ describe('AddUserGroupModal', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Add User Group/));
-        fireEvent.change(screen.getByRole("textbox", { name: 'Group Label' }), { target: { value: 'newGroup' } });
-        fireEvent.click(screen.getByRole("button", { name: 'Add Group' }));
+        const input = screen.getByRole("textbox", { name: 'Group Label' })
+        await user.type(input, 'newGroup');
+        await user.click(screen.getByRole("button", { name: 'Add Group' }));
         expect(axios.post).toBeCalledWith('testserver/namespaces/testNamespace/user-groups',
             null,
             { "params": { "label": "newGroup" } }

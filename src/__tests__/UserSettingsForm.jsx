@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import userEvent from '@testing-library/user-event';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import UserSettingsForm from '../components/UserSettingsForm'
 import UserSettingsFormGeneral from '../components/UserSettingsFormGeneral';
@@ -15,7 +15,11 @@ const AllProvidersWrapper = ({ children, options = { in_kubernetes: false } }) =
 );
 
 describe('UserSettingsForm', () => {
-    suppressActWarnings()
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders UserSettingsForm', () => {
         render(<Routes>
@@ -30,7 +34,7 @@ describe('UserSettingsForm', () => {
     })
 
     it('userSettingsContext is correctly updated when settings change', async () => {
-        const user = userEvent.setup();
+        ;
         render(<Routes>
             <Route path="/" element={<UserSettingsForm />}>
                 <Route path="general" element={<UserSettingsFormGeneral />} />
@@ -52,7 +56,7 @@ describe('UserSettingsForm', () => {
     })
 
     it('Cant edit notifications if webhooks not enabled', async () => {
-        const user = userEvent.setup();
+        ;
         render(<Routes>
             <Route path="/" element={<UserSettingsForm />}>
                 <Route path="general" element={<UserSettingsFormGeneral />} />
@@ -72,7 +76,7 @@ describe('UserSettingsForm', () => {
     })
 
     it('Cant edit notifications if push notifications not supported by browser', async () => {
-        const user = userEvent.setup();
+        ;
         render(<Routes>
             <Route path="/" element={<UserSettingsForm />}>
                 <Route path="general" element={<UserSettingsFormGeneral />} />

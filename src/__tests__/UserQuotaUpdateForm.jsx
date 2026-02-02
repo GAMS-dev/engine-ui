@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom'
 import axios from 'axios';
 import UserQuotaUpdateForm from '../components/UserQuotaUpdateForm';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
@@ -27,8 +27,6 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('UserQuotaUpdateForm', () => {
-    suppressActWarnings()
-
     beforeEach(() => {
         vi.clearAllMocks()
         vi.mocked(useParams).mockReturnValue({
@@ -87,6 +85,7 @@ describe('UserQuotaUpdateForm', () => {
         render(<UserQuotaUpdateForm />, {
             wrapper: AllProvidersWrapper
         });
+        await waitFor(() => screen.findByText(/Parallel Quota /));
     });
 
     it('displays everything correctly', async () => {
@@ -217,8 +216,11 @@ describe('UserQuotaUpdateForm', () => {
 
         fireEvent.click(screen.getByRole('button', { name: "Update Quotas" }))
 
+        await waitFor(() => {
+            expect(axios.delete).toHaveBeenCalledTimes(3);
+        });
+
         expect(axios.put).toHaveBeenCalledTimes(0);
-        expect(axios.delete).toHaveBeenCalledTimes(3);
         expect(axios.delete).toBeCalledWith(
             'testserver/usage/quota', { "params": { "field": "parallel_quota", "username": "user1" } });
         expect(axios.delete).toBeCalledWith(

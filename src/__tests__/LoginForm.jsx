@@ -1,8 +1,9 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import LoginForm from '../components/LoginForm';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
@@ -21,9 +22,10 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('LoginForm', () => {
-    suppressActWarnings()
-
+    let user;
     beforeEach(() => {
+        user = userEvent.setup();
+
         axios.get.mockImplementation((url) => {
             switch (url) {
                 case '/api/auth/providers':
@@ -57,6 +59,7 @@ describe('LoginForm', () => {
         render(<LoginForm />, {
             wrapper: AllProvidersWrapper
         });
+        await waitFor(() => screen.findByText(/Register/));
     });
 
     it('displays maintenance alert correctly', async () => {
@@ -79,14 +82,16 @@ describe('LoginForm', () => {
         render(<LoginForm />, {
             wrapper: AllProvidersWrapper
         });
-        fireEvent.click(screen.getByText('Register'))
-        fireEvent.change(screen.getByRole('textbox'), { target: { value: '123456789012345678901234567890123456' } })
+        await user.click(screen.getByText('Register'))
+        const input = screen.getByRole('textbox');
+        await user.type(input, '123456789012345678901234567890123456');
         await waitFor(() => screen.findByText(/Username/));
+
         const inputGroup = screen.getByLabelText('Password').closest('.input-group');
         const svgElements = inputGroup.querySelectorAll('svg');
         const infoIcon = svgElements[1];
-
-        fireEvent.mouseEnter(infoIcon);
+        await user.hover(infoIcon);
+        const tooltipText = await screen.findByText(/The minimum password length is 20/);
         expect(screen.getByText("The minimum password length is 20. Must contain at least one uppercase letter, lowercase letter, number and special character. It is checked against commonly used passwords.")).toBeInTheDocument();
     });
 })

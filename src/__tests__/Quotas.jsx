@@ -1,12 +1,12 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { within } from '@testing-library/dom'
-import '@testing-library/jest-dom'
+import { within } from '@testing-library/dom';
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import Quotas from '../components/Quotas'
-import { testDatax } from './utils/testData'
 import { Outlet, Route, Routes } from 'react-router-dom';
+import Quotas from '../components/Quotas';
+import { testDatax } from './utils/testData';
 
 let startDate = new Date('2020-08-03T17:10:15.000000+00:00')
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00')
@@ -22,6 +22,12 @@ const getQuotaComponent = ({ data, startDate, endDate, isLoading = false }) => {
 
 describe('Quotas with single job', () => {
     const testData = testDatax.test_single_job
+
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders Quotas component for single job', () => {
         render(
@@ -42,14 +48,10 @@ describe('Quotas with single job', () => {
         )
 
         // default was changed
-        fireEvent.keyDown(document.getElementById('aggregateDropdown'), {
-            key: 'ArrowDown',
-        })
-        const aggregateDropdownEl = within(
-            document.getElementById('aggregateDropdown')
-        )
-        await waitFor(() => aggregateDropdownEl.getByText('_'))
-        fireEvent.click(aggregateDropdownEl.getByText('_'))
+        const dropdown = await screen.findByLabelText(/aggregate/i);
+        await user.click(dropdown);
+        const option = await screen.findByText('_');
+        await user.click(option);
 
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
@@ -114,6 +116,11 @@ describe('Quotas with single job', () => {
 
 describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     const testData = testDatax.test_hypercube_with_pool_and_job
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders Quotas component for multiple jobs', () => {
         render(
@@ -166,14 +173,10 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
             }
         )
 
-        fireEvent.keyDown(document.getElementById('aggregateDropdown'), {
-            key: 'ArrowDown',
-        })
-        const aggregateDropdownEl = within(
-            document.getElementById('aggregateDropdown')
-        )
-        await waitFor(() => aggregateDropdownEl.getByText('_'))
-        fireEvent.click(aggregateDropdownEl.getByText('_'))
+        const dropdown = await screen.findByLabelText(/aggregate/i);
+        await user.click(dropdown);
+        const option = await screen.findByText('_');
+        await user.click(option);
 
         const tableJobs = within(screen.getByTestId('tableJobs'))
         expect(
@@ -259,7 +262,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     })
 
     it('displays correct data in the tables if grouped by instance', async () => {
-        const user = userEvent.setup();
+        ;
         render(
             getQuotaComponent({ data: testData, startDate, endDate }),
             {
@@ -302,7 +305,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     })
 
     it('displays correct data in the tables if grouped by pool label', async () => {
-        const user = userEvent.setup();
+        ;
         render(
             getQuotaComponent({ data: testData, startDate, endDate }),
             {
@@ -341,7 +344,7 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
     })
 
     it('changing aggregate multiple times works', async () => {
-        const user = userEvent.setup();
+        ;
         render(
             getQuotaComponent({ data: testData, startDate, endDate }),
             {
@@ -427,6 +430,11 @@ describe('Quotas loads with multiple jobs (with hypercube and pool)', () => {
 
 describe('charts cut of correctly when to many parts are given', () => {
     const testData = testDatax.test_too_many_pool_labels
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('displays only first 10 pool labels in chart', () => {
         render(
@@ -468,9 +476,14 @@ describe('test cases in calculateQuota', () => {
 
 describe('test h also works', () => {
     const testData = testDatax.test_hypercube_with_pool_and_job
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('h with multiple jobs ', async () => {
-        const user = userEvent.setup();
+        ;
         render(
             getQuotaComponent({ data: testData, startDate, endDate }),
             {

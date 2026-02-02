@@ -1,9 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { within } from '@testing-library/dom'
-import '@testing-library/jest-dom'
+import { within } from '@testing-library/dom';
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import UserUpdateIdentityProviderForm from '../components/UserUpdateIdentityProviderForm';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
@@ -15,7 +16,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
     }
 })
 
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
 
 const routes = [
     { path: '/users/user1', element: <p>after submit went back to usage</p> }]
@@ -27,9 +28,10 @@ const AllProvidersWrapper = ({ children }) => (
 );
 
 describe('UserUpdateIdentityProviderForm', () => {
-    suppressActWarnings()
-
+    let user;
     beforeEach(() => {
+        user = userEvent.setup();
+
         vi.clearAllMocks()
         vi.mocked(useParams).mockReturnValue({
             userToEdit: 'user1',
@@ -100,6 +102,7 @@ describe('UserUpdateIdentityProviderForm', () => {
         render(<UserUpdateIdentityProviderForm />, {
             wrapper: AllProvidersWrapper
         });
+        await waitFor(() => screen.findByText(/gams_engine/))
     });
 
     it('shows all identity providers in dropdown', async () => {
@@ -107,9 +110,8 @@ describe('UserUpdateIdentityProviderForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.keyDown(document.getElementById('identityProviderDropdown'), {
-            key: 'ArrowDown',
-        })
+        const dropdown = screen.getByRole('combobox', { name: /identity provider/i });
+        await user.click(dropdown);
         const aggregateDropdownEl = within(
             document.getElementById('identityProviderDropdown')
         )
@@ -122,9 +124,9 @@ describe('UserUpdateIdentityProviderForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword1' } })
-        fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword2' } })
-        fireEvent.click(screen.getByRole('button'))
+        await user.type(screen.getByPlaceholderText('New password'),  'newpassword1')
+        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword2')
+        await user.click(screen.getByRole('button'))
         expect(screen.queryByText(/The passwords you entered do not match/)).toBeInTheDocument();
     });
 
@@ -133,9 +135,9 @@ describe('UserUpdateIdentityProviderForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword' } })
-        fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword' } })
-        fireEvent.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
+        await user.type(screen.getByPlaceholderText('New password'),  'newpassword' )
+        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword')
+        await user.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
 
         let requestValue = new FormData()
         requestValue.append('username', 'user1')
@@ -153,21 +155,20 @@ describe('UserUpdateIdentityProviderForm', () => {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.keyDown(document.getElementById('identityProviderDropdown'), {
-            key: 'ArrowDown',
-        })
+        const dropdown = screen.getByRole('combobox', { name: /identity provider/i });
+        await user.click(dropdown);
         const aggregateDropdownEl = within(
             document.getElementById('identityProviderDropdown')
         )
         await waitFor(() => aggregateDropdownEl.getByText('None (block user)'))
-        fireEvent.click(aggregateDropdownEl.getByText('None (block user)'))
-        fireEvent.click(screen.getByRole('button'))
+        await user.click(aggregateDropdownEl.getByText('None (block user)'))
+        await user.click(screen.getByRole('button'))
         // the text is split in a <div> ... <code> ...</code> ... </div> so need to check for the text in blocks
         expect(screen.queryByText(/You are about to remove the identity provider from the user:/)).toBeInTheDocument()
         expect(screen.queryByText(/user1/)).toBeInTheDocument()
         expect(screen.queryByText(/. This user will no longer be able to log in./)).toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole('button', { name: 'Block User' }))
+        await user.click(screen.getByRole('button', { name: 'Block User' }))
         let requestValue = new FormData()
         requestValue.append('username', 'user1')
         requestValue.append('identity_provider_name', '');
@@ -178,26 +179,26 @@ describe('UserUpdateIdentityProviderForm', () => {
         await waitFor(() => screen.findByText(/after submit went back to usage/));
     })
 
-    it('cancles correctly if cancel is pressed in block user', async () => {
+    it('cancels correctly if cancel is pressed in block user', async () => {
         render(<UserUpdateIdentityProviderForm />, {
             wrapper: AllProvidersWrapper
         });
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.keyDown(document.getElementById('identityProviderDropdown'), {
-            key: 'ArrowDown',
-        })
+        const dropdown = screen.getByRole('combobox', { name: /identity provider/i });
+        await user.click(dropdown);
+
         const aggregateDropdownEl = within(
             document.getElementById('identityProviderDropdown')
         )
         await waitFor(() => aggregateDropdownEl.getByText('None (block user)'))
-        fireEvent.click(aggregateDropdownEl.getByText('None (block user)'))
-        fireEvent.click(screen.getByRole('button'))
+        await user.click(aggregateDropdownEl.getByText('None (block user)'))
+        await user.click(screen.getByRole('button'))
         // the text is split in a <div> ... <code> ...</code> ... </div> so need to check for the text in blocks
         expect(screen.queryByText(/You are about to remove the identity provider from the user:/)).toBeInTheDocument()
         expect(screen.queryByText(/user1/)).toBeInTheDocument()
         expect(screen.queryByText(/. This user will no longer be able to log in./)).toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+        await user.click(screen.getByRole('button', { name: 'Cancel' }))
         // make sure no put is called if it got canceled
         await expect(axios.put).toHaveBeenCalledTimes(0);
     })
@@ -226,9 +227,9 @@ describe('UserUpdateIdentityProviderForm', () => {
         });
 
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword' } })
-        fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword' } })
-        fireEvent.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
+        await user.type(screen.getByPlaceholderText('New password'),  'newpassword' )
+        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword' )
+        await user.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
         await waitFor(() => screen.findByText(/Some error occurred while trying to update the identity provider. Error message: undefined./))
     })
 
@@ -246,9 +247,9 @@ describe('UserUpdateIdentityProviderForm', () => {
         });
 
         await waitFor(() => screen.findByText(/gams_engine/))
-        fireEvent.change(screen.getByPlaceholderText('New password'), { target: { value: 'newpassword' } })
-        fireEvent.change(screen.getByPlaceholderText('Confirm password'), { target: { value: 'newpassword' } })
-        fireEvent.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
+        await user.type(screen.getByPlaceholderText('New password'),  'newpassword' )
+        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword')
+        await user.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
         await waitFor(() => screen.findByText(/Problems trying to update the identity provider./))
         await waitFor(() => screen.findByText(/test error/))
     })

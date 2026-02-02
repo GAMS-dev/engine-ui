@@ -1,8 +1,9 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AllProvidersWrapperDefault } from './utils/testUtils'
-import UpdatePasswordPolicyButton from '../components/UpdatePasswordPolicyButton';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
+import React from 'react';
+import UpdatePasswordPolicyButton from '../components/UpdatePasswordPolicyButton';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
@@ -13,8 +14,12 @@ vi.mock("../AuthContext", () => {
 });
 
 describe('test UpdatePasswordPolicyButton', () => {
+    let user;
+
     beforeEach(() => {
-        const passwordPlociy = {
+        user = userEvent.setup();
+
+        const passwordPolicy = {
             min_password_length: 10,
             must_include_uppercase: false,
             must_include_lowercase: false,
@@ -22,10 +27,10 @@ describe('test UpdatePasswordPolicyButton', () => {
             must_include_special_char: false,
             not_in_popular_passwords: false,
         }
-        axios.get.mockImplementation(() => Promise.resolve({ status: 200, data: passwordPlociy }));
+        axios.get.mockImplementation(() => Promise.resolve({ status: 200, data: passwordPolicy }));
     });
 
-    it('renders Button corectly', () => {
+    it('renders Button correctly', () => {
         render(<UpdatePasswordPolicyButton />, {
             wrapper: AllProvidersWrapperDefault
         });
@@ -36,7 +41,8 @@ describe('test UpdatePasswordPolicyButton', () => {
         render(<UpdatePasswordPolicyButton />, {
             wrapper: AllProvidersWrapperDefault
         });
-        fireEvent.click(screen.getByText('Update password policy'))
+
+        fireEvent.click(screen.getByText('Update password policy'));
         await waitFor(() => screen.getByText('Include at least one number?'));
 
         expect(screen.getByRole('spinbutton', { name: 'Minimum password length:' }).value).toEqual('10');
@@ -51,7 +57,7 @@ describe('test UpdatePasswordPolicyButton', () => {
     });
 
     it('displays correct passwordPolicy if set before', async () => {
-        const passwordPlociy = {
+        const passwordPolicy = {
             min_password_length: 20,
             must_include_uppercase: true,
             must_include_lowercase: true,
@@ -59,12 +65,12 @@ describe('test UpdatePasswordPolicyButton', () => {
             must_include_special_char: true,
             not_in_popular_passwords: true,
         }
-        axios.get.mockImplementation(() => Promise.resolve({ status: 200, data: passwordPlociy }));
+        axios.get.mockImplementation(() => Promise.resolve({ status: 200, data: passwordPolicy }));
         render(<UpdatePasswordPolicyButton />, {
             wrapper: AllProvidersWrapperDefault
         });
 
-        fireEvent.click(screen.getByText('Update password policy'))
+        await user.click(screen.getByText('Update password policy'))
         await waitFor(() => screen.getByText('Include at least one number?'));
 
         expect(screen.getByRole('spinbutton', { name: 'Minimum password length:' }).value).toEqual('20');
@@ -80,15 +86,18 @@ describe('test UpdatePasswordPolicyButton', () => {
             wrapper: AllProvidersWrapperDefault
         });
 
-        fireEvent.click(screen.getByText('Update password policy'))
+        await user.click(screen.getByText('Update password policy'));
         await waitFor(() => screen.getByText('Include at least one number?'));
 
-        fireEvent.change(screen.getByLabelText('Minimum password length:'), { target: { value: '12' } });
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one uppercase letter?' }));
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one lowercase letter?' }));
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one number?' }));
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one special character?' }));
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Check if the password is commonly used?' }));
+        const input = screen.getByLabelText('Minimum password length:');
+
+        fireEvent.change(input, { target: { value: '12' } });
+
+        await user.click(screen.getByRole('checkbox', { name: 'Include at least one uppercase letter?' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Include at least one lowercase letter?' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Include at least one number?' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Include at least one special character?' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Check if the password is commonly used?' }));
 
         expect(screen.getByRole('spinbutton', { name: 'Minimum password length:' }).value).toEqual('12');
         expect(screen.getByRole('checkbox', { name: 'Include at least one uppercase letter?' }).checked).toEqual(true);
@@ -98,15 +107,15 @@ describe('test UpdatePasswordPolicyButton', () => {
         expect(screen.getByRole('checkbox', { name: 'Check if the password is commonly used?' }).checked).toEqual(true);
     });
 
-    it('pasword policy updates correctly', async () => {
+    it('password policy updates correctly', async () => {
         render(<UpdatePasswordPolicyButton />, {
             wrapper: AllProvidersWrapperDefault
         });
 
-        fireEvent.click(screen.getByText('Update password policy'))
+        await user.click(screen.getByText('Update password policy'))
         await waitFor(() => screen.getByText('Include at least one number?'));
-        fireEvent.click(screen.getByRole('checkbox', { name: 'Include at least one special character?' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Update' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Include at least one special character?' }));
+        await user.click(screen.getByRole('button', { name: 'Update' }));
         await waitFor(() => screen.getByText('Update password policy'));
 
         expect(axios.put).toBeCalledWith(
@@ -129,22 +138,22 @@ describe('test UpdatePasswordPolicyButton', () => {
 
         axios.put.mockImplementation(() => Promise.reject(new Error('Test error')));
 
-        fireEvent.click(screen.getByText('Update password policy'))
-        fireEvent.click(screen.getByRole('button', { name: 'Update' }));
+        await user.click(screen.getByText('Update password policy'))
+        await user.click(screen.getByRole('button', { name: 'Update' }));
         await waitFor(() => screen.getByText("Couldn't set new password policy. Error message: Test error."));
     });
 
-    it('close and cancle work', async () => {
+    it('close and cancel work', async () => {
         render(<UpdatePasswordPolicyButton />, {
             wrapper: AllProvidersWrapperDefault
         });
 
-        fireEvent.click(screen.getByText('Update password policy'))
-        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+        await user.click(screen.getByText('Update password policy'))
+        await user.click(screen.getByRole('button', { name: 'Cancel' }));
         await waitFor(() => screen.getByText('Update password policy'));
 
-        fireEvent.click(screen.getByText('Update password policy'))
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await user.click(screen.getByText('Update password policy'))
+        await user.click(screen.getByRole('button', { name: 'Close' }));
         await waitFor(() => screen.getByText('Update password policy'));
 
         await expect(axios.put).toHaveBeenCalledTimes(0);

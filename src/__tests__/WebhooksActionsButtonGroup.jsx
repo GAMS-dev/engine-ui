@@ -1,20 +1,25 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import WebhooksActionsButtonGroup from '../components/WebhooksActionsButtonGroup'
+import WebhooksActionsButtonGroup from '../components/WebhooksActionsButtonGroup';
 
 vi.mock('axios');
 
 
 describe('WebhooksActionsButtonGroup', () => {
-    suppressActWarnings()
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders WebhooksActionsButtonGroup correctly', async () => {
         render(<WebhooksActionsButtonGroup />, {
             wrapper: AllProvidersWrapperDefault
         });
-        fireEvent.click(screen.getByText(/Delete/));
+        await user.click(screen.getByText(/Delete/));
         expect(screen.getByText(/Are you sure you want to remove the webhook /)).toBeInTheDocument();
     });
 

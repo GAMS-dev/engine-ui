@@ -1,15 +1,20 @@
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event'
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import axios from 'axios';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import AddNamespaceModal from '../components/AddNamespaceModal'
+import AddNamespaceModal from '../components/AddNamespaceModal';
 
 vi.mock('axios');
 
 describe('AddNamespaceModal', () => {
-    suppressActWarnings()
+
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders AddNamespaceModal correctly', async () => {
         render(<AddNamespaceModal showDialog="true" />, {
@@ -20,7 +25,6 @@ describe('AddNamespaceModal', () => {
 
     it('sends the correct request', async () => {
         const mockSetShowDialog = vi.fn();
-        const user = userEvent.setup()
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
             wrapper: AllProvidersWrapperDefault
@@ -35,7 +39,6 @@ describe('AddNamespaceModal', () => {
 
     it('does not send request if namespace already exists', async () => {
         const mockSetShowDialog = vi.fn();
-        const user = userEvent.setup()
         const existingNamespaces = ['thisNamespaceAlreadyExists']
 
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} existingNamespaces={existingNamespaces} />, {
@@ -56,8 +59,10 @@ describe('AddNamespaceModal', () => {
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
             wrapper: AllProvidersWrapperDefault
         });
-        await waitFor(() => screen.findByText(/Namespace Name/));
-        fireEvent.click(screen.getByRole("button", { name: 'Cancel' }));
+
+        await screen.findByText(/Namespace Name/);
+        const cancelButton = screen.getByRole("button", { name: /cancel/i });
+        await user.click(cancelButton);
         expect(mockSetShowDialog).toBeCalledWith(false);
         expect(axios.post).toHaveBeenCalledTimes(0);
     });
@@ -68,8 +73,9 @@ describe('AddNamespaceModal', () => {
         render(<AddNamespaceModal showDialog={true} setShowDialog={mockSetShowDialog} />, {
             wrapper: AllProvidersWrapperDefault
         });
-        await waitFor(() => screen.findByText(/Namespace Name/));
-        fireEvent.click(screen.getByRole("button", { name: 'Close' }));
+        await screen.findByText(/Namespace Name/);
+        const cancelButton = screen.getByRole("button", { name: /cancel/i });
+        await user.click(cancelButton);
         expect(mockSetShowDialog).toBeCalledWith(false);
         expect(axios.post).toHaveBeenCalledTimes(0);
     });
@@ -84,8 +90,6 @@ describe('AddNamespaceModal', () => {
                 }
             }
         })
-
-        const user = userEvent.setup()
 
         const mockSetShowDialog = vi.fn();
 

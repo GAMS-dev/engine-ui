@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import NamespaceQuotaUpdateForm from '../components/NamespaceQuotaUpdateForm'
 import axios from 'axios';
@@ -18,7 +18,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
 import { useParams } from 'react-router-dom'
 
 describe('NamespaceQuotaUpdateForm', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         vi.mocked(useParams).mockReturnValue({ namespace: 'global' })

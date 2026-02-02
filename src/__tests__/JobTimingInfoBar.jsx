@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import JobTimingInfoBar from '../components/JobTimingInfoBar'
 import axios from 'axios';
@@ -8,7 +8,6 @@ import axios from 'axios';
 vi.mock('axios');
 
 describe('JobTimingInfoBar', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {

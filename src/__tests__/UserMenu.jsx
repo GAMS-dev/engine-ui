@@ -1,17 +1,22 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import UserMenu from '../components/UserMenu'
+import UserMenu from '../components/UserMenu';
 
 describe('UserMenu', () => {
-    suppressActWarnings()
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders UserMenu correctly', async () => {
         render(<UserMenu />, {
             wrapper: AllProvidersWrapperDefault
         });
-        fireEvent.click(screen.getByRole('button'));
+        await user.click(screen.getByRole('button'));
         expect(screen.getByText('Usage')).toBeInTheDocument()
     });
 

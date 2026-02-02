@@ -1,15 +1,20 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import '@testing-library/jest-dom';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
-import LicUpdateButton from '../components/LicenseUpdateButton';
 import axios from 'axios';
+import LicUpdateButton from '../components/LicenseUpdateButton';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
 describe('LicUpdateButton', () => {
-    suppressActWarnings()
+
+    let user;
 
     beforeEach(() => {
+        user = userEvent.setup();
+
         axios.get.mockImplementation((url) => {
             switch (url) {
                 case 'testserver/licenses/engine':
@@ -30,6 +35,7 @@ describe('LicUpdateButton', () => {
         render(<LicUpdateButton type="engine" />, {
             wrapper: AllProvidersWrapperDefault
         });
+        await waitFor(() => screen.findByText(/Update Engine license/));
     });
 
 
@@ -43,7 +49,7 @@ describe('LicUpdateButton', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Update Engine license/));
-        fireEvent.click(screen.getByText(/Update Engine license/));
+        await user.click(screen.getByText(/Update Engine license/));
 
         expect(screen.getByRole("button", { name: 'Copy to clipboard' })).toBeInTheDocument();
     });
@@ -58,7 +64,7 @@ describe('LicUpdateButton', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Update Engine license/));
-        fireEvent.click(screen.getByText(/Update Engine license/));
+        await user.click(screen.getByText(/Update Engine license/));
 
         expect(screen.queryByRole("button", { name: 'Copy to clipboard' })).toBeNull();
     });

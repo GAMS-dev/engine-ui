@@ -1,6 +1,6 @@
 import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import axios from 'axios';
 
 import Job from '../components/Job'
@@ -18,7 +18,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
 import { useParams } from 'react-router-dom'
 
 describe('Job', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         vi.mocked(useParams).mockReturnValue({
@@ -44,6 +43,7 @@ describe('Job', () => {
         render(<Job />, {
             wrapper: AllProvidersWrapperDefault
         });
+        await waitFor(() => screen.findByText(/Problems fetching job information. Error message: undefined/));
     });
 
     it('gives the correct error message if an invalid token is called', async () => {

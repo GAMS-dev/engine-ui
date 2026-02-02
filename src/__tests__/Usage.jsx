@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import Usage from '../components/Usage'
 import axios from 'axios';
@@ -17,7 +17,6 @@ const getUsageComponent = ({ userToEditRoles = [] }) => {
 }
 
 describe('Usage', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {

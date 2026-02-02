@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import GroupMembers from '../components/GroupMembers'
 import axios from 'axios';
@@ -8,7 +8,6 @@ import axios from 'axios';
 vi.mock('axios');
 
 describe('GroupMembers', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {
@@ -66,7 +65,8 @@ describe('GroupMembers', () => {
         render(<GroupMembers namespace='global' label='group1' />, {
             wrapper: AllProvidersWrapperDefault
         });
-        expect(screen.getByRole('row', { name: 'Username Added Added By Actions' })).toBeInTheDocument()
+        await waitFor(() => { expect(screen.getByRole('row', { name: 'Username Added Added By Actions' })).toBeInTheDocument() });
+
     });
 
 })

@@ -1,13 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import JobReqInfoTable from '../components/JobReqInfoTable'
 
 vi.mock('axios');
 
 describe('JobReqInfoTable', () => {
-    suppressActWarnings()
 
     it('renders JobReqInfoTable correctly', async () => {
         const jobInfo = {

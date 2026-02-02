@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 import { testDatax } from './utils/testData';
 import axios from 'axios';
 
@@ -55,9 +55,10 @@ const getUserToEditComponent = () => {
 let isAuthorized = true;
 
 describe('UserEditBundle', () => {
-    suppressActWarnings()
-
+    let user;
     beforeEach(() => {
+        user = userEvent.setup();
+
         isAuthorized = true;
 
         vi.mocked(useParams).mockReturnValue({ userToEdit: 'user1' })
@@ -285,6 +286,7 @@ describe('UserEditBundle', () => {
                 </AllProvidersWrapperDefault>
             )
         });
+        await waitFor(() => screen.findByText(/Aggregate/));
     });
 
     // ------------------- test path opens correct tab --------------------
@@ -393,7 +395,7 @@ describe('UserEditBundle', () => {
     // ------------------- test click opens correct tab --------------------
 
     it('opens the correct tab after click', async () => {
-        const user = userEvent.setup();
+        ;
         render(getUserToEditComponent(), {
             wrapper: ({ children }) => (
                 <AllProvidersWrapperDefault options={{ initialEntries: ['/usage/timeline'] }}>

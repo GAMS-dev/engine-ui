@@ -1,11 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import UserLink from '../components/UserLink'
 
 describe('UserLink', () => {
-    suppressActWarnings()
 
     it('renders UserLink correctly', async () => {
         render(<UserLink user='admin' />, {
@@ -34,6 +33,4 @@ describe('UserLink', () => {
         });
         expect(screen.queryByText('me')).toBeNull();
     });
-
-
 })

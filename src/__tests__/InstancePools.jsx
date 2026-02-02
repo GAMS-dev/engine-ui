@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import axios from 'axios'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import InstancePools from '../components/InstancePools'
 
@@ -20,7 +20,11 @@ const AllProvidersWrapperEnabled = ({ children }) => (
 );
 
 describe('InstancePools Component', () => {
-    suppressActWarnings()
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders InstancePools correctly', async () => {
         axios.get.mockResolvedValueOnce({
@@ -37,7 +41,7 @@ describe('InstancePools Component', () => {
     })
 
     it('refresh button triggers API call', async () => {
-        const user = userEvent.setup()
+
         axios.get.mockResolvedValue({
             status: 200,
             data: { instance_pools_available: [] },
@@ -56,7 +60,7 @@ describe('InstancePools Component', () => {
     })
 
     it('clicking enable instance pools opens modal', async () => {
-        const user = userEvent.setup()
+
         axios.get.mockResolvedValueOnce({
             status: 200,
             data: { instance_pools_available: [] },
@@ -65,7 +69,7 @@ describe('InstancePools Component', () => {
             wrapper: AllProvidersWrapperDisabled,
         })
 
-        user.click(screen.getByText('Enable Instance Pools'))
+        await user.click(screen.getByText('Enable Instance Pools'))
 
         await waitFor(() =>
             screen.findByText(

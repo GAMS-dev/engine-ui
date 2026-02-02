@@ -1,11 +1,12 @@
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 import axios from 'axios';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TextEncoder, TextDecoder } from 'util';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils';
+import { TextDecoder, TextEncoder } from 'util';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
+import userEvent from '@testing-library/user-event';
 import LoginForm from '../components/LoginForm';
-import { OAuthClient } from './utils/oauth'
+import { OAuthClient } from './utils/oauth';
 
 const { Crypto } = require("@peculiar/webcrypto");
 
@@ -23,7 +24,11 @@ Object.defineProperty(window, "crypto", {
 Object.assign(global, { TextDecoder, TextEncoder });
 
 describe('LoginForm with OAuth2 flow', () => {
-    suppressActWarnings()
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('prints error with invalid native client id', async () => {
         axios.get.mockImplementation((url) => {
@@ -59,6 +64,7 @@ describe('LoginForm with OAuth2 flow', () => {
             expect(screen.queryByText('Please confirm that you are trying to log in with', { exact: false })).not.toBeInTheDocument();
         })
     });
+
     it('prints error with missing nc parameters', async () => {
         axios.get.mockImplementation((url) => {
             if (url.endsWith('/auth/password-policy')) {
@@ -181,7 +187,7 @@ describe('LoginForm with OAuth2 flow', () => {
             expect(screen.getByText('Please confirm that you are trying to log in with', { exact: false })).toBeInTheDocument();
             expect(screen.getByText('GAMS MIRO', { exact: false })).toBeInTheDocument();
         })
-        fireEvent.click(screen.getByText('Confirm'));
+        await user.click(screen.getByText('Confirm'));
         await waitFor(() => {
             expect(window.location.replace).toBeCalledWith(expect.stringMatching(/https:\/\/accounts\.google\.com\/o\/oauth2\/v2\/auth\?response_type=code&client_id=testclientid&scope=email%20profile%20openid&state=[a-zA-Z0-9_\-/]+&redirect_uri=http%3A%2F%2Flocalhost&code_challenge=[a-zA-Z0-9_\-/]+&code_challenge_method=S256/))
             expect(window.sessionStorage.setItem).toBeCalledWith('authParams', expect.stringMatching(/nativeClientParams/))

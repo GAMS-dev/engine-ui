@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import Webhooks from '../components/Webhooks'
 import axios from 'axios';
@@ -9,7 +9,6 @@ vi.mock('axios');
 
 
 describe('Webhooks', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {

@@ -4,7 +4,6 @@ import '@testing-library/jest-dom'
 import axios from 'axios'
 import {
     AllProvidersWrapperDefault,
-    suppressActWarnings,
 } from './utils/testUtils'
 
 import UserInviteesTree from '../components/UserInviteesTree'
@@ -22,9 +21,10 @@ vi.mock('react-router-dom', async (importOriginal) => {
 import { useParams } from 'react-router-dom'
 
 describe('UserInviteesTree', () => {
-    suppressActWarnings()
+    let user;
 
     beforeEach(() => {
+        user = userEvent.setup();
         vi.clearAllMocks()
         vi.mocked(useParams).mockReturnValue({
             userToEdit: 'mainuser',
@@ -87,6 +87,7 @@ describe('UserInviteesTree', () => {
         render(<UserInviteesTree />, {
             wrapper: AllProvidersWrapperDefault,
         })
+        await waitFor(() => screen.findByText(/mainuser/))
     })
 
     it('shows all invitees', async () => {
@@ -132,7 +133,7 @@ describe('UserInviteesTree', () => {
     })
 
     it('closes the list if triangle is clicked ', async () => {
-        const user = userEvent.setup()
+
         render(<UserInviteesTree />, {
             wrapper: AllProvidersWrapperDefault,
         })

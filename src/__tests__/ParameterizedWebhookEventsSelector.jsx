@@ -1,11 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
     AllProvidersWrapperDefault,
-    suppressActWarnings,
-} from './utils/testUtils'
+} from './utils/testUtils';
 
-import ParameterizedWebhookEventsSelector from '../components/ParameterizedWebhookEventsSelector'
+import userEvent from '@testing-library/user-event';
+import ParameterizedWebhookEventsSelector from '../components/ParameterizedWebhookEventsSelector';
 
 const AllProvidersWrapper =
     (options) => {
@@ -19,18 +19,22 @@ const AllProvidersWrapper =
     }
 
 describe('UserSettingsForm', () => {
-    suppressActWarnings()
+    let user;
 
-    it('renders ParameterizedWebhookEventsSelector', () => {
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
+
+    it('renders ParameterizedWebhookEventsSelector', async() => {
         render(
             <ParameterizedWebhookEventsSelector parameterizedEvents={[]} />,
             {
-                wrapper: AllProvidersWrapper,
+                wrapper: AllProvidersWrapper(),
             }
         )
     })
 
-    it('ParameterizedWebhookEventsSelector is depent on quotaFormat 1', () => {
+    it('ParameterizedWebhookEventsSelector is depend on quotaFormat 1', () => {
         render(
             <ParameterizedWebhookEventsSelector
                 parameterizedEvents={['VOLUME_QUOTA_THRESHOLD=3600']}
@@ -49,7 +53,8 @@ describe('UserSettingsForm', () => {
             screen.getByPlaceholderText('Event trigger (in h)')
         ).toBeInTheDocument()
     })
-    it('ParameterizedWebhookEventsSelector is depent on quotaFormat 2', () => {
+
+    it('ParameterizedWebhookEventsSelector is depend on quotaFormat 2', async () => {
         const mockSetEvents = vi.fn()
         const mockSetIsValid = vi.fn()
         render(
@@ -68,7 +73,7 @@ describe('UserSettingsForm', () => {
         const quotaThresholdInput = screen.getByRole('spinbutton')
         expect(quotaThresholdInput).toHaveClass('form-control')
         expect(quotaThresholdInput).toHaveValue(36)
-        fireEvent.click(
+        await user.click(
             screen.getByRole('button', { name: 'Add parameterized event' })
         )
         expect(mockSetEvents).toHaveBeenCalledWith([

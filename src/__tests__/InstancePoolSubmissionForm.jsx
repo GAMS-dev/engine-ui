@@ -1,14 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
 import axios from 'axios';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import InstancePoolSubmissionForm from '../components/InstancePoolSubmissionForm'
 
 vi.mock('axios');
 
 describe('InstancePoolSubmissionForm', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {

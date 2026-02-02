@@ -61,8 +61,7 @@ describe('zipAsync', () => {
         await zipAsync(files)
 
         expect(mockGenerateAsync).toHaveBeenCalledWith(
-            { type: 'blob', platform: 'UNIX' },
-            expect.any(Function)
+            { type: 'blob', platform: 'UNIX' }
         )
     })
 })

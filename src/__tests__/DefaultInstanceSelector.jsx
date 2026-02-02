@@ -1,6 +1,6 @@
 import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import DefaultInstanceSelector from '../components/DefaultInstanceSelector'
 import axios from 'axios';
@@ -8,7 +8,6 @@ import axios from 'axios';
 vi.mock('axios');
 
 describe('DefaultInstanceSelector', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockImplementation((url) => {

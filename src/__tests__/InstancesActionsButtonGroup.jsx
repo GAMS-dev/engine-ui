@@ -1,20 +1,25 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import InstancesActionsButtonGroup from '../components/InstancesActionsButtonGroup'
+import InstancesActionsButtonGroup from '../components/InstancesActionsButtonGroup';
 
 vi.mock('axios');
 
 describe('InstancesActionsButtonGroup', () => {
-    suppressActWarnings()
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
 
     it('renders InstancesActionsButtonGroup correctly', async () => {
         render(<InstancesActionsButtonGroup />, {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText(/Update/));
-        fireEvent.click(screen.getByRole("button", { name: 'Delete' }));
+        await user.click(screen.getByRole("button", { name: 'Delete' }));
         expect(screen.getByText(/Are you sure you want to remove the instance/)).toBeInTheDocument()
     });
 

@@ -1,13 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import TimeDiffDisplay from '../components/TimeDiffDisplay'
 
 vi.mock('axios');
 
 describe('TimeDiffDisplay', () => {
-    suppressActWarnings()
 
     it('renders TimeDiffDisplay correctly', async () => {
         render(<TimeDiffDisplay time={20000} />, {

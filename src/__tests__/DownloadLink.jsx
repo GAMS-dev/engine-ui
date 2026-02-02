@@ -3,12 +3,10 @@ import '@testing-library/jest-dom';
 
 import DownloadLink from '../components/DownloadLink'
 import axios from 'axios';
-import { suppressActWarnings } from './utils/testUtils';
 
 vi.mock('axios');
 
 describe('DownloadLink', () => {
-    suppressActWarnings()
 
     beforeEach(() => {
         axios.get.mockResolvedValue({
@@ -29,7 +27,7 @@ describe('DownloadLink', () => {
 
     it('renders DownloadLink correctly', async () => {
         render(<DownloadLink url="download/url" />);
-        expect(screen.getByRole('button')).toBeInTheDocument()
+        await expect(screen.getByRole('button')).toBeInTheDocument()
     });
 
 })

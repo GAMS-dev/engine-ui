@@ -2,7 +2,6 @@ import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import {
     AllProvidersWrapperDefault,
-    suppressActWarnings,
 } from './utils/testUtils'
 
 import TextEntryView from '../components/TextEntryView'
@@ -20,7 +19,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
 import { useParams } from 'react-router-dom'
 
 describe('TextEntryView', () => {
-    suppressActWarnings()
     beforeEach(() => {
         vi.mocked(useParams).mockReturnValue({ token: 'token1234' })
 

@@ -1,13 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault, suppressActWarnings } from './utils/testUtils'
+import { AllProvidersWrapperDefault } from './utils/testUtils'
 
 import JobActionsButtonGroup from '../components/JobActionsButtonGroup'
 
 vi.mock('axios');
 
 describe('JobActionsButtonGroup', () => {
-    suppressActWarnings()
 
     it('renders JobActionsButtonGroup correctly', async () => {
         render(<JobActionsButtonGroup />, {
