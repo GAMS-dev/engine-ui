@@ -1,6 +1,6 @@
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom'
 import axios from 'axios';
 import UserQuotaUpdateForm from '../components/UserQuotaUpdateForm';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
@@ -15,7 +15,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
     }
 })
 
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
 
 const routes = [
     { path: '/users/user1', element: <p>after submit went back to usage</p> }]
