@@ -61,6 +61,7 @@ const Models = () => {
         .sort((a, b) => ('' + a.name).localeCompare(b.name));
       if (availableNsTmp.length === 0) {
         setAlertMsg("You do not have permissions to see any namespaces.");
+        setGlobalIsLoading(false);
         return;
       }
       setAvailableNamespaces(availableNsTmp);
