@@ -24,7 +24,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
     ));
 
     // check if workers failed, if so keep the first start time and set the finish time
-    // to the last occurence of that particular worker
+    // to the last occurrence of that particular worker
     // simultaneously keep track of the number of fails
     dataPoolUsageNEW = dataPoolUsageNEW.map((pool) => {
         const workerTimes = {};
@@ -100,14 +100,14 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
 
     // Use map to transform each hypercube into an array of job objects
     // flatten it so its no loner ordered by hypercubes
-    // this way it can just be conbined with the job list (depth one always is enough here)
+    // this way it can just be combined with the job list (depth one always is enough here)
     let dataHypercubeNEW = dataHypercube.flatMap(function (hypercube) {
         // Map each job to a new object containing the relevant information
         return hypercube['jobs'].map((job) => (
             {
-                instance: hypercube['labels']['instance'],
+                instance: hypercube?.labels?.instance ?? 'default',
                 user: hypercube['username'],
-                multiplier: hypercube['labels']['multiplier'],
+                multiplier: hypercube?.labels?.multiplier ?? 1,
                 times: job['times'],
                 fails: 0,
                 pool_label: null,
@@ -117,7 +117,6 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
                 is_hypercube: true
             }
         ));
-
     });
 
     dataJobUsageNEW = dataJobUsageNEW.concat(dataHypercubeNEW)
@@ -162,7 +161,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
                 job['included'] = true;
                 job['times'] = calcEndTime - calcStartTime;
             }
-            // add debugg option:
+            // add debug option:
             // if debug=True this case should not happen, because no job outside of the timeframe
             // should be in the json object
             else {
@@ -170,7 +169,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
                 job['times'] = 0
             }
         }
-        // jobs that where canceld while the instance was generated
+        // jobs that where canceled while the instance was generated
         else {
             job['included'] = true;
             job['times'] = 0;
@@ -178,8 +177,8 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
         return job
     });
 
-    // substract the jobs corresponding to a pool (depends on label and timing)
-    // so that the totalWorkerTime is substracted by the actual run time
+    // subtract the jobs corresponding to a pool (depends on label and timing)
+    // so that the totalWorkerTime is subtracted by the actual run time
     // and only the idle time is left
     dataJobUsageNEW = dataJobUsageNEW.map((job) => {
         if (job['included']) {

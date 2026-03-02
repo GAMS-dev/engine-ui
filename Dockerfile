@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 node:25 AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
 ARG VITE_ENGINE_URL=AAAABBBBCCCC
 ARG VITE_BASE_NAME=DDDDEEEEFFFF

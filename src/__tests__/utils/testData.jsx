@@ -1659,7 +1659,91 @@ const testDatax = {
         ]
       }
     ]
-  }
+  },
+  'test_hypercube_job': {
+    "job_usage": [
+    ],
+    "hypercube_job_usage": [
+      {
+        "username": "hc_1",
+        "token": "token3",
+        "job_count": 0,
+        "completed": 0,
+        "jobs": [
+          {
+            "job_number": 0,
+            "status": 0,
+            "process_status": 0,
+            "times": [
+              {
+                "start": "2021-08-04T17:10:15.000000+00:00",
+                "finish": null
+              },
+              {
+                "start": "2021-08-04T17:10:15.000000+00:00",
+                "finish": "2021-08-04T17:10:35.000000+00:00"
+              }
+            ]
+          }
+        ],
+        "namespace": "string",
+        "model": "string",
+        "submitted": "2021-08-04T17:10:15.000000+00:00",
+        "finished": "2021-08-04T17:10:15.000000+00:00",
+        "status": 0,
+        "labels": null
+      },
+      {
+        "username": "hc_2",
+        "token": "token4",
+        "job_count": 0,
+        "completed": 0,
+        "jobs": [
+          {
+            "job_number": 0,
+            "status": 0,
+            "process_status": 0,
+            "times": [
+              {
+                "start": "2021-08-04T17:10:15.000000+00:00",
+                "finish": "2021-08-04T17:10:35.000000+00:00"
+              }
+            ]
+          }
+        ],
+        "namespace": "string",
+        "model": "string",
+        "submitted": "2021-08-04T17:10:15.000000+00:00",
+        "finished": "2021-08-04T17:10:15.000000+00:00",
+        "status": 0,
+        "labels": {
+          "cpu_request": 0,
+          "memory_request": 0,
+          "workspace_request": 0,
+          "tolerations": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "node_selectors": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "resource_warning": "none",
+          "instance": "pool_1",
+          "multiplier": 2,
+          "additionalProp1": "string",
+          "additionalProp2": "string",
+          "additionalProp3": "string"
+        }
+      }
+    ],
+    "pool_usage": [
+    ]
+  },
 }
 //const testData = testDatax.test_hypercube_with_pool_and_job
 

@@ -527,3 +527,38 @@ describe('test h also works', () => {
         ).toBeInTheDocument()
     })
 })
+
+describe('test hypercube jobs get displayed correctly', () => {
+    const testData = testDatax.test_hypercube_job
+    let user;
+
+    beforeEach(() => {
+        user = userEvent.setup();
+    });
+
+    it('renders Quotas component for hypercube job without lables correctly', async () => {
+        render(
+            getQuotaComponent({ data: testData, startDate, endDate }),
+            {
+                wrapper: AllProvidersWrapperDefault,
+            }
+        )
+
+        const dropdown = await screen.findByLabelText(/aggregate/i);
+        await user.click(dropdown);
+        const option = await screen.findByText('_');
+        await user.click(option);
+
+
+        let tableJobs = within(screen.getByTestId('tableJobs'))
+
+        expect(
+            tableJobs.getByRole('row', {
+                name: 'hc_1 token3HC default - 1 0:0:20 1 $0.20',
+            })
+        ).toBeInTheDocument()
+
+        // show default since one hc job has no labels
+        await screen.findByText(/default/i);
+    })
+})
