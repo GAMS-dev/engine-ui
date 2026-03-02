@@ -232,7 +232,10 @@ const JobSubmissionForm = ({ newHcJob }) => {
         ...accessGroups.map(el => ({ key: "access_groups", value: el.label }))];
 
         if (newHcJob) {
-            if (!hcFile.name.toLowerCase().endsWith(".json")) {
+            if (hcFile.name == undefined) {
+                setSubmissionErrorMsg("Hypercube description file must be provided!");
+                return;
+            } else if (!hcFile.name.toLowerCase().endsWith(".json")) {
                 setSubmissionErrorMsg("Hypercube description must be a JSON file!");
                 return;
             }
