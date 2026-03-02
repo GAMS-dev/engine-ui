@@ -308,7 +308,6 @@ const JobSubmissionForm = ({ newHcJob }) => {
         }
         try {
             let postJobResponse
-            serverInfo.is_saas = true
             if (serverInfo.is_saas) {
                 postJobResponse = await axios.post(
                     newHcJob ? `${server}/hypercube/` : `${server}/v2/jobs/`,
