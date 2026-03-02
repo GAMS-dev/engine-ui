@@ -55,7 +55,8 @@
         "test": "vitest",
         "test:coverage": "vitest run --coverage",
         "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=junit.xml",
-        "lint": "eslint src --ext=\".js,.jsx\" --max-warnings 0"
+        "lint": "eslint src --ext=\".js,.jsx\" --max-warnings 0",
+        "dev": "vite"
     },
     "browserslist": {
         "production": [
