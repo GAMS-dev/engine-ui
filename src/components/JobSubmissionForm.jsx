@@ -307,24 +307,14 @@ const JobSubmissionForm = ({ newHcJob }) => {
             return;
         }
         try {
-            let postJobResponse
-            if (serverInfo.is_saas) {
-                postJobResponse = await axios.post(
-                    newHcJob ? `${server}/hypercube/` : `${server}/v2/jobs/`,
-                    jobSubmissionForm,
-                    {
-                        "Content-Type": "multipart/form-data"
-                    }
-                );
-            } else {
-                postJobResponse = await axios.post(
-                    newHcJob ? `${server}/hypercube/` : `${server}/jobs/`,
-                    jobSubmissionForm,
-                    {
-                        "Content-Type": "multipart/form-data"
-                    }
-                );
-            }
+            const jobs_endpoint = serverInfo.is_saas ? `${server}/v2/jobs/` : `${server}/jobs/`;
+            const postJobResponse = await axios.post(
+                newHcJob ? `${server}/hypercube/` : jobs_endpoint,
+                jobSubmissionForm,
+                {
+                    "Content-Type": "multipart/form-data"
+                }
+            );
 
             if (postJobResponse.data?.quota_warning?.length) {
                 setAlertMsg(getQuotaWarningMessage(postJobResponse.data.quota_warning, userSettings.quotaFormattingFn));
