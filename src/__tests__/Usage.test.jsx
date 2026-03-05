@@ -1,12 +1,23 @@
+import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { useParams } from 'react-router-dom';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import Usage from '../components/Usage'
 import axios from 'axios';
 import { Outlet, Route, Routes } from 'react-router-dom';
+import Usage from '../components/Usage';
 
 vi.mock('axios');
+
+vi.mock('react-router-dom', async (importOriginal) => {
+    const actual = await importOriginal()
+    return {
+        ...actual,
+        useParams: vi.fn(),
+    }
+});
+
+
 
 const getUsageComponent = ({ userToEditRoles = [] }) => {
     return <Routes>
@@ -14,11 +25,16 @@ const getUsageComponent = ({ userToEditRoles = [] }) => {
             <Route index element={<Usage />} />
         </Route>
     </Routes>
-}
+};
 
 describe('Usage', () => {
 
     beforeEach(() => {
+        vi.clearAllMocks()
+        vi.mocked(useParams).mockReturnValue({
+            userToEdit: 'user1',
+        });
+
         axios.get.mockImplementation((url) => {
             switch (url) {
                 case 'testserver/usage/':
@@ -83,6 +99,106 @@ describe('Usage', () => {
             wrapper: AllProvidersWrapperDefault
         });
         await waitFor(() => screen.findByText('Show Invitees?'));
+    });
+
+    it('fetches from correct SaaS endpoints and makes the correct number of paginated requests', async () => {
+
+        axios.get.mockImplementation((url, options) => {
+            if (url.includes('/usage/quota')) {
+                return Promise.resolve({ data: [] });
+            }
+
+            const offset = options?.params?.offset || 0;
+            const perPage = 100;
+            let total = 0;
+
+            // Define how many total items exist for each endpoint
+            if (url.includes('/usage/jobs')) total = 250;      // Should take 3 calls (0, 100, 200)
+            else if (url.includes('/usage/hypercube')) total = 50; // Should take 1 call (0)
+            else if (url.includes('/usage/pools')) total = 150;    // Should take 2 calls (0, 100)
+
+            const remaining = Math.max(0, total - offset);
+            const itemsCount = Math.min(perPage, remaining);
+            const items = Array.from({ length: itemsCount }).map((_, i) => ({ id: offset + i }));
+
+            return Promise.resolve({
+                headers: {
+                    'x-total': total.toString(),
+                    'x-per-page': perPage.toString()
+                },
+                data: { items }
+            });
+        });
+
+        render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+            wrapper: ({ children }) => (
+                <AllProvidersWrapperDefault options={{ is_saas: true }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
+
+        await waitFor(() => screen.findByText('Show Invitees?'));
+
+        // Wait for the loading cycle to completely finish
+        expect(screen.queryByText('Fetching Usage Data...')).toBeNull();
+
+        const jobsUrl = `testserver/v2/iam/users/user1/usage/jobs`;
+        const hcUrl = `testserver/v2/iam/users/user1/usage/hypercube`;
+        const poolsUrl = `testserver/v2/iam/users/user1/usage/pools`;
+
+        // Check Phase 1 calls (Offset 0)
+        expect(axios.get).toHaveBeenCalledWith(jobsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 0 }) }));
+        expect(axios.get).toHaveBeenCalledWith(hcUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 0 }) }));
+        expect(axios.get).toHaveBeenCalledWith(poolsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 0 }) }));
+
+        // Check Phase 2 calls (Offset 100)
+        expect(axios.get).toHaveBeenCalledWith(jobsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 100 }) }));
+        expect(axios.get).toHaveBeenCalledWith(poolsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 100 }) }));
+
+        // Hypercube should NOT have been called with offset 100 because total is 50
+        expect(axios.get).not.toHaveBeenCalledWith(hcUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 100 }) }));
+
+        // Check Phase 2 calls (Offset 200)
+        expect(axios.get).toHaveBeenCalledWith(jobsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 200 }) }));
+
+        // Pools should NOT have been called with offset 200 because total is 150
+        expect(axios.get).not.toHaveBeenCalledWith(poolsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 200 }) }));
+
+        expect(axios.get).toHaveBeenCalledTimes(6);
+    });
+
+    it('fetches from correct non-SaaS endpoint and makes a single request', async () => {
+        axios.get.mockImplementation((url) => {
+            if (url.includes('/usage/quota')) {
+                return Promise.resolve({ data: [] });
+            }
+            return Promise.resolve({ data: [] });
+        });
+
+        render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+            wrapper: ({ children }) => (
+                <AllProvidersWrapperDefault options={{ is_saas: false }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
+
+        // Wait for the UI to finish loading
+        await waitFor(() => screen.findByText('Show Invitees?'));
+
+        const usageUrl = `testserver/usage/`;
+
+        expect(axios.get).toHaveBeenCalledWith(usageUrl, expect.objectContaining({
+            headers: {
+                "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}"
+            },
+            params: expect.objectContaining({
+                recursive: false
+            })
+        }));
+
+        expect(axios.get).toHaveBeenCalledTimes(1);
     });
 
 })

@@ -1,15 +1,16 @@
-import { useEffect, useState, useContext, useMemo } from 'react';
-import { Chart as ChartJS, ArcElement, Legend, Tooltip } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import computeTimes from '../util/calculateQuota.js'
-import Table from './Table.jsx'
-import Select from 'react-select';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { Pie } from 'react-chartjs-2';
 import { Link, useOutletContext } from "react-router-dom";
-import UserSettingsContext from "../contexts/UserSettingsContext";
+import Select from 'react-select';
 import { ClipLoader } from 'react-spinners';
-import { UserLink } from './UserLink.jsx';
+import ServerInfoContext from "../contexts/ServerInfoContext";
+import UserSettingsContext from "../contexts/UserSettingsContext";
+import computeTimes from '../util/calculateQuota.js';
 import { formatDecimal } from '../util/util.jsx';
+import Table from './Table.jsx';
+import { UserLink } from './UserLink.jsx';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -59,7 +60,7 @@ const COLUMN_DEFS = {
 };
 
 const Quotas = () => {
-  const { data, startDate: calcStartDate, endDate: calcEndTime, isLoading: dataIsLoading } = useOutletContext();
+  const { data, startDate: calcStartDate, endDate: calcEndTime, isLoading: dataIsLoading, downloadProgress } = useOutletContext();
   const [userSettings,] = useContext(UserSettingsContext)
   const quotaFormattingFn = userSettings.quotaFormattingFn
 
@@ -70,6 +71,7 @@ const Quotas = () => {
   const [numPools, setNumPools] = useState(0);
   const [numCharts, setNumCharts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [serverInfo,] = useContext(ServerInfoContext);
 
   // if data, calcStartDate, calcEndTime changes:
   useEffect(() => {
@@ -286,7 +288,27 @@ const Quotas = () => {
 
   return (
     <>
-      {dataIsLoading ? <ClipLoader /> : <div className="App">
+      {dataIsLoading ? (
+        serverInfo.is_saas ? (
+          <div className="w-100 px-4 py-3">
+            <p className="text-center mb-2">Fetching Usage Data...</p>
+            <div className="progress" style={{ height: '20px' }}>
+              <div
+                className="progress-bar progress-bar-striped progress-bar-animated"
+                role="progressbar"
+                style={{ width: `${downloadProgress}%` }}
+                aria-valuenow={downloadProgress}
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                {downloadProgress}%
+              </div>
+            </div>
+          </div>
+        ) : (
+          <ClipLoader />
+        )
+      ) : (<div className="App">
         <div className="form-group mt-3 mb-3">
           <label htmlFor="aggregateDropdownInput">
             Aggregate
@@ -361,7 +383,7 @@ const Quotas = () => {
               <div>* includes Idle Times</div>
             ) : null}
           </>)}
-      </div>}
+      </div>)}
     </>
   );
 }

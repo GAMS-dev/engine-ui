@@ -22,6 +22,7 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
     const instance_pool_access = options.instance_pool_access ?? undefined;
     const setServerConfig = options.setServerConfig ?? vi.fn();
     const in_kubernetes = options.in_kubernetes ?? true;
+    const is_saas = options.is_saas ?? false;
     const setServerInfo = options.setServerInfo ?? vi.fn();
     const initialEntries = options.initialEntries ?? undefined;
     const routes = options.routes ?? [];
@@ -40,7 +41,7 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
                 <Route path='*'
                     element={
                         <ServerConfigContext.Provider value={[serverConfig, setServerConfig]}>
-                            <ServerInfoContext.Provider value={[{ in_kubernetes: in_kubernetes }, setServerInfo]}>
+                            <ServerInfoContext.Provider value={[{ in_kubernetes: in_kubernetes, is_saas: is_saas }, setServerInfo]}>
                                 <UserSettingsContext.Provider value={[{ quotaUnit, quotaConversionFactor, quotaFormattingFn, multiplierUnit, tablePageLength }, updateUserSettings]}>
                                     <AuthContext.Provider value={login ? [{ username, roles, server }, setLogin] : [login, setLogin]}>
                                         {children}
