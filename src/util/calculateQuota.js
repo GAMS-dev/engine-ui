@@ -108,7 +108,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
                 instance: hypercube?.labels?.instance ?? 'default',
                 user: hypercube['username'],
                 multiplier: hypercube?.labels?.multiplier ?? 1,
-                times: job['times'],
+                times: job?.times?? [],
                 fails: 0,
                 pool_label: null,
                 included: false,
