@@ -131,7 +131,7 @@ const Usage = () => {
 
         }
         fetchData();
-    }, [jwt, server, refresh, setAlertMsg, userToEdit, recursive, startDate, endDate, userToEditIsInviter]);
+    }, [jwt, server, refresh, setAlertMsg, userToEdit, recursive, startDate, endDate, userToEditIsInviter, serverInfo.is_saas]);
 
     useEffect(() => {
         const getRemainingQuota = async () => {

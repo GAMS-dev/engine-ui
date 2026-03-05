@@ -1,4 +1,4 @@
-import { waitFor, within } from '@testing-library/dom';
+import { within } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -565,11 +565,6 @@ describe('test hypercube jobs get displayed correctly', () => {
 
 describe('Quotas loading states', () => {
     const testData = testDatax.test_hypercube_with_pool_and_job
-    let user;
-
-    beforeEach(() => {
-        user = userEvent.setup();
-    });
 
     it('renders the progress bar correctly when isLoading is true and is_saas is true', () => {
         render(
