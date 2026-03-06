@@ -55,7 +55,7 @@ const Usage = () => {
         }
 
         try {
-            if (serverInfo.is_saas) {
+            if (serverInfo.is_saas && serverInfo.use_brockerv2) {
                 setDownloadProgress(0);
 
                 const endpoints = [
