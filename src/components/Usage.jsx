@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { Nav, Tab } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,7 +18,7 @@ const Usage = () => {
     const [data, setData] = useState([]);
     const [recursive, setRecursive] = useState(false);
     const [refresh, setRefresh] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
@@ -33,105 +33,113 @@ const Usage = () => {
     const navigate = useNavigate();
 
     const userToEditIsInviter = userToEditRoles.includes('admin') || userToEditRoles.includes('inviter');
+    const abortControllerRef = useRef(null);
 
-    useEffect(() => {
-        if (userToEditIsInviter == null) {
-            return;
+    const fetchData = async () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
         }
-        const fetchData = async () => {
-            setIsLoading(true);
 
-            const requestParams = {
-                recursive: userToEditIsInviter ? recursive : false,
-                from_datetime: startDate,
-                to_datetime: endDate,
-            }
-            const requestHeader = {
-                "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}"
-            }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
 
-            try {
-                if (serverInfo.is_saas) {
-                    setDownloadProgress(0);
+        setIsLoading(true);
 
-                    const endpoints = [
-                        { key: 'job_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/jobs` },
-                        { key: 'hypercube_job_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/hypercube` },
-                        { key: 'pool_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/pools` }
-                    ];
+        const requestParams = {
+            recursive: userToEditIsInviter ? recursive : false,
+            from_datetime: startDate,
+            to_datetime: endDate,
+        }
+        const requestHeader = {
+            "X-Fields": "job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}"
+        }
 
-                    let currentOffset = 0;
+        try {
+            if (serverInfo.is_saas) {
+                setDownloadProgress(0);
 
-                    const firstResponses = await Promise.all(
-                        endpoints.map(e => axios.get(e.url, {
-                            params: { ...requestParams, offset: currentOffset },
-                            headers: requestHeader
-                        }))
-                    );
+                const endpoints = [
+                    { key: 'job_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/jobs` },
+                    { key: 'hypercube_job_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/hypercube` },
+                    { key: 'pool_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/pools` }
+                ];
 
-                    const metadata = firstResponses.map(res => ({
-                        total: parseInt(res.headers['x-total']) || 0,
-                        perPage: parseInt(res.headers['x-per-page']) || 100
-                    }));
+                let currentOffset = 0;
 
-                    let finalData = {
-                        job_usage: [...firstResponses[0].data.items],
-                        hypercube_job_usage: [...firstResponses[1].data.items],
-                        pool_usage: [...firstResponses[2].data.items]
-                    };
+                const firstResponses = await Promise.all(
+                    endpoints.map(e => axios.get(e.url, {
+                        params: { ...requestParams, offset: currentOffset },
+                        headers: requestHeader,
+                        signal: controller.signal
+                    }))
+                );
 
-                    const getTotalCount = () => metadata.reduce((sum, m) => sum + m.total, 0);
-                    const getCurrentCount = () => finalData.job_usage.length + finalData.hypercube_job_usage.length + finalData.pool_usage.length;
+                const metadata = firstResponses.map(res => ({
+                    total: parseInt(res.headers['x-total']) || 0,
+                    perPage: parseInt(res.headers['x-per-page']) || 100
+                }));
 
-                    const totalToFetch = getTotalCount();
-                    setDownloadProgress(Math.min(Math.round((getCurrentCount() / totalToFetch) * 100), 100));
+                let finalData = {
+                    job_usage: [...firstResponses[0].data.items],
+                    hypercube_job_usage: [...firstResponses[1].data.items],
+                    pool_usage: [...firstResponses[2].data.items]
+                };
+
+                const getTotalCount = () => metadata.reduce((sum, m) => sum + m.total, 0);
+                const getCurrentCount = () => finalData.job_usage.length + finalData.hypercube_job_usage.length + finalData.pool_usage.length;
+
+                const totalToFetch = getTotalCount();
+                setDownloadProgress(Math.min(Math.round((getCurrentCount() / totalToFetch) * 100), 100));
 
 
-                    while (finalData.job_usage.length < metadata[0].total ||
-                        finalData.hypercube_job_usage.length < metadata[1].total ||
-                        finalData.pool_usage.length < metadata[2].total) {
+                while (finalData.job_usage.length < metadata[0].total ||
+                    finalData.hypercube_job_usage.length < metadata[1].total ||
+                    finalData.pool_usage.length < metadata[2].total) {
 
-                        // await new Promise(r => setTimeout(r, 1000)); // One-line sleep for testing
-                        currentOffset += metadata[0].perPage;
+                    // await new Promise(r => setTimeout(r, 1000)); // One-line sleep for testing
+                    currentOffset += metadata[0].perPage;
 
-                        const pendingRequests = [];
-                        if (finalData.job_usage.length < metadata[0].total) {
-                            pendingRequests.push(axios.get(endpoints[0].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader }).then(r => ({ key: 'job_usage', items: r.data.items })));
-                        }
-                        if (finalData.hypercube_job_usage.length < metadata[1].total) {
-                            pendingRequests.push(axios.get(endpoints[1].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader }).then(r => ({ key: 'hypercube_job_usage', items: r.data.items })));
-                        }
-                        if (finalData.pool_usage.length < metadata[2].total) {
-                            pendingRequests.push(axios.get(endpoints[2].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader }).then(r => ({ key: 'pool_usage', items: r.data.items })));
-                        }
-
-                        const nextBatch = await Promise.all(pendingRequests);
-
-                        nextBatch.forEach(batch => {
-                            finalData[batch.key] = [...finalData[batch.key], ...batch.items];
-                        });
-
-                        setDownloadProgress(Math.min(Math.round((getCurrentCount() / totalToFetch) * 100), 100));
+                    const pendingRequests = [];
+                    if (finalData.job_usage.length < metadata[0].total) {
+                        pendingRequests.push(axios.get(endpoints[0].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'job_usage', items: r.data.items })));
+                    }
+                    if (finalData.hypercube_job_usage.length < metadata[1].total) {
+                        pendingRequests.push(axios.get(endpoints[1].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'hypercube_job_usage', items: r.data.items })));
+                    }
+                    if (finalData.pool_usage.length < metadata[2].total) {
+                        pendingRequests.push(axios.get(endpoints[2].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'pool_usage', items: r.data.items })));
                     }
 
-                    setData(finalData);
+                    const nextBatch = await Promise.all(pendingRequests);
 
-                } else {
-                    const response = await axios.get(`${server}/usage/`, {
-                        params: { ...requestParams, username: userToEdit },
-                        headers: requestHeader
-                    })
-                    setData(response.data)
+                    nextBatch.forEach(batch => {
+                        finalData[batch.key] = [...finalData[batch.key], ...batch.items];
+                    });
+
+                    setDownloadProgress(Math.min(Math.round((getCurrentCount() / totalToFetch) * 100), 100));
                 }
-            } catch (err) {
-                setAlertMsg(`Problems fetching usage information: ${getResponseError(err)}`);
-            } finally {
-                setIsLoading(false);
-            }
 
+                setData(finalData);
+
+            } else {
+                const response = await axios.get(`${server}/usage/`, {
+                    params: { ...requestParams, username: userToEdit },
+                    headers: requestHeader,
+                    signal: controller.signal
+                })
+                setData(response.data)
+            }
+        } catch (err) {
+            if (axios.isCancel(err)) {
+                setAlertMsg("Request canceled by the user.");
+            } else {
+                setAlertMsg(`Problems fetching usage information: ${getResponseError(err)}`);
+            }
+        } finally {
+            setIsLoading(false);
         }
-        fetchData();
-    }, [jwt, server, refresh, setAlertMsg, userToEdit, recursive, startDate, endDate, userToEditIsInviter, serverInfo.is_saas]);
+
+    }
 
     useEffect(() => {
         const getRemainingQuota = async () => {
@@ -153,6 +161,23 @@ const Usage = () => {
         }
         getRemainingQuota()
     }, [server, setAlertMsg, userToEdit, quotaFormattingFn]);
+
+    const handleCancel = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+    };
+
+    // Cleanup: Abort any inflight request if the user unmounts/navigates away
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, [abortControllerRef]);
+
+
     return (
         <>
             <div>
@@ -162,19 +187,27 @@ const Usage = () => {
                             Remaining Quota: {remainingQuota}
                         </div>
                     </div>
-
-                    <div className="btn-toolbar mb-2 mb-md-0">
-                        <div className="btn-group me-2">
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => {
-                                    setRefresh(refresh + 1);
-                                }}
-                            >
-                                Refresh
-                                <RefreshCw width="12px" className="ms-2" />
+                    <div className="d-flex gap-2">
+                        {isLoading ? (
+                            <button className="btn btn-danger" onClick={handleCancel}>
+                                <i className="bi bi-x-circle me-1"></i> Cancel
                             </button>
+                        ) : (
+                            <button className="btn btn-primary" onClick={fetchData}>
+                                <i className="bi bi-cloud-download me-1"></i> Fetch Usage
+                            </button>
+                        )}
+                        <div className="btn-toolbar mb-2 mb-md-0">
+                            <div className="btn-group me-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={fetchData}
+                                >
+                                    Refresh
+                                    <RefreshCw width="12px" className="ms-2" />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
