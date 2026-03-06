@@ -118,7 +118,7 @@ const Usage = () => {
 
                 } else {
                     const response = await axios.get(`${server}/usage/`, {
-                        params: requestParams,
+                        params: { ...requestParams, username: userToEdit },
                         headers: requestHeader
                     })
                     setData(response.data)
