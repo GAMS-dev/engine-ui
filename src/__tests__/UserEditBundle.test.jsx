@@ -419,7 +419,7 @@ describe('UserEditBundle', () => {
                 </AllProvidersWrapperDefault>
             )
         });
-        await waitFor(() => screen.findByText(/Usage/));
+        await waitFor(() => screen.findAllByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeInTheDocument();
         expect(screen.queryByText(/License/)).toBeInTheDocument();
         expect(screen.queryByText(/Instances/)).toBeInTheDocument();
@@ -439,7 +439,7 @@ describe('UserEditBundle', () => {
                 </AllProvidersWrapperDefault>
             )
         });
-        await waitFor(() => screen.findByText(/Usage/));
+        await waitFor(() => screen.findAllByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeInTheDocument();
         expect(screen.queryByText(/License/)).toBeInTheDocument();
         expect(screen.queryByText(/Instances/)).toBeInTheDocument();
@@ -458,7 +458,7 @@ describe('UserEditBundle', () => {
                 </AllProvidersWrapperDefault>
             )
         });
-        await waitFor(() => screen.findByText(/Usage/));
+        await waitFor(() => screen.findAllByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeNull();
         expect(screen.queryByText(/License/)).toBeInTheDocument();
         expect(screen.queryByText(/Instances/)).toBeInTheDocument();
@@ -518,7 +518,7 @@ describe('UserEditBundle', () => {
                 </AllProvidersWrapperDefault>
             )
         });
-        await waitFor(() => screen.findByText(/Usage/));
+        await waitFor(() => screen.findAllByText(/Usage/));
         expect(screen.queryByText(/Password/)).toBeInTheDocument();
         // inviter is not admin
         expect(screen.queryByText(/License/)).toBeNull();
