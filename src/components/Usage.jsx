@@ -55,13 +55,13 @@ const Usage = () => {
         }
 
         try {
-            if (serverInfo.is_saas && serverInfo.use_brockerv2) {
+            if (serverInfo.is_saas && serverInfo.use_brokerv2) {
                 setDownloadProgress(0);
 
                 const endpoints = [
-                    { key: 'job_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/jobs` },
-                    { key: 'hypercube_job_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/hypercube` },
-                    { key: 'pool_usage', url: `${server}/v2/iam/users/${userToEdit}/usage/pools` }
+                    { key: 'job_usage', url: `${server}/v2/usage/${userToEdit}/jobs` },
+                    { key: 'hypercube_job_usage', url: `${server}/v2/usage/${userToEdit}/hypercube` },
+                    { key: 'pool_usage', url: `${server}/v2/usage/${userToEdit}/pools` }
                 ];
 
                 let currentOffset = 0;
