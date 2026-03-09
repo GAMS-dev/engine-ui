@@ -17,12 +17,11 @@ const Usage = () => {
     const { userToEdit } = useParams();
     const [data, setData] = useState([]);
     const [recursive, setRecursive] = useState(false);
-    const [refresh, setRefresh] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
     const [endDate, setEndDate] = useState(new Date());
     const [, setAlertMsg] = useContext(AlertContext);
-    const [{ jwt, server }] = useContext(AuthContext);
+    const [{ server }] = useContext(AuthContext);
     const [serverInfo,] = useContext(ServerInfoContext);
     const [remainingQuota, setRemainingQuota] = useState(0)
     const [userSettings,] = useContext(UserSettingsContext)
