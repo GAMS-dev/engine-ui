@@ -307,7 +307,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
             return;
         }
         try {
-            const jobs_endpoint = (serverInfo.is_saas && serverInfo.use_brockerv2) ? `${server}/v2/jobs/` : `${server}/jobs/`;
+            const jobs_endpoint = (serverInfo.is_saas && serverInfo.use_brokerv2) ? `${server}/v2/jobs/` : `${server}/jobs/`;
             const postJobResponse = await axios.post(
                 newHcJob ? `${server}/hypercube/` : jobs_endpoint,
                 jobSubmissionForm,
