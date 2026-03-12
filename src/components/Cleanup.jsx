@@ -1,19 +1,19 @@
-import { useEffect, useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import { RefreshCw, Send } from "react-feather";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import AuthContext from "../contexts/AuthContext";
-import AlertContext from "../contexts/AlertContext";
-import moment from "moment";
 import axios from "axios";
-import Table from "./Table";
-import { getResponseError, formatFileSize, calcRemainingQuota } from "../util/util";
-import TimeDisplay from "./TimeDisplay";
-import SubmitButton from "./SubmitButton";
-import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
+import moment from "moment";
+import { useContext, useEffect, useState } from "react";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { RefreshCw, Send } from "react-feather";
 import { ClipLoader } from "react-spinners";
+import AlertContext from "../contexts/AlertContext";
+import AuthContext from "../contexts/AuthContext";
 import UserSettingsContext from "../contexts/UserSettingsContext";
+import { calcRemainingQuota, formatFileSize, getResponseError } from "../util/util";
+import CleanupActionsButtonGroup from "./CleanupActionsButtonGroup";
+import { JobTokenLink } from "./JobTokenLink";
+import SubmitButton from "./SubmitButton";
+import Table from "./Table";
+import TimeDisplay from "./TimeDisplay";
 import { UserLink } from "./UserLink";
 
 const Cleanup = () => {
@@ -42,13 +42,7 @@ const Cleanup = () => {
         {
             field: "token,type",
             column: "Job token",
-            displayer: (name, type) => <>
-                {type === "hypercube_result" ? <Link to={`/jobs/hc:${name}`}>{name}
-                    <sup>
-                        <span className="badge rounded-pill bg-primary ms-1">HC</span>
-                    </sup></Link> :
-                    <Link to={`/jobs/${name}`}>{name}</Link>}
-            </>
+            displayer: (name, type) => <JobTokenLink name={name} type={type} />
         },
         {
             field: "username",

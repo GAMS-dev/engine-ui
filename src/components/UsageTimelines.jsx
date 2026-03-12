@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
-import { Chart as ChartJS, LinearScale, TimeScale, PointElement, LineElement, Legend, Tooltip, Filler } from 'chart.js';
+import { Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, TimeScale, Tooltip } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import zoomPlugin from 'chartjs-plugin-zoom'
+import zoomPlugin from 'chartjs-plugin-zoom';
+import { useEffect, useState } from "react";
 import { Line } from 'react-chartjs-2';
-import { Link, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
+import { mergeSortedArrays } from "../util/util";
+import { JobTokenLink } from "./JobTokenLink";
 import Table from "./Table";
 import TimeDiffDisplay from "./TimeDiffDisplay";
 import TimeDisplay from "./TimeDisplay";
 import UserLink from "./UserLink";
-import { mergeSortedArrays } from "../util/util";
 
 ChartJS.register(
     LinearScale,
@@ -87,13 +88,8 @@ const UsageTimeline = () => {
         {
             field: "token,job_count",
             column: "Job token",
-            displayer: (name, job_count) => <>
-                {job_count != null ? <Link to={`/jobs/hc:${name}`}>{name}
-                    <sup>
-                        <span className="badge rounded-pill bg-primary ms-1">HC</span>
-                    </sup></Link> :
-                    <Link to={`/jobs/${name}`}>{name}</Link>}
-            </>
+            displayer: (name, type) => <JobTokenLink name={name} type={type} />
+
         },
         {
             field: "submitted",

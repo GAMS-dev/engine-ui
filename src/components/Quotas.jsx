@@ -2,13 +2,14 @@ import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
-import { Link, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import Select from 'react-select';
 import { ClipLoader } from 'react-spinners';
 import ServerInfoContext from "../contexts/ServerInfoContext";
 import UserSettingsContext from "../contexts/UserSettingsContext";
 import computeTimes from '../util/calculateQuota.js';
 import { formatDecimal } from '../util/util.jsx';
+import { JobTokenLink } from './JobTokenLink.jsx';
 import Table from './Table.jsx';
 import { UserLink } from './UserLink.jsx';
 
@@ -155,16 +156,7 @@ const Quotas = () => {
     {
       field: "token,is_hypercube",
       column: "Job token",
-      displayer: (name, is_hypercube) => (
-        <Link to={`/jobs/${is_hypercube ? `hc:${name}` : name}`}>
-          {name}
-          {is_hypercube && (
-            <sup>
-              <span className="badge badge-pill badge-primary ml-1">HC</span>
-            </sup>
-          )}
-        </Link>
-      )
+      displayer: (name, type) => <JobTokenLink name={name} type={type} />
     },
     COLUMN_DEFS.instance,
     COLUMN_DEFS.pool_label,
