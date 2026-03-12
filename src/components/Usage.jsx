@@ -63,19 +63,21 @@ const Usage = () => {
                     { key: 'pool_usage', url: `${server}/v2/usage/${userToEdit}/pools` }
                 ];
 
-                let currentOffset = 0;
+                let currentOffsetJob = 0;
+                let currentOffsetHcJob = 0;
+                let currentOffsetPool = 0;
 
                 const firstResponses = await Promise.all(
                     endpoints.map(e => axios.get(e.url, {
-                        params: { ...requestParams, offset: currentOffset },
+                        params: { ...requestParams, offset: 0 },
                         headers: requestHeader,
                         signal: controller.signal
                     }))
                 );
 
                 const metadata = firstResponses.map(res => ({
-                    total: parseInt(res.headers['x-total']) || 0,
-                    perPage: parseInt(res.headers['x-per-page']) || 100
+                    total: parseInt(res.headers['x-total']),
+                    perPage: parseInt(res.headers['x-per-page'])
                 }));
 
                 let finalData = {
@@ -95,18 +97,19 @@ const Usage = () => {
                     finalData.hypercube_job_usage.length < metadata[1].total ||
                     finalData.pool_usage.length < metadata[2].total) {
 
-                    // await new Promise(r => setTimeout(r, 1000)); // One-line sleep for testing
-                    currentOffset += metadata[0].perPage;
+                    currentOffsetJob += metadata[0].perPage;
+                    currentOffsetHcJob += metadata[1].perPage;
+                    currentOffsetPool += metadata[2].perPage;
 
                     const pendingRequests = [];
                     if (finalData.job_usage.length < metadata[0].total) {
-                        pendingRequests.push(axios.get(endpoints[0].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'job_usage', items: r.data.items })));
+                        pendingRequests.push(axios.get(endpoints[0].url, { params: { ...requestParams, offset: currentOffsetJob }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'job_usage', items: r.data.items })));
                     }
                     if (finalData.hypercube_job_usage.length < metadata[1].total) {
-                        pendingRequests.push(axios.get(endpoints[1].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'hypercube_job_usage', items: r.data.items })));
+                        pendingRequests.push(axios.get(endpoints[1].url, { params: { ...requestParams, offset: currentOffsetHcJob }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'hypercube_job_usage', items: r.data.items })));
                     }
                     if (finalData.pool_usage.length < metadata[2].total) {
-                        pendingRequests.push(axios.get(endpoints[2].url, { params: { ...requestParams, offset: currentOffset }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'pool_usage', items: r.data.items })));
+                        pendingRequests.push(axios.get(endpoints[2].url, { params: { ...requestParams, offset: currentOffsetPool }, headers: requestHeader, signal: controller.signal }).then(r => ({ key: 'pool_usage', items: r.data.items })));
                     }
 
                     const nextBatch = await Promise.all(pendingRequests);

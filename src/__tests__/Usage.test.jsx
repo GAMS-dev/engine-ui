@@ -291,6 +291,85 @@ describe('Usage', () => {
         expect(signal.aborted).toBe(true);
 
         resolveRequest({ data: [] });
+        // should switch back to the fetch button
+        await screen.findByRole("button", { name: /Fetch Usage/i });
+    });
+
+    it('handles different per-page limits for different endpoints correctly', async () => {
+        const jobsUrl = `testserver/v2/usage/user1/jobs`;
+        const hcUrl = `testserver/v2/usage/user1/hypercube`;
+        const poolsUrl = `testserver/v2/usage/user1/pools`;
+
+        axios.get.mockImplementation((url, options) => {
+            if (url.includes('/usage/quota')) {
+                return Promise.resolve({ data: [] });
+            }
+
+            const offset = options?.params?.offset || 0;
+            let total = 0;
+            let perPage = 100;
+
+            if (url.includes(jobsUrl)) {
+                total = 50;
+                perPage = 50; // Will take 1 call (offset 0)
+            } else if (url.includes(hcUrl)) {
+                total = 30;
+                perPage = 10; // Will take 3 calls (offset 0, 10, 20)
+            } else if (url.includes(poolsUrl)) {
+                total = 100;
+                perPage = 25; // Will take 4 calls (offset 0, 25, 50, 75)
+            }
+
+            const remaining = Math.max(0, total - offset);
+            const itemsCount = Math.min(perPage, remaining);
+            const items = Array.from({ length: itemsCount }).map((_, i) => ({ id: offset + i }));
+
+            return Promise.resolve({
+                headers: {
+                    'x-total': total.toString(),
+                    'x-per-page': perPage.toString()
+                },
+                data: { items }
+            });
+        });
+
+        render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+            wrapper: ({ children }) => (
+                <AllProvidersWrapperDefault options={{ is_saas: true, use_brokerv2: true }}>
+                    {children}
+                </AllProvidersWrapperDefault>
+            )
+        });
+
+        await waitFor(() => screen.findByText('Show Invitees?'));
+
+        const fetchButton = screen.getByRole("button", { name: /Refresh/i });
+        await user.click(fetchButton);
+
+        // Wait until the final pool request (offset 75) has been made to ensure the while loop finished
+        await waitFor(() => {
+            expect(axios.get).toHaveBeenCalledWith(poolsUrl, expect.objectContaining({ params: expect.objectContaining({ offset: 75 }) }));
+        });
+
+        // Jobs: total 50, perPage 50 -> exactly 1 call at offset 0
+        const jobsCalls = axios.get.mock.calls.filter(call => call[0].includes(jobsUrl));
+        expect(jobsCalls.length).toBe(1);
+        expect(jobsCalls[0][1].params.offset).toBe(0);
+
+        // Hypercube: total 30, perPage 10 -> exactly 3 calls at offsets 0, 10, 20
+        const hcCalls = axios.get.mock.calls.filter(call => call[0].includes(hcUrl));
+        expect(hcCalls.length).toBe(3);
+        expect(hcCalls[0][1].params.offset).toBe(0);
+        expect(hcCalls[1][1].params.offset).toBe(10);
+        expect(hcCalls[2][1].params.offset).toBe(20);
+
+        // Pools: total 100, perPage 25 -> exactly 4 calls at offsets 0, 25, 50, 75
+        const poolsCalls = axios.get.mock.calls.filter(call => call[0].includes(poolsUrl));
+        expect(poolsCalls.length).toBe(4);
+        expect(poolsCalls[0][1].params.offset).toBe(0);
+        expect(poolsCalls[1][1].params.offset).toBe(25);
+        expect(poolsCalls[2][1].params.offset).toBe(50);
+        expect(poolsCalls[3][1].params.offset).toBe(75);
     });
 
 })
