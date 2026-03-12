@@ -156,7 +156,12 @@ const Quotas = () => {
     {
       field: "token,is_hypercube",
       column: "Job token",
-      displayer: (name, type) => <JobTokenLink name={name} type={type} />
+      displayer: (name, is_hypercube) => (
+        <JobTokenLink
+          name={name}
+          type={is_hypercube ? "hypercube_result" : "standard"}
+        />
+      )
     },
     COLUMN_DEFS.instance,
     COLUMN_DEFS.pool_label,

@@ -88,7 +88,12 @@ const UsageTimeline = () => {
         {
             field: "token,job_count",
             column: "Job token",
-            displayer: (name, type) => <JobTokenLink name={name} type={type} />
+            displayer: (name, job_count) => (
+                <JobTokenLink
+                    name={name}
+                    type={job_count != null ? "hypercube_result" : "standard"}
+                />
+            )
 
         },
         {
