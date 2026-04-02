@@ -1,5 +1,5 @@
-import { createContext } from 'react'
+import { createContext } from 'react';
 
-const AlertContext = createContext(['', () => { }])
+const AlertContext = createContext(['', () => {}]);
 
 export default AlertContext;

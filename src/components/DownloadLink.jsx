@@ -1,66 +1,90 @@
-import { useState, useContext } from "react";
-import axios from "axios";
-import { getResponseError } from "../util/util";
-import AlertContext from "../contexts/AlertContext";
+import { useState, useContext } from 'react';
+import axios from 'axios';
+import { getResponseError } from '../util/util';
+import AlertContext from '../contexts/AlertContext';
 
-export default function DownloadLink({ url, filename, children, className, jsonSubkey }) {
+export default function DownloadLink({
+  url,
+  filename,
+  children,
+  className,
+  jsonSubkey,
+}) {
   const [, setAlertMsg] = useContext(AlertContext);
   const [percentComleted, setPercentCompleted] = useState(0);
   const [linkDisabled, setLinkDisabled] = useState(false);
-  const [cancelTokenSource, setCancelTokenSource] = useState(axios.CancelToken.source());
+  const [cancelTokenSource, setCancelTokenSource] = useState(
+    axios.CancelToken.source(),
+  );
 
   const abortDownload = () => {
     cancelTokenSource.cancel();
-  }
+  };
 
   const handleAction = async () => {
     setLinkDisabled(true);
-    let response
+    let response;
     try {
       response = await axios({
         url: url,
-        method: "GET",
-        responseType: jsonSubkey ? "json" : "blob",
-        onDownloadProgress: progressEvent => {
+        method: 'GET',
+        responseType: jsonSubkey ? 'json' : 'blob',
+        onDownloadProgress: (progressEvent) => {
           if (progressEvent.total > 0) {
-            setPercentCompleted(Math.floor((progressEvent.loaded * 100) / progressEvent.total));
-          } else if (progressEvent.srcElement.getResponseHeader('Content-Length')) {
-            setPercentCompleted(Math.floor((progressEvent.loaded * 100) /
-              progressEvent.srcElement.getResponseHeader('Content-Length')));
+            setPercentCompleted(
+              Math.floor((progressEvent.loaded * 100) / progressEvent.total),
+            );
+          } else if (
+            progressEvent.srcElement.getResponseHeader('Content-Length')
+          ) {
+            setPercentCompleted(
+              Math.floor(
+                (progressEvent.loaded * 100) /
+                  progressEvent.srcElement.getResponseHeader('Content-Length'),
+              ),
+            );
           }
         },
-        cancelToken: cancelTokenSource.token
-      })
+        cancelToken: cancelTokenSource.token,
+      });
     } catch (err) {
       if (axios.isCancel(err)) {
         setCancelTokenSource(axios.CancelToken.source());
       } else {
-        setAlertMsg(`Problems fetching ${filename}. Error message: ${getResponseError(err)}`);
+        setAlertMsg(
+          `Problems fetching ${filename}. Error message: ${getResponseError(err)}`,
+        );
       }
       setLinkDisabled(false);
     }
-    const downloadUrl = window.URL.createObjectURL(new Blob([jsonSubkey ? response.data[jsonSubkey] : response.data]));
+    const downloadUrl = window.URL.createObjectURL(
+      new Blob([jsonSubkey ? response.data[jsonSubkey] : response.data]),
+    );
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     setLinkDisabled(false);
-  }
+  };
 
   return (
     <>
       <button
         className={className}
         onClick={handleAction}
-        disabled={linkDisabled}>
+        disabled={linkDisabled}
+      >
         {linkDisabled ? `${percentComleted}%` : children}
       </button>
-      {linkDisabled &&
+      {linkDisabled && (
         <button
           className="btn btn-sm btn-outline-danger"
-          onClick={abortDownload}>x
-        </button>}
+          onClick={abortDownload}
+        >
+          x
+        </button>
+      )}
     </>
-  )
+  );
 }

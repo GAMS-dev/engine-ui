@@ -8,19 +8,20 @@ import InstancesActionsButtonGroup from '../components/InstancesActionsButtonGro
 vi.mock('axios');
 
 describe('InstancesActionsButtonGroup', () => {
-    let user;
+  let user;
 
-    beforeEach(() => {
-        user = userEvent.setup();
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  it('renders InstancesActionsButtonGroup correctly', async () => {
+    render(<InstancesActionsButtonGroup />, {
+      wrapper: AllProvidersWrapperDefault,
     });
-
-    it('renders InstancesActionsButtonGroup correctly', async () => {
-        render(<InstancesActionsButtonGroup />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await waitFor(() => screen.findByText(/Update/));
-        await user.click(screen.getByRole("button", { name: 'Delete' }));
-        expect(screen.getByText(/Are you sure you want to remove the instance/)).toBeInTheDocument()
-    });
-
-})
+    await waitFor(() => screen.findByText(/Update/));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(
+      screen.getByText(/Are you sure you want to remove the instance/),
+    ).toBeInTheDocument();
+  });
+});

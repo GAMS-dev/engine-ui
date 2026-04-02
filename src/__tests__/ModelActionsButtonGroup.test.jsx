@@ -8,19 +8,20 @@ import ModelActionsButtonGroup from '../components/ModelActionsButtonGroup';
 vi.mock('axios');
 
 describe('ModelActionsButtonGroup', () => {
-    let user;
+  let user;
 
-    beforeEach(() => {
-        user = userEvent.setup();
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  it('renders ModelActionsButtonGroup correctly', async () => {
+    render(<ModelActionsButtonGroup namespace={{ permission: 110 }} />, {
+      wrapper: AllProvidersWrapperDefault,
     });
-
-    it('renders ModelActionsButtonGroup correctly', async () => {
-        render(<ModelActionsButtonGroup namespace={{ permission: 110 }} />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await waitFor(() => screen.findByText('Download'));
-        await user.click(screen.getByText(/Delete/));
-        expect(screen.getByText(/Are you sure you want to delete the model:/)).toBeInTheDocument();
-    });
-
-})
+    await waitFor(() => screen.findByText('Download'));
+    await user.click(screen.getByText(/Delete/));
+    expect(
+      screen.getByText(/Are you sure you want to delete the model:/),
+    ).toBeInTheDocument();
+  });
+});

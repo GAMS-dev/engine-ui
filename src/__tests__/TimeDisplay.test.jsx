@@ -1,19 +1,21 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import TimeDisplay from '../components/TimeDisplay'
+import TimeDisplay from '../components/TimeDisplay';
 
 vi.mock('axios');
 
 describe('TimeDisplay', () => {
-
-    it('renders TimeDisplay correctly', async () => {
-        const oneYearAgo = new Date(new Date().getFullYear() - 1, new Date().getMonth(), new Date().getDate()).toISOString();
-        render(<TimeDisplay time={oneYearAgo} />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await waitFor(() => screen.findByText('a year ago'));
+  it('renders TimeDisplay correctly', async () => {
+    const oneYearAgo = new Date(
+      new Date().getFullYear() - 1,
+      new Date().getMonth(),
+      new Date().getDate(),
+    ).toISOString();
+    render(<TimeDisplay time={oneYearAgo} />, {
+      wrapper: AllProvidersWrapperDefault,
     });
-
-})
+    await waitFor(() => screen.findByText('a year ago'));
+  });
+});

@@ -1,36 +1,35 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import Layout from '../components/Layout'
+import Layout from '../components/Layout';
 import axios from 'axios';
 
 vi.mock('axios');
 
 describe('Layout', () => {
-
-    beforeEach(() => {
-        axios.get.mockImplementation((url) => {
-            switch (url) {
-                case 'testserver/licenses/engine':
-                    return Promise.resolve({
-                        status: 200, data: {
-                            "license": null,
-                            "expiration_date": null,
-                            "usi": "usiToken1234"
-                        }
-                    })
-                default:
-                    return Promise.reject(new Error('not found'))
-            }
-        })
-    })
-
-    it('renders Layout correctly', async () => {
-        render(<Layout />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await waitFor(() => screen.findByText('No license'));
+  beforeEach(() => {
+    axios.get.mockImplementation((url) => {
+      switch (url) {
+        case 'testserver/licenses/engine':
+          return Promise.resolve({
+            status: 200,
+            data: {
+              license: null,
+              expiration_date: null,
+              usi: 'usiToken1234',
+            },
+          });
+        default:
+          return Promise.reject(new Error('not found'));
+      }
     });
+  });
 
-})
+  it('renders Layout correctly', async () => {
+    render(<Layout />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText('No license'));
+  });
+});

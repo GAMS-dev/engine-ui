@@ -1,16 +1,22 @@
-import { useEffect, useContext, useState } from "react";
-import { RefreshCw, Send, Layers, ToggleLeft, ToggleRight } from "react-feather";
-import AuthContext from "../contexts/AuthContext";
-import AlertContext from "../contexts/AlertContext";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
-import Table from "./Table";
-import TimeDisplay from "./TimeDisplay";
-import { getResponseError } from "../util/util";
-import JobActionsButtonGroup from "./JobActionsButtonGroup";
-import { Tab, Tabs } from "react-bootstrap";
-import UserSettingsContext from "../contexts/UserSettingsContext";
-import { UserLink } from "./UserLink";
+import { useEffect, useContext, useState } from 'react';
+import {
+  RefreshCw,
+  Send,
+  Layers,
+  ToggleLeft,
+  ToggleRight,
+} from 'react-feather';
+import AuthContext from '../contexts/AuthContext';
+import AlertContext from '../contexts/AlertContext';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Table from './Table';
+import TimeDisplay from './TimeDisplay';
+import { getResponseError } from '../util/util';
+import JobActionsButtonGroup from './JobActionsButtonGroup';
+import { Tab, Tabs } from 'react-bootstrap';
+import UserSettingsContext from '../contexts/UserSettingsContext';
+import { UserLink } from './UserLink';
 
 const Jobs = () => {
   const location = useLocation();
@@ -18,18 +24,22 @@ const Jobs = () => {
   const [refresh, setRefresh] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const [tabSelected, setTabSelected] = useState(location.pathname === "/hc" ? "hc" : "jobs");
+  const [tabSelected, setTabSelected] = useState(
+    location.pathname === '/hc' ? 'hc' : 'jobs',
+  );
   const [totalJobs, setTotalJobs] = useState(0);
   const [currentPageJobs, setCurrentPageJobs] = useState(1);
-  const [sortedColJobs, setSortedColJobs] = useState("submitted_at");
+  const [sortedColJobs, setSortedColJobs] = useState('submitted_at');
   const [sortAscJobs, setSortAscJobs] = useState(false);
-  const [userSettings,] = useContext(UserSettingsContext)
+  const [userSettings] = useContext(UserSettingsContext);
   const [rowsPerPage, setRowsPerPage] = useState(userSettings.tablePageLength);
-  const [rowsPerPageHc, setRowsPerPageHc] = useState(userSettings.tablePageLength);
+  const [rowsPerPageHc, setRowsPerPageHc] = useState(
+    userSettings.tablePageLength,
+  );
   const [jobData, setJobData] = useState([]);
   const [totalHcJobs, setTotalHcJobs] = useState(0);
   const [currentPageHcJobs, setCurrentPageHcJobs] = useState(1);
-  const [sortedColHcJobs, setSortedColHcJobs] = useState("submitted_at");
+  const [sortedColHcJobs, setSortedColHcJobs] = useState('submitted_at');
   const [sortAscHcJobs, setSortAscHcJobs] = useState(false);
   const [hcJobData, setHcJobData] = useState([]);
   const [filterActive, setFilterActive] = useState(false);
@@ -37,59 +47,66 @@ const Jobs = () => {
   const [{ jwt, server, roles }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 
-  const isInviter = roles && roles.find(role => ["admin", "inviter"].includes(role)) !== undefined;
+  const isInviter =
+    roles &&
+    roles.find((role) => ['admin', 'inviter'].includes(role)) !== undefined;
 
   const displayFieldsDefault = [
     {
-      field: "user",
-      column: "Username",
-      sorter: "alphabetical-object",
-      displayer: user => user.deleted ?
-        <span className="badge rounded-pill bg-secondary ms-1">deleted</span> :
-        <UserLink user={user.username} />
+      field: 'user',
+      column: 'Username',
+      sorter: 'alphabetical-object',
+      displayer: (user) =>
+        user.deleted ? (
+          <span className="badge rounded-pill bg-secondary ms-1">deleted</span>
+        ) : (
+          <UserLink user={user.username} />
+        ),
     },
     {
-      field: "model",
-      column: "Model",
-      sorter: "alphabetical",
-      displayer: String
+      field: 'model',
+      column: 'Model',
+      sorter: 'alphabetical',
+      displayer: String,
     },
     {
-      field: "namespace",
-      column: "Namespace",
-      sorter: "alphabetical",
-      displayer: String
+      field: 'namespace',
+      column: 'Namespace',
+      sorter: 'alphabetical',
+      displayer: String,
     },
     {
-      field: "tag",
-      column: "Tag",
-      displayer: e => <div className="table-cell-overflow">{e}</div>
+      field: 'tag',
+      column: 'Tag',
+      displayer: (e) => <div className="table-cell-overflow">{e}</div>,
     },
     {
-      field: "submitted_at",
-      column: "Submitted",
-      sorter: "datetime",
-      displayer: e => <TimeDisplay time={e} />
+      field: 'submitted_at',
+      column: 'Submitted',
+      sorter: 'datetime',
+      displayer: (e) => <TimeDisplay time={e} />,
     },
     {
-      field: "status",
-      column: "Status",
-      displayer: String
+      field: 'status',
+      column: 'Status',
+      displayer: String,
     },
     {
-      field: "token,status",
-      column: "Actions",
-      displayer: (e, status) =>
+      field: 'token,status',
+      column: 'Actions',
+      displayer: (e, status) => (
         <JobActionsButtonGroup
-          token={tabSelected === "hc" ? `hc:${e}` : e}
+          token={tabSelected === 'hc' ? `hc:${e}` : e}
           status={status}
           server={server}
-          setRefresh={setRefresh} />
-    }
+          setRefresh={setRefresh}
+        />
+      ),
+    },
   ];
   const [displayFields, setDisplayFields] = useState(displayFieldsDefault);
 
-  const [displayFieldKeys,] = useState(displayFields.map(e => e.field));
+  const [displayFieldKeys] = useState(displayFields.map((e) => e.field));
 
   const statusCodeReducer = (accumulator, currentValue) => {
     accumulator[currentValue.status_code] = currentValue.description;
@@ -99,7 +116,7 @@ const Jobs = () => {
   //init the list
   useEffect(() => {
     const fetchJobs = async () => {
-      let jReq
+      let jReq;
       try {
         jReq = await axios.get(server + `/jobs/`, {
           params: {
@@ -108,22 +125,24 @@ const Jobs = () => {
             page: currentPageJobs,
             order_by: sortedColJobs,
             order_asc: sortAscJobs,
-            show_only_active: filterActive
+            show_only_active: filterActive,
           },
-          headers: { "X-Fields": displayFieldKeys.join(",") }
-        })
+          headers: { 'X-Fields': displayFieldKeys.join(',') },
+        });
       } catch (err) {
-        setAlertMsg(`Problems fetching job information. Error message: ${getResponseError(err)}`)
-        setIsLoading(false)
-        return
+        setAlertMsg(
+          `Problems fetching job information. Error message: ${getResponseError(err)}`,
+        );
+        setIsLoading(false);
+        return;
       }
       setTotalJobs(jReq.data.count);
       setJobData(jReq.data.results);
       setIsLoading(false);
-    }
+    };
 
     const fetchHCJobs = async () => {
-      let jHCReq
+      let jHCReq;
       try {
         jHCReq = await axios.get(server + `/hypercube/`, {
           params: {
@@ -132,50 +151,69 @@ const Jobs = () => {
             page: currentPageHcJobs,
             order_by: sortedColHcJobs,
             order_asc: sortAscHcJobs,
-            show_only_active: filterActive
+            show_only_active: filterActive,
           },
-          headers: { "X-Fields": displayFieldKeys.join(",") }
-        })
+          headers: { 'X-Fields': displayFieldKeys.join(',') },
+        });
       } catch (err) {
-        setAlertMsg(`Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`)
-        setIsLoading(false)
-        return
+        setAlertMsg(
+          `Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`,
+        );
+        setIsLoading(false);
+        return;
       }
       setTotalHcJobs(jHCReq.data.count);
       setHcJobData(jHCReq.data.results);
       setIsLoading(false);
-    }
+    };
     setIsLoading(true);
-    if (tabSelected === "jobs") {
-      fetchJobs()
+    if (tabSelected === 'jobs') {
+      fetchJobs();
     } else {
-      fetchHCJobs()
+      fetchHCJobs();
     }
-  }, [jwt, server, isInviter, filterActive, refresh, setAlertMsg,
-    currentPageJobs, currentPageHcJobs, sortedColJobs, sortedColHcJobs, sortAscJobs,
-    sortAscHcJobs, rowsPerPage, rowsPerPageHc, tabSelected, displayFieldKeys]);
+  }, [
+    jwt,
+    server,
+    isInviter,
+    filterActive,
+    refresh,
+    setAlertMsg,
+    currentPageJobs,
+    currentPageHcJobs,
+    sortedColJobs,
+    sortedColHcJobs,
+    sortAscJobs,
+    sortAscHcJobs,
+    rowsPerPage,
+    rowsPerPageHc,
+    tabSelected,
+    displayFieldKeys,
+  ]);
 
   //fetch status codes
   useEffect(() => {
     const fetchStatusCode = async () => {
-      let scReq
+      let scReq;
       try {
-        scReq = await axios.get(server + `/jobs/status-codes`)
+        scReq = await axios.get(server + `/jobs/status-codes`);
       } catch (err) {
-        setAlertMsg(`Problems fetching status code map. Error message: ${getResponseError(err)}`)
-        return
+        setAlertMsg(
+          `Problems fetching status code map. Error message: ${getResponseError(err)}`,
+        );
+        return;
       }
       const newStatusCodes = scReq.data.reduce(statusCodeReducer, {});
       setStatusCodes(newStatusCodes);
-      const newDisplayFields = displayFields.map(e => ({ ...e }));
-      newDisplayFields.find(e => e.field === "status").displayer = e => (
+      const newDisplayFields = displayFields.map((e) => ({ ...e }));
+      newDisplayFields.find((e) => e.field === 'status').displayer = (e) => (
         <p className="text-info">{newStatusCodes[e]}</p>
       );
       setDisplayFields(newDisplayFields);
-    }
+    };
     // Only fetch status codes if not already fetched
     if (statusCodes.length === 0) {
-      fetchStatusCode()
+      fetchStatusCode();
     }
   }, [server, displayFields, statusCodes, setAlertMsg]);
 
@@ -186,13 +224,19 @@ const Jobs = () => {
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
             <Link to="/new-job">
-              <button type="button" className="btn btn-sm btn-outline-primary h-100">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary h-100"
+              >
                 New Job
                 <Send width="12px" className="ms-2" />
               </button>
             </Link>
             <Link to="/new-hc-job">
-              <button type="button" className="btn btn-sm btn-outline-primary h-100">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary h-100"
+              >
                 New Hypercube Job
                 <Layers width="12px" className="ms-2" />
               </button>
@@ -203,19 +247,17 @@ const Jobs = () => {
               onClick={() => {
                 setResetPageNumber(true);
                 setCurrentPageJobs(1);
-                setFilterActive(currFilterActive => !currFilterActive)
+                setFilterActive((currFilterActive) => !currFilterActive);
               }}
             >
-              {filterActive ?
-                <ToggleRight size={18} style={{ marginTop: "2px" }} />
-                :
-                <ToggleLeft size={18} style={{ marginTop: "2px" }} />
-              }
+              {filterActive ? (
+                <ToggleRight size={18} style={{ marginTop: '2px' }} />
+              ) : (
+                <ToggleLeft size={18} style={{ marginTop: '2px' }} />
+              )}
               &nbsp;
               <span className="flex-grow-1">
-                {filterActive
-                  ? "Show All"
-                  : "Show Active"}
+                {filterActive ? 'Show All' : 'Show Active'}
               </span>
             </button>
             <button
@@ -234,9 +276,10 @@ const Jobs = () => {
       <Tabs
         activeKey={tabSelected}
         onSelect={(k) => {
-          navigate(`/${k}`)
-          setTabSelected(k)
-        }}>
+          navigate(`/${k}`);
+          setTabSelected(k);
+        }}
+      >
         <Tab eventKey="jobs" title="Jobs">
           <Table
             data={jobData}
@@ -257,10 +300,10 @@ const Jobs = () => {
                   return;
                 }
               }
-              setCurrentPageJobs(currentPage + 1)
-              setSortedColJobs(sortedCol)
-              setSortAscJobs(sortAsc)
-              setRowsPerPage(rowsPerPage)
+              setCurrentPageJobs(currentPage + 1);
+              setSortedColJobs(sortedCol);
+              setSortAscJobs(sortAsc);
+              setRowsPerPage(rowsPerPage);
             }}
           />
         </Tab>
@@ -284,10 +327,10 @@ const Jobs = () => {
                   return;
                 }
               }
-              setCurrentPageHcJobs(currentPage + 1)
-              setSortedColHcJobs(sortedCol)
-              setSortAscHcJobs(sortAsc)
-              setRowsPerPageHc(rowsPerPage)
+              setCurrentPageHcJobs(currentPage + 1);
+              setSortedColHcJobs(sortedCol);
+              setSortAscHcJobs(sortAsc);
+              setRowsPerPageHc(rowsPerPage);
             }}
           />
         </Tab>

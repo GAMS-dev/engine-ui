@@ -1,28 +1,34 @@
-import { Link } from "react-router-dom";
-import DownloadLink from "./DownloadLink";
-import TerminateJobButton from "./TerminateJobButton";
+import { Link } from 'react-router-dom';
+import DownloadLink from './DownloadLink';
+import TerminateJobButton from './TerminateJobButton';
 
-const JobActionsButtonGroup = props => {
+const JobActionsButtonGroup = (props) => {
   const { token, status, server, setRefresh } = props;
 
   return (
     <div className="btn-group">
-      <Link to={"/jobs/" + token} className="btn btn-sm btn-outline-info">
+      <Link to={'/jobs/' + token} className="btn btn-sm btn-outline-info">
         Show
       </Link>
-      {status > 9 &&
+      {status > 9 && (
         <DownloadLink
-          url={token.startsWith("hc:") ? `${server}/hypercube/${encodeURIComponent(token.substring(3))}/result` :
-            `${server}/jobs/${encodeURIComponent(token)}/result`}
+          url={
+            token.startsWith('hc:')
+              ? `${server}/hypercube/${encodeURIComponent(token.substring(3))}/result`
+              : `${server}/jobs/${encodeURIComponent(token)}/result`
+          }
           filename="results.zip"
-          className="btn btn-sm btn-outline-info">
+          className="btn btn-sm btn-outline-info"
+        >
           Download
-        </DownloadLink>}
+        </DownloadLink>
+      )}
       <TerminateJobButton
         token={token}
         setRefresh={setRefresh}
         status={status}
-        server={server} />
+        server={server}
+      />
     </div>
   );
 };

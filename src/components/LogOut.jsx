@@ -1,14 +1,14 @@
-import { useContext } from "react";
-import AuthContext from "../contexts/AuthContext";
-import { useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { useContext } from 'react';
+import AuthContext from '../contexts/AuthContext';
+import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 
 const LogOut = () => {
   const [, setLogin] = useContext(AuthContext);
   useEffect(() => {
-    localStorage.removeItem("login");
+    localStorage.removeItem('login');
     setLogin(false);
-  }, [setLogin])
+  }, [setLogin]);
   return <Navigate replace to="/login" />;
 };
 

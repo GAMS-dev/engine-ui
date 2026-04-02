@@ -8,19 +8,20 @@ import InstancePoolsActionsButtonGroup from '../components/InstancePoolsActionsB
 vi.mock('axios');
 
 describe('InstancePoolsActionsButtonGroup', () => {
-    let user;
+  let user;
 
-    beforeEach(() => {
-        user = userEvent.setup();
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  it('renders InstancePoolsActionsButtonGroup correctly', async () => {
+    render(<InstancePoolsActionsButtonGroup />, {
+      wrapper: AllProvidersWrapperDefault,
     });
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
 
-    it('renders InstancePoolsActionsButtonGroup correctly', async () => {
-        render(<InstancePoolsActionsButtonGroup />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await user.click(screen.getByRole("button", { name: 'Delete' }));
-
-        expect(screen.getByText(/Are you sure you want to remove the instance/)).toBeInTheDocument()
-    });
-
-})
+    expect(
+      screen.getByText(/Are you sure you want to remove the instance/),
+    ).toBeInTheDocument();
+  });
+});

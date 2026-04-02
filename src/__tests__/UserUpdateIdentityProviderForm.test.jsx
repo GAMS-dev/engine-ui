@@ -1,4 +1,4 @@
-import { within } from '@testing-library/dom';
+import { within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,250 +9,303 @@ import { AllProvidersWrapperDefault } from './utils/testUtils';
 vi.mock('axios');
 
 vi.mock('react-router-dom', async (importOriginal) => {
-    const actual = await importOriginal()
-    return {
-        ...actual,
-        useParams: vi.fn(),
-    }
-})
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useParams: vi.fn(),
+  };
+});
 
 import { useParams } from 'react-router-dom';
 
 const routes = [
-    { path: '/users/user1', element: <p>after submit went back to usage</p> }]
+  { path: '/users/user1', element: <p>after submit went back to usage</p> },
+];
 
 const AllProvidersWrapper = ({ children }) => (
-    <AllProvidersWrapperDefault options={{ routes: routes }}>
-        {children}
-    </AllProvidersWrapperDefault>
+  <AllProvidersWrapperDefault options={{ routes: routes }}>
+    {children}
+  </AllProvidersWrapperDefault>
 );
 
 describe('UserUpdateIdentityProviderForm', () => {
-    let user;
-    beforeEach(() => {
-        user = userEvent.setup();
+  let user;
+  beforeEach(() => {
+    user = userEvent.setup();
 
-        vi.clearAllMocks()
-        vi.mocked(useParams).mockReturnValue({
-            userToEdit: 'user1',
-        })
-        axios.get.mockImplementation((url, paramsRaw) => {
-            let params
-            if (paramsRaw != null) {
-                ({ params } = paramsRaw)
-            }
-            switch (url) {
-                case 'testserver/users/':
-                    if (params?.username === 'user1') {
-                        return Promise.resolve({
-                            status: 200,
-                            data: [
-                                {
-                                    'username': 'user1',
-                                    'roles': [],
-                                    'deleted': false,
-                                    'old_username': 'test1',
-                                    'inviter_name': 'admin',
-                                    'invitation_time': '2024-04-15T12:45:39.866973+00:00',
-                                    'identity_provider': 'gams_engine',
-                                    'identity_provider_user_subject': 'user1'
-                                }
-                            ]
-                        })
-                    } else if (params?.username === 'admin') {
-                        return Promise.resolve({
-                            status: 200,
-                            data: []
-                        })
-                    }
-                    else {
-                        return Promise.reject(new Error('not found'))
-                    }
-                case 'testserver/users/inviters-providers/admin':
-                    return Promise.resolve({
-                        status: 200,
-                        data: [
-                            {
-                                'name': 'gams_engine',
-                                'label': 'Login',
-                                'hidden': false,
-                                'oauth2': null,
-                                'oidc': null,
-                                'is_main_identity_provider': true,
-                                'is_ldap_identity_provider': false
-                            },
-                            {
-                                'name': 'test_provider',
-                                'label': 'Login',
-                                'hidden': false,
-                                'oauth2': null,
-                                'oidc': null,
-                                'is_main_identity_provider': true,
-                                'is_ldap_identity_provider': false
-                            }
-                        ]
-                    })
-                default:
-                    return Promise.reject(new Error('not found'))
-            }
-        })
-    })
+    vi.clearAllMocks();
+    vi.mocked(useParams).mockReturnValue({
+      userToEdit: 'user1',
+    });
+    axios.get.mockImplementation((url, paramsRaw) => {
+      let params;
+      if (paramsRaw != null) {
+        ({ params } = paramsRaw);
+      }
+      switch (url) {
+        case 'testserver/users/':
+          if (params?.username === 'user1') {
+            return Promise.resolve({
+              status: 200,
+              data: [
+                {
+                  username: 'user1',
+                  roles: [],
+                  deleted: false,
+                  old_username: 'test1',
+                  inviter_name: 'admin',
+                  invitation_time: '2024-04-15T12:45:39.866973+00:00',
+                  identity_provider: 'gams_engine',
+                  identity_provider_user_subject: 'user1',
+                },
+              ],
+            });
+          } else if (params?.username === 'admin') {
+            return Promise.resolve({
+              status: 200,
+              data: [],
+            });
+          } else {
+            return Promise.reject(new Error('not found'));
+          }
+        case 'testserver/users/inviters-providers/admin':
+          return Promise.resolve({
+            status: 200,
+            data: [
+              {
+                name: 'gams_engine',
+                label: 'Login',
+                hidden: false,
+                oauth2: null,
+                oidc: null,
+                is_main_identity_provider: true,
+                is_ldap_identity_provider: false,
+              },
+              {
+                name: 'test_provider',
+                label: 'Login',
+                hidden: false,
+                oauth2: null,
+                oidc: null,
+                is_main_identity_provider: true,
+                is_ldap_identity_provider: false,
+              },
+            ],
+          });
+        default:
+          return Promise.reject(new Error('not found'));
+      }
+    });
+  });
 
-    it('renders UserUpdateIdentityProviderForm corectly', async () => {
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-        await waitFor(() => screen.findByText(/gams_engine/))
+  it('renders UserUpdateIdentityProviderForm corectly', async () => {
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
+    });
+    await waitFor(() => screen.findByText(/gams_engine/));
+  });
+
+  it('shows all identity providers in dropdown', async () => {
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
+    });
+    await waitFor(() => screen.findByText(/gams_engine/));
+    const dropdown = screen.getByRole('combobox', {
+      name: /identity provider/i,
+    });
+    await user.click(dropdown);
+    const aggregateDropdownEl = within(
+      document.getElementById('identityProviderDropdown'),
+    );
+    await waitFor(() => aggregateDropdownEl.getByText('None (block user)'));
+    expect(
+      aggregateDropdownEl.queryByText(/test_provider/),
+    ).toBeInTheDocument();
+  });
+
+  it('fails if the passwords do not match', async () => {
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
+    });
+    await waitFor(() => screen.findByText(/gams_engine/));
+    await user.type(
+      screen.getByPlaceholderText('New password'),
+      'newpassword1',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Confirm password'),
+      'newpassword2',
+    );
+    await user.click(screen.getByRole('button'));
+    expect(
+      screen.queryByText(/The passwords you entered do not match/),
+    ).toBeInTheDocument();
+  });
+
+  it('sends the correct put request and redirects back to usage', async () => {
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
+    });
+    await waitFor(() => screen.findByText(/gams_engine/));
+    await user.type(screen.getByPlaceholderText('New password'), 'newpassword');
+    await user.type(
+      screen.getByPlaceholderText('Confirm password'),
+      'newpassword',
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Change Identity Provider' }),
+    );
+
+    let requestValue = new FormData();
+    requestValue.append('username', 'user1');
+    requestValue.append('identity_provider_name', 'gams_engine');
+    requestValue.append('password', 'newpassword');
+    expect(axios.put).toBeCalledWith(
+      'testserver/users/identity-provider',
+      requestValue,
+    );
+    await waitFor(() => screen.findByText(/after submit went back to usage/));
+  });
+
+  it('blocks user if none is selected and submitted', async () => {
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
+    });
+    await waitFor(() => screen.findByText(/gams_engine/));
+    const dropdown = screen.getByRole('combobox', {
+      name: /identity provider/i,
+    });
+    await user.click(dropdown);
+    const aggregateDropdownEl = within(
+      document.getElementById('identityProviderDropdown'),
+    );
+    await waitFor(() => aggregateDropdownEl.getByText('None (block user)'));
+    await user.click(aggregateDropdownEl.getByText('None (block user)'));
+    await user.click(screen.getByRole('button'));
+    // the text is split in a <div> ... <code> ...</code> ... </div> so need to check for the text in blocks
+    expect(
+      screen.queryByText(
+        /You are about to remove the identity provider from the user:/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/user1/)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/. This user will no longer be able to log in./),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Block User' }));
+    let requestValue = new FormData();
+    requestValue.append('username', 'user1');
+    requestValue.append('identity_provider_name', '');
+    expect(axios.put).toBeCalledWith(
+      'testserver/users/identity-provider',
+      requestValue,
+    );
+    await waitFor(() => screen.findByText(/after submit went back to usage/));
+  });
+
+  it('cancels correctly if cancel is pressed in block user', async () => {
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
+    });
+    await waitFor(() => screen.findByText(/gams_engine/));
+    const dropdown = screen.getByRole('combobox', {
+      name: /identity provider/i,
+    });
+    await user.click(dropdown);
+
+    const aggregateDropdownEl = within(
+      document.getElementById('identityProviderDropdown'),
+    );
+    await waitFor(() => aggregateDropdownEl.getByText('None (block user)'));
+    await user.click(aggregateDropdownEl.getByText('None (block user)'));
+    await user.click(screen.getByRole('button'));
+    // the text is split in a <div> ... <code> ...</code> ... </div> so need to check for the text in blocks
+    expect(
+      screen.queryByText(
+        /You are about to remove the identity provider from the user:/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/user1/)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/. This user will no longer be able to log in./),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    // make sure no put is called if it got canceled
+    await expect(axios.put).toHaveBeenCalledTimes(0);
+  });
+
+  it('handles errors while retrieving identity providers', async () => {
+    axios.get.mockRejectedValue({
+      response: {
+        status: 400,
+      },
+    });
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
     });
 
-    it('shows all identity providers in dropdown', async () => {
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-        await waitFor(() => screen.findByText(/gams_engine/))
-        const dropdown = screen.getByRole('combobox', { name: /identity provider/i });
-        await user.click(dropdown);
-        const aggregateDropdownEl = within(
-            document.getElementById('identityProviderDropdown')
-        )
-        await waitFor(() => aggregateDropdownEl.getByText('None (block user)'))
-        expect(aggregateDropdownEl.queryByText(/test_provider/)).toBeInTheDocument();
+    await waitFor(() =>
+      screen.findByText(
+        /Problems while retrieving identity providers. Error message: undefined./,
+      ),
+    );
+  });
+
+  it('handles errors while submission', async () => {
+    axios.put.mockRejectedValue({
+      response: {
+        status: 400,
+      },
+    });
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
     });
 
-    it('fails if the passwords do not match', async () => {
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-        await waitFor(() => screen.findByText(/gams_engine/))
-        await user.type(screen.getByPlaceholderText('New password'),  'newpassword1')
-        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword2')
-        await user.click(screen.getByRole('button'))
-        expect(screen.queryByText(/The passwords you entered do not match/)).toBeInTheDocument();
+    await waitFor(() => screen.findByText(/gams_engine/));
+    await user.type(screen.getByPlaceholderText('New password'), 'newpassword');
+    await user.type(
+      screen.getByPlaceholderText('Confirm password'),
+      'newpassword',
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Change Identity Provider' }),
+    );
+    await waitFor(() =>
+      screen.findByText(
+        /Some error occurred while trying to update the identity provider. Error message: undefined./,
+      ),
+    );
+  });
+
+  it('handles errors while submission, with message in response', async () => {
+    axios.put.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          errors: { password: 'test error' }, // pragma: allowlist secret
+        },
+      },
+    });
+    render(<UserUpdateIdentityProviderForm />, {
+      wrapper: AllProvidersWrapper,
     });
 
-    it('sends the correct put request and redirects back to usage', async () => {
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-        await waitFor(() => screen.findByText(/gams_engine/))
-        await user.type(screen.getByPlaceholderText('New password'),  'newpassword' )
-        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword')
-        await user.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
+    await waitFor(() => screen.findByText(/gams_engine/));
+    await user.type(screen.getByPlaceholderText('New password'), 'newpassword');
+    await user.type(
+      screen.getByPlaceholderText('Confirm password'),
+      'newpassword',
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Change Identity Provider' }),
+    );
+    await waitFor(() =>
+      screen.findByText(/Problems trying to update the identity provider./),
+    );
+    await waitFor(() => screen.findByText(/test error/));
+  });
 
-        let requestValue = new FormData()
-        requestValue.append('username', 'user1')
-        requestValue.append('identity_provider_name', 'gams_engine');
-        requestValue.append('password', 'newpassword');
-        expect(axios.put).toBeCalledWith(
-            'testserver/users/identity-provider',
-            requestValue
-        );
-        await waitFor(() => screen.findByText(/after submit went back to usage/));
-    });
-
-    it('blocks user if none is selected and submitted', async () => {
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-        await waitFor(() => screen.findByText(/gams_engine/))
-        const dropdown = screen.getByRole('combobox', { name: /identity provider/i });
-        await user.click(dropdown);
-        const aggregateDropdownEl = within(
-            document.getElementById('identityProviderDropdown')
-        )
-        await waitFor(() => aggregateDropdownEl.getByText('None (block user)'))
-        await user.click(aggregateDropdownEl.getByText('None (block user)'))
-        await user.click(screen.getByRole('button'))
-        // the text is split in a <div> ... <code> ...</code> ... </div> so need to check for the text in blocks
-        expect(screen.queryByText(/You are about to remove the identity provider from the user:/)).toBeInTheDocument()
-        expect(screen.queryByText(/user1/)).toBeInTheDocument()
-        expect(screen.queryByText(/. This user will no longer be able to log in./)).toBeInTheDocument()
-
-        await user.click(screen.getByRole('button', { name: 'Block User' }))
-        let requestValue = new FormData()
-        requestValue.append('username', 'user1')
-        requestValue.append('identity_provider_name', '');
-        expect(axios.put).toBeCalledWith(
-            'testserver/users/identity-provider',
-            requestValue
-        );
-        await waitFor(() => screen.findByText(/after submit went back to usage/));
-    })
-
-    it('cancels correctly if cancel is pressed in block user', async () => {
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-        await waitFor(() => screen.findByText(/gams_engine/))
-        const dropdown = screen.getByRole('combobox', { name: /identity provider/i });
-        await user.click(dropdown);
-
-        const aggregateDropdownEl = within(
-            document.getElementById('identityProviderDropdown')
-        )
-        await waitFor(() => aggregateDropdownEl.getByText('None (block user)'))
-        await user.click(aggregateDropdownEl.getByText('None (block user)'))
-        await user.click(screen.getByRole('button'))
-        // the text is split in a <div> ... <code> ...</code> ... </div> so need to check for the text in blocks
-        expect(screen.queryByText(/You are about to remove the identity provider from the user:/)).toBeInTheDocument()
-        expect(screen.queryByText(/user1/)).toBeInTheDocument()
-        expect(screen.queryByText(/. This user will no longer be able to log in./)).toBeInTheDocument()
-
-        await user.click(screen.getByRole('button', { name: 'Cancel' }))
-        // make sure no put is called if it got canceled
-        await expect(axios.put).toHaveBeenCalledTimes(0);
-    })
-
-    it('handles errors while retrieving identity providers', async () => {
-        axios.get.mockRejectedValue({
-            response: {
-                status: 400,
-            }
-        })
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-
-        await waitFor(() => screen.findByText(/Problems while retrieving identity providers. Error message: undefined./))
-    })
-
-    it('handles errors while submission', async () => {
-        axios.put.mockRejectedValue({
-            response: {
-                status: 400
-            }
-        })
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-
-        await waitFor(() => screen.findByText(/gams_engine/))
-        await user.type(screen.getByPlaceholderText('New password'),  'newpassword' )
-        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword' )
-        await user.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
-        await waitFor(() => screen.findByText(/Some error occurred while trying to update the identity provider. Error message: undefined./))
-    })
-
-    it('handles errors while submission, with message in response', async () => {
-        axios.put.mockRejectedValue({
-            response: {
-                status: 400,
-                data: {
-                    errors: { password: "test error" } // pragma: allowlist secret
-                }
-            }
-        })
-        render(<UserUpdateIdentityProviderForm />, {
-            wrapper: AllProvidersWrapper
-        });
-
-        await waitFor(() => screen.findByText(/gams_engine/))
-        await user.type(screen.getByPlaceholderText('New password'),  'newpassword' )
-        await user.type(screen.getByPlaceholderText('Confirm password'),  'newpassword')
-        await user.click(screen.getByRole('button', { name: 'Change Identity Provider' }))
-        await waitFor(() => screen.findByText(/Problems trying to update the identity provider./))
-        await waitFor(() => screen.findByText(/test error/))
-    })
-
-    // TODO test for some different identity provider than engine
-})
+  // TODO test for some different identity provider than engine
+});

@@ -7,7 +7,6 @@ stages:
   - lint
   - test
 
-
 build_build_image:
   services:
     - docker:24-dind
@@ -24,33 +23,32 @@ build_build_image:
     - if: '$CI_PIPELINE_SOURCE != "push"'
       when: never
     - changes:
-      - .ci/Dockerfile
-
+        - .ci/Dockerfile
 
 lint:
   image: $CI_REGISTRY_IMAGE/buildimage:latest
   stage: lint
-  before_script:
-    - npm ci --ignore-scripts
+  before_script: deno install --frozen
   script:
-    - pre-commit run --all-files
-    - npm run lint
+    - SKIP='prettier' pre-commit run --all-files
+    - deno task format:check
+    - deno task lint
+    - deno audit --socket
   variables:
     PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
+    DENO_DIR: ${CI_PROJECT_DIR}/.cache/deno
   cache:
     - key:
         files:
-          - package-lock.json
+          - deno.lock
       paths:
-        - node_modules/
+        - .cache/deno
 
 test:
   image: $CI_REGISTRY_IMAGE/buildimage:latest
   stage: test
-  before_script:
-    - npm ci
-  script:
-    - npm run test:ci
+  before_script: deno install --frozen
+  script: deno task test:ci
   coverage: /All files(?:[^|]*\|){4}\s*(\S+)/
   artifacts:
     expire_in: 1 week
@@ -63,9 +61,11 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
+  variables:
+    DENO_DIR: ${CI_PROJECT_DIR}/.cache/deno
   cache:
     - key:
         files:
-          - package-lock.json
+          - deno.lock
       paths:
-        - node_modules/
+        - .cache/deno

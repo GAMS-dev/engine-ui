@@ -7,20 +7,20 @@ import WebhooksActionsButtonGroup from '../components/WebhooksActionsButtonGroup
 
 vi.mock('axios');
 
-
 describe('WebhooksActionsButtonGroup', () => {
-    let user;
+  let user;
 
-    beforeEach(() => {
-        user = userEvent.setup();
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  it('renders WebhooksActionsButtonGroup correctly', async () => {
+    render(<WebhooksActionsButtonGroup />, {
+      wrapper: AllProvidersWrapperDefault,
     });
-
-    it('renders WebhooksActionsButtonGroup correctly', async () => {
-        render(<WebhooksActionsButtonGroup />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await user.click(screen.getByText(/Delete/));
-        expect(screen.getByText(/Are you sure you want to remove the webhook /)).toBeInTheDocument();
-    });
-
-})
+    await user.click(screen.getByText(/Delete/));
+    expect(
+      screen.getByText(/Are you sure you want to remove the webhook /),
+    ).toBeInTheDocument();
+  });
+});

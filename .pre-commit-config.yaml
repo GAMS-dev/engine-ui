@@ -1,12 +1,27 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-    -   id: check-merge-conflict
--   repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-json
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
     hooks:
-    -   id: detect-secrets
+      - id: detect-secrets
+        name: detect secrets
         args: ['--baseline', '.secrets.baseline']
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: check format
+        entry: deno run -A npm:prettier --check
+        language: unsupported
+        types_or:
+          [html, scss, css, ts, javascript, tsx, jsx, json, yaml, markdown]

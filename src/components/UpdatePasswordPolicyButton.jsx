@@ -1,176 +1,199 @@
-import { useState, useContext, useEffect } from "react";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import AuthContext from "../contexts/AuthContext";
-import AlertContext from "../contexts/AlertContext";
-import SubmitButton from "./SubmitButton";
-import axios from "axios";
-import { getResponseError } from "../util/util";
-
+import { useState, useContext, useEffect } from 'react';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import AuthContext from '../contexts/AuthContext';
+import AlertContext from '../contexts/AlertContext';
+import SubmitButton from './SubmitButton';
+import axios from 'axios';
+import { getResponseError } from '../util/util';
 
 const UpdatePasswordPolicyButton = () => {
+  const [{ server }] = useContext(AuthContext);
+  const [, setAlertMsg] = useContext(AlertContext);
 
-    const [{ server }] = useContext(AuthContext);
-    const [, setAlertMsg] = useContext(AlertContext);
+  const [showDialog, setShowDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState('');
+  const [submissionErrorMsg, setSubmissionErrorMsg] = useState('');
+  const [minPasswordLength, setMinPasswordLength] = useState(10);
+  const [includeUppercase, setIncludeUppercase] = useState(false);
+  const [includeLowercase, setIncludeLowercase] = useState(false);
+  const [includeNumber, setIncludeNumber] = useState(false);
+  const [includeSpecialChar, setIncludeSpecialChar] = useState(false);
+  const [notInPopular, setNotInPopular] = useState(false);
 
-    const [showDialog, setShowDialog] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState("");
-    const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
-    const [minPasswordLength, setMinPasswordLength] = useState(10);
-    const [includeUppercase, setIncludeUppercase] = useState(false);
-    const [includeLowercase, setIncludeLowercase] = useState(false);
-    const [includeNumber, setIncludeNumber] = useState(false);
-    const [includeSpecialChar, setIncludeSpecialChar] = useState(false);
-    const [notInPopular, setNotInPopular] = useState(false);
-
-    // get the current password policy to display it in the dialog
-    useEffect(() => {
-        if (!showDialog) {
-            return
-        }
-        const fetchCurrentPolicy = async () => {
-            let pReq
-            setSubmissionErrorMsg('')
-            try {
-                pReq = await axios.get(`${server}/auth/password-policy`)
-            } catch (err) {
-                setSubmissionErrorMsg(`Problems retrieving password policy. Error message: ${getResponseError(err)}.`);
-                return;
-            }
-            const respDataTmp = pReq.data
-            setMinPasswordLength(respDataTmp.min_password_length)
-            setIncludeUppercase(respDataTmp.must_include_uppercase)
-            setIncludeLowercase(respDataTmp.must_include_lowercase)
-            setIncludeNumber(respDataTmp.must_include_number)
-            setIncludeSpecialChar(respDataTmp.must_include_special_char)
-            setNotInPopular(respDataTmp.not_in_popular_passwords)
-        }
-        fetchCurrentPolicy()
-    }, [server, showDialog])
-
-    const updatePasswordPolicy = async () => {
-        setSubmissionErrorMsg("")
-        setIsSubmitting(true)
-
-        try {
-            await axios.put(`${server}/auth/password-policy`,
-                {
-                    'min_password_length': minPasswordLength,
-                    'must_include_uppercase': includeUppercase,
-                    'must_include_lowercase': includeLowercase,
-                    'must_include_number': includeNumber,
-                    'must_include_special_char': includeSpecialChar,
-                    'not_in_popular_passwords': notInPopular
-                })
-            setShowDialog(false);
-            setAlertMsg("success:Password policy updated successfully!");
-        } catch (err) {
-            setSubmissionErrorMsg(`Couldn't set new password policy. Error message: ${getResponseError(err)}.`);
-            return;
-        } finally {
-            setIsSubmitting(false)
-        }
+  // get the current password policy to display it in the dialog
+  useEffect(() => {
+    if (!showDialog) {
+      return;
     }
+    const fetchCurrentPolicy = async () => {
+      let pReq;
+      setSubmissionErrorMsg('');
+      try {
+        pReq = await axios.get(`${server}/auth/password-policy`);
+      } catch (err) {
+        setSubmissionErrorMsg(
+          `Problems retrieving password policy. Error message: ${getResponseError(err)}.`,
+        );
+        return;
+      }
+      const respDataTmp = pReq.data;
+      setMinPasswordLength(respDataTmp.min_password_length);
+      setIncludeUppercase(respDataTmp.must_include_uppercase);
+      setIncludeLowercase(respDataTmp.must_include_lowercase);
+      setIncludeNumber(respDataTmp.must_include_number);
+      setIncludeSpecialChar(respDataTmp.must_include_special_char);
+      setNotInPopular(respDataTmp.not_in_popular_passwords);
+    };
+    fetchCurrentPolicy();
+  }, [server, showDialog]);
 
+  const updatePasswordPolicy = async () => {
+    setSubmissionErrorMsg('');
+    setIsSubmitting(true);
 
-    return (
-        <>
-            <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setShowDialog(true)}>
-                Update password policy
-            </button>
-            <Modal show={showDialog} onHide={() => setShowDialog(false)}>
-                <form
-                    onSubmit={e => {
-                        e.preventDefault();
-                        updatePasswordPolicy();
-                        return false;
-                    }}
+    try {
+      await axios.put(`${server}/auth/password-policy`, {
+        min_password_length: minPasswordLength,
+        must_include_uppercase: includeUppercase,
+        must_include_lowercase: includeLowercase,
+        must_include_number: includeNumber,
+        must_include_special_char: includeSpecialChar,
+        not_in_popular_passwords: notInPopular,
+      });
+      setShowDialog(false);
+      setAlertMsg('success:Password policy updated successfully!');
+    } catch (err) {
+      setSubmissionErrorMsg(
+        `Couldn't set new password policy. Error message: ${getResponseError(err)}.`,
+      );
+      return;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="btn btn-sm btn-outline-primary"
+        onClick={() => setShowDialog(true)}
+      >
+        Update password policy
+      </button>
+      <Modal show={showDialog} onHide={() => setShowDialog(false)}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            updatePasswordPolicy();
+            return false;
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Update password policy</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div
+              className="invalid-feedback"
+              style={{ display: submissionErrorMsg !== '' ? 'block' : 'none' }}
+            >
+              {submissionErrorMsg}
+            </div>
+            <fieldset disabled={isSubmitting}>
+              <div className="form-outline mt-3">
+                <label className="form-label" htmlFor="minPasswordLength">
+                  Minimum password length:
+                </label>
+                <input
+                  required
+                  min="8"
+                  max="70"
+                  step="1"
+                  type="number"
+                  value={minPasswordLength}
+                  onChange={(e) => setMinPasswordLength(e.target.valueAsNumber)}
+                  id="minPasswordLength"
+                  className="form-control"
+                />
+              </div>
+              <div className="form-check mt-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={includeUppercase}
+                  onChange={(e) => setIncludeUppercase(e.target.checked)}
+                  id="includeUppercase"
+                />
+                <label className="form-check-label" htmlFor="includeUppercase">
+                  Include at least one uppercase letter?
+                </label>
+              </div>
+              <div className="form-check mt-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={includeLowercase}
+                  onChange={(e) => setIncludeLowercase(e.target.checked)}
+                  id="includeLowercase"
+                />
+                <label className="form-check-label" htmlFor="includeLowercase">
+                  Include at least one lowercase letter?
+                </label>
+              </div>
+              <div className="form-check mt-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={includeNumber}
+                  onChange={(e) => setIncludeNumber(e.target.checked)}
+                  id="includeNumber"
+                />
+                <label className="form-check-label" htmlFor="includeNumber">
+                  Include at least one number?
+                </label>
+              </div>
+              <div className="form-check mt-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={includeSpecialChar}
+                  onChange={(e) => setIncludeSpecialChar(e.target.checked)}
+                  id="includeSpecialChar"
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor="includeSpecialChar"
                 >
-                    <Modal.Header closeButton>
-                        <Modal.Title>Update password policy</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
-                            {submissionErrorMsg}
-                        </div>
-                        <fieldset disabled={isSubmitting}>
-                            <div className="form-outline mt-3">
-                                <label className="form-label" htmlFor="minPasswordLength">Minimum password length:</label>
-                                <input
-                                    required
-                                    min="8"
-                                    max="70"
-                                    step="1"
-                                    type="number"
-                                    value={minPasswordLength}
-                                    onChange={e => setMinPasswordLength(e.target.valueAsNumber)}
-                                    id="minPasswordLength"
-                                    className="form-control" />
-                            </div>
-                            <div className="form-check mt-3">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    checked={includeUppercase}
-                                    onChange={e => setIncludeUppercase(e.target.checked)}
-                                    id="includeUppercase"
-                                />
-                                <label className="form-check-label" htmlFor="includeUppercase">Include at least one uppercase letter?</label>
-                            </div>
-                            <div className="form-check mt-3">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    checked={includeLowercase}
-                                    onChange={e => setIncludeLowercase(e.target.checked)}
-                                    id="includeLowercase"
-                                />
-                                <label className="form-check-label" htmlFor="includeLowercase">Include at least one lowercase letter?</label>
-                            </div>
-                            <div className="form-check mt-3">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    checked={includeNumber}
-                                    onChange={e => setIncludeNumber(e.target.checked)}
-                                    id="includeNumber"
-                                />
-                                <label className="form-check-label" htmlFor="includeNumber">Include at least one number?</label>
-                            </div>
-                            <div className="form-check mt-3">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    checked={includeSpecialChar}
-                                    onChange={e => setIncludeSpecialChar(e.target.checked)}
-                                    id="includeSpecialChar"
-                                />
-                                <label className="form-check-label" htmlFor="includeSpecialChar">Include at least one special character?</label>
-                            </div>
-                            <div className="form-check mt-3">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    checked={notInPopular}
-                                    onChange={e => setNotInPopular(e.target.checked)}
-                                    id="notInPopular"
-                                />
-                                <label className="form-check-label" htmlFor="notInPopular">Check if the password is commonly used?</label>
-                            </div>
-                        </fieldset>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setShowDialog(false)}>
-                            Cancel
-                        </Button>
-                        <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
-                            Update
-                        </SubmitButton>
-                    </Modal.Footer>
-                </form>
-            </Modal>
-        </>
-    );
+                  Include at least one special character?
+                </label>
+              </div>
+              <div className="form-check mt-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={notInPopular}
+                  onChange={(e) => setNotInPopular(e.target.checked)}
+                  id="notInPopular"
+                />
+                <label className="form-check-label" htmlFor="notInPopular">
+                  Check if the password is commonly used?
+                </label>
+              </div>
+            </fieldset>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDialog(false)}>
+              Cancel
+            </Button>
+            <SubmitButton isSubmitting={isSubmitting} className="btn-primary">
+              Update
+            </SubmitButton>
+          </Modal.Footer>
+        </form>
+      </Modal>
+    </>
+  );
 };
 
 export default UpdatePasswordPolicyButton;

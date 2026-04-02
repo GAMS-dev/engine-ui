@@ -8,17 +8,16 @@ import TerminateJobButton from '../components/TerminateJobButton';
 vi.mock('axios');
 
 describe('TerminateJobButton', () => {
-    let user;
+  let user;
 
-    beforeEach(() => {
-        user = userEvent.setup();
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+  it('renders TerminateJobButton correctly', async () => {
+    render(<TerminateJobButton status={1} />, {
+      wrapper: AllProvidersWrapperDefault,
     });
-    it('renders TerminateJobButton correctly', async () => {
-        render(<TerminateJobButton status={1} />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await user.click(screen.getByText(/Cancel/));
-        await waitFor(() => screen.findByText('Please Confirm'));
-    });
-
-})
+    await user.click(screen.getByText(/Cancel/));
+    await waitFor(() => screen.findByText('Please Confirm'));
+  });
+});

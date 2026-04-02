@@ -1,24 +1,24 @@
-import { useEffect, useContext, useState } from "react";
-import { RefreshCw, Send } from "react-feather";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import AuthContext from "../contexts/AuthContext";
-import AlertContext from "../contexts/AlertContext";
-import { Link, useNavigate } from "react-router-dom";
-import moment from "moment";
-import axios from "axios";
-import Table from "./Table";
-import TimeDisplay from "./TimeDisplay";
-import UserActionsButtonGroup from "./UserActionsButtonGroup";
-import SubmitButton from "./SubmitButton";
-import { getResponseError } from "../util/util";
-import { UserLink } from "./UserLink";
+import { useEffect, useContext, useState } from 'react';
+import { RefreshCw, Send } from 'react-feather';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import AuthContext from '../contexts/AuthContext';
+import AlertContext from '../contexts/AlertContext';
+import { Link, useNavigate } from 'react-router-dom';
+import moment from 'moment';
+import axios from 'axios';
+import Table from './Table';
+import TimeDisplay from './TimeDisplay';
+import UserActionsButtonGroup from './UserActionsButtonGroup';
+import SubmitButton from './SubmitButton';
+import { getResponseError } from '../util/util';
+import { UserLink } from './UserLink';
 
 const Users = () => {
   const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
-  const [userToDelete, setUserToDelete] = useState({ username: "", roles: [] });
+  const [userToDelete, setUserToDelete] = useState({ username: '', roles: [] });
   const [deleteInvitation, setDeleteInvitation] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [refresh, setRefresh] = useState(0);
@@ -28,53 +28,61 @@ const Users = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setAlertMsg] = useContext(AlertContext);
   const [{ jwt, server, roles, username }] = useContext(AuthContext);
-  const isAdmin = roles && roles.includes("admin");
-  const isInviter = roles && roles.includes("inviter");
+  const isAdmin = roles && roles.includes('admin');
+  const isInviter = roles && roles.includes('inviter');
   const [displayFields] = useState([
     {
-      field: "username,id",
-      column: "User",
-      sorter: "alphabetical",
-      displayer: (user, id) => user === "" ? <span className="badge rounded-pill bg-info">unregistered {window.isSecureContext ? '' : `(${id})`}</span> :
-        <UserLink user={user} />
+      field: 'username,id',
+      column: 'User',
+      sorter: 'alphabetical',
+      displayer: (user, id) =>
+        user === '' ? (
+          <span className="badge rounded-pill bg-info">
+            unregistered {window.isSecureContext ? '' : `(${id})`}
+          </span>
+        ) : (
+          <UserLink user={user} />
+        ),
     },
     {
-      field: "roles",
-      column: "Role",
-      sorter: "alphabetical-array",
-      displayer: e => e.join(",")
+      field: 'roles',
+      column: 'Role',
+      sorter: 'alphabetical-array',
+      displayer: (e) => e.join(','),
     },
     {
-      field: "inviter_name",
-      column: "Invited by",
-      sorter: "alphabetical",
-      displayer: (user) =>
-        isAdmin ? <UserLink user={user} /> : user
+      field: 'inviter_name',
+      column: 'Invited by',
+      sorter: 'alphabetical',
+      displayer: (user) => (isAdmin ? <UserLink user={user} /> : user),
     },
     {
-      field: "created",
-      column: "Created",
-      sorter: "datetime",
-      displayer: e => e == null ? "-" : <TimeDisplay time={e} />
+      field: 'created',
+      column: 'Created',
+      sorter: 'datetime',
+      displayer: (e) => (e == null ? '-' : <TimeDisplay time={e} />),
     },
     {
-      field: "id,username,roles,identity_provider",
-      column: "Actions",
-      displayer: (id, name, roles) => <UserActionsButtonGroup
-        id={id}
-        username={name}
-        userroles={roles}
-        me={username}
-        isAdmin={isAdmin}
-        isInviter={isInviter}
-        setUserToDelete={setUserToDelete}
-        setDeleteInvitation={setDeleteInvitation}
-        handleShowDeleteConfirmDialog={() => {
-          setDeleteResults(false);
-          setDeleteChildren(true);
-          setShowDeleteConfirmDialog(true);
-        }} />
-    }
+      field: 'id,username,roles,identity_provider',
+      column: 'Actions',
+      displayer: (id, name, roles) => (
+        <UserActionsButtonGroup
+          id={id}
+          username={name}
+          userroles={roles}
+          me={username}
+          isAdmin={isAdmin}
+          isInviter={isInviter}
+          setUserToDelete={setUserToDelete}
+          setDeleteInvitation={setDeleteInvitation}
+          handleShowDeleteConfirmDialog={() => {
+            setDeleteResults(false);
+            setDeleteChildren(true);
+            setShowDeleteConfirmDialog(true);
+          }}
+        />
+      ),
+    },
   ]);
 
   const deleteUser = async () => {
@@ -89,82 +97,99 @@ const Users = () => {
     try {
       await axios.delete(
         deleteInvitation ? `${server}/users/invitation` : `${server}/users/`,
-        { params: deleteRequestParams }
-      )
+        { params: deleteRequestParams },
+      );
     } catch (err) {
-      setAlertMsg(`Problems deleting user. Error message: ${getResponseError(err)}`);
+      setAlertMsg(
+        `Problems deleting user. Error message: ${getResponseError(err)}`,
+      );
       setIsSubmitting(false);
       setShowDeleteConfirmDialog(false);
-      return
+      return;
     }
     if (!deleteInvitation && userToDelete.username === username) {
       // log me out when I deleted myself
-      navigate("/logout");
+      navigate('/logout');
       return;
     }
-    setRefresh(refreshCnt => ({
-      refresh: refreshCnt + 1
+    setRefresh((refreshCnt) => ({
+      refresh: refreshCnt + 1,
     }));
     setIsSubmitting(false);
     setShowDeleteConfirmDialog(false);
-  }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       const queryParamsUsersQuery = roles?.length ? {} : { username: username };
       queryParamsUsersQuery['filter'] = 'deleted=false';
-      const queryParamsInvitationsQuery = { everyone: roles?.includes("admin") === true };
+      const queryParamsInvitationsQuery = {
+        everyone: roles?.includes('admin') === true,
+      };
       queryParamsInvitationsQuery['filter'] = 'used=false';
 
       try {
         const queries = [
           axios.get(`${server}/users/`, {
             params: queryParamsUsersQuery,
-            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", invitation_time, deleted, identity_provider" }
-          })];
+            headers: {
+              'X-Fields':
+                displayFields.map((e) => e.field).join(', ') +
+                ', invitation_time, deleted, identity_provider',
+            },
+          }),
+        ];
         if (roles?.length > 0) {
-          queries.push(axios.get(`${server}/users/invitation`, {
-            headers: { "X-Fields": displayFields.map(e => e.field).join(", ") + ", token, used" },
-            params: queryParamsInvitationsQuery
-          }))
+          queries.push(
+            axios.get(`${server}/users/invitation`, {
+              headers: {
+                'X-Fields':
+                  displayFields.map((e) => e.field).join(', ') +
+                  ', token, used',
+              },
+              params: queryParamsInvitationsQuery,
+            }),
+          );
         }
         const reponses = await Promise.all(queries);
-        let userDataTmp = reponses[0].data
-          .map(user => {
-            const newUserInfo = user;
-            newUserInfo.id = newUserInfo.username;
-            newUserInfo.created = newUserInfo.invitation_time;
-            return newUserInfo;
-          });
+        let userDataTmp = reponses[0].data.map((user) => {
+          const newUserInfo = user;
+          newUserInfo.id = newUserInfo.username;
+          newUserInfo.created = newUserInfo.invitation_time;
+          return newUserInfo;
+        });
         if (roles?.length > 0) {
-          userDataTmp = userDataTmp.concat(reponses[1].data
-            .map(invitation => {
+          userDataTmp = userDataTmp.concat(
+            reponses[1].data.map((invitation) => {
               const newInvitation = invitation;
               newInvitation.id = newInvitation.token;
-              newInvitation.username = "";
+              newInvitation.username = '';
               return newInvitation;
-            }));
+            }),
+          );
         }
-        setUsers(userDataTmp
-          .sort((a, b) => {
+        setUsers(
+          userDataTmp.sort((a, b) => {
             if (a.created == null) {
               return 1;
             }
             if (b.created == null) {
               return -1;
             }
-            return (moment.utc(b.created) - moment.utc(a.created));
-          }));
+            return moment.utc(b.created) - moment.utc(a.created);
+          }),
+        );
       } catch (err) {
-        setAlertMsg(`Problems fetching user information. Error message: ${getResponseError(err)}`);
+        setAlertMsg(
+          `Problems fetching user information. Error message: ${getResponseError(err)}`,
+        );
       } finally {
         setIsLoading(false);
       }
-    }
+    };
     fetchData();
   }, [jwt, server, username, roles, refresh, displayFields, setAlertMsg]);
-
 
   return (
     <div>
@@ -172,13 +197,19 @@ const Users = () => {
         <h1 className="h2">Users</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
-            {roles.length ?
+            {roles.length ? (
               <Link to="/new-user">
-                <button type="button" className="btn btn-sm btn-outline-primary">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                >
                   Invite User
                   <Send width="12px" className="ms-2" />
                 </button>
-              </Link> : <></>}
+              </Link>
+            ) : (
+              <></>
+            )}
             <button
               type="button"
               className="btn btn-sm btn-outline-secondary"
@@ -192,16 +223,21 @@ const Users = () => {
           </div>
         </div>
       </div>
-      <Table data={users}
+      <Table
+        data={users}
         noDataMsg="No User Found"
         displayFields={displayFields}
         sortedAsc={false}
         isLoading={isLoading}
         sortedCol="created"
-        idFieldName="id" />
-      <Modal show={showDeleteConfirmDialog} onHide={() => setShowDeleteConfirmDialog(false)}>
+        idFieldName="id"
+      />
+      <Modal
+        show={showDeleteConfirmDialog}
+        onHide={() => setShowDeleteConfirmDialog(false)}
+      >
         <form
-          onSubmit={e => {
+          onSubmit={(e) => {
             e.preventDefault();
             deleteUser();
             return false;
@@ -212,25 +248,49 @@ const Users = () => {
           </Modal.Header>
           <Modal.Body>
             <fieldset disabled={isSubmitting}>
-              Are you sure you want to remove the {deleteInvitation ? 'invitation' : 'user'}: <code>{userToDelete.username}</code>? This cannot be undone!
-              {!deleteInvitation &&
+              Are you sure you want to remove the{' '}
+              {deleteInvitation ? 'invitation' : 'user'}:{' '}
+              <code>{userToDelete.username}</code>? This cannot be undone!
+              {!deleteInvitation && (
                 <>
                   <div className="form-check mt-3">
-                    <input type="checkbox" className="form-check-input" checked={deleteResults} onChange={e => setDeleteResults(e.target.checked)}
-                      id="deleteData" />
-                    <label className="form-check-label" htmlFor="deleteData">Delete all data associated with this user?</label>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={deleteResults}
+                      onChange={(e) => setDeleteResults(e.target.checked)}
+                      id="deleteData"
+                    />
+                    <label className="form-check-label" htmlFor="deleteData">
+                      Delete all data associated with this user?
+                    </label>
                   </div>
-                  {userToDelete.roles.length > 0 &&
+                  {userToDelete.roles.length > 0 && (
                     <div className="form-check mt-3">
-                      <input type="checkbox" className="form-check-input" checked={deleteChildren} onChange={e => setDeleteChildren(e.target.checked)}
-                        id="deleteChildren" />
-                      <label className="form-check-label" htmlFor="deleteChildren">Also delete all invitees of this user?</label>
-                    </div>}
-                </>}
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={deleteChildren}
+                        onChange={(e) => setDeleteChildren(e.target.checked)}
+                        id="deleteChildren"
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="deleteChildren"
+                      >
+                        Also delete all invitees of this user?
+                      </label>
+                    </div>
+                  )}
+                </>
+              )}
             </fieldset>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowDeleteConfirmDialog(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirmDialog(false)}
+            >
               Cancel
             </Button>
             <SubmitButton isSubmitting={isSubmitting} className="btn-primary">

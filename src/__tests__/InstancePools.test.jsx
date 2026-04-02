@@ -1,116 +1,112 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import axios from 'axios'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import axios from 'axios';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import InstancePools from '../components/InstancePools'
+import InstancePools from '../components/InstancePools';
 
-vi.mock('axios')
+vi.mock('axios');
 
 const AllProvidersWrapperDisabled = ({ children }) => (
-    <AllProvidersWrapperDefault options={{ instance_pool_access: 'DISABLED' }}>
-        {children}
-    </AllProvidersWrapperDefault>
+  <AllProvidersWrapperDefault options={{ instance_pool_access: 'DISABLED' }}>
+    {children}
+  </AllProvidersWrapperDefault>
 );
 
 const AllProvidersWrapperEnabled = ({ children }) => (
-    <AllProvidersWrapperDefault options={{ instance_pool_access: 'ENABLED' }}>
-        {children}
-    </AllProvidersWrapperDefault>
+  <AllProvidersWrapperDefault options={{ instance_pool_access: 'ENABLED' }}>
+    {children}
+  </AllProvidersWrapperDefault>
 );
 
 describe('InstancePools Component', () => {
-    let user;
+  let user;
 
-    beforeEach(() => {
-        user = userEvent.setup();
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  it('renders InstancePools correctly', async () => {
+    axios.get.mockResolvedValueOnce({
+      status: 200,
+      data: { instance_pools_available: [] },
     });
 
-    it('renders InstancePools correctly', async () => {
-        axios.get.mockResolvedValueOnce({
-            status: 200,
-            data: { instance_pools_available: [] },
-        })
+    render(<InstancePools />, {
+      wrapper: AllProvidersWrapperDisabled,
+    });
+    await waitFor(() => screen.findByText('Instance pools disabled'));
+    await waitFor(() => screen.findByText('Instance Pools'));
+    await waitFor(() => screen.findByText('Enable Instance Pools'));
+  });
 
-        render(<InstancePools />, {
-            wrapper: AllProvidersWrapperDisabled,
-        })
-        await waitFor(() => screen.findByText('Instance pools disabled'))
-        await waitFor(() => screen.findByText('Instance Pools'))
-        await waitFor(() => screen.findByText('Enable Instance Pools'))
-    })
+  it('refresh button triggers API call', async () => {
+    axios.get.mockResolvedValue({
+      status: 200,
+      data: { instance_pools_available: [] },
+    });
 
-    it('refresh button triggers API call', async () => {
+    render(<InstancePools />, {
+      wrapper: AllProvidersWrapperDisabled,
+    });
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
 
-        axios.get.mockResolvedValue({
-            status: 200,
-            data: { instance_pools_available: [] },
-        })
+    const refreshButton = screen.getByText('Refresh');
 
-        render(<InstancePools />, {
-            wrapper: AllProvidersWrapperDisabled,
-        })
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1))
+    await user.click(refreshButton);
 
-        const refreshButton = screen.getByText('Refresh')
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
+  });
 
-        await user.click(refreshButton)
+  it('clicking enable instance pools opens modal', async () => {
+    axios.get.mockResolvedValueOnce({
+      status: 200,
+      data: { instance_pools_available: [] },
+    });
+    render(<InstancePools />, {
+      wrapper: AllProvidersWrapperDisabled,
+    });
 
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2))
-    })
+    await user.click(screen.getByText('Enable Instance Pools'));
 
-    it('clicking enable instance pools opens modal', async () => {
-
-        axios.get.mockResolvedValueOnce({
-            status: 200,
-            data: { instance_pools_available: [] },
-        })
-        render(<InstancePools />, {
-            wrapper: AllProvidersWrapperDisabled,
-        })
-
-        await user.click(screen.getByText('Enable Instance Pools'))
-
-        await waitFor(() =>
-            screen.findByText(
-                'Are you sure that you want to enable instance pools?'
-            )
-        )
-    })
-    it('Instance pool table renders', async () => {
-        axios.get.mockResolvedValueOnce({
-            status: 200,
-            data: {
-                instance_pools_available: [
-                    {
-                        label: 'test123',
-                        owner: {
-                            username: 'admin',
-                            deleted: false,
-                            old_username: null,
-                        },
-                        instance: {
-                            label: 'test',
-                            cpu_request: 0.3,
-                            memory_request: 100,
-                            workspace_request: 100,
-                            node_selectors: [],
-                            tolerations: [],
-                            multiplier: 1.0,
-                            multiplier_idle: 1.0,
-                        },
-                        size: 0,
-                        size_active: 0,
-                        size_busy: 0,
-                        cancelling: false,
-                    },
-                ],
+    await waitFor(() =>
+      screen.findByText('Are you sure that you want to enable instance pools?'),
+    );
+  });
+  it('Instance pool table renders', async () => {
+    axios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        instance_pools_available: [
+          {
+            label: 'test123',
+            owner: {
+              username: 'admin',
+              deleted: false,
+              old_username: null,
             },
-        })
-        render(<InstancePools />, {
-            wrapper: AllProvidersWrapperEnabled,
-        })
+            instance: {
+              label: 'test',
+              cpu_request: 0.3,
+              memory_request: 100,
+              workspace_request: 100,
+              node_selectors: [],
+              tolerations: [],
+              multiplier: 1.0,
+              multiplier_idle: 1.0,
+            },
+            size: 0,
+            size_active: 0,
+            size_busy: 0,
+            cancelling: false,
+          },
+        ],
+      },
+    });
+    render(<InstancePools />, {
+      wrapper: AllProvidersWrapperEnabled,
+    });
 
-        await waitFor(() => screen.findByText('Change Size'))
-    })
-})
+    await waitFor(() => screen.findByText('Change Size'));
+  });
+});

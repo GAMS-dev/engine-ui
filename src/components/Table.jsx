@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext } from "react";
-import moment from "moment";
-import { ArrowUp, ArrowDown } from "react-feather";
-import ClipLoader from "react-spinners/ClipLoader";
+import { useState, useEffect, useContext } from 'react';
+import moment from 'moment';
+import { ArrowUp, ArrowDown } from 'react-feather';
+import ClipLoader from 'react-spinners/ClipLoader';
 import Pagination from 'react-bootstrap/Pagination';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { FormControl } from "react-bootstrap";
-import OverlayFilter from "./OverlayFilter";
-import { getRandomInt } from "../util/util";
-import UserSettingsContext from "../contexts/UserSettingsContext";
-import { availableTablePageLengths } from "../util/constants";
+import { FormControl } from 'react-bootstrap';
+import OverlayFilter from './OverlayFilter';
+import { getRandomInt } from '../util/util';
+import UserSettingsContext from '../contexts/UserSettingsContext';
+import { availableTablePageLengths } from '../util/constants';
 
-const Table = props => {
+const Table = (props) => {
   const { noDataMsg, isLoading, onChange, total, resetPageNumber } = props;
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -28,141 +28,180 @@ const Table = props => {
 
   const [currentFilters, setCurrentFilters] = useState({});
 
-  const [userSettings,] = useContext(UserSettingsContext);
-  const [noRows, setNoRows] = useState(onChange == null ? props.data.length : total);
-  const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage == null ? parseInt(userSettings.tablePageLength, 10) : props.rowsPerPage);
+  const [userSettings] = useContext(UserSettingsContext);
+  const [noRows, setNoRows] = useState(
+    onChange == null ? props.data.length : total,
+  );
+  const [rowsPerPage, setRowsPerPage] = useState(
+    props.rowsPerPage == null
+      ? parseInt(userSettings.tablePageLength, 10)
+      : props.rowsPerPage,
+  );
   const [noPages, setNoPages] = useState(Math.ceil(noRows / rowsPerPage));
 
   useEffect(() => {
     if (resetPageNumber === true) {
       setCurrentPage(0);
     }
-  }, [resetPageNumber])
+  }, [resetPageNumber]);
 
   useEffect(() => {
     setData([...props.data]);
     setDataRaw([...props.data]);
     const newNoRows = onChange == null ? props.data.length : total;
     setNoRows(newNoRows);
-    const newRowsPerPage = props.rowsPerPage ? props.rowsPerPage : parseInt(userSettings.tablePageLength, 10);
+    const newRowsPerPage = props.rowsPerPage
+      ? props.rowsPerPage
+      : parseInt(userSettings.tablePageLength, 10);
     const newNoPages = Math.ceil(newNoRows / newRowsPerPage);
     setRowsPerPage(newRowsPerPage);
     setNoPages(newNoPages);
-    setCurrentPage(current => Math.max(0, Math.min(current, newNoPages - 1)));
+    setCurrentPage((current) => Math.max(0, Math.min(current, newNoPages - 1)));
     setSortAsc(props.sortedAsc === true);
     setSortedCol(props.sortedCol);
     setCurrentFilters({});
     setIdFieldName(props.idFieldName);
     setDisplayFields(props.displayFields);
-    setRefreshCount(prev => prev + 1);
-  }, [props.data, props.sortedAsc, props.sortedCol, props.idFieldName,
-  props.displayFields, props.rowsPerPage, onChange, total, userSettings])
+    setRefreshCount((prev) => prev + 1);
+  }, [
+    props.data,
+    props.sortedAsc,
+    props.sortedCol,
+    props.idFieldName,
+    props.displayFields,
+    props.rowsPerPage,
+    onChange,
+    total,
+    userSettings,
+  ]);
 
   useEffect(() => {
     if (onChange != null) {
-      onChange(currentPage, sortedCol, sortAsc, rowsPerPage)
+      onChange(currentPage, sortedCol, sortAsc, rowsPerPage);
     }
-  }, [currentPage, sortedCol, sortAsc, onChange, rowsPerPage])
+  }, [currentPage, sortedCol, sortAsc, onChange, rowsPerPage]);
 
   const gotoFirstPage = () => {
     setCurrentPage(0);
-  }
+  };
   const gotoLastPage = () => {
     setCurrentPage(noPages - 1);
-  }
+  };
   const gotoNextPage = () => {
     setCurrentPage(currentPage + 1);
-  }
+  };
   const gotoPreviousPage = () => {
     setCurrentPage(currentPage - 1);
-  }
-  const updateCurrentPage = e => {
+  };
+  const updateCurrentPage = (e) => {
     const newPage = parseInt(e.target.text, 10);
     if (!isNaN(newPage)) {
       setCurrentPage(newPage - 1);
     }
-  }
-  const createRow = sub => {
-    return <tr key={sub[idFieldName]}>
-      {displayFields.map(e => (
-        <td key={sub[idFieldName] + "_" + e.field}>
-          {e.displayer(...e.field.split(",").map(subEl => sub[subEl]))}
-        </td>
-      ))}
-    </tr>
-  }
+  };
+  const createRow = (sub) => {
+    return (
+      <tr key={sub[idFieldName]}>
+        {displayFields.map((e) => (
+          <td key={sub[idFieldName] + '_' + e.field}>
+            {e.displayer(...e.field.split(',').map((subEl) => sub[subEl]))}
+          </td>
+        ))}
+      </tr>
+    );
+  };
   const changeToPage = () => {
     if (invalidPageNumber || goToPage == null) {
       return;
     }
     setCurrentPage(goToPage - 1);
-  }
-  const sortCol = e => {
+  };
+  const sortCol = (e) => {
     if (!e.target.dataset.field) {
       return;
     }
-    const field = e.target.dataset.field.split(",")[0];
+    const field = e.target.dataset.field.split(',')[0];
     const sorter = e.target.dataset.sorter;
-    const asc = (field === sortedCol && sortAsc) ? 1 : -1;
-    if (sorter === "alphabetical") {
-      setData(data.sort((a, b) => {
-        if (a[field] == null) {
-          return -asc;
-        }
-        if (b[field] == null) {
-          return asc;
-        }
-        return -1 * a[field].localeCompare(b[field]) * asc;
-      }));
-    } else if (sorter === "numerical") {
-      setData(data.sort((a, b) => {
-        return (a[field] > b[field]) ? -asc : asc;
-      }));
-    } else if (sorter === "datetime") {
-      setData(data.sort((a, b) => {
-        if (a[field] == null) {
-          return asc;
-        }
-        if (b[field] == null) {
-          return -asc;
-        }
-        return (moment.utc(b[field]) - moment.utc(a[field])) * asc;
-      }));
-    } else if (sorter === "alphabetical-array") {
-      setData(data.sort((a, b) => {
-        if (a[field] == null) {
-          return -asc;
-        }
-        if (b[field] == null) {
-          return asc;
-        }
-        return -1 * a[field].join(",").localeCompare(b[field].join(",")) * asc;
-      }));
-    } else if (sorter === "alphabetical-object") {
+    const asc = field === sortedCol && sortAsc ? 1 : -1;
+    if (sorter === 'alphabetical') {
+      setData(
+        data.sort((a, b) => {
+          if (a[field] == null) {
+            return -asc;
+          }
+          if (b[field] == null) {
+            return asc;
+          }
+          return -1 * a[field].localeCompare(b[field]) * asc;
+        }),
+      );
+    } else if (sorter === 'numerical') {
+      setData(
+        data.sort((a, b) => {
+          return a[field] > b[field] ? -asc : asc;
+        }),
+      );
+    } else if (sorter === 'datetime') {
+      setData(
+        data.sort((a, b) => {
+          if (a[field] == null) {
+            return asc;
+          }
+          if (b[field] == null) {
+            return -asc;
+          }
+          return (moment.utc(b[field]) - moment.utc(a[field])) * asc;
+        }),
+      );
+    } else if (sorter === 'alphabetical-array') {
+      setData(
+        data.sort((a, b) => {
+          if (a[field] == null) {
+            return -asc;
+          }
+          if (b[field] == null) {
+            return asc;
+          }
+          return (
+            -1 * a[field].join(',').localeCompare(b[field].join(',')) * asc
+          );
+        }),
+      );
+    } else if (sorter === 'alphabetical-object') {
       const firstKey = Object.keys(data[0][field])[0];
-      setData(data.sort((a, b) => {
-        if (a[field][firstKey] == null) {
-          return -asc;
-        }
-        if (b[field][firstKey] == null) {
-          return asc;
-        }
-        return -1 * a[field][firstKey].localeCompare(b[field][firstKey]) * asc;
-      }));
+      setData(
+        data.sort((a, b) => {
+          if (a[field][firstKey] == null) {
+            return -asc;
+          }
+          if (b[field][firstKey] == null) {
+            return asc;
+          }
+          return (
+            -1 * a[field][firstKey].localeCompare(b[field][firstKey]) * asc
+          );
+        }),
+      );
     }
     setSortAsc(asc === -1);
     setSortedCol(field);
-  }
+  };
   const filterCol = (colName, filterText) => {
     const currentFiltersTmp = {
-      ...currentFilters
-    }
+      ...currentFilters,
+    };
     gotoFirstPage();
     let newDataTmp = null;
-    if (currentFiltersTmp[colName] == null || filterText.startsWith(currentFiltersTmp[colName])) {
+    if (
+      currentFiltersTmp[colName] == null ||
+      filterText.startsWith(currentFiltersTmp[colName])
+    ) {
       const filterTextLower = filterText.toLowerCase();
-      newDataTmp = data
-        .filter(dataTmp => dataTmp[colName] && dataTmp[colName].toLowerCase().includes(filterTextLower));
+      newDataTmp = data.filter(
+        (dataTmp) =>
+          dataTmp[colName] &&
+          dataTmp[colName].toLowerCase().includes(filterTextLower),
+      );
       currentFiltersTmp[colName] = filterText;
     } else {
       if (filterText.length > 0) {
@@ -173,10 +212,15 @@ const Table = props => {
       if (Object.keys(currentFiltersTmp).length === 0) {
         newDataTmp = dataRaw;
       } else {
-        newDataTmp = dataRaw
-          .filter(dataTmp =>
-            Object.keys(currentFiltersTmp).every(colNameTmp => dataTmp[colNameTmp] && dataTmp[colNameTmp].toLowerCase().includes(currentFiltersTmp[colNameTmp]))
-          );
+        newDataTmp = dataRaw.filter((dataTmp) =>
+          Object.keys(currentFiltersTmp).every(
+            (colNameTmp) =>
+              dataTmp[colNameTmp] &&
+              dataTmp[colNameTmp]
+                .toLowerCase()
+                .includes(currentFiltersTmp[colNameTmp]),
+          ),
+        );
       }
     }
     setCurrentFilters(currentFiltersTmp);
@@ -185,64 +229,109 @@ const Table = props => {
     const newNoPages = Math.ceil(newNoRows / rowsPerPage);
     setNoPages(newNoPages);
     setData(newDataTmp);
-  }
+  };
   return (
     <>
       <table className="table summary-table table-striped">
         <thead className="table-dark">
           <tr>
-            {displayFields.map(e => {
-              const colKey = e.field.split(",")[0];
-              return <th scope="col" key={e.field}
-                data-field={e.field}
-                data-sorter={e.sorter}
-                style={e.sorter == null ? {} : { cursor: "pointer" }}
-                onClick={e.sorter == null ? undefined : sortCol}>
-                {e.column}
-                {(colKey === sortedCol) && (sortAsc ?
-                  <ArrowUp width="12px" /> :
-                  <ArrowDown width="12px" />)}
-                {onChange == null && e.sorter != null && ["alphabetical"].includes(e.sorter) &&
-                  <OverlayFilter
-                    width="12px"
-                    filterKey={colKey}
-                    resetFilter={refreshCount}
-                    onChange={filterCol} />}
-              </th>;
+            {displayFields.map((e) => {
+              const colKey = e.field.split(',')[0];
+              return (
+                <th
+                  scope="col"
+                  key={e.field}
+                  data-field={e.field}
+                  data-sorter={e.sorter}
+                  style={e.sorter == null ? {} : { cursor: 'pointer' }}
+                  onClick={e.sorter == null ? undefined : sortCol}
+                >
+                  {e.column}
+                  {colKey === sortedCol &&
+                    (sortAsc ? (
+                      <ArrowUp width="12px" />
+                    ) : (
+                      <ArrowDown width="12px" />
+                    ))}
+                  {onChange == null &&
+                    e.sorter != null &&
+                    ['alphabetical'].includes(e.sorter) && (
+                      <OverlayFilter
+                        width="12px"
+                        filterKey={colKey}
+                        resetFilter={refreshCount}
+                        onChange={filterCol}
+                      />
+                    )}
+                </th>
+              );
             })}
           </tr>
         </thead>
         <tbody>
-          {noRows && isLoading === false ? (onChange == null ?
-            data.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage).map(createRow) :
-            data.map(createRow)) :
+          {noRows && isLoading === false ? (
+            onChange == null ? (
+              data
+                .slice(
+                  currentPage * rowsPerPage,
+                  currentPage * rowsPerPage + rowsPerPage,
+                )
+                .map(createRow)
+            ) : (
+              data.map(createRow)
+            )
+          ) : (
             <tr>
-              <td colSpan={displayFields.length}>{isLoading === true ? <ClipLoader /> : noDataMsg}</td>
+              <td colSpan={displayFields.length}>
+                {isLoading === true ? <ClipLoader /> : noDataMsg}
+              </td>
             </tr>
-          }
+          )}
         </tbody>
       </table>
-      {noRows > 0 &&
+      {noRows > 0 && (
         <>
-          <small>{currentPage * rowsPerPage + 1}-{Math.min((currentPage + 1) * rowsPerPage, noRows)} of {noRows.toLocaleString()}</small>
+          <small>
+            {currentPage * rowsPerPage + 1}-
+            {Math.min((currentPage + 1) * rowsPerPage, noRows)} of{' '}
+            {noRows.toLocaleString()}
+          </small>
           <Pagination>
-            <Pagination.First disabled={currentPage === 0} onClick={gotoFirstPage} />
-            <Pagination.Prev disabled={currentPage === 0} onClick={gotoPreviousPage} />
-            {[...Array(noPages).keys()].map(i => {
-              const pageDistance = (i === 0 || i === (noPages - 1)) ? 0 :
-                Math.abs(currentPage - i);
+            <Pagination.First
+              disabled={currentPage === 0}
+              onClick={gotoFirstPage}
+            />
+            <Pagination.Prev
+              disabled={currentPage === 0}
+              onClick={gotoPreviousPage}
+            />
+            {[...Array(noPages).keys()].map((i) => {
+              const pageDistance =
+                i === 0 || i === noPages - 1 ? 0 : Math.abs(currentPage - i);
               if (pageDistance === 2) {
-                return <Pagination.Ellipsis key={'pe_' + i} disabled={true} />
+                return <Pagination.Ellipsis key={'pe_' + i} disabled={true} />;
               } else if (pageDistance > 1) {
-                return undefined
+                return undefined;
               }
-              return <Pagination.Item key={'p_' + i} active={currentPage === i} onClick={updateCurrentPage}>
-                {++i}
-              </Pagination.Item>
+              return (
+                <Pagination.Item
+                  key={'p_' + i}
+                  active={currentPage === i}
+                  onClick={updateCurrentPage}
+                >
+                  {++i}
+                </Pagination.Item>
+              );
             })}
-            <Pagination.Next disabled={currentPage === (noPages - 1)} onClick={gotoNextPage} />
-            <Pagination.Last disabled={currentPage === (noPages - 1)} onClick={gotoLastPage} />
-            {noRows > rowsPerPage * 4 &&
+            <Pagination.Next
+              disabled={currentPage === noPages - 1}
+              onClick={gotoNextPage}
+            />
+            <Pagination.Last
+              disabled={currentPage === noPages - 1}
+              onClick={gotoLastPage}
+            />
+            {noRows > rowsPerPage * 4 && (
               <InputGroup className="ms-3" style={{ width: '150px' }}>
                 <FormControl
                   placeholder="Page"
@@ -250,7 +339,7 @@ const Table = props => {
                   aria-describedby="basic-addon2"
                   isInvalid={invalidPageNumber}
                   onKeyPress={(e) => {
-                    if (e.code === "Enter") {
+                    if (e.code === 'Enter') {
                       changeToPage();
                     }
                   }}
@@ -264,30 +353,38 @@ const Table = props => {
                     setInvalidPageNumber(false);
                   }}
                 />
-                <Button variant="outline-secondary" onClick={changeToPage}>Go</Button>
-              </InputGroup>}
+                <Button variant="outline-secondary" onClick={changeToPage}>
+                  Go
+                </Button>
+              </InputGroup>
+            )}
             <li>
-              <Form.Group controlId={`table${getRandomInt(100000)}_rpp`} className="d-flex ms-3 text-nowrap pt-1">
+              <Form.Group
+                controlId={`table${getRandomInt(100000)}_rpp`}
+                className="d-flex ms-3 text-nowrap pt-1"
+              >
                 <Form.Label>Rows per page</Form.Label>
                 <Form.Select
                   size="sm"
                   className="ms-1"
-                  onChange={e => {
+                  onChange={(e) => {
                     const newNoRows = parseInt(e.target.value, 10);
-                    setRowsPerPage(newNoRows)
-                    setNoPages(Math.ceil(noRows / newNoRows))
+                    setRowsPerPage(newNoRows);
+                    setNoPages(Math.ceil(noRows / newNoRows));
                   }}
-                  value={rowsPerPage.toString()}>
-                  {availableTablePageLengths.map((rpp, idx) =>
-                    <option
-                      key={`rpp_${idx}`}
-                      value={rpp.name}>
-                      {rpp.label}</option>)}
+                  value={rowsPerPage.toString()}
+                >
+                  {availableTablePageLengths.map((rpp, idx) => (
+                    <option key={`rpp_${idx}`} value={rpp.name}>
+                      {rpp.label}
+                    </option>
+                  ))}
                 </Form.Select>
               </Form.Group>
             </li>
           </Pagination>
-        </>}
+        </>
+      )}
     </>
   );
 };

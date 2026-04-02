@@ -1,14 +1,14 @@
-import { useState, useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import { getResponseError } from "../util/util";
-import AlertContext from "../contexts/AlertContext";
+import { useState, useContext, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { getResponseError } from '../util/util';
+import AlertContext from '../contexts/AlertContext';
 
 const TextEntryView = ({ textEntries, server }) => {
   const [, setAlertMsg] = useContext(AlertContext);
 
   const [cache, setCache] = useState([]);
-  const [teContent, setTeContent] = useState("")
+  const [teContent, setTeContent] = useState('');
   const { token } = useParams();
   const [truncationFlag, setTruncationFlag] = useState(false);
   const viewCharLimit = 1000000;
@@ -21,25 +21,33 @@ const TextEntryView = ({ textEntries, server }) => {
       entry_size: 17
     }*/
     const fetchTextEntry = async () => {
-      let teReq
+      let teReq;
       try {
         teReq = await axios.get(
           `${server}/jobs/${encodeURIComponent(token)}/text-entry`,
-          { params: { length: viewCharLimit + 1, entry_name: textEntries[entryIndex].entry_name } })
+          {
+            params: {
+              length: viewCharLimit + 1,
+              entry_name: textEntries[entryIndex].entry_name,
+            },
+          },
+        );
       } catch (err) {
-        setAlertMsg(`A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`)
-        return
+        setAlertMsg(
+          `A problem has occurred while retrieving the text entry. Error message: ${getResponseError(err)}`,
+        );
+        return;
       }
-      setCache(currCache => {
+      setCache((currCache) => {
         if (teReq.data.entry_value == null) {
           currCache[entryIndex] = {
             entry_size: 0,
-            entry_value: ""
+            entry_value: '',
           };
         } else {
           currCache[entryIndex] = {
             entry_size: teReq.data.entry_value.length,
-            entry_value: teReq.data.entry_value
+            entry_value: teReq.data.entry_value,
           };
         }
         return currCache;
@@ -50,7 +58,7 @@ const TextEntryView = ({ textEntries, server }) => {
         setTruncationFlag(false);
       }
       setTeContent(cache[entryIndex].entry_value);
-    }
+    };
 
     if (cache[entryIndex] && cache[entryIndex].entry_value) {
       if (cache[entryIndex].entry_size > viewCharLimit) {
@@ -60,9 +68,18 @@ const TextEntryView = ({ textEntries, server }) => {
       }
       setTeContent(cache[entryIndex].entry_value);
     } else {
-      fetchTextEntry()
+      fetchTextEntry();
     }
-  }, [entryIndex, server, cache, setCache, setTeContent, setAlertMsg, textEntries, token]);
+  }, [
+    entryIndex,
+    server,
+    cache,
+    setCache,
+    setTeContent,
+    setAlertMsg,
+    textEntries,
+    token,
+  ]);
 
   return (
     <form action="">
@@ -79,9 +96,9 @@ const TextEntryView = ({ textEntries, server }) => {
             name="text_entry_sel"
             id="text_entry_sel"
             className="form-control form-select"
-            onChange={e => setEntryIndex(e.target.selectedIndex)}
+            onChange={(e) => setEntryIndex(e.target.selectedIndex)}
           >
-            {textEntries.map(e => (
+            {textEntries.map((e) => (
               <option key={e.entry_name} value={e.entry_value}>
                 {e.entry_name}
               </option>
@@ -91,13 +108,15 @@ const TextEntryView = ({ textEntries, server }) => {
       </div>
       <div className="mb-3">
         <label htmlFor="exampleFormControlTextarea1">Value</label>
-        {truncationFlag &&
+        {truncationFlag && (
           <div>
             <small className="text-danger">
-              The text entry is too large to be displayed here and was truncated to {viewCharLimit} characters. Download the text entry to see the entire content.
+              The text entry is too large to be displayed here and was truncated
+              to {viewCharLimit} characters. Download the text entry to see the
+              entire content.
             </small>
           </div>
-        }
+        )}
         <textarea
           className="form-control text-monospace nowrap"
           id="exampleFormControlTextarea1"

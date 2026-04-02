@@ -1,43 +1,47 @@
-import { useState, useContext } from "react";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import AuthContext from "../contexts/AuthContext";
-import SubmitButton from "./SubmitButton";
-import { getResponseError } from "../util/util";
-import axios from "axios";
+import { useState, useContext } from 'react';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import AuthContext from '../contexts/AuthContext';
+import SubmitButton from './SubmitButton';
+import { getResponseError } from '../util/util';
+import axios from 'axios';
 
-const RemoveNamespaceModal = props => {
+const RemoveNamespaceModal = (props) => {
   const { showDialog, setShowDialog, handleSuccess, namespace } = props;
   const [{ server }] = useContext(AuthContext);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionErrorMsg, setSubmissionErrorMsg] = useState("");
+  const [submissionErrorMsg, setSubmissionErrorMsg] = useState('');
 
   const handleCloseDialog = () => {
-    setSubmissionErrorMsg("");
+    setSubmissionErrorMsg('');
     setShowDialog(false);
-  }
+  };
   const handleRemoveNamespace = () => {
     const deleteNamespaceReq = async () => {
       try {
-        await axios.delete(`${server}/namespaces/${encodeURIComponent(namespace)}`)
+        await axios.delete(
+          `${server}/namespaces/${encodeURIComponent(namespace)}`,
+        );
       } catch (err) {
-        setSubmissionErrorMsg(`Some error occurred while trying to remove the namespace. Error message: ${getResponseError(err)}.`)
-        setIsSubmitting(false)
-        return
+        setSubmissionErrorMsg(
+          `Some error occurred while trying to remove the namespace. Error message: ${getResponseError(err)}.`,
+        );
+        setIsSubmitting(false);
+        return;
       }
       setIsSubmitting(false);
       handleCloseDialog();
       handleSuccess();
-    }
+    };
     setIsSubmitting(true);
-    deleteNamespaceReq()
-  }
+    deleteNamespaceReq();
+  };
 
   return (
     <Modal show={showDialog} onHide={handleCloseDialog}>
       <form
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault();
           handleRemoveNamespace();
           return false;
@@ -47,11 +51,20 @@ const RemoveNamespaceModal = props => {
           <Modal.Title>Please Confirm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="invalid-feedback" style={{ display: submissionErrorMsg !== "" ? "block" : "none" }}>
+          <div
+            className="invalid-feedback"
+            style={{ display: submissionErrorMsg !== '' ? 'block' : 'none' }}
+          >
             {submissionErrorMsg}
           </div>
-          <p>Are you sure you want to remove the namespace: <code>{props.namespace}</code>?</p>
-          <p>This will also remove all the models registered in this namespace as well as cancel all jobs currently running in this namespace!</p>
+          <p>
+            Are you sure you want to remove the namespace:{' '}
+            <code>{props.namespace}</code>?
+          </p>
+          <p>
+            This will also remove all the models registered in this namespace as
+            well as cancel all jobs currently running in this namespace!
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseDialog}>

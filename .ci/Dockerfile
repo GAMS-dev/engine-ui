@@ -1,5 +1,8 @@
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim
 
-RUN apt-get update && apt-get install --no-install-recommends -y git nodejs npm
+RUN apt-get update && apt-get install --no-install-recommends -y curl unzip git
 
-RUN pip install pre-commit
+RUN curl -fsSL https://deno.land/install.sh | sh
+ENV PATH="/root/.deno/bin:$PATH"
+
+RUN uv pip install --system pre-commit

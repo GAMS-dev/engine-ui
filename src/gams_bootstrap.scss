@@ -7,7 +7,7 @@ $border-radius: 0;
 $border-radius-lg: 0;
 $border-radius-sm: 0;
 
-@import "../node_modules/bootstrap/scss/bootstrap";
+@import '../node_modules/bootstrap/scss/bootstrap';
 
 .navbar-logo {
   height: 50px;
@@ -129,7 +129,7 @@ body {
 
 .sidebar .dropdown-toggle {
   width: 100%;
-  text-align: left
+  text-align: left;
 }
 
 .username-container {
@@ -142,7 +142,7 @@ body {
   vertical-align: middle;
 }
 
-[role="main"] {
+[role='main'] {
   padding-top: 77px;
 }
 
@@ -171,7 +171,7 @@ body {
     max-width: 100vw;
   }
 
-  [role="main"] {
+  [role='main'] {
     -webkit-overflow-scrolling: touch;
     overflow: auto;
   }
@@ -198,7 +198,7 @@ body {
     height: auto;
   }
 
-  [role="main"] {
+  [role='main'] {
     padding-bottom: 100px;
     min-height: 100vh;
   }
@@ -278,7 +278,15 @@ body {
 }
 
 .monospace {
-  font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+  font-family:
+    Consolas,
+    Monaco,
+    Lucida Console,
+    Liberation Mono,
+    DejaVu Sans Mono,
+    Bitstream Vera Sans Mono,
+    Courier New,
+    monospace;
 }
 
 .nowrap {
@@ -359,7 +367,7 @@ body {
 }
 
 .pre-line {
-  white-space: pre-line
+  white-space: pre-line;
 }
 
 .job-timings-info-wrapper {

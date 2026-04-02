@@ -1,18 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
-import { AllProvidersWrapperDefault } from './utils/testUtils'
+import '@testing-library/jest-dom';
+import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import TimeDiffDisplay from '../components/TimeDiffDisplay'
+import TimeDiffDisplay from '../components/TimeDiffDisplay';
 
 vi.mock('axios');
 
 describe('TimeDiffDisplay', () => {
-
-    it('renders TimeDiffDisplay correctly', async () => {
-        render(<TimeDiffDisplay time={20000} />, {
-            wrapper: AllProvidersWrapperDefault
-        });
-        await waitFor(() => screen.findByText('5 hours, 33 minutes, 20 seconds'));
+  it('renders TimeDiffDisplay correctly', async () => {
+    render(<TimeDiffDisplay time={20000} />, {
+      wrapper: AllProvidersWrapperDefault,
     });
-
-})
+    await waitFor(() => screen.findByText('5 hours, 33 minutes, 20 seconds'));
+  });
+});
