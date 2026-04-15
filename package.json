@@ -15,7 +15,7 @@
     "lint": "eslint src --ext=\".js,.jsx\" --max-warnings 0"
   },
   "dependencies": {
-    "axios": "^1.14.0",
+    "axios": "^1.15.0",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
     "chartjs-adapter-date-fns": "^3.0.0",
