@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: prettier
         name: check format
-        entry: deno run -A npm:prettier --check
+        entry: deno run -A npm:prettier --check --write
         language: unsupported
         types_or:
           [html, scss, css, ts, javascript, tsx, jsx, json, yaml, markdown]
