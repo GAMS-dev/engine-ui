@@ -90,21 +90,39 @@ export const NamespacePermissionSelector = ({
   ]);
 
   const updateNsPermissions = (permBit) => {
-    const newNamespacePermissions = namespacePermissions;
-    newNamespacePermissions[nsId].perm ^= permBit;
-    if (modifiedFlag === false) {
+    setNamespacePermissions((prevPermissions) => {
+      const updatedList = [...prevPermissions];
+
+      updatedList[nsId] = {
+        ...updatedList[nsId],
+        perm: updatedList[nsId].perm ^ permBit,
+      };
+
+      return updatedList;
+    });
+
+    if (!modifiedFlag) {
       setModifiedFlag(true);
     }
-    setNamespacePermissions(newNamespacePermissions);
   };
+
   const updateNsGroups = (labels) => {
-    const newNamespacePermissions = namespacePermissions;
-    newNamespacePermissions[nsId].groups = labels;
-    if (modifiedFlag === false) {
+    setNamespacePermissions((prevPermissions) => {
+      const updatedList = [...prevPermissions];
+
+      updatedList[nsId] = {
+        ...updatedList[nsId],
+        groups: labels,
+      };
+
+      return updatedList;
+    });
+
+    if (!modifiedFlag) {
       setModifiedFlag(true);
     }
-    setNamespacePermissions(newNamespacePermissions);
   };
+
   const updateSelectedNamespace = (e) => {
     const newNsId = namespacePermissions.findIndex(
       (el) => el.name === e.target.value,
