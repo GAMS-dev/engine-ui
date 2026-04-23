@@ -33,7 +33,7 @@ const JobReqInfoTable = (props) => {
   const [tmpJobTag, setTmpJobTag] = useState(job.tag == null ? '' : job.tag);
   const [jobTagUpdating, setJobTagUpdating] = useState(false);
 
-  let preventUpdateTag = false;
+  const [preventUpdateTag, setPreventUpdateTag] = useState(false);
 
   const formatLabel = useCallback(
     (label) => {
@@ -58,7 +58,7 @@ const JobReqInfoTable = (props) => {
     if (e.key !== 'Enter') {
       if (e.key === 'Escape') {
         setTmpJobTag(jobTag);
-        preventUpdateTag = true;
+        setPreventUpdateTag(true);
         e.target.blur();
       }
       return;
@@ -73,7 +73,7 @@ const JobReqInfoTable = (props) => {
       );
       setJobTag(tmpJobTag);
       if (e.target != null) {
-        preventUpdateTag = true;
+        setPreventUpdateTag(true);
         e.target.blur();
       }
     } catch (err) {
@@ -213,7 +213,7 @@ const JobReqInfoTable = (props) => {
                 disabled={jobTagUpdating}
                 onBlur={() => {
                   if (preventUpdateTag) {
-                    preventUpdateTag = false;
+                    setPreventUpdateTag(false);
                   } else {
                     updateJobTag({ key: 'Enter' });
                   }
