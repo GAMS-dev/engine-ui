@@ -20,6 +20,12 @@ const TextEntryView = ({ textEntries, server }) => {
       entry_value: "You will see here",
       entry_size: 17
     }*/
+    if (cache[entryIndex] && cache[entryIndex].entry_value !== undefined) {
+      setTruncationFlag(cache[entryIndex].entry_size > viewCharLimit);
+      setTeContent(cache[entryIndex].entry_value);
+      return;
+    }
+
     const fetchTextEntry = async () => {
       let teReq;
       try {
@@ -38,38 +44,27 @@ const TextEntryView = ({ textEntries, server }) => {
         );
         return;
       }
+
+      // Extract values directly from the API response into local variables
+      const entryValue =
+        teReq.data.entry_value == null ? '' : teReq.data.entry_value;
+      const entrySize =
+        teReq.data.entry_value == null ? 0 : teReq.data.entry_value.length;
+
+      setTruncationFlag(entrySize > viewCharLimit);
+      setTeContent(entryValue);
+
       setCache((currCache) => {
-        if (teReq.data.entry_value == null) {
-          currCache[entryIndex] = {
-            entry_size: 0,
-            entry_value: '',
-          };
-        } else {
-          currCache[entryIndex] = {
-            entry_size: teReq.data.entry_value.length,
-            entry_value: teReq.data.entry_value,
-          };
-        }
-        return currCache;
+        const newCache = [...currCache]; // Create a shallow copy first!
+        newCache[entryIndex] = {
+          entry_size: entrySize,
+          entry_value: entryValue,
+        };
+        return newCache;
       });
-      if (cache[entryIndex].entry_size > viewCharLimit) {
-        setTruncationFlag(true);
-      } else {
-        setTruncationFlag(false);
-      }
-      setTeContent(cache[entryIndex].entry_value);
     };
 
-    if (cache[entryIndex] && cache[entryIndex].entry_value) {
-      if (cache[entryIndex].entry_size > viewCharLimit) {
-        setTruncationFlag(true);
-      } else {
-        setTruncationFlag(false);
-      }
-      setTeContent(cache[entryIndex].entry_value);
-    } else {
-      fetchTextEntry();
-    }
+    fetchTextEntry();
   }, [
     entryIndex,
     server,
