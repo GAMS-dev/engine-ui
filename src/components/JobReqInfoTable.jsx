@@ -85,7 +85,10 @@ const JobReqInfoTable = (props) => {
     }
   };
 
-  const formatInstanceSpecsCallback = useCallback(formatInstanceSpecs, []);
+  const formatInstanceSpecsCallback = useCallback(
+    () => formatInstanceSpecs,
+    [],
+  );
 
   useEffect(() => {
     if (!inKubernetes || !job.labels) {
