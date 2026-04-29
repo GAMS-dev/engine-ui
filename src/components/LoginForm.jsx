@@ -7,7 +7,14 @@ import { Navigate, Link } from 'react-router-dom';
 import SubmitButton from './SubmitButton';
 import { getResponseError } from '../util/util';
 import { useEffect } from 'react';
-import { Nav, OverlayTrigger, Tooltip, Alert, Button, Modal } from 'react-bootstrap';
+import {
+  Nav,
+  OverlayTrigger,
+  Tooltip,
+  Alert,
+  Button,
+  Modal,
+} from 'react-bootstrap';
 import OAuth2Login from './OAuth2Login';
 import { ClipLoader } from 'react-spinners';
 import ShowHidePasswordInput from './ShowHidePasswordInput';
