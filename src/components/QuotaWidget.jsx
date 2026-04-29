@@ -6,7 +6,7 @@ import {
   formatFileSize,
   getResponseError,
 } from '../util/util';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import { Cpu, HardDrive } from 'react-feather';
 import { quotaWarningThresholds } from '../util/constants';
 import UserSettingsContext from '../contexts/UserSettingsContext';

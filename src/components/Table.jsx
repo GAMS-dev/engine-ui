@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 import { ArrowUp, ArrowDown } from 'react-feather';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import Pagination from 'react-bootstrap/Pagination';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';

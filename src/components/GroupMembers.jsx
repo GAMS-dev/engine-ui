@@ -9,7 +9,7 @@ import Table from './Table';
 import TimeDisplay from './TimeDisplay';
 import { getResponseError } from '../util/util';
 import axios from 'axios';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import { useParams } from 'react-router-dom';
 import GroupMemberActionsButtonGroup from './GroupMemberActionsButtonGroup';
 import { UserLink } from './UserLink';

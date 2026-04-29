@@ -8,7 +8,7 @@ import JobRespInfoTable from './JobRespInfoTable';
 import { getResponseError } from '../util/util';
 import TextEntryView from './TextEntryView';
 import ServerInfoContext from '../contexts/ServerInfoContext';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 
 const Job = () => {
   const [job, setJob] = useState(null);

@@ -4,7 +4,7 @@ import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import UserQuotaSelector from './UserQuotaSelector';
 import AlertContext from '../contexts/AlertContext';
 

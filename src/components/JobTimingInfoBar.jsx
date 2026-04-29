@@ -4,7 +4,7 @@ import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';
 import { useContext } from 'react';
 import AuthContext from '../contexts/AuthContext';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 

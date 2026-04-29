@@ -7,7 +7,7 @@ import Select from 'react-select';
 import { zipAsync, getResponseError } from '../util/util';
 import InexJSONSelector from './InexJSONSelector';
 import SubmitButton from './SubmitButton';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import FileDropZone from './FileDropZone';
 import { useCallback } from 'react';
 

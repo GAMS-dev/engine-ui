@@ -11,7 +11,7 @@ import {
 } from '../util/util';
 import NamespacePermissionSelector from './NamespacePermissionSelector';
 import SubmitButton from './SubmitButton';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 import UserQuotaSelector from './UserQuotaSelector';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 import UserSettingsContext from '../contexts/UserSettingsContext';

@@ -14,7 +14,7 @@ import AddUserGroupModal from './AddUserGroupModal';
 import GroupActionsButtonGroup from './GroupActionsButtonGroup';
 import { Tab, Tabs } from 'react-bootstrap';
 import { UserLink } from './UserLink';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { ClipLoader } from 'react-spinners';
 
 const Models = () => {
   const location = useLocation();
