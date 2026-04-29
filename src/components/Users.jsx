@@ -1,7 +1,6 @@
 import { useEffect, useContext, useState } from 'react';
 import { RefreshCw, Send } from 'react-feather';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import { Link, useNavigate } from 'react-router-dom';

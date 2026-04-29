@@ -1,8 +1,7 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import Select from 'react-select';
 import { Navigate } from 'react-router-dom';
-import Button from 'react-bootstrap/Button';
-import Collapse from 'react-bootstrap/Collapse';
+import { Button, Collapse } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';

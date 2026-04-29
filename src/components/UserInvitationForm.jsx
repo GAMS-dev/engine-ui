@@ -1,7 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import AuthContext from '../contexts/AuthContext';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 import Select from 'react-select';
 import {

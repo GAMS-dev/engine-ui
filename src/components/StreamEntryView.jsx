@@ -2,9 +2,8 @@ import { useState, useEffect, useRef, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Activity } from 'react-feather';
-import Modal from 'react-bootstrap/Modal';
 import { getResponseError } from '../util/util';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 
 function entryCacheReducer(state, action) {
   if (state[action.key] == null) {

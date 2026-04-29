@@ -1,8 +1,5 @@
 import { useState, useContext, useEffect, useRef } from 'react';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Overlay from 'react-bootstrap/Overlay';
-import Tooltip from 'react-bootstrap/Tooltip';
+import { Modal, Button, Overlay, Tooltip } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import SubmitButton from './SubmitButton';

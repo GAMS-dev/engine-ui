@@ -1,7 +1,6 @@
 import { useState, useContext } from 'react';
 import axios from 'axios';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import SubmitButton from './SubmitButton';
 import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';

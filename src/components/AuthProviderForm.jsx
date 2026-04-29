@@ -1,8 +1,7 @@
 import { useEffect, useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import { Trash2 } from 'react-feather';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';

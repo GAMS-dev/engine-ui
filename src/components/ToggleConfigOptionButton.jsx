@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
 import AlertContext from '../contexts/AlertContext';

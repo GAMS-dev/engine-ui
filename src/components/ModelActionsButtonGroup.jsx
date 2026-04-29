@@ -1,6 +1,5 @@
 import { useContext, useState } from 'react';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 import DownloadLink from './DownloadLink';
 import { getResponseError } from '../util/util';

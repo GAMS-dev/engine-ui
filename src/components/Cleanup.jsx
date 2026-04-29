@@ -1,8 +1,7 @@
 import axios from 'axios';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
+import { Modal, Button } from 'react-bootstrap';
 import { RefreshCw, Send } from 'react-feather';
 import { ClipLoader } from 'react-spinners';
 import AlertContext from '../contexts/AlertContext';

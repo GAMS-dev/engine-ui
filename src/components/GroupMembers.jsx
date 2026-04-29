@@ -1,8 +1,7 @@
 import { useEffect, useContext, useState } from 'react';
 import Select from 'react-select';
 import { RefreshCw, Users } from 'react-feather';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import Table from './Table';

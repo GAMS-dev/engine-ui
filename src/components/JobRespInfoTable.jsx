@@ -2,8 +2,7 @@ import { useState, useContext } from 'react';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
 import { Bell, FileText } from 'react-feather';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import DownloadLink from './DownloadLink';
 import StreamEntryView from './StreamEntryView';
 import SolveTraceEntryView from './SolveTraceEntryView';
@@ -11,7 +10,6 @@ import TerminateJobButton from './TerminateJobButton';
 import { GAMSRcMap } from '../util/constants';
 import { isActiveJob, getResponseError } from '../util/util';
 import JobTimingInfoBar from './JobTimingInfoBar';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 const JobRespInfoTable = (props) => {
