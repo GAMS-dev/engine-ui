@@ -331,6 +331,8 @@ const Table = (props) => {
             {noRows > rowsPerPage * 4 && (
               <InputGroup className="ms-3" style={{ width: '150px' }}>
                 <FormControl
+                  id="page-input"
+                  name="goToPageNumber"
                   placeholder="Page"
                   aria-label="Page"
                   aria-describedby="basic-addon2"
