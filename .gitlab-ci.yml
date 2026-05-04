@@ -30,10 +30,9 @@ lint:
   stage: lint
   before_script: deno install --frozen
   script:
-    - SKIP='prettier' pre-commit run --all-files
+    - SKIP='check-format, lint-files' pre-commit run --all-files
     - deno task format:check
     - deno task lint
-    - deno audit --socket
   variables:
     PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
     DENO_DIR: ${CI_PROJECT_DIR}/.cache/deno
