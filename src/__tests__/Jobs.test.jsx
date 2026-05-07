@@ -12,6 +12,44 @@ describe('Jobs', () => {
   beforeEach(() => {
     axios.get.mockImplementation((url) => {
       switch (url) {
+        case 'testserver/jobs/status-codes':
+          return Promise.resolve({
+            status: 200,
+            data: [
+              {
+                status_code: -10,
+                description: 'Waiting',
+              },
+              {
+                status_code: -3,
+                description: 'Cancelled',
+              },
+              {
+                status_code: -2,
+                description: 'Cancelling',
+              },
+              {
+                status_code: -1,
+                description: 'Corrupted',
+              },
+              {
+                status_code: 0,
+                description: 'Queued',
+              },
+              {
+                status_code: 1,
+                description: 'Running',
+              },
+              {
+                status_code: 2,
+                description: 'Outputting',
+              },
+              {
+                status_code: 10,
+                description: 'Finished',
+              },
+            ],
+          });
         default:
           return Promise.reject(new Error('not found'));
       }
