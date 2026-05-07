@@ -5,6 +5,8 @@ import {
   Layers,
   ToggleLeft,
   ToggleRight,
+  Maximize2,
+  Minimize2,
 } from 'react-feather';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
@@ -23,6 +25,7 @@ const Jobs = () => {
   const [statusCodes, setStatusCodes] = useState([]);
   const [refresh, setRefresh] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTagExpanded, setIsTagExpanded] = useState(false);
   const navigate = useNavigate();
   const [tabSelected, setTabSelected] = useState(
     location.pathname === '/hc' ? 'hc' : 'jobs',
@@ -77,7 +80,15 @@ const Jobs = () => {
     },
     {
       field: 'tag',
-      column: 'Tag',
+      expanded: false,
+      column: (
+        <span
+          style={{ cursor: 'pointer' }}
+          onClick={() => setIsTagExpanded((prev) => !prev)}
+        >
+          Tag &nbsp; <Maximize2 className="feather" size={12} />
+        </span>
+      ),
       displayer: (e) => <div className="table-cell-overflow">{e}</div>,
     },
     {
@@ -214,8 +225,46 @@ const Jobs = () => {
     // Only fetch status codes if not already fetched
     if (statusCodes.length === 0) {
       fetchStatusCode();
+    } else {
+      if (
+        displayFields.find((e) => e.field === 'tag').expanded !== isTagExpanded
+      ) {
+        const newDisplayFields = displayFields.map((e) => ({ ...e }));
+        newDisplayFields.find((e) => e.field === 'status').displayer = (e) => (
+          <p className="text-info">{statusCodes[e]}</p>
+        );
+
+        if (isTagExpanded) {
+          newDisplayFields.find((e) => e.field === 'tag').displayer = (e) => (
+            <span>{e}</span>
+          );
+          newDisplayFields.find((e) => e.field === 'tag').column = (
+            <span
+              style={{ cursor: 'pointer' }}
+              onClick={() => setIsTagExpanded((prev) => !prev)}
+            >
+              Tag &nbsp; <Minimize2 className="feather" size={12} />
+            </span>
+          );
+          newDisplayFields.find((e) => e.field === 'tag').expanded = true;
+        } else {
+          newDisplayFields.find((e) => e.field === 'tag').displayer = (e) => (
+            <div className="table-cell-overflow">{e}</div>
+          );
+          newDisplayFields.find((e) => e.field === 'tag').column = (
+            <span
+              style={{ cursor: 'pointer' }}
+              onClick={() => setIsTagExpanded((prev) => !prev)}
+            >
+              Tag &nbsp; <Maximize2 className="feather" size={12} />
+            </span>
+          );
+          newDisplayFields.find((e) => e.field === 'tag').expanded = false;
+        }
+        setDisplayFields(newDisplayFields);
+      }
     }
-  }, [server, displayFields, statusCodes, setAlertMsg]);
+  }, [server, displayFields, statusCodes, setAlertMsg, isTagExpanded]);
 
   return (
     <div>
