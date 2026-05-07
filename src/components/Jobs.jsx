@@ -82,12 +82,13 @@ const Jobs = () => {
       field: 'tag',
       expanded: false,
       column: (
-        <span
-          style={{ cursor: 'pointer' }}
+        <button
+          className="invisible-button"
+          aria-label={'expand tag column'}
           onClick={() => setIsTagExpanded((prev) => !prev)}
         >
           Tag &nbsp; <Maximize2 className="feather" size={12} />
-        </span>
+        </button>
       ),
       displayer: (e) => <div className="table-cell-overflow">{e}</div>,
     },
@@ -225,44 +226,45 @@ const Jobs = () => {
     // Only fetch status codes if not already fetched
     if (statusCodes.length === 0) {
       fetchStatusCode();
-    } else {
-      if (
-        displayFields.find((e) => e.field === 'tag').expanded !== isTagExpanded
-      ) {
-        const newDisplayFields = displayFields.map((e) => ({ ...e }));
-        newDisplayFields.find((e) => e.field === 'status').displayer = (e) => (
-          <p className="text-info">{statusCodes[e]}</p>
-        );
+    }
+    if (
+      displayFields.find((e) => e.field === 'tag').expanded !== isTagExpanded
+    ) {
+      const newDisplayFields = displayFields.map((e) => ({ ...e }));
+      newDisplayFields.find((e) => e.field === 'status').displayer = (e) => (
+        <p className="text-info">{statusCodes[e]}</p>
+      );
 
-        if (isTagExpanded) {
-          newDisplayFields.find((e) => e.field === 'tag').displayer = (e) => (
-            <span>{e}</span>
-          );
-          newDisplayFields.find((e) => e.field === 'tag').column = (
-            <span
-              style={{ cursor: 'pointer' }}
-              onClick={() => setIsTagExpanded((prev) => !prev)}
-            >
-              Tag &nbsp; <Minimize2 className="feather" size={12} />
-            </span>
-          );
-          newDisplayFields.find((e) => e.field === 'tag').expanded = true;
-        } else {
-          newDisplayFields.find((e) => e.field === 'tag').displayer = (e) => (
-            <div className="table-cell-overflow">{e}</div>
-          );
-          newDisplayFields.find((e) => e.field === 'tag').column = (
-            <span
-              style={{ cursor: 'pointer' }}
-              onClick={() => setIsTagExpanded((prev) => !prev)}
-            >
-              Tag &nbsp; <Maximize2 className="feather" size={12} />
-            </span>
-          );
-          newDisplayFields.find((e) => e.field === 'tag').expanded = false;
-        }
-        setDisplayFields(newDisplayFields);
+      if (isTagExpanded) {
+        newDisplayFields.find((e) => e.field === 'tag').displayer = (e) => (
+          <span>{e}</span>
+        );
+        newDisplayFields.find((e) => e.field === 'tag').column = (
+          <button
+            className="invisible-button"
+            aria-label={'minimize tag column'}
+            onClick={() => setIsTagExpanded((prev) => !prev)}
+          >
+            Tag &nbsp; <Minimize2 className="feather" size={12} />
+          </button>
+        );
+        newDisplayFields.find((e) => e.field === 'tag').expanded = true;
+      } else {
+        newDisplayFields.find((e) => e.field === 'tag').displayer = (e) => (
+          <div className="table-cell-overflow">{e}</div>
+        );
+        newDisplayFields.find((e) => e.field === 'tag').column = (
+          <button
+            className="invisible-button"
+            aria-label={'expand tag column'}
+            onClick={() => setIsTagExpanded((prev) => !prev)}
+          >
+            Tag &nbsp; <Maximize2 className="feather" size={12} />
+          </button>
+        );
+        newDisplayFields.find((e) => e.field === 'tag').expanded = false;
       }
+      setDisplayFields(newDisplayFields);
     }
   }, [server, displayFields, statusCodes, setAlertMsg, isTagExpanded]);
 

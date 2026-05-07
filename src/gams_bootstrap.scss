@@ -428,3 +428,16 @@ body {
   max-width: 300px !important; //constrained to max width
   width: max-content !important; //uses the content as a guide of default length
 }
+
+.invisible-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: inherit;
+  display: flex;
+  align-items: center;
+}
