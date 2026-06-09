@@ -9,7 +9,7 @@
     "npm:@types/node@^25.6.0": "25.6.0",
     "npm:@vitejs/plugin-react@^5.2.0": "5.2.0_vite@8.0.10__@types+node@25.6.0__sass@1.99.0_@types+node@25.6.0_sass@1.99.0",
     "npm:@vitest/coverage-v8@^4.1.6": "4.1.6_vitest@4.1.6_canvas@3.2.3_jsdom@29.1.1__canvas@3.2.3",
-    "npm:axios@^1.15.2": "1.15.2",
+    "npm:axios@^1.17.0": "1.17.0",
     "npm:bootstrap@^5.3.8": "5.3.8_@popperjs+core@2.11.8",
     "npm:canvas@^3.2.3": "3.2.3",
     "npm:chart.js@^4.5.1": "4.5.1",
@@ -33,7 +33,7 @@
     "npm:react-dom@^19.2.5": "19.2.5_react@19.2.5",
     "npm:react-dropzone@^14.4.1": "14.4.1_react@19.2.5",
     "npm:react-feather@^2.0.10": "2.0.10_react@19.2.5",
-    "npm:react-router-dom@^7.14.2": "7.14.2_react@19.2.5_react-dom@19.2.5__react@19.2.5",
+    "npm:react-router-dom@^7.15.0": "7.17.0_react@19.2.5_react-dom@19.2.5__react@19.2.5",
     "npm:react-select-event@^5.5.1": "5.5.1",
     "npm:react-select@^5.10.2": "5.10.2_react@19.2.5_react-dom@19.2.5__react@19.2.5",
     "npm:react-spinners@0.17": "0.17.0_react@19.2.5_react-dom@19.2.5__react@19.2.5",
@@ -1002,6 +1002,12 @@
       "integrity": "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==",
       "bin": true
     },
+    "agent-base@6.0.2": {
+      "integrity": "sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==",
+      "dependencies": [
+        "debug"
+      ]
+    },
     "ajv@6.14.0": {
       "integrity": "sha512-IWrosm/yrn43eiKqkfkHis7QioDleaXQHdDVPKg0FSwwd/DuvyX79TZnFOnYpB7dcsFAMmtFztZuXPDvSePkFw==",
       "dependencies": [
@@ -1129,11 +1135,12 @@
         "possible-typed-array-names"
       ]
     },
-    "axios@1.15.2": {
-      "integrity": "sha512-wLrXxPtcrPTsNlJmKjkPnNPK2Ihe0hn0wGSaTEiHRPxwjvJwT3hKmXF4dpqxmPO9SoNb2FsYXj/xEo0gHN+D5A==",
+    "axios@1.17.0": {
+      "integrity": "sha512-J8SwNxprqqpbfenehxWYXE7CW+wM1BB4w3+N+g+/Wx40xM4rsLrfPmHHxSWIxJLYDgSY/HqlFPIYb2/S3rxafw==",
       "dependencies": [
         "follow-redirects",
         "form-data",
+        "https-proxy-agent",
         "proxy-from-env"
       ]
     },
@@ -1949,6 +1956,13 @@
     },
     "html-escaper@2.0.2": {
       "integrity": "sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg=="
+    },
+    "https-proxy-agent@5.0.1": {
+      "integrity": "sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==",
+      "dependencies": [
+        "agent-base",
+        "debug"
+      ]
     },
     "ieee754@1.2.1": {
       "integrity": "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="
@@ -2796,16 +2810,16 @@
     "react-refresh@0.18.0": {
       "integrity": "sha512-QgT5//D3jfjJb6Gsjxv0Slpj23ip+HtOpnNgnb2S5zU3CB26G/IDPGoy4RJB42wzFE46DRsstbW6tKHoKbhAxw=="
     },
-    "react-router-dom@7.14.2_react@19.2.5_react-dom@19.2.5__react@19.2.5": {
-      "integrity": "sha512-YZcM5ES8jJSM+KrJ9BdvHHqlnGTg5tH3sC5ChFRj4inosKctdyzBDhOyyHdGk597q2OT6NTrCA1OvB/YDwfekQ==",
+    "react-router-dom@7.17.0_react@19.2.5_react-dom@19.2.5__react@19.2.5": {
+      "integrity": "sha512-fyU2yjGups/hE6Xz0I5ZYbVL8Gx29eCjgpHaRaTaVU+OOAdfRX05KsvyRm0GO8YQwOkhpU3MurW1jyMUJn+zSw==",
       "dependencies": [
         "react",
         "react-dom",
         "react-router"
       ]
     },
-    "react-router@7.14.2_react@19.2.5_react-dom@19.2.5__react@19.2.5": {
-      "integrity": "sha512-yCqNne6I8IB6rVCH7XUvlBK7/QKyqypBFGv+8dj4QBFJiiRX+FG7/nkdAvGElyvVZ/HQP5N19wzteuTARXi5Gw==",
+    "react-router@7.17.0_react@19.2.5_react-dom@19.2.5__react@19.2.5": {
+      "integrity": "sha512-FDELK7rTMlCHO5+reyXsPlmfr7N1F91lPHsWYfMEGQm/KQ+F4JFM8jGoeQDmDvdTs93Fw9aSilH+uKRb4/jXvQ==",
       "dependencies": [
         "cookie",
         "react",
@@ -3586,7 +3600,7 @@
         "npm:@types/node@^25.6.0",
         "npm:@vitejs/plugin-react@^5.2.0",
         "npm:@vitest/coverage-v8@^4.1.6",
-        "npm:axios@^1.15.2",
+        "npm:axios@^1.17.0",
         "npm:bootstrap@^5.3.8",
         "npm:canvas@^3.2.3",
         "npm:chart.js@^4.5.1",
@@ -3610,7 +3624,7 @@
         "npm:react-dom@^19.2.5",
         "npm:react-dropzone@^14.4.1",
         "npm:react-feather@^2.0.10",
-        "npm:react-router-dom@^7.14.2",
+        "npm:react-router-dom@^7.15.0",
         "npm:react-select-event@^5.5.1",
         "npm:react-select@^5.10.2",
         "npm:react-spinners@0.17",
