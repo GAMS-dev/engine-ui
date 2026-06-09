@@ -84,11 +84,6 @@ const JobReqInfoTable = (props) => {
     }
   };
 
-  const formatInstanceSpecsCallback = useCallback(
-    () => formatInstanceSpecs,
-    [],
-  );
-
   useEffect(() => {
     if (!inKubernetes || !job.labels) {
       setJobLabels(null);
@@ -126,7 +121,7 @@ const JobReqInfoTable = (props) => {
               return el;
             }
             const elTmp = el;
-            elTmp[1] = formatInstanceSpecsCallback(
+            elTmp[1] = formatInstanceSpecs(
               {
                 label: elTmp[1],
                 cpu_request: cpuRequest?.length === 2 ? cpuRequest[1] : '',
@@ -143,14 +138,7 @@ const JobReqInfoTable = (props) => {
     } else {
       setJobLabels(jobLabelsTmp);
     }
-  }, [
-    job,
-    inKubernetes,
-    setJobLabels,
-    userSettings,
-    formatInstanceSpecsCallback,
-    formatLabel,
-  ]);
+  }, [job, inKubernetes, setJobLabels, userSettings, formatLabel]);
 
   const handleCloseEditAccessGroupsDialog = () => {
     setShowEditAccessGroupsDialog(false);
