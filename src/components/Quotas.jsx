@@ -5,7 +5,6 @@ import { Pie } from 'react-chartjs-2';
 import { useOutletContext } from 'react-router-dom';
 import Select from 'react-select';
 import { ClipLoader } from 'react-spinners';
-import ServerInfoContext from '../contexts/ServerInfoContext';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import computeTimes from '../util/calculateQuota.js';
 import { formatDecimal } from '../util/util.jsx';
@@ -65,8 +64,6 @@ const Quotas = () => {
     data,
     startDate: calcStartDate,
     endDate: calcEndTime,
-    isLoading: dataIsLoading,
-    downloadProgress,
   } = useOutletContext();
   const [userSettings] = useContext(UserSettingsContext);
   const quotaFormattingFn = userSettings.quotaFormattingFn;
@@ -78,13 +75,9 @@ const Quotas = () => {
   const [numPools, setNumPools] = useState(0);
   const [numCharts, setNumCharts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [serverInfo] = useContext(ServerInfoContext);
 
   // if data, calcStartDate, calcEndTime changes:
   useEffect(() => {
-    if (dataIsLoading) {
-      return;
-    }
     setIsLoading(true);
     const dataTmp = computeTimes(data, calcStartDate, calcEndTime);
     setUngroupedDataJobs(dataTmp.data_jobs);
@@ -101,7 +94,7 @@ const Quotas = () => {
 
     setNumCharts(numChartsTmp);
     setIsLoading(false);
-  }, [data, calcStartDate, calcEndTime, dataIsLoading]);
+  }, [data, calcStartDate, calcEndTime]);
 
   function getChartData(label, ungroupedData) {
     let groupedData = [];
@@ -419,147 +412,121 @@ const Quotas = () => {
   }, [ungroupedDataJobs, ungroupedDataPools, numUser, numInstances, numPools]);
 
   return (
-    <>
-      {dataIsLoading ? (
-        serverInfo.is_saas ? (
-          <div className="w-100 px-4 py-3">
-            <p className="text-center mb-2">Fetching Usage Data...</p>
-            <div className="progress" style={{ height: '20px' }}>
+    <div className="App">
+      <div className="form-group mt-3 mb-3">
+        <label htmlFor="aggregateDropdownInput">Aggregate</label>
+        <Select
+          id="aggregateDropdown"
+          inputId="aggregateDropdownInput"
+          isClearable={false}
+          value={availableAggregateTypes.find(
+            (type) => type.value === selectedAggregateType,
+          )}
+          isSearchable={true}
+          onChange={(selected) => setSelectedAggregateType(selected.value)}
+          options={availableAggregateTypes}
+        />
+      </div>
+      {isLoading ? (
+        <ClipLoader />
+      ) : (
+        <>
+          <h2 className="text-end">Total: {quotaFormattingFn(totalUsage)} </h2>
+          {truncateWarning !== '' && (
+            <div className="alert alert-warning" role="alert">
+              {truncateWarning}
+            </div>
+          )}
+          <div className="row">
+            {numCharts > 0 ? (
               <div
-                className="progress-bar progress-bar-striped progress-bar-animated"
-                role="progressbar"
-                style={{ width: `${downloadProgress}%` }}
-                aria-valuenow={downloadProgress}
-                aria-valuemin="0"
-                aria-valuemax="100"
+                className={
+                  'col-xl-' +
+                  (numCharts === 3 ? '12' : '3') +
+                  ' col-lg-3 col-md-12 col-12'
+                }
               >
-                {downloadProgress}%
+                <div className="row">
+                  {numUser > 1 ? (
+                    <div
+                      className={
+                        'col-xl-' +
+                        (numCharts === 3 ? '4' : '12') +
+                        ' col-lg-12 col-md-6 col-sm-' +
+                        (12 / numCharts).toString() +
+                        ' col-12'
+                      }
+                    >
+                      <h3>Users</h3>
+                      <Pie data={userChartData} />
+                    </div>
+                  ) : null}
+                  {numInstances > 1 ? (
+                    <div
+                      className={
+                        'col-xl-' +
+                        (numCharts === 3 ? '4' : '12') +
+                        ' col-lg-12 col-md-6 col-sm-' +
+                        (12 / numCharts).toString() +
+                        ' col-12'
+                      }
+                    >
+                      <h3>Instances</h3>
+                      <Pie data={instanceChartData} />
+                    </div>
+                  ) : null}
+                  {numPools > 1 ? (
+                    <div
+                      className={
+                        'col-xl-' +
+                        (numCharts === 3 ? '4' : '12') +
+                        ' col-lg-12 col-md-6 col-sm-' +
+                        (12 / numCharts).toString() +
+                        ' col-12'
+                      }
+                    >
+                      <h3>Pools *</h3>
+                      <Pie data={poolLabelChartData} />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+            <div
+              className={
+                'col-xl-' +
+                (numCharts === 3 ? '12' : numCharts > 0 ? '9' : '12') +
+                ' col-lg-' +
+                (numCharts > 0 ? '9' : '12') +
+                ' col-md-12 col-12'
+              }
+            >
+              <h3>Jobs</h3>
+              <div data-testid="tableJobs">
+                <Table
+                  data={tableDataJobs}
+                  noDataMsg="No Usage data found"
+                  displayFields={displayFieldsJobs}
+                  isLoading={false}
+                  idFieldName={'unique_id'}
+                />
+              </div>
+              <h3>Idle Pool Times</h3>
+              <div data-testid="tableIdlePool">
+                <Table
+                  data={tableDataPools}
+                  noDataMsg="No Usage data found"
+                  displayFields={displayFieldsPools}
+                  isLoading={false}
+                  idFieldName={'unique_id'}
+                />
               </div>
             </div>
           </div>
-        ) : (
-          <ClipLoader />
-        )
-      ) : (
-        <div className="App">
-          <div className="form-group mt-3 mb-3">
-            <label htmlFor="aggregateDropdownInput">Aggregate</label>
-            <Select
-              id="aggregateDropdown"
-              inputId="aggregateDropdownInput"
-              isClearable={false}
-              value={availableAggregateTypes.find(
-                (type) => type.value === selectedAggregateType,
-              )}
-              isSearchable={true}
-              onChange={(selected) => setSelectedAggregateType(selected.value)}
-              options={availableAggregateTypes}
-            />
-          </div>
-          {isLoading ? (
-            <ClipLoader />
-          ) : (
-            <>
-              <h2 className="text-end">
-                Total: {quotaFormattingFn(totalUsage)}{' '}
-              </h2>
-              {truncateWarning !== '' && (
-                <div className="alert alert-warning" role="alert">
-                  {truncateWarning}
-                </div>
-              )}
-              <div className="row">
-                {numCharts > 0 ? (
-                  <div
-                    className={
-                      'col-xl-' +
-                      (numCharts === 3 ? '12' : '3') +
-                      ' col-lg-3 col-md-12 col-12'
-                    }
-                  >
-                    <div className="row">
-                      {numUser > 1 ? (
-                        <div
-                          className={
-                            'col-xl-' +
-                            (numCharts === 3 ? '4' : '12') +
-                            ' col-lg-12 col-md-6 col-sm-' +
-                            (12 / numCharts).toString() +
-                            ' col-12'
-                          }
-                        >
-                          <h3>Users</h3>
-                          <Pie data={userChartData} />
-                        </div>
-                      ) : null}
-                      {numInstances > 1 ? (
-                        <div
-                          className={
-                            'col-xl-' +
-                            (numCharts === 3 ? '4' : '12') +
-                            ' col-lg-12 col-md-6 col-sm-' +
-                            (12 / numCharts).toString() +
-                            ' col-12'
-                          }
-                        >
-                          <h3>Instances</h3>
-                          <Pie data={instanceChartData} />
-                        </div>
-                      ) : null}
-                      {numPools > 1 ? (
-                        <div
-                          className={
-                            'col-xl-' +
-                            (numCharts === 3 ? '4' : '12') +
-                            ' col-lg-12 col-md-6 col-sm-' +
-                            (12 / numCharts).toString() +
-                            ' col-12'
-                          }
-                        >
-                          <h3>Pools *</h3>
-                          <Pie data={poolLabelChartData} />
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                ) : null}
-                <div
-                  className={
-                    'col-xl-' +
-                    (numCharts === 3 ? '12' : numCharts > 0 ? '9' : '12') +
-                    ' col-lg-' +
-                    (numCharts > 0 ? '9' : '12') +
-                    ' col-md-12 col-12'
-                  }
-                >
-                  <h3>Jobs</h3>
-                  <div data-testid="tableJobs">
-                    <Table
-                      data={tableDataJobs}
-                      noDataMsg="No Usage data found"
-                      displayFields={displayFieldsJobs}
-                      isLoading={false}
-                      idFieldName={'unique_id'}
-                    />
-                  </div>
-                  <h3>Idle Pool Times</h3>
-                  <div data-testid="tableIdlePool">
-                    <Table
-                      data={tableDataPools}
-                      noDataMsg="No Usage data found"
-                      displayFields={displayFieldsPools}
-                      isLoading={false}
-                      idFieldName={'unique_id'}
-                    />
-                  </div>
-                </div>
-              </div>
-              {numPools > 1 ? <div>* includes Idle Times</div> : null}
-            </>
-          )}
-        </div>
+          {numPools > 1 ? <div>* includes Idle Times</div> : null}
+        </>
       )}
-    </>
+    </div>
   );
 };
 

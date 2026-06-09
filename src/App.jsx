@@ -4,6 +4,7 @@ import LogOut from './components/LogOut';
 
 import Layout from './components/Layout';
 import AuthContext from './contexts/AuthContext';
+import { MantineProvider } from '@mantine/core';
 import ServerInfoProvider from './providers/ServerInfoProvider';
 import {
   BrowserRouter as Router,
@@ -19,24 +20,27 @@ const App = () => {
     <React.Fragment>
       <Router basename={import.meta.env.BASE_URL}>
         <ServerInfoProvider>
-          <Routes>
-            <Route path="/login" element={<LoginForm />} />
-            <Route
-              path="/register"
-              element={<LoginForm showRegistrationForm="true" />}
-            />
-            <Route path="/logout" element={<LogOut />} />
-            <Route
-              path="*"
-              element={
-                login && window.location.search.includes('state=') === false ? (
-                  <Layout />
-                ) : (
-                  <Navigate replace to={`/login${window.location.search}`} />
-                )
-              }
-            />
-          </Routes>
+          <MantineProvider>
+            <Routes>
+              <Route path="/login" element={<LoginForm />} />
+              <Route
+                path="/register"
+                element={<LoginForm showRegistrationForm="true" />}
+              />
+              <Route path="/logout" element={<LogOut />} />
+              <Route
+                path="*"
+                element={
+                  login &&
+                  window.location.search.includes('state=') === false ? (
+                    <Layout />
+                  ) : (
+                    <Navigate replace to={`/login${window.location.search}`} />
+                  )
+                }
+              />
+            </Routes>
+          </MantineProvider>
         </ServerInfoProvider>
       </Router>
     </React.Fragment>

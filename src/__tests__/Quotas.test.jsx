@@ -11,22 +11,12 @@ import { testDatax } from './utils/testData';
 let startDate = new Date('2020-08-03T17:10:15.000000+00:00');
 let endDate = new Date('2023-08-05T17:10:15.000000+00:00');
 
-const getQuotaComponent = ({
-  data,
-  startDate,
-  endDate,
-  isLoading = false,
-  downloadProgress = 0,
-}) => {
+const getQuotaComponent = ({ data, startDate, endDate }) => {
   return (
     <Routes>
       <Route
         path="/"
-        element={
-          <Outlet
-            context={{ data, startDate, endDate, isLoading, downloadProgress }}
-          />
-        }
+        element={<Outlet context={{ data, startDate, endDate }} />}
       >
         <Route index element={<Quotas />} />
       </Route>
@@ -523,81 +513,5 @@ describe('test hypercube jobs get displayed correctly', () => {
 
     // show default since one hc job has no labels
     await screen.findByText(/default/i);
-  });
-});
-
-describe('Quotas loading states', () => {
-  const testData = testDatax.test_hypercube_with_pool_and_job;
-
-  it('renders the progress bar correctly when isLoading is true and is_saas is true', () => {
-    render(
-      getQuotaComponent({
-        data: testData,
-        startDate,
-        endDate,
-        isLoading: true,
-      }),
-      {
-        wrapper: ({ children }) => (
-          <AllProvidersWrapperDefault options={{ is_saas: true }}>
-            {children}
-          </AllProvidersWrapperDefault>
-        ),
-      },
-    );
-
-    expect(screen.getByText('Fetching Usage Data...')).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('renders the progress bar with the correct partial percentage', () => {
-    const testProgress = 68;
-
-    render(
-      getQuotaComponent({
-        data: testData,
-        startDate,
-        endDate,
-        isLoading: true,
-        downloadProgress: testProgress,
-      }),
-      {
-        wrapper: ({ children }) => (
-          <AllProvidersWrapperDefault options={{ is_saas: true }}>
-            {children}
-          </AllProvidersWrapperDefault>
-        ),
-      },
-    );
-
-    const progressBar = screen.getByRole('progressbar');
-
-    expect(progressBar).toBeInTheDocument();
-    expect(progressBar).toHaveStyle({ width: `${testProgress}%` });
-    expect(progressBar).toHaveTextContent(`${testProgress}%`);
-    expect(progressBar).toHaveAttribute(
-      'aria-valuenow',
-      testProgress.toString(),
-    );
-  });
-
-  it('renders the ClipLoader when isLoading is true and is_saas is false', () => {
-    render(
-      getQuotaComponent({
-        data: testData,
-        startDate,
-        endDate,
-        isLoading: true,
-      }),
-      {
-        wrapper: ({ children }) => (
-          <AllProvidersWrapperDefault options={{ is_saas: false }}>
-            {children}
-          </AllProvidersWrapperDefault>
-        ),
-      },
-    );
-    expect(screen.queryByText('Fetching Usage Data...')).toBeNull();
-    expect(screen.queryByRole('progressbar')).toBeNull();
   });
 });

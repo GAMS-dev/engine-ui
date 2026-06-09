@@ -14,7 +14,7 @@ const UserEditBundle = () => {
 
   const { userToEdit } = useParams();
   const [userToEditIDP, setUserToEditIDP] = useState(null);
-  const [userToEditRoles, setUserToEditRoles] = useState([]);
+  const [userToEditRoles, setUserToEditRoles] = useState(null);
   const [invalidUserRequest, setInvalidUserRequest] = useState(false);
   const [invalidUserMessage, setInvalidUserMessage] = useState('');
   const [, setAlertMsg] = useContext(AlertContext);
@@ -123,7 +123,7 @@ const UserEditBundle = () => {
                       <Nav.Link eventKey="instances">Change Instances</Nav.Link>
                     </Nav.Item>
                   )}
-                  {!userToEditRoles.includes('admin') && (
+                  {!userToEditRoles?.includes('admin') && (
                     <Nav.Item>
                       <Nav.Link eventKey="quotas">Change Quota</Nav.Link>
                     </Nav.Item>

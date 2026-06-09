@@ -137,18 +137,13 @@ describe('Usage', () => {
 
     render(getUsageComponent({ userToEditRoles: ['admin'] }), {
       wrapper: ({ children }) => (
-        <AllProvidersWrapperDefault
-          options={{ is_saas: true, use_brokerv2: true }}
-        >
+        <AllProvidersWrapperDefault options={{ use_brokerv2: true }}>
           {children}
         </AllProvidersWrapperDefault>
       ),
     });
 
     await waitFor(() => screen.findByText('Show Invitees?'));
-
-    const fetchButton = screen.getByRole('button', { name: /Fetch Usage/i });
-    await user.click(fetchButton);
 
     const jobsUrl = `testserver/v2/usage/user1/jobs`;
     const hcUrl = `testserver/v2/usage/user1/hypercube`;
@@ -225,16 +220,13 @@ describe('Usage', () => {
 
     render(getUsageComponent({ userToEditRoles: ['admin'] }), {
       wrapper: ({ children }) => (
-        <AllProvidersWrapperDefault options={{ is_saas: false }}>
+        <AllProvidersWrapperDefault options={{ use_brokerv2: false }}>
           {children}
         </AllProvidersWrapperDefault>
       ),
     });
 
     await waitFor(() => screen.findByText('Show Invitees?'));
-
-    const fetchButton = screen.getByRole('button', { name: /Fetch Usage/i });
-    await user.click(fetchButton);
 
     const usageUrl = `testserver/usage/`;
 
@@ -246,7 +238,7 @@ describe('Usage', () => {
             'job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}',
         },
         params: expect.objectContaining({
-          recursive: false,
+          recursive: true,
         }),
       }),
     );
@@ -264,18 +256,13 @@ describe('Usage', () => {
 
     render(getUsageComponent({ userToEditRoles: ['admin'] }), {
       wrapper: ({ children }) => (
-        <AllProvidersWrapperDefault
-          options={{ is_saas: true, use_brokerv2: false }}
-        >
+        <AllProvidersWrapperDefault options={{ use_brokerv2: false }}>
           {children}
         </AllProvidersWrapperDefault>
       ),
     });
 
     await waitFor(() => screen.findByText('Show Invitees?'));
-
-    const fetchButton = screen.getByRole('button', { name: /Fetch Usage/i });
-    await user.click(fetchButton);
 
     const usageUrl = `testserver/usage/`;
 
@@ -287,22 +274,12 @@ describe('Usage', () => {
             'job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}',
         },
         params: expect.objectContaining({
-          recursive: false,
+          recursive: true,
         }),
       }),
     );
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not fetch usage data on initial render', async () => {
-    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
-      wrapper: AllProvidersWrapperDefault,
-    });
-
-    await waitFor(() => screen.findByText('Show Invitees?'));
-
-    expect(axios.get).toHaveBeenCalledTimes(0);
   });
 
   it('cancels the fetch request when the cancel button is clicked', async () => {
@@ -330,9 +307,6 @@ describe('Usage', () => {
 
     await waitFor(() => screen.findByText('Show Invitees?'));
 
-    const fetchButton = screen.getByRole('button', { name: /Fetch Usage/i });
-    await user.click(fetchButton);
-
     const cancelButton = await screen.findByRole('button', { name: /Cancel/i });
     expect(cancelButton).toBeInTheDocument();
 
@@ -347,7 +321,7 @@ describe('Usage', () => {
 
     resolveRequest({ data: [] });
     // should switch back to the fetch button
-    await screen.findByRole('button', { name: /Fetch Usage/i });
+    await screen.findByRole('button', { name: /Refresh/i });
   });
 
   it('handles different per-page limits for different endpoints correctly', async () => {
@@ -392,18 +366,14 @@ describe('Usage', () => {
 
     render(getUsageComponent({ userToEditRoles: ['admin'] }), {
       wrapper: ({ children }) => (
-        <AllProvidersWrapperDefault
-          options={{ is_saas: true, use_brokerv2: true }}
-        >
+        <AllProvidersWrapperDefault options={{ use_brokerv2: true }}>
           {children}
         </AllProvidersWrapperDefault>
       ),
     });
 
     await waitFor(() => screen.findByText('Show Invitees?'));
-
-    const fetchButton = screen.getByRole('button', { name: /Refresh/i });
-    await user.click(fetchButton);
+    await waitFor(() => screen.findByText('Refresh Data'));
 
     // Wait until the final pool request (offset 75) has been made to ensure the while loop finished
     await waitFor(() => {
@@ -440,5 +410,147 @@ describe('Usage', () => {
     expect(poolsCalls[1][1].params.offset).toBe(25);
     expect(poolsCalls[2][1].params.offset).toBe(50);
     expect(poolsCalls[3][1].params.offset).toBe(75);
+  });
+
+  it('More than 1000 items should require user confirmation', async () => {
+    let resolveDelayedRequest;
+    let delayedPromise;
+
+    axios.get.mockImplementation((url, options) => {
+      if (url.includes('/usage/quota')) {
+        return Promise.resolve({ data: [] });
+      }
+
+      const offset = options?.params?.offset || 0;
+      const perPage = 100;
+      let total = 0;
+
+      // Define how many total items exist for each endpoint
+      if (url.includes('/usage/user1/jobs')) total = 650;
+      else if (url.includes('/usage/user1/hypercube')) total = 50;
+      else if (url.includes('/usage/user1/pools')) total = 350;
+
+      const remaining = Math.max(0, total - offset);
+      const itemsCount = Math.min(perPage, remaining);
+      const items = Array.from({ length: itemsCount }).map((_, i) => ({
+        id: offset + i,
+      }));
+
+      const response = {
+        headers: {
+          'x-total': total.toString(),
+          'x-per-page': perPage.toString(),
+        },
+        data: { items },
+      };
+
+      if (url.includes('/usage/user1/jobs') && offset === 600) {
+        delayedPromise = new Promise((resolve) => {
+          resolveDelayedRequest = () => resolve(response);
+        });
+        return delayedPromise;
+      }
+
+      return Promise.resolve(response);
+    });
+
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: ({ children }) => (
+        <AllProvidersWrapperDefault options={{ use_brokerv2: true }}>
+          {children}
+        </AllProvidersWrapperDefault>
+      ),
+    });
+
+    await waitFor(() => screen.findByText('Show Invitees?'));
+
+    const jobsUrl = `testserver/v2/usage/user1/jobs`;
+    const hcUrl = `testserver/v2/usage/user1/hypercube`;
+    const poolsUrl = `testserver/v2/usage/user1/pools`;
+
+    // Check Phase 1 calls (Offset 0)
+    expect(axios.get).toHaveBeenCalledWith(
+      jobsUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 0 }),
+      }),
+    );
+    expect(axios.get).toHaveBeenCalledWith(
+      hcUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 0 }),
+      }),
+    );
+    expect(axios.get).toHaveBeenCalledWith(
+      poolsUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 0 }),
+      }),
+    );
+
+    // Phase 2 calls should not have been called as user confirmation is pending
+    expect(axios.get).not.toHaveBeenCalledWith(
+      jobsUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 100 }),
+      }),
+    );
+
+    const loadAllButton = await screen.findByRole('button', {
+      name: /Load All Data/i,
+    });
+    expect(loadAllButton).toBeInTheDocument();
+    await user.click(loadAllButton);
+
+    const progressBar = await screen.findByRole('progressbar');
+
+    const testProgress = 86;
+
+    expect(progressBar).toBeInTheDocument();
+    expect(progressBar).toHaveStyle({ width: `${testProgress}%` });
+    expect(progressBar).toHaveTextContent(`${testProgress}%`);
+    expect(progressBar).toHaveAttribute(
+      'aria-valuenow',
+      testProgress.toString(),
+    );
+
+    resolveDelayedRequest();
+
+    await waitFor(() => {
+      expect(progressBar).not.toBeInTheDocument();
+    });
+
+    expect(axios.get).toHaveBeenCalledWith(
+      poolsUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 100 }),
+      }),
+    );
+
+    // Hypercube should NOT have been called with offset 100 because total is 50
+    expect(axios.get).not.toHaveBeenCalledWith(
+      hcUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 100 }),
+      }),
+    );
+
+    // Check Phase 2 calls (Offset 600)
+    expect(axios.get).toHaveBeenCalledWith(
+      jobsUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 600 }),
+      }),
+    );
+
+    // Pools should NOT have been called with offset 400 because total is 350
+    expect(axios.get).not.toHaveBeenCalledWith(
+      poolsUrl,
+      expect.objectContaining({
+        params: expect.objectContaining({ offset: 400 }),
+      }),
+    );
+
+    expect(axios.get).toHaveBeenCalledTimes(12);
   });
 });

@@ -3,6 +3,7 @@ import UserSettingsContext from '../../contexts/UserSettingsContext';
 import AuthContext from '../../contexts/AuthContext';
 import ServerInfoContext from '../../contexts/ServerInfoContext';
 import ServerConfigContext from '../../contexts/ServerConfigContext';
+import { MantineProvider } from '@mantine/core';
 
 export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
   const quotaUnit = options.quotaUnit ?? '$';
@@ -80,7 +81,7 @@ export const AllProvidersWrapperDefault = ({ children, options = {} }) => {
                         : [login, setLogin]
                     }
                   >
-                    {children}
+                    <MantineProvider env="test">{children}</MantineProvider>
                   </AuthContext.Provider>
                 </UserSettingsContext.Provider>
               </ServerInfoContext.Provider>
