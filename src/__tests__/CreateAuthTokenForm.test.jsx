@@ -38,6 +38,6 @@ describe('CreateAuthTokenForm', () => {
     render(<CreateAuthTokenForm />, {
       wrapper: AllProvidersWrapperDefault,
     });
-    await waitFor(() => screen.findByText('Expiration date'));
+    await waitFor(() => screen.findByText('Expiration Date'));
   });
 });
