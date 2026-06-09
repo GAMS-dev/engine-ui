@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
 import ServerInfoContext from '../contexts/ServerInfoContext';
@@ -30,7 +30,8 @@ const ServerInfoProvider = (props) => {
             'engine.gams.com',
             'engine-eu.gams.com',
           ].includes(window.location.hostname);
-          serverInfoTmp.use_brokerv2 = configRes.data.use_brokerv2 ?? false;
+          serverInfoTmp.use_brokerv2 =
+            serverInfoTmp.is_saas && (configRes.data.use_brokerv2 ?? false);
           setServerInfo(serverInfoTmp);
           localStorage.setItem('serverInfo', JSON.stringify(serverInfoTmp));
         })

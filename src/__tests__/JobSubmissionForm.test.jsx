@@ -106,7 +106,7 @@ describe('JobSubmissionForm', () => {
     await waitFor(() => screen.findByText(/Use raw resource requests?/));
   });
 
-  it('uses v1/jobs/ endpoint when is_saas and use_brokerv2 are false', async () => {
+  it('uses v1/jobs/ endpoint when use_brokerv2 is false', async () => {
     axios.post.mockResolvedValue({ data: {} });
 
     render(<JobSubmissionForm />, {
@@ -133,7 +133,7 @@ describe('JobSubmissionForm', () => {
     });
   });
 
-  it('uses the /v2/jobs/ endpoint when is_saas and use_brokerv2 are true', async () => {
+  it('uses the /v2/jobs/ endpoint when use_brokerv2 is true', async () => {
     axios.post.mockResolvedValue({ data: {} });
 
     render(<JobSubmissionForm />, {
@@ -159,39 +159,6 @@ describe('JobSubmissionForm', () => {
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
         'testserver/v2/jobs/',
-        expect.any(FormData),
-        expect.any(Object),
-      );
-    });
-  });
-
-  it('uses v1/jobs/ endpoint when is_saas is true and use_brokerv2 is false', async () => {
-    axios.post.mockResolvedValue({ data: {} });
-
-    render(<JobSubmissionForm />, {
-      wrapper: ({ children }) => (
-        <AllProvidersWrapperDefault
-          options={{ is_saas: true, use_brokerv2: false }}
-        >
-          {children}
-        </AllProvidersWrapperDefault>
-      ),
-    });
-
-    await waitFor(() => screen.findByText(/Submit Job/));
-
-    // Use the registered model to bypass the need to upload a model file
-    const useRegisteredCheckbox = screen.getByLabelText(
-      /Use a Registered Model\?/i,
-    );
-    await user.click(useRegisteredCheckbox);
-
-    const submitBtn = screen.getByRole('button', { name: /Submit Job/i });
-    await user.click(submitBtn);
-
-    await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        'testserver/jobs/',
         expect.any(FormData),
         expect.any(Object),
       );
