@@ -215,9 +215,7 @@ const Usage = () => {
           : false,
         from_datetime: selectedDateRange[0].toISOString(),
         to_datetime: selectedDateRange[1].toISOString(),
-        limit: ITEMS_PER_PAGE,
       };
-      setRequestParams(requestParamsTmp);
       const requestHeader = {
         'X-Fields':
           'job_usage{*,labels{*}},hypercube_job_usage{*,labels{*}},pool_usage{*}',
@@ -227,6 +225,9 @@ const Usage = () => {
         if (serverInfo.use_brokerv2) {
           setHasProgressInfo(true);
           setDownloadProgress(0);
+
+          requestParamsTmp.limit = ITEMS_PER_PAGE;
+          setRequestParams(requestParamsTmp);
 
           const metadata = {
             job_usage: {
@@ -282,6 +283,7 @@ const Usage = () => {
             );
           }
         } else {
+          setRequestParams(requestParamsTmp);
           const response = await axios.get(`${server}/usage/`, {
             params: { ...requestParamsTmp, username: userToEdit },
             headers: requestHeader,
