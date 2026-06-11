@@ -390,7 +390,7 @@ const Usage = () => {
             )}
           </div>
         </div>
-        <div className="row">
+        <div className="row mb-4">
           <DateTimePicker
             type="range"
             label="Pick Data Range"
