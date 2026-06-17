@@ -351,7 +351,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
           <div className="input-group-append">
             <span className="input-group-text">
               {(remainingLive != null
-                ? `remaining: ${remainingLive.volume}, `
+                ? `remaining: ${remainingLive.volume} — `
                 : '') +
                 `max: ${userSettings.quotaFormattingFn(maxQuotas.volume)}`}
             </span>
@@ -420,7 +420,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
           <div className="input-group-append">
             <span className="input-group-text">
               {(remainingLive != null
-                ? `remaining: ${remainingLive.disk}, `
+                ? `remaining: ${remainingLive.disk} — `
                 : '') + `max: ${formatFileSize(maxQuotas.disk)}`}
             </span>
           </div>
