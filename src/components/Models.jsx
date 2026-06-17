@@ -403,14 +403,7 @@ const Models = () => {
                         field: 'created_by',
                         column: 'Created By',
                         sorter: 'alphabetical',
-                        displayer: (user) =>
-                          user.deleted ? (
-                            <span className="badge rounded-pill bg-secondary ms-1">
-                              deleted
-                            </span>
-                          ) : (
-                            <UserLink user={user.username} />
-                          ),
+                        displayer: (user) => <UserLink user={user} />,
                       },
                       {
                         field: 'no_members',
@@ -447,7 +440,11 @@ const Models = () => {
                         field: 'id,username',
                         column: 'User',
                         sorter: 'alphabetical',
-                        displayer: (user) => <UserLink user={user} />,
+                        displayer: (username) => (
+                          <UserLink
+                            user={{ username: username, deleted: false }}
+                          />
+                        ),
                       },
                       {
                         field: 'permission',

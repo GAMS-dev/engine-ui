@@ -55,7 +55,7 @@ const TreeNode = ({
           ) : username === userToEdit ? (
             <strong className="text-primary">{username}</strong>
           ) : (
-            <UserLink user={username} />
+            <UserLink user={{ username: username, deleted: false }} />
           )}
           <sup>
             <span className="badge rounded-pill bg-secondary ms-1">

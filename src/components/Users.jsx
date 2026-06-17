@@ -34,13 +34,13 @@ const Users = () => {
       field: 'username,id',
       column: 'User',
       sorter: 'alphabetical',
-      displayer: (user, id) =>
-        user === '' ? (
+      displayer: (username, id) =>
+        username === '' ? (
           <span className="badge rounded-pill bg-info">
             unregistered {window.isSecureContext ? '' : `(${id})`}
           </span>
         ) : (
-          <UserLink user={user} />
+          <UserLink user={{ username: username, deleted: false }} />
         ),
     },
     {
@@ -53,7 +53,12 @@ const Users = () => {
       field: 'inviter_name',
       column: 'Invited by',
       sorter: 'alphabetical',
-      displayer: (user) => (isAdmin ? <UserLink user={user} /> : user),
+      displayer: (username) =>
+        isAdmin ? (
+          <UserLink user={{ username: username, deleted: false }} />
+        ) : (
+          username
+        ),
     },
     {
       field: 'created',

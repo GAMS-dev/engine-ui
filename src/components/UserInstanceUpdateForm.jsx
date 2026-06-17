@@ -260,9 +260,16 @@ const UserInstanceUpdateForm = () => {
                           Inherit instances from{' '}
                           {instancesInheritedFrom == null ||
                           instancesInheritedFrom === userToEdit ? (
-                            <UserLink user={inviterName} />
+                            <UserLink
+                              user={{ username: inviterName, deleted: false }}
+                            />
                           ) : (
-                            <UserLink user={instancesInheritedFrom} />
+                            <UserLink
+                              user={{
+                                username: instancesInheritedFrom,
+                                deleted: false,
+                              }}
+                            />
                           )}
                           {inheritInstances && (
                             <small
@@ -359,9 +366,16 @@ const UserInstanceUpdateForm = () => {
                           Inherit default instance from{' '}
                           {defaultInheritedFrom == null ||
                           defaultInheritedFrom === userToEdit ? (
-                            <UserLink user={inviterName} />
+                            <UserLink
+                              user={{ username: inviterName, deleted: false }}
+                            />
                           ) : (
-                            <UserLink user={defaultInheritedFrom} />
+                            <UserLink
+                              user={{
+                                username: defaultInheritedFrom,
+                                deleted: false,
+                              }}
+                            />
                           )}
                         </>
                       </label>

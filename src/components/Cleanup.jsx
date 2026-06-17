@@ -47,7 +47,7 @@ const Cleanup = () => {
       displayer: (name, type) => <JobTokenLink name={name} type={type} />,
     },
     {
-      field: 'username',
+      field: 'user',
       column: 'User',
       sorter: 'alphabetical',
       displayer: (user) => <UserLink user={user} />,

@@ -19,7 +19,9 @@ const COLUMN_DEFS = {
     field: 'user',
     column: 'User',
     sorter: 'alphabetical',
-    displayer: (user) => <UserLink user={user} />,
+    displayer: (username) => (
+      <UserLink user={{ username: username, deleted: false }} />
+    ),
   },
   instance: {
     field: 'instance',

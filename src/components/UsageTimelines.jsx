@@ -58,7 +58,9 @@ const UsageTimeline = () => {
       field: 'username',
       column: 'User',
       sorter: 'alphabetical',
-      displayer: (user) => <UserLink user={user} />,
+      displayer: (username) => (
+        <UserLink user={{ username: username, deleted: false }} />
+      ),
     },
     {
       field: 'nojobs',

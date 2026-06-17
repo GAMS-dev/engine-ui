@@ -126,7 +126,10 @@ const LicenseUpdateForm = () => {
                 licenseErrorMsg
               ) : (
                 <>
-                  {licenseErrorMsg} <UserLink user={inheritedFrom} />
+                  {licenseErrorMsg}{' '}
+                  <UserLink
+                    user={{ username: inheritedFrom, deleted: false }}
+                  />
                 </>
               )}
             </div>

@@ -284,7 +284,9 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
           {quotaParallel === '' && quotaInheritedFrom.parallel != null ? (
             <>
               Inherited from{' '}
-              <UserLink user={quotaInheritedFrom.parallel} />{' '}
+              <UserLink
+                user={{ username: quotaInheritedFrom.parallel, deleted: false }}
+              />{' '}
             </>
           ) : (
             ''
@@ -358,7 +360,10 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         <small id="quotaVolumeInherited" className="form-text text-muted">
           {quotaVolume === '' && quotaInheritedFrom.volume != null ? (
             <>
-              Inherited from <UserLink user={quotaInheritedFrom.volume} />{' '}
+              Inherited from{' '}
+              <UserLink
+                user={{ username: quotaInheritedFrom.volume, deleted: false }}
+              />{' '}
             </>
           ) : (
             ''
@@ -423,7 +428,10 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
         <small id="quotaDiskInherited" className="form-text text-muted">
           {quotaDisk === '' && quotaInheritedFrom.disk != null ? (
             <>
-              Inherited from <UserLink user={quotaInheritedFrom.disk} />{' '}
+              Inherited from{' '}
+              <UserLink
+                user={{ username: quotaInheritedFrom.disk, deleted: false }}
+              />{' '}
             </>
           ) : (
             ''

@@ -216,15 +216,7 @@ const JobReqInfoTable = (props) => {
           <tr>
             <th>Submitted by</th>
             <td>
-              {job.user.deleted ? (
-                <span className="badge rounded-pill bg-secondary ms-1">
-                  deleted
-                </span>
-              ) : (
-                <>
-                  <UserLink user={job.user.username} />
-                </>
-              )}
+              <UserLink user={job.user} />
             </td>
           </tr>
           <tr>

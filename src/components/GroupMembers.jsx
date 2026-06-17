@@ -198,7 +198,9 @@ const GroupMembers = () => {
             field: 'username',
             column: 'Username',
             sorter: 'alphabetical',
-            displayer: (user) => <UserLink user={user} />,
+            displayer: (username) => (
+              <UserLink user={{ username: username, deleted: false }} />
+            ),
           },
           {
             field: 'added_at',
@@ -210,14 +212,7 @@ const GroupMembers = () => {
             field: 'added_by',
             column: 'Added By',
             sorter: 'alphabetical',
-            displayer: (user) =>
-              user.deleted ? (
-                <span className="badge rounded-pill bg-secondary ms-1">
-                  deleted
-                </span>
-              ) : (
-                <UserLink user={user.username} />
-              ),
+            displayer: (user) => <UserLink user={user} />,
           },
           {
             field: 'id',
