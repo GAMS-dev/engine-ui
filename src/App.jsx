@@ -6,12 +6,7 @@ import Layout from './components/Layout';
 import AuthContext from './contexts/AuthContext';
 import { MantineProvider } from '@mantine/core';
 import ServerInfoProvider from './providers/ServerInfoProvider';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router';
 
 const App = () => {
   const [login] = useContext(AuthContext);
