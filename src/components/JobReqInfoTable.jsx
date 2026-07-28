@@ -380,7 +380,7 @@ const JobReqInfoTable = (props) => {
           {jobLabels && (
             <tr>
               <th>Resources</th>
-              <td>
+              <td style={{ minHeight: '20px' }}>
                 {jobLabels.map((el) => {
                   if (el[0] === 'cpu_request') {
                     return (
