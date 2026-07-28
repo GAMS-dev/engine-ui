@@ -34,7 +34,8 @@ repos:
 
       - id: lint-files
         name: lint files
-        entry: deno run -A npm:eslint --max-warnings 0 --fix
+        # entry: deno run -A npm:eslint --max-warnings 0 --fix
+        entry: deno run -A eslint-wrapper.ts --max-warnings 0 --fix
         language: unsupported
         files: ^src/
         # types_or: [ts, javascript, tsx, jsx]
