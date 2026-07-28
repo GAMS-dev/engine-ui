@@ -93,6 +93,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
       start_time: new Date(job['submitted']),
       token: job['token'],
       is_hypercube: false,
+      finished: job['finished'] ?? null,
     };
   });
 
@@ -112,13 +113,14 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
       start_time: new Date(hypercube['submitted']),
       token: hypercube['token'],
       is_hypercube: true,
+      finished: hypercube['finished'] ?? null,
     }));
   });
 
   dataJobUsageNEW = dataJobUsageNEW.concat(dataHypercubeNEW);
 
   // check which jobs are in the timeframe and compute their run time
-  dataJobUsageNEW = dataJobUsageNEW.map((job, i) => {
+  dataJobUsageNEW = dataJobUsageNEW.map((job) => {
     if (job['times'].length !== 0) {
       job['fails'] += job['times'].length - 1;
       // always take the last element, so it also works if the job crashed before
@@ -127,8 +129,8 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
       let finishTime;
       if (job['times'][job['times'].length - 1]['finish']) {
         finishTime = new Date(job['times'][job['times'].length - 1]['finish']);
-      } else if (dataJobUsage[i]['finished'] != null) {
-        finishTime = new Date(dataJobUsage[i]['finished']);
+      } else if (job['finished'] != null) {
+        finishTime = new Date(job['finished']);
         if (debug)
           console.log('There is no finish time, but the job was finished!!');
       } else {
