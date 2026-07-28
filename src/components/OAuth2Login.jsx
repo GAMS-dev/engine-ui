@@ -8,7 +8,7 @@ const OAuth2Login = ({ server, loginConfig, setAuthToken, setErrorMsg }) => {
     const initiateOAuthLogin = async (config) => {
       const state = generateRandomString(32);
       const pkceParams = await generatePKCEParams();
-      let requestScopes = [];
+      let requestScopes;
       let oauthConfig;
 
       if (config.oidc != null) {
@@ -75,7 +75,7 @@ const OAuth2Login = ({ server, loginConfig, setAuthToken, setErrorMsg }) => {
         );
         return;
       }
-      let jwt = null;
+      let jwt;
       let refreshTokenData = null;
       try {
         const params = new URLSearchParams();

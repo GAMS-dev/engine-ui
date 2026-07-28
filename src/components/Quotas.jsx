@@ -89,17 +89,17 @@ const Quotas = () => {
     setNumPools(dataTmp.num_pools);
 
     let numChartsTmp = 0;
-    numChartsTmp = dataTmp.num_users > 1 ? (numChartsTmp += 1) : numChartsTmp;
-    numChartsTmp =
-      dataTmp.num_instances > 1 ? (numChartsTmp += 1) : numChartsTmp;
-    numChartsTmp = dataTmp.num_pools > 1 ? (numChartsTmp += 1) : numChartsTmp;
+
+    if (dataTmp.num_users > 1) numChartsTmp++;
+    if (dataTmp.num_instances > 1) numChartsTmp++;
+    if (dataTmp.num_pools > 1) numChartsTmp++;
 
     setNumCharts(numChartsTmp);
     setIsLoading(false);
   }, [data, calcStartDate, calcEndTime]);
 
   function getChartData(label, ungroupedData) {
-    let groupedData = [];
+    let groupedData;
     let labels = [];
     let cost = [];
     if (label === 'usernames') {
@@ -387,7 +387,7 @@ const Quotas = () => {
 
   useEffect(() => {
     setTruncateWarning('');
-    let chartDataTmp = {};
+    let chartDataTmp;
     if (numUser > 1) {
       chartDataTmp = getChartData(
         'usernames',

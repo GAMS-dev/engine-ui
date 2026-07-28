@@ -85,6 +85,7 @@ const subscribe = async (server, events, parameterizedEvents) => {
   } catch (err) {
     throw new Error(
       `Problems subscribing to webhook. Error message: ${getResponseError(err)}`,
+      { cause: err },
     );
   }
 };
@@ -104,6 +105,7 @@ const unsubscribe = async (server, pushSubscription, deleteWebhook) => {
     } else {
       throw new Error(
         `Problems deleting Web Push subscription. Error message: ${getResponseError(err)}`,
+        { cause: err },
       );
     }
   }

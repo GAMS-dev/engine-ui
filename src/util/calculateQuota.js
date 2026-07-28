@@ -47,7 +47,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
   dataPoolUsageNEW = dataPoolUsageNEW.map((pool, i) => {
     pool['times'] = pool['times'].reduce(function (accumulator, times) {
       let startTime = new Date(times['start']);
-      let finishTime = calcEndTime;
+      let finishTime;
       // check if the worker is still running
       if (times['finish'] != null) {
         finishTime = new Date(times['finish']);
@@ -124,7 +124,7 @@ function getComputationTimes(data, calcStartTime, calcEndTime) {
       // always take the last element, so it also works if the job crashed before
       let startTime = new Date(job['times'][job['times'].length - 1]['start']);
       // check if the job is still running
-      let finishTime = calcEndTime;
+      let finishTime;
       if (job['times'][job['times'].length - 1]['finish']) {
         finishTime = new Date(job['times'][job['times'].length - 1]['finish']);
       } else if (dataJobUsage[i]['finished'] != null) {

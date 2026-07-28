@@ -188,7 +188,7 @@ const Table = (props) => {
       ...currentFilters,
     };
     gotoFirstPage();
-    let newDataTmp = null;
+    let newDataTmp;
     if (
       currentFiltersTmp[colName] == null ||
       filterText.startsWith(currentFiltersTmp[colName])
@@ -316,7 +316,7 @@ const Table = (props) => {
                   active={currentPage === i}
                   onClick={updateCurrentPage}
                 >
-                  {++i}
+                  {i + 1}
                 </Pagination.Item>
               );
             })}
