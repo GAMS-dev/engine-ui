@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';

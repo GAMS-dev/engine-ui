@@ -1,16 +1,16 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 import axios from 'axios';
-import { Outlet, Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router';
 import Usage from '../components/Usage';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('axios');
 
-vi.mock('react-router-dom', async (importOriginal) => {
+vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

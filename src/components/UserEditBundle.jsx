@@ -1,7 +1,7 @@
 import { useEffect, useContext, useState } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router';
 import { Nav, Tab } from 'react-bootstrap';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import AuthContext from '../contexts/AuthContext';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 import AlertContext from '../contexts/AlertContext';

@@ -1,4 +1,4 @@
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import UserSettingsContext from '../../contexts/UserSettingsContext';
 import AuthContext from '../../contexts/AuthContext';
 import ServerInfoContext from '../../contexts/ServerInfoContext';

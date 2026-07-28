@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import DownloadLink from './DownloadLink';
 import TerminateJobButton from './TerminateJobButton';
 

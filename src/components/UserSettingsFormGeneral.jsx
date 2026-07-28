@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import Select from 'react-select';
 import DefaultInstanceSelector from './DefaultInstanceSelector';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 import { availableTablePageLengths } from '../util/constants';
 

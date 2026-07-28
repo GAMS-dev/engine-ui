@@ -1,5 +1,5 @@
 import { useEffect, useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { RefreshCw } from 'react-feather';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';

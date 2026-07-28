@@ -16,7 +16,7 @@ import AlertContext from '../contexts/AlertContext';
 import { isMobileDevice } from '../util/util';
 import { Share } from 'react-feather';
 import ServerConfigContext from '../contexts/ServerConfigContext';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router';
 
 const UserSettingsFormWebPush = () => {
   const [{ server, roles }] = useContext(AuthContext);

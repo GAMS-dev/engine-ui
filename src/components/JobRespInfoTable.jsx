@@ -10,7 +10,7 @@ import TerminateJobButton from './TerminateJobButton';
 import { GAMSRcMap } from '../util/constants';
 import { isActiveJob, getResponseError } from '../util/util';
 import JobTimingInfoBar from './JobTimingInfoBar';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const JobRespInfoTable = (props) => {
   const { job, statusCodes, server, isHcJob, setRefreshJob } = props;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useReducer } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import axios from 'axios';
 import { Activity } from 'react-feather';
 import { getResponseError } from '../util/util';

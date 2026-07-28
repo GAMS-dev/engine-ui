@@ -5,7 +5,7 @@ import { AllProvidersWrapperDefault } from './utils/testUtils';
 import UserChangeNameForm from '../components/UserChangeNameForm';
 
 vi.mock('axios');
-vi.mock('react-router-dom', async (importOriginal) => {
+vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -13,7 +13,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 describe('UserChangeNameForm', () => {
   beforeEach(() => {

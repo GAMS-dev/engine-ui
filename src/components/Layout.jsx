@@ -15,7 +15,7 @@ import NamespaceQuotaUpdateForm from './NamespaceQuotaUpdateForm';
 import Users from './Users';
 import { Alert } from './Alert';
 import AlertContext from '../contexts/AlertContext';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router';
 import Cleanup from './Cleanup';
 import { getResponseError } from '../util/util';
 import Webhooks from './Webhooks';

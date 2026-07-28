@@ -10,7 +10,7 @@ import {
 } from 'react-feather';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router';
 import axios from 'axios';
 import Table from './Table';
 import TimeDisplay from './TimeDisplay';

@@ -1,5 +1,5 @@
 import { useEffect, useContext, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import Select from 'react-select';
 import { Modal, Button } from 'react-bootstrap';
 import { Trash2 } from 'react-feather';

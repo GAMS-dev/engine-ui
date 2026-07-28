@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import { Nav, Tab } from 'react-bootstrap';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 
 const UserSettingsForm = () => {
   const navigate = useNavigate();

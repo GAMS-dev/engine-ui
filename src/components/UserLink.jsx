@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import AuthContext from '../contexts/AuthContext';
 
 export const UserLink = ({ user, hideMeBadge, children }) => {

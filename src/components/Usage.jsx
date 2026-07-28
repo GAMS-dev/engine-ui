@@ -7,7 +7,7 @@ import {
   useNavigate,
   useOutletContext,
   useParams,
-} from 'react-router-dom';
+} from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import ServerInfoContext from '../contexts/ServerInfoContext';

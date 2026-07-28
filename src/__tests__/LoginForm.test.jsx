@@ -7,7 +7,7 @@ import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
-vi.mock('react-router-dom', async (importOriginal) => {
+vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

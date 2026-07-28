@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { useLocation, Outlet, useNavigate } from 'react-router-dom';
+import { useLocation, Outlet, useNavigate } from 'react-router';
 import { Tab, Nav } from 'react-bootstrap';
 import ServerInfoContext from '../contexts/ServerInfoContext.jsx';
 import LicUpdateButton from './LicenseUpdateButton';

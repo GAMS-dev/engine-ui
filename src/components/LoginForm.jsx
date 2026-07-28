@@ -3,7 +3,7 @@ import logo from '../assets/images/logo.svg';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
 import { sessionTokenExpirationSeconds } from '../util/constants';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link } from 'react-router';
 import SubmitButton from './SubmitButton';
 import { getResponseError } from '../util/util';
 import { useEffect } from 'react';

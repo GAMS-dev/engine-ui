@@ -4,7 +4,7 @@ import axios from 'axios';
 import DownloadLink from './DownloadLink';
 import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const ModelActionsButtonGroup = (props) => {
   const { id, namespace, server, setRefresh } = props;

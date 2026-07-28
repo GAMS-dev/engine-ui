@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router';
 import Select from 'react-select';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';

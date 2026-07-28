@@ -3,7 +3,7 @@ import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const GroupActionsButtonGroup = (props) => {
   const { id, namespace, server, roles, setRefresh } = props;

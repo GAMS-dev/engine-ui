@@ -5,10 +5,10 @@ import { AllProvidersWrapperDefault } from './utils/testUtils.jsx';
 
 import TextEntryView from '../components/TextEntryView';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 vi.mock('axios');
-vi.mock('react-router-dom', async (importOriginal) => {
+vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

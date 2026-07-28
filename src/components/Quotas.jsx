@@ -2,7 +2,7 @@ import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router';
 import Select from 'react-select';
 import { ClipLoader } from 'react-spinners';
 import UserSettingsContext from '../contexts/UserSettingsContext';

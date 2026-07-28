@@ -9,7 +9,7 @@ import UserEditBundle from '../components/UserEditBundle';
 
 vi.mock('axios');
 
-vi.mock('react-router-dom', async (importOriginal) => {
+vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -17,7 +17,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router';
 import Usage from '../components/Usage';
 import UserChangePassForm from '../components/UserChangePassForm';
 import UserQuotaUpdateForm from '../components/UserQuotaUpdateForm';

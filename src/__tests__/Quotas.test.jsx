@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 
-import { Outlet, Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router';
 import Quotas from '../components/Quotas';
 import { testDatax } from './utils/testData';
 

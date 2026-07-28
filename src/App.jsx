@@ -11,7 +11,7 @@ import {
   Routes,
   Route,
   Navigate,
-} from 'react-router-dom';
+} from 'react-router';
 
 const App = () => {
   const [login] = useContext(AuthContext);

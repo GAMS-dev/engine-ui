@@ -8,7 +8,7 @@ import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 vi.mock('axios');
 
-vi.mock('react-router-dom', async (importOriginal) => {
+vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -16,7 +16,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 const routes = [
   { path: '/users/user1', element: <p>after submit went back to usage</p> },

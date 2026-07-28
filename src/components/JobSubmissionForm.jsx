@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import Select from 'react-select';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { Button, Collapse } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';

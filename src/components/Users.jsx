@@ -3,7 +3,7 @@ import { RefreshCw, Send } from 'react-feather';
 import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import moment from 'moment';
 import axios from 'axios';
 import Table from './Table';

@@ -12,7 +12,7 @@ import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router';
 import Select from 'react-select';
 import { ClipLoader } from 'react-spinners';
 import { mergeSortedArrays } from '../util/util';

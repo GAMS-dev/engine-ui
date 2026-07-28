@@ -3,7 +3,7 @@ import { Modal, Button } from 'react-bootstrap';
 import SubmitButton from './SubmitButton';
 import { getResponseError } from '../util/util';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import { useEffect } from 'react';
 

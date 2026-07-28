@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import AuthContext from '../contexts/AuthContext';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 import UserSettingsForm from '../components/UserSettingsForm';
-import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Navigate, Route, Routes } from 'react-router';
 import ServerConfigContext from '../contexts/ServerConfigContext';
 import UserSettingsFormGeneral from '../components/UserSettingsFormGeneral';
 import UserSettingsFormWebPush from '../components/UserSettingsFormWebPush';

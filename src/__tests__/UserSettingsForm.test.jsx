@@ -6,7 +6,7 @@ import { AllProvidersWrapperDefault } from './utils/testUtils';
 import UserSettingsForm from '../components/UserSettingsForm';
 import UserSettingsFormGeneral from '../components/UserSettingsFormGeneral';
 import UserSettingsFormWebPush from '../components/UserSettingsFormWebPush';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router';
 
 const AllProvidersWrapper = ({
   children,

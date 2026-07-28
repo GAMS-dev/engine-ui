@@ -8,8 +8,8 @@ import {
   ExternalLink,
   Server,
 } from 'react-feather';
-import { useLocation } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router';
+import { Link } from 'react-router';
 import AuthContext from '../contexts/AuthContext';
 import UserMenu from './UserMenu';
 import ServerConfigContext from '../contexts/ServerConfigContext';
