@@ -32,7 +32,8 @@ lint:
   script:
     - SKIP='check-format, lint-files' pre-commit run --all-files
     - deno task format:check
-    - deno task lint
+    # - deno task lint
+    - deno run -A eslint-wrapper.ts --max-warnings 0 ./src
   variables:
     PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
     DENO_DIR: ${CI_PROJECT_DIR}/.cache/deno
