@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import Module from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import process from 'node:process';
 
 const require = createRequire(import.meta.url);
 const originalRequire = Module.prototype.require;
