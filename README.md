@@ -14,7 +14,16 @@ GAMS Engine UI must know which instance of [GAMS Engine](https://gams.com/engine
 
 # Building
 
-To create a set of static HTML/Javascript/CSS files for use in production, run `deno task build`. Once finished, the files are located in the `build` subdirectory. If you want to mount the Engine UI on a path other than `/` (e.g. `https://my-domain.com/engine`), set the environment variable `PUBLIC_URL` accordingly (prior to running `deno task build`).
+To create a set of static HTML/Javascript/CSS files for use in production, run `deno task build`. Once finished, the files are located in the `build` subdirectory. The build's asset paths are always relative, so the same output works regardless of which path it's mounted on.
+
+Which GAMS Engine instance to connect to, and which path the UI is mounted on, are configured at runtime rather than at build time, via `build/env-config.js`. When using the bundled Docker image, this file is generated automatically at container startup from the `ENGINE_URL` and `BASE_URL` environment variables. If you're hosting the `build` output yourself without the Docker image, edit `env-config.js` directly after building, e.g.:
+
+```js
+window.__RUNTIME_CONFIG__ = {
+  ENGINE_URL: 'https://my-domain.com/api',
+  BASE_URL: '/engine',
+};
+```
 
 # License
 

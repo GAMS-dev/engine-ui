@@ -20,14 +20,9 @@ if [ "$DISABLE_REQUEST_LIMIT" = "true" ]; then
   sed -i '/^limit_req/d' /etc/nginx/conf.d/default.conf
 fi
 
-if [ -n "${mount_url+x}" ] && [ "$mount_url" != "" ] &&
-  [ "$mount_url" != "/" ] && [ "$mount_url" != "/engine" ]; then
-  ln -s /usr/share/nginx/engine "/usr/share/nginx${mount_url}"
-fi
-
 sed -i -E "s/listen [0-9]+;/listen ${ENGINE_HTTP_PORT};/" /etc/nginx/conf.d/default.conf
 
-RUNTIME_CONFIG_DIR="/var/run/engine-ui-config"
+RUNTIME_CONFIG_DIR="/tmp/engine-ui-config"
 mkdir -p "$RUNTIME_CONFIG_DIR"
 cat >"$RUNTIME_CONFIG_DIR/env-config.js" <<EOF
 window.__RUNTIME_CONFIG__ = {
