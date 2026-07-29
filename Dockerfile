@@ -3,9 +3,6 @@ WORKDIR /app
 COPY package.json deno.lock ./
 RUN deno install --frozen
 COPY . .
-ARG VITE_ENGINE_URL=AAAABBBBCCCC
-ARG VITE_BASE_NAME=DDDDEEEEFFFF
-ARG PUBLIC_URL=GGGGHHHHIIIIJJJJ
 RUN deno task build
 
 FROM nginx:1.29-alpine-slim

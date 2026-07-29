@@ -1,12 +1,11 @@
 import { useState, useLayoutEffect, useContext } from 'react';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
+import { getEngineUrl } from '../util/runtimeConfig';
 import ServerConfigContext from '../contexts/ServerConfigContext';
 import AlertContext from '../contexts/AlertContext';
 
-const SERVER_NAME = import.meta.env.VITE_ENGINE_URL
-  ? import.meta.env.VITE_ENGINE_URL
-  : '/api';
+const SERVER_NAME = getEngineUrl();
 
 const ServerConfigProvider = ({ children }) => {
   const [serverConfig, setServerConfig] = useState({});

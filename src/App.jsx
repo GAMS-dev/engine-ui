@@ -7,13 +7,14 @@ import AuthContext from './contexts/AuthContext';
 import { MantineProvider } from '@mantine/core';
 import ServerInfoProvider from './providers/ServerInfoProvider';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router';
+import { getBaseUrl } from './util/runtimeConfig';
 
 const App = () => {
   const [login] = useContext(AuthContext);
 
   return (
     <React.Fragment>
-      <Router basename={import.meta.env.BASE_URL}>
+      <Router basename={getBaseUrl()}>
         <ServerInfoProvider>
           <MantineProvider>
             <Routes>

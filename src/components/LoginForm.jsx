@@ -6,6 +6,7 @@ import { sessionTokenExpirationSeconds } from '../util/constants';
 import { Navigate, Link } from 'react-router';
 import SubmitButton from './SubmitButton';
 import { getResponseError } from '../util/util';
+import { getEngineUrl } from '../util/runtimeConfig';
 import { useEffect } from 'react';
 import {
   Nav,
@@ -21,9 +22,7 @@ import ShowHidePasswordInput from './ShowHidePasswordInput';
 import { Info } from 'react-feather';
 import { encryptRSA } from '../util/oauth';
 
-const SERVER_NAME = import.meta.env.VITE_ENGINE_URL
-  ? import.meta.env.VITE_ENGINE_URL
-  : '/api';
+const SERVER_NAME = getEngineUrl();
 const VALID_NATIVE_CLIENT_IDS = { 'com.gams.miro': 'GAMS MIRO' };
 
 const LoginForm = ({ showRegistrationForm }) => {

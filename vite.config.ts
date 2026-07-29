@@ -1,11 +1,10 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import process from 'node:process';
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.PUBLIC_URL ?? './',
+  base: './',
   server: {
     port: 3000,
     proxy: {

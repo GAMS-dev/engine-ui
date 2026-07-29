@@ -25,15 +25,13 @@ if [ -n "${mount_url+x}" ] && [ "$mount_url" != "" ] &&
   ln -s /usr/share/nginx/engine "/usr/share/nginx${mount_url}"
 fi
 
-BASE_URL_STRIPPED=$(echo "${BASE_URL}" | sed -e 's@/$@@g')
-
-find /usr/share/nginx/engine -type f -name 'index*.js*' -print0 |
-  xargs -0 sed -i "s@AAAABBBBCCCC@${ENGINE_URL}@g"
-
-find /usr/share/nginx/engine -type f -name 'index*.js*' -print0 |
-  xargs -0 sed -i "s@DDDDEEEEFFFF@${BASE_URL}@g"
-
-find /usr/share/nginx/engine -type f -exec grep -q "GGGGHHHHIIIIJJJJ" {} \; -print0 |
-  xargs -0 -r sed -i "s@/GGGGHHHHIIIIJJJJ@${BASE_URL_STRIPPED}@g"
-
 sed -i -E "s/listen [0-9]+;/listen ${ENGINE_HTTP_PORT};/" /etc/nginx/conf.d/default.conf
+
+RUNTIME_CONFIG_DIR="/var/run/engine-ui-config"
+mkdir -p "$RUNTIME_CONFIG_DIR"
+cat >"$RUNTIME_CONFIG_DIR/env-config.js" <<EOF
+window.__RUNTIME_CONFIG__ = {
+  ENGINE_URL: "${ENGINE_URL}",
+  BASE_URL: "${BASE_URL}",
+};
+EOF

@@ -1,11 +1,10 @@
 import { useLayoutEffect, useState } from 'react';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
+import { getEngineUrl } from '../util/runtimeConfig';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 
-const SERVER_NAME = import.meta.env.VITE_ENGINE_URL
-  ? import.meta.env.VITE_ENGINE_URL
-  : '/api';
+const SERVER_NAME = getEngineUrl();
 
 const ServerInfoProvider = (props) => {
   const [serverInfo, setServerInfo] = useState(
