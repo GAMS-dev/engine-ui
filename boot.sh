@@ -10,17 +10,10 @@ if [ -z "${BASE_URL+x}" ]; then
   export BASE_URL=/
 fi
 
-if [ -z "${ENGINE_HTTP_PORT+x}" ]; then
-  echo "ENGINE_HTTP_PORT is unset, using default 80"
-  export ENGINE_HTTP_PORT=80
-fi
-
 if [ "$DISABLE_REQUEST_LIMIT" = "true" ]; then
   echo "DISABLE_REQUEST_LIMIT is set to true, disabling request limiting"
   sed -i '/^limit_req/d' /etc/nginx/conf.d/default.conf
 fi
-
-sed -i -E "s/listen [0-9]+;/listen ${ENGINE_HTTP_PORT};/" /etc/nginx/conf.d/default.conf
 
 RUNTIME_CONFIG_DIR="/tmp/engine-ui-config"
 mkdir -p "$RUNTIME_CONFIG_DIR"

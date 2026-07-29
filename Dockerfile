@@ -10,6 +10,8 @@ USER root
 COPY --from=builder /app/build /usr/share/nginx/engine
 RUN apk update && \
     apk upgrade --available
+COPY engine-ui-defaults.envsh /docker-entrypoint.d/05-engine-ui-defaults.envsh
+RUN chmod +x /docker-entrypoint.d/05-engine-ui-defaults.envsh
 COPY boot.sh /docker-entrypoint.d/30-fix-ui-vars.sh
 RUN chmod +x /docker-entrypoint.d/30-fix-ui-vars.sh
 COPY engine.conf /etc/nginx/templates/default.conf.template
