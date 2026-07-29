@@ -403,12 +403,11 @@ describe('charts cut of correctly when to many parts are given', () => {
     expect(screen.getByText('Pools *', { selector: 'h3' })).toBeInTheDocument();
 
     expect(screen.getAllByRole('img')).toHaveLength(1);
-    expect(
-      screen.getByText(
-        'Only the 10 most used pool_label displayed in the chart.',
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('alert')).toBeInTheDocument();
+    const truncateWarning = screen.getByText(
+      'Only the 10 most used pool_label displayed in the chart.',
+    );
+    expect(truncateWarning).toBeInTheDocument();
+    expect(truncateWarning.closest('[role="alert"]')).toBeInTheDocument();
   });
 });
 

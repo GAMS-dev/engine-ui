@@ -434,6 +434,9 @@ const Quotas = () => {
       ) : (
         <>
           <h2 className="text-end">Total: {quotaFormattingFn(totalUsage)} </h2>
+          <p className="text-muted small text-end mb-2">
+            This total is an estimate. Actual cost may be higher.
+          </p>
           {truncateWarning !== '' && (
             <div className="alert alert-warning" role="alert">
               {truncateWarning}
