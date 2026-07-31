@@ -5,9 +5,13 @@ import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';
 import { Link } from 'react-router';
 
-const GroupActionsButtonGroup = (props) => {
-  const { id, namespace, server, roles, setRefresh } = props;
-
+const GroupActionsButtonGroup = ({
+  id,
+  namespace,
+  server,
+  roles,
+  setRefresh,
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -39,58 +43,54 @@ const GroupActionsButtonGroup = (props) => {
   }
 
   return (
-    <>
-      {namespace && (
-        <div className="btn-group">
-          <Link
-            to={`/groups/${namespace.name}/${id}`}
-            className="btn btn-sm btn-outline-info"
-          >
-            Show Members
-          </Link>
-          {roles &&
-            (roles.includes('inviter') || roles.includes('admin')) &&
-            (namespace.permission & 2) === 2 && (
-              <>
-                <button
-                  className="btn btn-sm btn-outline-danger"
-                  onClick={() => setShowDeleteDialog(true)}
+    <div className="btn-group">
+      <Link
+        to={`/groups/${namespace.name}/${id}`}
+        className="btn btn-sm btn-outline-info"
+      >
+        Show Members
+      </Link>
+      {roles &&
+        (roles.includes('inviter') || roles.includes('admin')) &&
+        (namespace.permission & 2) === 2 && (
+          <>
+            <button
+              className="btn btn-sm btn-outline-danger"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              Delete
+            </button>
+            <Modal
+              show={showDeleteDialog}
+              onHide={() => setShowDeleteDialog(false)}
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Please Confirm</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                Are you sure you want to delete the group: <code>{id}</code>{' '}
+                from the namespace: <code>{namespace.name}</code>? This cannot
+                be undone!
+              </Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowDeleteDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={deleteGroup}
+                  disabled={isSubmitting}
                 >
                   Delete
-                </button>
-                <Modal
-                  show={showDeleteDialog}
-                  onHide={() => setShowDeleteDialog(false)}
-                >
-                  <Modal.Header closeButton>
-                    <Modal.Title>Please Confirm</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    Are you sure you want to delete the group: <code>{id}</code>{' '}
-                    from the namespace: <code>{namespace.name}</code>? This
-                    cannot be undone!
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowDeleteDialog(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={deleteGroup}
-                      disabled={isSubmitting}
-                    >
-                      Delete
-                    </Button>
-                  </Modal.Footer>
-                </Modal>
-              </>
-            )}
-        </div>
-      )}
-    </>
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          </>
+        )}
+    </div>
   );
 };
 export default GroupActionsButtonGroup;

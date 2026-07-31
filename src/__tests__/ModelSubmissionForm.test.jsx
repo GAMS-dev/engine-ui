@@ -1,8 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 import ModelSubmissionForm from '../components/ModelSubmissionForm';
+import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
 
 vi.mock('axios');
@@ -15,10 +17,29 @@ vi.mock('react-router', async (importOriginal) => {
   };
 });
 
+// Mock FileDropZone to render a simple file input so we can easily test file uploads
+vi.mock('../components/FileDropZone', () => ({
+  __esModule: true,
+  default: ({ onDrop, label, multiple }) => (
+    <div>
+      <label htmlFor={`mock-dropzone-${label}`}>{label}</label>
+      <input
+        id={`mock-dropzone-${label}`}
+        type="file"
+        multiple={multiple}
+        onChange={(e) => onDrop(Array.from(e.target.files))}
+      />
+    </div>
+  ),
+}));
+
 import { useParams } from 'react-router';
 
 describe('ModelSubmissionForm', () => {
+  let user;
+
   beforeEach(() => {
+    user = userEvent.setup();
     vi.mocked(useParams).mockReturnValue({
       modelname: 'transport',
       namespace: 'global',
@@ -68,5 +89,302 @@ describe('ModelSubmissionForm', () => {
       wrapper: AllProvidersWrapperDefault,
     });
     await waitFor(() => screen.findByText(/Update model/));
+  });
+
+  it('shows the not-found error when the model does not exist in the namespace', async () => {
+    render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          /Model: transport does not exist in namespace: global/i,
+        ),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it('shows an error when retrieving model info fails', async () => {
+    axios.get.mockImplementation((url) => {
+      if (url === 'testserver/namespaces/global') {
+        return Promise.reject(new Error('model service down'));
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Problems while while retrieving model info/i),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  describe('add mode', () => {
+    beforeEach(() => {
+      vi.mocked(useParams).mockReturnValue({
+        modelname: undefined,
+        namespace: 'global',
+      });
+    });
+
+    it('renders the add-model form and fetches available user groups', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+      expect(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+      ).toBeInTheDocument();
+      expect(axios.get).toHaveBeenCalledWith(
+        'testserver/namespaces/global/user-groups',
+      );
+    });
+
+    it('shows an error when fetching user groups fails', async () => {
+      axios.get.mockImplementation((url) => {
+        if (url === 'testserver/namespaces/global/user-groups') {
+          return Promise.reject(new Error('groups service down'));
+        }
+        return Promise.reject(new Error('not found'));
+      });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() =>
+        expect(
+          screen.getByText(/Problems while while user group info/i),
+        ).toBeInTheDocument(),
+      );
+      expect(
+        screen.queryByPlaceholderText(/Identifier for the model/i),
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows a validation error when the model name ends with .gms', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel.gms',
+      );
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(/Model name must not end with '\.gms'!/i),
+        ).toBeInTheDocument(),
+      );
+      expect(axios).not.toHaveBeenCalled();
+    });
+
+    it('shows an error when no model data is provided', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel',
+      );
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(/No model data provided!/i),
+        ).toBeInTheDocument(),
+      );
+      expect(axios).not.toHaveBeenCalled();
+    });
+
+    it('submits a new model with a single zip file and no optional fields', async () => {
+      axios.mockResolvedValue({ data: {} });
+      const setAlertMsg = vi.fn();
+
+      render(
+        <AlertContext.Provider value={['', setAlertMsg]}>
+          <ModelSubmissionForm />
+        </AlertContext.Provider>,
+        { wrapper: AllProvidersWrapperDefault },
+      );
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel',
+      );
+      const fileInput = screen.getByLabelText(/Drop model files here/i);
+      const zipFile = new File(['a'.repeat(50)], 'model.zip', {
+        type: 'application/zip',
+      });
+      await user.upload(fileInput, zipFile);
+
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const call = axios.mock.calls[0][0];
+      expect(call.method).toBe('post');
+      expect(call.url).toBe('testserver/namespaces/global/models/mymodel');
+      const formData = call.data;
+      expect(formData.get('protect_model_files')).toBe('false');
+      expect(formData.get('delete_arguments')).toBeNull();
+      expect(formData.get('delete_text_entries')).toBeNull();
+      expect(formData.get('delete_stream_entries')).toBeNull();
+      expect(formData.get('delete_inex_file')).toBeNull();
+      expect(formData.get('delete_run')).toBeNull();
+      expect(formData.get('delete_user_groups')).toBeNull();
+      await waitFor(() =>
+        expect(setAlertMsg).toHaveBeenCalledWith(
+          'success:Model successfully added!',
+        ),
+      );
+    });
+
+    it('shows an error message when registering a model fails', async () => {
+      axios.mockRejectedValue(new Error('boom'));
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel',
+      );
+      const fileInput = screen.getByLabelText(/Drop model files here/i);
+      const zipFile = new File(['a'.repeat(50)], 'model.zip', {
+        type: 'application/zip',
+      });
+      await user.upload(fileInput, zipFile);
+
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(
+            /Problems while registering model\. Error message: boom\./i,
+          ),
+        ).toBeInTheDocument(),
+      );
+    });
+  });
+
+  describe('edit mode with existing model data', () => {
+    const modelResponse = {
+      name: 'transport',
+      run: 'main.gms',
+      arguments: ['--a', '--b'],
+      text_entries: ['t1'],
+      stream_entries: ['s1'],
+      inex: { type: 'include', files: ['f1'], globbing_enabled: true },
+      protect_model_files: true,
+      user_groups: ['g1'],
+    };
+
+    beforeEach(() => {
+      axios.get.mockImplementation((url) => {
+        switch (url) {
+          case 'testserver/namespaces/global':
+            return Promise.resolve({ status: 200, data: [modelResponse] });
+          case 'testserver/namespaces/global/user-groups':
+            return Promise.resolve({
+              status: 200,
+              data: [{ label: 'g1' }, { label: 'g2' }],
+            });
+          default:
+            return Promise.reject(new Error('not found'));
+        }
+      });
+    });
+
+    it('populates all fields from the fetched model data', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      expect(screen.getByDisplayValue('main.gms')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('--a,--b')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('t1')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('s1')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/protected from being overwritten/i),
+      ).toBeChecked();
+      expect(screen.getByText('g1')).toBeInTheDocument();
+      expect(screen.getByText(/Enable globbing/i)).toBeInTheDocument();
+    });
+
+    it('does not override pre-filled name fields when a replacement file is uploaded', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      const fileInput = screen.getByLabelText(/Drop updated model files here/i);
+      const replacementFile = new File(['a'.repeat(20)], 'replacement.gms', {
+        type: 'text/plain',
+      });
+      await user.upload(fileInput, replacementFile);
+
+      expect(screen.getByDisplayValue('main.gms')).toBeInTheDocument();
+    });
+
+    it('submits deletion sentinels when optional fields are cleared', async () => {
+      axios.mockResolvedValue({ data: {} });
+      const setAlertMsg = vi.fn();
+
+      render(
+        <AlertContext.Provider value={['', setAlertMsg]}>
+          <ModelSubmissionForm />
+        </AlertContext.Provider>,
+        { wrapper: AllProvidersWrapperDefault },
+      );
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      await user.clear(screen.getByDisplayValue('--a,--b'));
+      await user.clear(screen.getByDisplayValue('t1'));
+      await user.clear(screen.getByDisplayValue('s1'));
+      await user.click(screen.getByLabelText(/Filter results/i));
+
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const call = axios.mock.calls[0][0];
+      expect(call.method).toBe('patch');
+      const formData = call.data;
+      expect(formData.get('delete_arguments')).toBe('true');
+      expect(formData.get('delete_text_entries')).toBe('true');
+      expect(formData.get('delete_stream_entries')).toBe('true');
+      expect(formData.get('delete_inex_file')).toBe('true');
+      await waitFor(() =>
+        expect(setAlertMsg).toHaveBeenCalledWith(
+          'success:Model successfully updated!',
+        ),
+      );
+    });
+
+    it('appends the run argument when it differs from the derived default', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      const runInput = screen.getByDisplayValue('main.gms');
+      await user.clear(runInput);
+      await user.type(runInput, 'other.gms');
+
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const formData = axios.mock.calls[0][0].data;
+      expect(formData.get('run')).toBe('other.gms');
+    });
+
+    it('shows an error message when updating a model fails', async () => {
+      axios.mockRejectedValue(new Error('boom'));
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(
+            /Problems while updating model\. Error message: boom\./i,
+          ),
+        ).toBeInTheDocument(),
+      );
+    });
   });
 });

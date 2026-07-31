@@ -107,14 +107,13 @@ const UserInvitationForm = () => {
           setNamespacePermissions(
             responseData.map((el) => ({
               name: el.name,
-              maxPerm:
-                roles && roles.includes('admin')
-                  ? 7
-                  : el.permissions.reduce(
-                      (acc, curr) =>
-                        curr.username === username ? curr.permission : acc,
-                      0,
-                    ),
+              maxPerm: roles?.includes('admin')
+                ? 7
+                : el.permissions.reduce(
+                    (acc, curr) =>
+                      curr.username === username ? curr.permission : acc,
+                    0,
+                  ),
             })),
           );
           return;
@@ -304,31 +303,29 @@ const UserInvitationForm = () => {
                   {submissionErrorMsg}
                 </div>
                 <fieldset disabled={isSubmitting}>
-                  {roles.length > 0 && (
-                    <div className="mt-3 mb-3">
-                      <label htmlFor="roleSelector">
-                        Select a role to be assigned to the invitee
-                      </label>
-                      <select
-                        id="roleSelector"
-                        className="form-control form-select"
-                        value={role}
-                        onChange={updateRole}
-                      >
-                        <option key="user" value="user">
-                          User
+                  <div className="mt-3 mb-3">
+                    <label htmlFor="roleSelector">
+                      Select a role to be assigned to the invitee
+                    </label>
+                    <select
+                      id="roleSelector"
+                      className="form-control form-select"
+                      value={role}
+                      onChange={updateRole}
+                    >
+                      <option key="user" value="user">
+                        User
+                      </option>
+                      <option key="inviter" value="inviter">
+                        Inviter
+                      </option>
+                      {roles?.includes('admin') && (
+                        <option key="admin" value="admin">
+                          Admin
                         </option>
-                        <option key="inviter" value="inviter">
-                          Inviter
-                        </option>
-                        {roles && roles.includes('admin') && (
-                          <option key="admin" value="admin">
-                            Admin
-                          </option>
-                        )}
-                      </select>
-                    </div>
-                  )}
+                      )}
+                    </select>
+                  </div>
                   {role === 'inviter' &&
                     availableIdentityProviders.length === 0 && (
                       <div
@@ -383,7 +380,7 @@ const UserInvitationForm = () => {
                                 htmlFor="assignInstances"
                               >
                                 {availableInstances.length === 0 ||
-                                (roles && roles.includes('admin'))
+                                roles?.includes('admin')
                                   ? 'Allowed to use any instance/raw resource requests'
                                   : 'Inherit instances from you'}
                               </label>
@@ -440,7 +437,7 @@ const UserInvitationForm = () => {
                         )}
                     </>
                   )}
-                  {roles && roles.includes('admin') && (
+                  {roles?.includes('admin') && (
                     <div className="form-check mt-3 mb-3">
                       <input
                         type="checkbox"

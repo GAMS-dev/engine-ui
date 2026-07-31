@@ -14,11 +14,10 @@ function entryCacheReducer(state, action) {
   return state;
 }
 
-const StreamEntryView = (props) => {
+const StreamEntryView = ({ streamEntry, isStdOut, server, setRefreshJob }) => {
   const [showStreamEntry, setShowStreamEntry] = useState(false);
 
   const contentTextarea = useRef(null);
-  const { streamEntry, isStdOut, server, setRefreshJob } = props;
   const [errorMsg, setErrorMsg] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [entryCache, setEntryCache] = useReducer(entryCacheReducer, {});
@@ -46,6 +45,7 @@ const StreamEntryView = (props) => {
             `A problem occurred while retrieving the stream entry. Error message: ${getResponseError(err)}`,
           );
         }
+        return;
       }
       const entryValTmp = seReq.data[isStdOut ? 'message' : 'entry_value'];
       setErrorMsg('');

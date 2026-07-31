@@ -7,6 +7,7 @@ import axios from 'axios';
 import { Outlet, Route, Routes } from 'react-router';
 import Usage from '../components/Usage';
 import userEvent from '@testing-library/user-event';
+import AlertContext from '../contexts/AlertContext';
 
 vi.mock('axios');
 
@@ -101,6 +102,174 @@ describe('Usage', () => {
       wrapper: AllProvidersWrapperDefault,
     });
     await waitFor(() => screen.findByText('Show Invitees?'));
+  });
+
+  it('displays the remaining quota when quota data is returned', async () => {
+    axios.mockImplementation((config) => {
+      if (config?.url === 'testserver/usage/quota') {
+        return Promise.resolve({
+          data: [
+            {
+              volume_quota: 1000,
+              volume_used: 200,
+              disk_quota: 500,
+              disk_used: 100,
+            },
+          ],
+        });
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    expect(await screen.findByText(/\$8\.00/)).toBeInTheDocument();
+  });
+
+  it('shows unlimited quota when no quota data is returned', async () => {
+    axios.mockImplementation((config) => {
+      if (config?.url === 'testserver/usage/quota') {
+        return Promise.resolve({ data: [] });
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    expect(await screen.findByText(/unlimited/)).toBeInTheDocument();
+  });
+
+  it('toggles Show Invitees and clicks Refresh Data / Timeline nav without crashing', async () => {
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() => screen.findByText('Show Invitees?'));
+
+    const invitees = screen.getByRole('checkbox');
+    await user.click(invitees);
+    expect(invitees).not.toBeChecked();
+
+    const refreshButton = await screen.findByRole('button', {
+      name: /Refresh Data/i,
+    });
+    await user.click(refreshButton);
+
+    const timelineLink = await screen.findByRole('tab', {
+      name: /Timeline/i,
+    });
+    await user.click(timelineLink);
+  });
+
+  it('shows an error message on a non-cancel error while fetching remaining paginated data', async () => {
+    axios.get.mockImplementation((url, options) => {
+      if (url.includes('/usage/quota')) {
+        return Promise.resolve({ data: [] });
+      }
+
+      const offset = options?.params?.offset || 0;
+      const perPage = 100;
+      let total = 0;
+
+      if (url.includes('/usage/user1/jobs')) total = 150;
+      else if (url.includes('/usage/user1/hypercube')) total = 50;
+      else if (url.includes('/usage/user1/pools')) total = 50;
+
+      if (url.includes('/usage/user1/jobs') && offset === 100) {
+        return Promise.reject(new Error('network error'));
+      }
+
+      const remaining = Math.max(0, total - offset);
+      const itemsCount = Math.min(perPage, remaining);
+      const items = Array.from({ length: itemsCount }).map((_, i) => ({
+        id: offset + i,
+      }));
+
+      return Promise.resolve({
+        headers: {
+          'x-total': total.toString(),
+          'x-per-page': perPage.toString(),
+        },
+        data: { items },
+      });
+    });
+
+    const setAlertMsg = vi.fn();
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: ({ children }) => (
+        <AlertContext.Provider value={['', setAlertMsg]}>
+          <AllProvidersWrapperDefault options={{ use_brokerv2: true }}>
+            {children}
+          </AllProvidersWrapperDefault>
+        </AlertContext.Provider>
+      ),
+    });
+
+    await waitFor(() => screen.findByText('Show Invitees?'));
+
+    await waitFor(() =>
+      expect(setAlertMsg).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Problems fetching usage information: network error',
+        ),
+      ),
+    );
+
+    // Once the failed request is handled, loading should stop and the
+    // Refresh Data button should reappear.
+    await waitFor(() => screen.findByRole('button', { name: /Refresh Data/i }));
+  });
+
+  it('handles a canceled error while fetching remaining paginated data', async () => {
+    axios.isCancel = vi.fn().mockReturnValue(true);
+
+    axios.get.mockImplementation((url, options) => {
+      if (url.includes('/usage/quota')) {
+        return Promise.resolve({ data: [] });
+      }
+
+      const offset = options?.params?.offset || 0;
+      const perPage = 100;
+      let total = 0;
+
+      if (url.includes('/usage/user1/jobs')) total = 150;
+      else if (url.includes('/usage/user1/hypercube')) total = 50;
+      else if (url.includes('/usage/user1/pools')) total = 50;
+
+      if (url.includes('/usage/user1/jobs') && offset === 100) {
+        return Promise.reject(new Error('canceled'));
+      }
+
+      const remaining = Math.max(0, total - offset);
+      const itemsCount = Math.min(perPage, remaining);
+      const items = Array.from({ length: itemsCount }).map((_, i) => ({
+        id: offset + i,
+      }));
+
+      return Promise.resolve({
+        headers: {
+          'x-total': total.toString(),
+          'x-per-page': perPage.toString(),
+        },
+        data: { items },
+      });
+    });
+
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: ({ children }) => (
+        <AllProvidersWrapperDefault options={{ use_brokerv2: true }}>
+          {children}
+        </AllProvidersWrapperDefault>
+      ),
+    });
+
+    await waitFor(() => screen.findByText('Show Invitees?'));
+
+    await waitFor(() => screen.findByRole('button', { name: /Refresh Data/i }));
   });
 
   it('fetches from correct SaaS endpoints and makes the correct number of paginated requests', async () => {

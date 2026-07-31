@@ -94,9 +94,10 @@ const JobSubmissionForm = ({ newHcJob }) => {
       responses.forEach((response, index) => {
         if (index === 0) {
           if (response.status !== 'fulfilled') {
-            setSubmissionErrorMsg(
-              `An error occurred while retrieving namespaces. Error message: ${getResponseError(response.reason)}.`,
-            );
+            const errMsg = `An error occurred while retrieving namespaces. Error message: ${getResponseError(response.reason)}.`;
+            setSubmissionErrorMsg(errMsg);
+            setUnableToSolve(<p>{errMsg}</p>);
+            setIsLoading(false);
             return;
           }
           const availableNsTmp = response.value.data
@@ -167,7 +168,6 @@ const JobSubmissionForm = ({ newHcJob }) => {
         setSubmissionErrorMsg(
           `Problems while retrieving registered models. Error message: ${getResponseError(err)}.`,
         );
-        return;
       }
       setIsLoading(false);
     };
@@ -464,23 +464,27 @@ const JobSubmissionForm = ({ newHcJob }) => {
                 {serverInfo && serverInfo.in_kubernetes === true && (
                   <div id="labelsWrapperContent">
                     <ClipLoader loading={!instancesLoaded} />
-                    {instancesLoaded && rawResourceRequestsAllowed && (
-                      <div className="form-check mb-3">
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          checked={useRawRequests}
-                          onChange={(e) => setUseRawRequests(e.target.checked)}
-                          id="useRawRequests"
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="useRawRequests"
-                        >
-                          Use raw resource requests?
-                        </label>
-                      </div>
-                    )}
+                    {instancesLoaded &&
+                      rawResourceRequestsAllowed &&
+                      availableInstances.length > 0 && (
+                        <div className="form-check mb-3">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            checked={useRawRequests}
+                            onChange={(e) =>
+                              setUseRawRequests(e.target.checked)
+                            }
+                            id="useRawRequests"
+                          />
+                          <label
+                            className="form-check-label"
+                            htmlFor="useRawRequests"
+                          >
+                            Use raw resource requests?
+                          </label>
+                        </div>
+                      )}
                     <div
                       style={{
                         display: !useRawRequests ? 'block' : 'none',

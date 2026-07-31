@@ -6,9 +6,7 @@ import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';
 import { Link } from 'react-router';
 
-const ModelActionsButtonGroup = (props) => {
-  const { id, namespace, server, setRefresh } = props;
-
+const ModelActionsButtonGroup = ({ id, namespace, server, setRefresh }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteModelDialog, setShowDeleteModelDialog] = useState(false);
 
@@ -40,65 +38,61 @@ const ModelActionsButtonGroup = (props) => {
   }
 
   return (
-    <>
-      {namespace && (
-        <div className="btn-group">
-          {(namespace.permission & 4) === 4 && (
-            <DownloadLink
-              url={`${server}/namespaces/${encodeURIComponent(namespace.name)}/models/${encodeURIComponent(id)}`}
-              filename={`${id}.zip`}
-              className="btn btn-sm btn-outline-info"
-            >
-              Download
-            </DownloadLink>
-          )}
-          {(namespace.permission & 2) === 2 && (
-            <>
-              <Link
-                to={`/models/${encodeURIComponent(namespace.name)}/${encodeURIComponent(id)}`}
-                className="btn btn-sm btn-outline-info"
+    <div className="btn-group">
+      {(namespace.permission & 4) === 4 && (
+        <DownloadLink
+          url={`${server}/namespaces/${encodeURIComponent(namespace.name)}/models/${encodeURIComponent(id)}`}
+          filename={`${id}.zip`}
+          className="btn btn-sm btn-outline-info"
+        >
+          Download
+        </DownloadLink>
+      )}
+      {(namespace.permission & 2) === 2 && (
+        <>
+          <Link
+            to={`/models/${encodeURIComponent(namespace.name)}/${encodeURIComponent(id)}`}
+            className="btn btn-sm btn-outline-info"
+          >
+            Update
+          </Link>
+          <button
+            className="btn btn-sm btn-outline-danger"
+            onClick={() => setShowDeleteModelDialog(true)}
+          >
+            Delete
+          </button>
+          <Modal
+            show={showDeleteModelDialog}
+            onHide={() => setShowDeleteModelDialog(false)}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Please Confirm</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to delete the model: <code>{id}</code> from
+              the namespace: <code>{namespace.name}</code>? This cannot be
+              undone!
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteModelDialog(false)}
               >
-                Update
-              </Link>
-              <button
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => setShowDeleteModelDialog(true)}
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={deleteModel}
+                disabled={isSubmitting}
               >
                 Delete
-              </button>
-              <Modal
-                show={showDeleteModelDialog}
-                onHide={() => setShowDeleteModelDialog(false)}
-              >
-                <Modal.Header closeButton>
-                  <Modal.Title>Please Confirm</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  Are you sure you want to delete the model: <code>{id}</code>{' '}
-                  from the namespace: <code>{namespace.name}</code>? This cannot
-                  be undone!
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setShowDeleteModelDialog(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={deleteModel}
-                    disabled={isSubmitting}
-                  >
-                    Delete
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            </>
-          )}
-        </div>
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </>
       )}
-    </>
+    </div>
   );
 };
 export default ModelActionsButtonGroup;

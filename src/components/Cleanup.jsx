@@ -352,9 +352,6 @@ const Cleanup = () => {
                     checked={deletedUsersOnly}
                     onChange={(e) => setDeletedUsersOnly(e.target.checked)}
                     id="deletedUsersOnly"
-                    disabled={
-                      datasets.filter((el) => el.deleted === true).length > 0
-                    }
                   />
                   <label
                     className="form-check-label"

@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useCallback } from 'react';
+import { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router';
 import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
@@ -32,7 +32,7 @@ const JobReqInfoTable = (props) => {
   const [tmpJobTag, setTmpJobTag] = useState(job.tag == null ? '' : job.tag);
   const [jobTagUpdating, setJobTagUpdating] = useState(false);
 
-  const [preventUpdateTag, setPreventUpdateTag] = useState(false);
+  const preventUpdateTagRef = useRef(false);
 
   const formatLabel = useCallback(
     (label) => {
@@ -57,7 +57,7 @@ const JobReqInfoTable = (props) => {
     if (e.key !== 'Enter') {
       if (e.key === 'Escape') {
         setTmpJobTag(jobTag);
-        setPreventUpdateTag(true);
+        preventUpdateTagRef.current = true;
         e.target.blur();
       }
       return;
@@ -72,7 +72,7 @@ const JobReqInfoTable = (props) => {
       );
       setJobTag(tmpJobTag);
       if (e.target != null) {
-        setPreventUpdateTag(true);
+        preventUpdateTagRef.current = true;
         e.target.blur();
       }
     } catch (err) {
@@ -202,8 +202,8 @@ const JobReqInfoTable = (props) => {
                 value={tmpJobTag}
                 disabled={jobTagUpdating}
                 onBlur={() => {
-                  if (preventUpdateTag) {
-                    setPreventUpdateTag(false);
+                  if (preventUpdateTagRef.current) {
+                    preventUpdateTagRef.current = false;
                   } else {
                     updateJobTag({ key: 'Enter' });
                   }

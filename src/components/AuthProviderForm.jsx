@@ -41,7 +41,7 @@ const AuthProviderForm = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [submissionErrorMsg, setSubmissionErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState('');
+  const [formErrors, setFormErrors] = useState({});
 
   const [selectedAuthProvider, setSelectedAuthProvider] =
     useState('__+add_new');
@@ -158,19 +158,19 @@ const AuthProviderForm = () => {
         return;
       }
       if (issuerURL.protocol !== 'https:') {
-        setFormErrors((formErrors) => {
-          formErrors.issuer = 'Only HTTPS allowed';
-          return formErrors;
-        });
+        setFormErrors((formErrors) => ({
+          ...formErrors,
+          issuer: 'Only HTTPS allowed',
+        }));
         setIssuerValid(false);
         return;
       }
       if (issuerURL.search !== '' || issuerURL.hash !== '') {
-        setFormErrors((formErrors) => {
-          formErrors.issuer =
-            'Issuer URL must not contain query string or fragment components';
-          return formErrors;
-        });
+        setFormErrors((formErrors) => ({
+          ...formErrors,
+          issuer:
+            'Issuer URL must not contain query string or fragment components',
+        }));
         setIssuerValid(false);
         return;
       }
@@ -203,7 +203,7 @@ const AuthProviderForm = () => {
 
   useEffect(() => {
     setIssuerIDModified(false);
-    setFormErrors('');
+    setFormErrors({});
     if (selectedAuthProvider === '__+add_new') {
       setProviderName('');
       setProviderLabel('');
@@ -435,7 +435,7 @@ const AuthProviderForm = () => {
       return;
     }
     setIsSubmitting(true);
-    setFormErrors('');
+    setFormErrors({});
     setSubmissionErrorMsg('');
     let authURI;
     const authProviderForm = new FormData();

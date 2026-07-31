@@ -56,6 +56,7 @@ export default function DownloadLink({
         );
       }
       setLinkDisabled(false);
+      return;
     }
     const downloadUrl = window.URL.createObjectURL(
       new Blob([jsonSubkey ? response.data[jsonSubkey] : response.data]),

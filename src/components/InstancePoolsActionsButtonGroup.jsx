@@ -46,7 +46,7 @@ const InstancePoolsActionsButtonGroup = (props) => {
       }));
     } catch (err) {
       let responseErrorMsg = getResponseError(err);
-      if (isPool && err.response.status === 404) {
+      if (isPool && err.response?.status === 404) {
         responseErrorMsg = 'You are not allowed to delete this instance pool.';
       }
       setSubmissionErrorMsg(
@@ -70,7 +70,7 @@ const InstancePoolsActionsButtonGroup = (props) => {
       }));
     } catch (err) {
       let responseErrorMsg = getResponseError(err);
-      if (isPool && err.response.status === 404) {
+      if (isPool && err.response?.status === 404) {
         responseErrorMsg = 'You are not allowed to scale this instance pool.';
       }
       setSubmissionErrorMsg(
@@ -133,7 +133,7 @@ const InstancePoolsActionsButtonGroup = (props) => {
           }}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Upade Instance Pool Size</Modal.Title>
+            <Modal.Title>Update Instance Pool Size</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div

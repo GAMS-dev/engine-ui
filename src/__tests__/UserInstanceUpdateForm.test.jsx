@@ -78,9 +78,110 @@ describe('UserInstanceUpdateForm', () => {
                 },
               ],
             });
+          } else if (params.username === 'missinguser') {
+            return Promise.resolve({
+              status: 200,
+              data: [],
+            });
+          } else if (params.username === 'noinstuser') {
+            return Promise.resolve({
+              status: 200,
+              data: [
+                {
+                  username: 'noinstuser',
+                  roles: [],
+                  deleted: false,
+                  inviter_name: null,
+                  identity_provider: 'gams_engine',
+                  identity_provider_user_subject: 'noinstuser',
+                },
+              ],
+            });
+          } else if (params.username === 'erroruser') {
+            return Promise.reject(new Error('server down'));
+          } else if (params.username === 'admin2') {
+            return Promise.resolve({
+              status: 200,
+              data: [
+                {
+                  username: 'admin2',
+                  roles: ['admin'],
+                  deleted: false,
+                  inviter_name: null,
+                  identity_provider: 'gams_engine',
+                  identity_provider_user_subject: 'admin2',
+                },
+              ],
+            });
           } else {
             return Promise.reject(new Error('not found'));
           }
+        case 'testserver/usage/pools/noinstuser':
+          return Promise.resolve({
+            status: 200,
+            data: { instance_pools_available: [] },
+          });
+        case 'testserver/usage/instances/noinstuser':
+          return Promise.resolve({
+            status: 200,
+            data: { instances_inherited_from: null, instances_available: [] },
+          });
+        case 'testserver/usage/instances/noinstuser/default':
+          return Promise.resolve({
+            status: 200,
+            data: { default_instance: null, default_inherited_from: null },
+          });
+        case 'testserver/usage/pools/admin2':
+          return Promise.resolve({
+            status: 200,
+            data: { instance_pools_available: [] },
+          });
+        case 'testserver/usage/instances/admin2':
+          return Promise.resolve({
+            status: 200,
+            data: {
+              instances_inherited_from: null,
+              instances_available: [
+                {
+                  label: 'TestInstance',
+                  cpu_request: 3,
+                  memory_request: 100,
+                  workspace_request: 100,
+                  node_selectors: [],
+                  tolerations: [],
+                  multiplier: 3,
+                  multiplier_idle: 3,
+                },
+                {
+                  label: 'Test2',
+                  cpu_request: 2,
+                  memory_request: 100,
+                  workspace_request: 100,
+                  node_selectors: [],
+                  tolerations: [],
+                  multiplier: 6,
+                  multiplier_idle: 6,
+                },
+              ],
+            },
+          });
+        case 'testserver/usage/instances/admin2/default':
+          return Promise.resolve({
+            status: 200,
+            data: {
+              default_instance: {
+                label: 'TestInstance',
+                cpu_request: 3,
+                memory_request: 100,
+                workspace_request: 100,
+                node_selectors: [],
+                tolerations: [],
+                multiplier: 3,
+                multiplier_idle: 3,
+              },
+              default_inherited_from: null,
+            },
+          });
         case 'testserver/usage/pools/user1':
           return Promise.resolve({
             status: 200,
@@ -438,5 +539,138 @@ describe('UserInstanceUpdateForm', () => {
     expect(instancesAllowedDropdown.queryByText(/medium/)).toBeNull();
     expect(defaultInstanceDropdown.queryByText(/small/)).toBeNull();
     expect(defaultInstanceDropdown.getByText(/test_pool/)).toBeInTheDocument();
+  });
+
+  it('shows an error message when the user is not found', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'missinguser' });
+
+    render(<UserInstanceUpdateForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() => screen.findByText('User not found.'));
+  });
+
+  it('shows an error message when no instances are available', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'noinstuser' });
+
+    render(<UserInstanceUpdateForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() => screen.findByText('No instances available.'));
+  });
+
+  it('shows an error message when fetching required data fails', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'erroruser' });
+
+    render(<UserInstanceUpdateForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() =>
+      screen.findByText(
+        /Problems while while retrieving user instances\. Error message: server down\./,
+      ),
+    );
+  });
+
+  it('hides inherit checkboxes and shows the default instance selector for an admin user', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'admin2' });
+
+    render(<UserInstanceUpdateForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() => screen.findByText('Default Instance'));
+    expect(screen.queryByText(/Inherit instances from/)).toBeNull();
+    expect(screen.queryByText(/Allowed to use any instance/)).toBeNull();
+  });
+
+  it('submits successfully for a user who inherits instances by calling the delete endpoint', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'user2' });
+    axios.delete.mockResolvedValue({ status: 200 });
+    const routes = [
+      { path: '/users/user2', element: <p>after submit went to user2</p> },
+    ];
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault options={{ routes }}>
+        {children}
+      </AllProvidersWrapperDefault>
+    );
+
+    render(<UserInstanceUpdateForm />, { wrapper: Wrapper });
+
+    await waitFor(() => screen.findByText(/Inherit instances from/));
+    await user.click(screen.getByRole('button', { name: 'Update Instances' }));
+
+    await waitFor(() =>
+      expect(axios.delete).toHaveBeenCalledWith(
+        'testserver/usage/instances/user2',
+      ),
+    );
+    await waitFor(() => screen.findByText(/after submit went to user2/));
+  });
+
+  it('shows an error message when the delete-based submission fails', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'user2' });
+    axios.delete.mockRejectedValue(new Error('delete failed'));
+
+    render(<UserInstanceUpdateForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() => screen.findByText(/Inherit instances from/));
+    await user.click(screen.getByRole('button', { name: 'Update Instances' }));
+
+    await waitFor(() =>
+      screen.findByText(
+        /An error occurred while updating user instances\. Error message: delete failed\./,
+      ),
+    );
+  });
+
+  it('submits successfully for a non-inheriting user by calling the labels endpoint', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'user3' });
+    axios.put.mockResolvedValue({ status: 200 });
+    const routes = [
+      { path: '/users/user3', element: <p>after submit went to user3</p> },
+    ];
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault options={{ routes }}>
+        {children}
+      </AllProvidersWrapperDefault>
+    );
+
+    render(<UserInstanceUpdateForm />, { wrapper: Wrapper });
+
+    await waitFor(() => screen.findByText(/Instances user is allowed to use/));
+    await user.click(screen.getByRole('button', { name: 'Update Instances' }));
+
+    await waitFor(() =>
+      expect(axios.put).toHaveBeenCalledWith(
+        'testserver/usage/instances/user3',
+        expect.objectContaining({ default_label: 'small' }),
+      ),
+    );
+    await waitFor(() => screen.findByText(/after submit went to user3/));
+  });
+
+  it('shows an error message when the labels-based submission fails', async () => {
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'user3' });
+    axios.put.mockRejectedValue(new Error('put failed'));
+
+    render(<UserInstanceUpdateForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() => screen.findByText(/Instances user is allowed to use/));
+    await user.click(screen.getByRole('button', { name: 'Update Instances' }));
+
+    await waitFor(() =>
+      screen.findByText(
+        /An error occurred while updating user instances\. Error message: put failed\./,
+      ),
+    );
   });
 });

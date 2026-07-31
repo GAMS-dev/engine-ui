@@ -55,6 +55,7 @@ const Models = () => {
         setAlertMsg(
           `Problems while retrieving namespaces. Error message: ${getResponseError(err)}.`,
         );
+        setGlobalIsLoading(false);
         return;
       }
       const availableNsTmp = nsReq.data
