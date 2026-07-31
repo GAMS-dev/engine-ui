@@ -63,7 +63,7 @@ const Job = () => {
             cancelToken: source.token,
           });
           if (jobData.data.results.length === 0) {
-            setAlertMsg(
+            setInvalidUserMessage(
               'Problems fetching Hypercube job information. Please try again later.',
             );
             setIsLoading(false);

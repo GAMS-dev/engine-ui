@@ -32,7 +32,6 @@ const LoginForm = ({ showRegistrationForm }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
-  const [server, setServer] = useState(SERVER_NAME);
   const [invitationTokenHasSub, setInvitationTokenHasSub] = useState(false);
   const [isValidInvitationCode, setIsValidInvitationCode] = useState(false);
   const [invitationCode, setInvitationCode] = useState('');
@@ -86,7 +85,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       if (token?.isIdToken === true) {
         try {
           const oidcLoginResponse = await axios.post(
-            `${server}/auth/oidc-providers/login`,
+            `${SERVER_NAME}/auth/oidc-providers/login`,
             {
               id_token: jwt,
               expires_in: sessionTokenExpirationSeconds,
@@ -136,7 +135,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         return;
       }
       try {
-        const reponse = await axios.get(`${server}/users/`, {
+        const reponse = await axios.get(`${SERVER_NAME}/users/`, {
           params: {
             everyone: false,
           },
@@ -148,7 +147,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         if (reponse.data.length === 1) {
           setLogin({
             jwt,
-            server,
+            SERVER_NAME,
             roles: reponse.data[0].roles,
             username: reponse.data[0].username,
             isOAuthToken: token?.isOAuthToken,
@@ -177,7 +176,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         setIsOAuthProcessing(false);
       }
     },
-    [server, setLogin],
+    [setLogin],
   );
 
   const handleLogin = useCallback(async () => {
@@ -187,7 +186,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       let authResponse;
       let isIDPManaged = true;
       if (selectedAuthProvider === 'gams_engine') {
-        authResponse = await axios.post(`${server}/auth/login`, {
+        authResponse = await axios.post(`${SERVER_NAME}/auth/login`, {
           username: username,
           password: password,
           expires_in: sessionTokenExpirationSeconds,
@@ -195,7 +194,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         isIDPManaged = false;
       } else {
         authResponse = await axios.post(
-          `${server}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
+          `${SERVER_NAME}/auth/ldap-providers/${encodeURIComponent(selectedAuthProvider)}/login`,
           {
             username: username,
             password: password,
@@ -215,7 +214,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [username, password, selectedAuthProvider, loginUser, server]);
+  }, [username, password, selectedAuthProvider, loginUser]);
 
   const handleRegistration = async () => {
     const getIdentityProviderInfo = async (providerName) => {
@@ -244,7 +243,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         };
       }
       try {
-        const response = await axios.get(`${server}/auth/providers`, {
+        const response = await axios.get(`${SERVER_NAME}/auth/providers`, {
           params: { name: providerName },
         });
         if (response.data.length === 0) {
@@ -320,7 +319,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       registrationForm.append('password', password);
     }
     try {
-      await axios.post(`${server}/users/`, registrationForm);
+      await axios.post(`${SERVER_NAME}/users/`, registrationForm);
       if (providerInfo.type === 'gams_engine') {
         await handleLogin();
       } else if (providerInfo.type === 'ldap') {
@@ -357,7 +356,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     const fetchAuthProviders = async (selectedProvider, nativeClientParams) => {
       let response;
       try {
-        response = await axios.get(`${server}/auth/providers`);
+        response = await axios.get(`${SERVER_NAME}/auth/providers`);
       } catch (err) {
         if (err?.response?.data?.maintenance_mode === true) {
           setInMaintenanceMode(true);
@@ -395,7 +394,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         }
         if (!selectedProviderFound) {
           try {
-            response = await axios.get(`${server}/auth/providers`, {
+            response = await axios.get(`${SERVER_NAME}/auth/providers`, {
               params: { name: selectedProvider },
             });
           } catch (err) {
@@ -413,7 +412,7 @@ const LoginForm = ({ showRegistrationForm }) => {
             }
             if (providerConfig.is_ldap_identity_provider) {
               LDAPConfigTmp.push(providerConfig);
-              setSelectedAuthProvider(providerConfig);
+              setSelectedAuthProvider(providerConfig.name);
             }
           }
         }
@@ -453,13 +452,13 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
     }
     fetchAuthProviders(selectedProvider, nativeClientParams);
-  }, [server]);
+  }, []);
 
   useEffect(() => {
     const fetchPasswordPolicy = async () => {
       try {
         const policyResponse = await axios.get(
-          `${server}/auth/password-policy`,
+          `${SERVER_NAME}/auth/password-policy`,
         );
         const passwordPolicy = policyResponse?.data;
         let passwordPolicyStringTmp = `The minimum password length is ${passwordPolicy.min_password_length}.`;
@@ -501,7 +500,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
     };
     fetchPasswordPolicy();
-  }, [server]);
+  }, []);
 
   useEffect(() => {
     if (invitationCode.length !== 36) {
@@ -519,7 +518,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     const fetchInvitationCodeMetadata = async () => {
       try {
         const response = await axios.get(
-          `${server}/users/invitation/${invitationCode}`,
+          `${SERVER_NAME}/users/invitation/${invitationCode}`,
         );
         if (response.data.identity_provider == null) {
           setLoginErrorMsg(
@@ -557,7 +556,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       }
     };
     fetchInvitationCodeMetadata();
-  }, [server, invitationCode, invitationCodeValidated]);
+  }, [invitationCode, invitationCodeValidated]);
 
   useEffect(() => {
     if (OAuthErrorMsg === '') {
@@ -599,7 +598,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         );
         registrationForm.append('identification_token', OAuthToken.jwt);
         try {
-          await axios.post(`${server}/users/`, registrationForm);
+          await axios.post(`${SERVER_NAME}/users/`, registrationForm);
         } catch (err) {
           setInvitationCodeValidated(registrationData.invitationCode);
           setInvitationCode(registrationData.invitationCode);
@@ -634,7 +633,7 @@ const LoginForm = ({ showRegistrationForm }) => {
       return;
     }
     registerAndLoginUser();
-  }, [server, OAuthToken, loginUser]);
+  }, [OAuthToken, loginUser]);
 
   return (
     <>
@@ -747,27 +746,6 @@ const LoginForm = ({ showRegistrationForm }) => {
                 {!isNativeClientLogin && (
                   <>
                     <fieldset disabled={isSubmitting}>
-                      {!SERVER_NAME.startsWith('/') &&
-                        !SERVER_NAME.startsWith('http') && (
-                          <div className="mb-3">
-                            <label
-                              htmlFor="inputServer"
-                              className="visually-hidden"
-                            >
-                              Server
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              id="inputServer"
-                              placeholder="Server"
-                              autoComplete="on"
-                              value={server}
-                              onChange={(e) => setServer(e.target.value)}
-                              required
-                            />
-                          </div>
-                        )}
                       {register ? (
                         <div className="mb-3">
                           <label
@@ -931,7 +909,7 @@ const LoginForm = ({ showRegistrationForm }) => {
             <></>
           ) : (
             <OAuth2Login
-              server={server}
+              SERVER_NAME={SERVER_NAME}
               loginConfig={OAuthLoginConfig}
               setAuthToken={setOAuthToken}
               setErrorMsg={setOAuthErrorMsg}

@@ -860,7 +860,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
                       <div className="mb-3">
                         <label htmlFor="priority">Priority</label>
                         <Select
-                          id="priority"
+                          inputId="priority"
                           isClearable={false}
                           value={priority}
                           isSearchable={true}

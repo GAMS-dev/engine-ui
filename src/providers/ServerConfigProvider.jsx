@@ -25,10 +25,11 @@ const ServerConfigProvider = ({ children }) => {
     }
     await axios.patch(`${SERVER_NAME}/configuration`, patchConfigForm);
     setServerConfig((currentConfig) => {
+      const updatedConfig = { ...currentConfig };
       for (const [key, value] of newConfigEntries) {
-        currentConfig[key] = value;
+        updatedConfig[key] = value;
       }
-      return currentConfig;
+      return updatedConfig;
     });
   };
   const serverConfigState = [

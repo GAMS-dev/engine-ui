@@ -1062,4 +1062,491 @@ describe('AuthProviderForm', () => {
     );
     expect(setServerConfigMock).not.toHaveBeenCalled();
   });
+
+  it('closes the hostname update modal via the header close button without navigating', async () => {
+    const setServerConfigMock = vi.fn().mockResolvedValue();
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault
+        options={{ setServerConfig: setServerConfigMock }}
+      >
+        {children}
+      </AllProvidersWrapperDefault>
+    );
+    render(<AuthProviderForm />, { wrapper: Wrapper });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+    await selectEvent.select(
+      screen.getByLabelText('Provider type'),
+      'OAuth 2.0',
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Update' }));
+    await waitFor(() => screen.findByText('Please Confirm'));
+
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Close' }),
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText('Please Confirm')).not.toBeInTheDocument(),
+    );
+    expect(setServerConfigMock).not.toHaveBeenCalled();
+  });
+
+  it('shows an alert when updating the hostname fails', async () => {
+    const setServerConfigMock = vi
+      .fn()
+      .mockRejectedValue(new Error('cannot update'));
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault
+        options={{ setServerConfig: setServerConfigMock }}
+      >
+        <AlertContext.Provider value={['', alertMsgMock]}>
+          {children}
+        </AlertContext.Provider>
+      </AllProvidersWrapperDefault>
+    );
+    render(<AuthProviderForm />, { wrapper: Wrapper });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+    await selectEvent.select(
+      screen.getByLabelText('Provider type'),
+      'OAuth 2.0',
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Update' }));
+    await waitFor(() => screen.findByText('Please Confirm'));
+
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Update' }),
+    );
+
+    await waitFor(() =>
+      expect(alertMsgMock).toHaveBeenCalledWith(
+        'Problems updating hostname. Error message: cannot update.',
+      ),
+    );
+  });
+
+  it('keeps the issuer marked valid when the debounce timer fires without any user edits', async () => {
+    render(<AuthProviderForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    expect(
+      screen.getByLabelText(/asserts as its Issuer Identifier/),
+    ).not.toHaveClass('is-invalid');
+  }, 10000);
+
+  it('marks the issuer invalid and blocks submission when the issuer is not a valid URL', async () => {
+    const { container } = render(<AuthProviderForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+
+    fireEvent.change(container.querySelector('#providerName'), {
+      target: { value: 'new_oidc' },
+    });
+    fireEvent.change(container.querySelector('#providerLabel'), {
+      target: { value: 'New OIDC' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/Client ID to be used by the Engine UI/),
+      { target: { value: 'client123' } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(/URL of the authorization endpoint/),
+      { target: { value: 'https://issuer.example.com/auth' } },
+    );
+    fireEvent.change(screen.getByLabelText(/URL of the token endpoint/), {
+      target: { value: 'https://issuer.example.com/token' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/URL of the JSON Web Key Set document/),
+      { target: { value: 'https://issuer.example.com/jwks' } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(/asserts as its Issuer Identifier/),
+      { target: { value: 'not-a-valid-url' } },
+    );
+
+    await waitFor(
+      () =>
+        expect(
+          screen.getByLabelText(/asserts as its Issuer Identifier/),
+        ).toHaveClass('is-invalid'),
+      { timeout: 3000 },
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add Provider' }));
+    expect(axios.post).not.toHaveBeenCalled();
+  }, 10000);
+
+  it('falls back to manual entry when both auto-discovery endpoints fail', async () => {
+    render(<AuthProviderForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+
+    await selectEvent.select(
+      screen.getByLabelText('Auto discovery endpoint'),
+      'OpenID Connect Discovery 1.0',
+    );
+    expect(
+      screen.queryByLabelText(/URL of the authorization endpoint/),
+    ).not.toBeInTheDocument();
+
+    fireEvent.change(
+      screen.getByLabelText(/asserts as its Issuer Identifier/),
+      { target: { value: 'https://discovery-fails.example.com' } },
+    );
+
+    await waitFor(
+      () =>
+        expect(
+          screen.getByLabelText(/URL of the authorization endpoint/),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+  }, 10000);
+
+  it('submits a new OIDC provider including all optional fields', async () => {
+    axios.post.mockResolvedValue({});
+    const { container } = render(<AuthProviderForm />, {
+      wrapper: AlertWrapper,
+    });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+
+    fireEvent.change(container.querySelector('#providerName'), {
+      target: { value: 'new_oidc_full' },
+    });
+    fireEvent.change(container.querySelector('#providerLabel'), {
+      target: { value: 'New OIDC Full' },
+    });
+    await userEvent.click(container.querySelector('#providerHidden'));
+    expect(container.querySelector('#providerHidden')).toBeChecked();
+
+    fireEvent.change(
+      screen.getByLabelText(/asserts as its Issuer Identifier/),
+      { target: { value: 'https://issuer.example.com' } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(/Client ID to be used by the Engine UI/),
+      { target: { value: 'client123' } },
+    );
+    fireEvent.change(container.querySelector('#webuiClientSecret'), {
+      target: { value: 'webuisecret' },
+    });
+    fireEvent.change(container.querySelector('#deviceClientId'), {
+      target: { value: 'device-client-1' },
+    });
+    fireEvent.change(container.querySelector('#deviceClientSecret'), {
+      target: { value: 'devicesecret1' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/URL of the authorization endpoint/),
+      { target: { value: 'https://issuer.example.com/auth' } },
+    );
+    fireEvent.change(screen.getByLabelText(/URL of the token endpoint/), {
+      target: { value: 'https://issuer.example.com/token' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/URL of the JSON Web Key Set document/),
+      { target: { value: 'https://issuer.example.com/jwks' } },
+    );
+    fireEvent.change(screen.getByLabelText(/URL of the end session endpoint/), {
+      target: { value: 'https://issuer.example.com/logout' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/URL of the device authorization endpoint/),
+      { target: { value: 'https://issuer.example.com/device' } },
+    );
+    fireEvent.change(screen.getByLabelText(/client authentication methods/i), {
+      target: { value: 'client_secret_post,client_secret_basic' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/The scopes to request from the OP/),
+      { target: { value: 'openid,email' } },
+    );
+    fireEvent.change(container.querySelector('#oidcUid'), {
+      target: { value: 'preferred_username' },
+    });
+    fireEvent.change(container.querySelector('#extraClientIDs'), {
+      target: { value: 'extra1,extra2' },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add Provider' }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+    const fd = lastFormData(axios.post);
+    expect(fd.get('hidden')).toBe('true');
+    expect(fd.get('web_ui_client_secret')).toBe('webuisecret');
+    expect(fd.get('device_client_id')).toBe('device-client-1');
+    expect(fd.get('device_client_secret')).toBe('devicesecret1');
+    expect(fd.get('end_session_endpoint')).toBe(
+      'https://issuer.example.com/logout',
+    );
+    expect(fd.get('device_authorization_endpoint')).toBe(
+      'https://issuer.example.com/device',
+    );
+    expect(fd.getAll('token_endpoint_auth_methods_supported')).toEqual([
+      'client_secret_post',
+      'client_secret_basic',
+    ]);
+    expect(fd.getAll('scopes')).toEqual(['openid', 'email']);
+    expect(fd.get('uid')).toBe('preferred_username');
+    expect(fd.getAll('extra_client_ids')).toEqual(['extra1', 'extra2']);
+  });
+
+  it('marks use_oauth2_auth_server_metadata false when an OAuth2 provider auto-detects OIDC discovery', async () => {
+    axios.post.mockResolvedValue({});
+    axios.get.mockImplementation((url) => {
+      if (
+        url.startsWith('https://oauth2-oidc.example.com') &&
+        url.endsWith('/.well-known/openid-configuration')
+      ) {
+        return Promise.resolve({ status: 200, data: {} });
+      }
+      return buildAxiosGetMock()(url);
+    });
+    const expectedHostname = computeExpectedHostname();
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault
+        options={{ serverConfig: { hostname: expectedHostname } }}
+      >
+        {children}
+      </AllProvidersWrapperDefault>
+    );
+    const { container } = render(<AuthProviderForm />, { wrapper: Wrapper });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+    await selectEvent.select(
+      screen.getByLabelText('Provider type'),
+      'OAuth 2.0',
+    );
+
+    fireEvent.change(container.querySelector('#providerName'), {
+      target: { value: 'new_oauth2_oidc' },
+    });
+    fireEvent.change(container.querySelector('#providerLabel'), {
+      target: { value: 'New OAuth2 OIDC' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/Client ID to be used by the Engine UI/),
+      { target: { value: 'client123' } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(/asserts as its Issuer Identifier/),
+      { target: { value: 'https://oauth2-oidc.example.com' } },
+    );
+
+    await waitFor(() => screen.findByText('OpenID Connect Discovery 1.0'), {
+      timeout: 3000,
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add Provider' }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+    const fd = lastFormData(axios.post);
+    expect(fd.get('use_oidc_discover')).toBe('true');
+    expect(fd.get('use_oauth2_auth_server_metadata')).toBe('false');
+  }, 10000);
+
+  it('marks use_oauth2_auth_server_metadata true when OAuth 2.0 Authorization Server Metadata discovery is selected', async () => {
+    axios.post.mockResolvedValue({});
+    const expectedHostname = computeExpectedHostname();
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault
+        options={{ serverConfig: { hostname: expectedHostname } }}
+      >
+        {children}
+      </AllProvidersWrapperDefault>
+    );
+    const { container } = render(<AuthProviderForm />, { wrapper: Wrapper });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+    await selectEvent.select(
+      screen.getByLabelText('Provider type'),
+      'OAuth 2.0',
+    );
+
+    fireEvent.change(container.querySelector('#providerName'), {
+      target: { value: 'new_oauth2_meta' },
+    });
+    fireEvent.change(container.querySelector('#providerLabel'), {
+      target: { value: 'New OAuth2 Meta' },
+    });
+    fireEvent.change(
+      screen.getByLabelText(/Client ID to be used by the Engine UI/),
+      { target: { value: 'client123' } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(/asserts as its Issuer Identifier/),
+      { target: { value: 'https://issuer.example.com' } },
+    );
+
+    // let the automatic discovery debounce settle (it fails and reverts to
+    // manual) before manually overriding the discovery mode below, so the
+    // debounce doesn't clobber our manual selection afterwards.
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    await selectEvent.select(
+      screen.getByLabelText('Auto discovery endpoint'),
+      'OAuth 2.0 Authorization Server Metadata',
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add Provider' }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+    const fd = lastFormData(axios.post);
+    expect(fd.get('use_oidc_discover')).toBe('false');
+    expect(fd.get('use_oauth2_auth_server_metadata')).toBe('true');
+  }, 10000);
+
+  it('submits a new OAuth2 provider with custom manual discovery lists and request scopes', async () => {
+    axios.post.mockResolvedValue({});
+    const expectedHostname = computeExpectedHostname();
+    const Wrapper = ({ children }) => (
+      <AllProvidersWrapperDefault
+        options={{ serverConfig: { hostname: expectedHostname } }}
+      >
+        {children}
+      </AllProvidersWrapperDefault>
+    );
+    const { container } = render(<AuthProviderForm />, { wrapper: Wrapper });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+    await selectEvent.select(
+      screen.getByLabelText('Provider type'),
+      'OAuth 2.0',
+    );
+
+    fillOAuth2RequiredFields(container);
+    fireEvent.change(screen.getByLabelText(/List of grant types/), {
+      target: { value: 'authorization_code,refresh_token' },
+    });
+
+    fireEvent.change(container.querySelector('#requestScopeREADONLY'), {
+      target: { value: 'scope-ro' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeCONFIGURATION'), {
+      target: { value: 'scope-cfg' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeNAMESPACES'), {
+      target: { value: 'scope-ns' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeJOBS'), {
+      target: { value: 'scope-jobs' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeUSERS'), {
+      target: { value: 'scope-users' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeHYPERCUBE'), {
+      target: { value: 'scope-hc' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeCLEANUP'), {
+      target: { value: 'scope-cleanup' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeLICENSES'), {
+      target: { value: 'scope-lic' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeUSAGE'), {
+      target: { value: 'scope-usage' },
+    });
+    fireEvent.change(container.querySelector('#requestScopeAUTH'), {
+      target: { value: 'scope-auth' },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add Provider' }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+    const fd = lastFormData(axios.post);
+    expect(fd.getAll('grant_types_supported')).toEqual([
+      'authorization_code',
+      'refresh_token',
+    ]);
+    expect(fd.get('request_scope_READONLY')).toBe('scope-ro');
+    expect(fd.get('request_scope_CONFIGURATION')).toBe('scope-cfg');
+    expect(fd.get('request_scope_NAMESPACES')).toBe('scope-ns');
+    expect(fd.get('request_scope_JOBS')).toBe('scope-jobs');
+    expect(fd.get('request_scope_USERS')).toBe('scope-users');
+    expect(fd.get('request_scope_HYPERCUBE')).toBe('scope-hc');
+    expect(fd.get('request_scope_CLEANUP')).toBe('scope-cleanup');
+    expect(fd.get('request_scope_LICENSES')).toBe('scope-lic');
+    expect(fd.get('request_scope_USAGE')).toBe('scope-usage');
+    expect(fd.get('request_scope_AUTH')).toBe('scope-auth');
+  });
+
+  it('submits a new LDAP provider with a custom port, active directory enabled, and certificate verification disabled', async () => {
+    axios.post.mockResolvedValue({});
+    const { container } = render(<AuthProviderForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText(/Add New Identity Provider/));
+    await selectEvent.select(screen.getByLabelText('Provider type'), 'LDAP');
+
+    fireEvent.change(container.querySelector('#providerName'), {
+      target: { value: 'new_ldap_ad' },
+    });
+    fireEvent.change(container.querySelector('#providerLabel'), {
+      target: { value: 'New LDAP AD' },
+    });
+    fireEvent.change(screen.getByLabelText(/Host of the LDAP server/), {
+      target: { value: 'ldap.example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/Port of the LDAP server/), {
+      target: { value: '636' },
+    });
+    await userEvent.click(
+      screen.getByLabelText(/Is LDAP server an Active Directory/),
+    );
+    fireEvent.change(
+      screen.getByLabelText(/LDAP attribute that is used as username/),
+      { target: { value: 'sAMAccountName' } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(/DN of the base where users are located/),
+      { target: { value: 'ou=users,dc=example,dc=com' } },
+    );
+    fireEvent.change(screen.getByLabelText(/User filter/), {
+      target: { value: '(objectClass=user)' },
+    });
+    await userEvent.click(
+      screen.getByLabelText(/Verify TLS certificate signature/),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add Provider' }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+    const fd = lastFormData(axios.post);
+    expect(fd.get('port')).toBe('636');
+    expect(fd.get('active_directory')).toBe('true');
+    expect(fd.get('verify_certificates')).toBe('false');
+  });
+
+  it('resets the form when clicking Add New Identity Provider after selecting an existing provider', async () => {
+    axios.get.mockImplementation(
+      buildAxiosGetMock({
+        authProviders: [mainProvider, oidcAuthProviderEntry],
+        oidcProviders: [oidcProviderDetail],
+      }),
+    );
+    const { container } = render(<AuthProviderForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText('oidc_provider'));
+    await userEvent.click(screen.getByText('oidc_provider'));
+    await waitFor(() =>
+      expect(container.querySelector('#providerName')).toHaveValue(
+        'oidc_provider',
+      ),
+    );
+
+    await userEvent.click(screen.getByText('Add New Identity Provider'));
+
+    await waitFor(() =>
+      expect(container.querySelector('#providerName')).toHaveValue(''),
+    );
+    expect(container.querySelector('#providerName')).not.toBeDisabled();
+  });
 });

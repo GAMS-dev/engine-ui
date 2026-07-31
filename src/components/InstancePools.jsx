@@ -247,7 +247,7 @@ const InstancePools = () => {
           </Button>
           {serverConfig.instance_pool_access !== 'ADMIN_ONLY' && (
             <SubmitButton
-              poolAccessIsSubmitting={poolAccessIsSubmitting}
+              isSubmitting={poolAccessIsSubmitting}
               onClick={() => setInstancePoolAccessConfig('ADMIN_ONLY')}
               className="btn-primary"
             >
@@ -256,7 +256,7 @@ const InstancePools = () => {
           )}
           {serverConfig.instance_pool_access !== 'INVITER_ONLY' && (
             <SubmitButton
-              poolAccessIsSubmitting={poolAccessIsSubmitting}
+              isSubmitting={poolAccessIsSubmitting}
               onClick={() => setInstancePoolAccessConfig('INVITER_ONLY')}
               className="btn-primary"
             >
@@ -266,7 +266,7 @@ const InstancePools = () => {
           {showInstancePoolAccessModal === 'enable' ? (
             <>
               <SubmitButton
-                poolAccessIsSubmitting={poolAccessIsSubmitting}
+                isSubmitting={poolAccessIsSubmitting}
                 onClick={() => setInstancePoolAccessConfig('ENABLED')}
                 className="btn-primary"
               >
@@ -275,7 +275,7 @@ const InstancePools = () => {
             </>
           ) : (
             <SubmitButton
-              poolAccessIsSubmitting={poolAccessIsSubmitting}
+              isSubmitting={poolAccessIsSubmitting}
               onClick={() => setInstancePoolAccessConfig('DISABLED')}
               className="btn-primary"
             >

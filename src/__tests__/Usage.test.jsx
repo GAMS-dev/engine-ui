@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 
@@ -8,8 +8,21 @@ import { Outlet, Route, Routes } from 'react-router';
 import Usage from '../components/Usage';
 import userEvent from '@testing-library/user-event';
 import AlertContext from '../contexts/AlertContext';
+import dayjs from 'dayjs';
 
 vi.mock('axios');
+
+// The real Mantine DateTimePicker renders a full calendar UI that is
+// impractical to drive from jsdom. We stub it out and capture the props
+// Usage.jsx passes to it so tests can invoke `onChange` / `onDropdownClose`
+// directly, exercising the component's own date-handling logic.
+let mockDateTimePickerProps = null;
+vi.mock('@mantine/dates', () => ({
+  DateTimePicker: (props) => {
+    mockDateTimePickerProps = props;
+    return <div data-testid="mock-date-time-picker">{props.label}</div>;
+  },
+}));
 
 vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal();
@@ -29,6 +42,32 @@ const getUsageComponent = ({ userToEditRoles = [] }) => {
   );
 };
 
+// Shared setup for tests that only exercise the date-range picker logic
+// (handleDateChange / onDropdownClose). Uses the simpler v1 (non-brokerv2)
+// data path since the network responses themselves aren't under test here.
+const renderUsageForDateTests = () => {
+  axios.mockImplementation((config) => {
+    if (config?.url === 'testserver/usage/quota') {
+      return Promise.resolve({ data: [] });
+    }
+    return Promise.reject(new Error('not found'));
+  });
+  axios.get.mockImplementation((url) => {
+    if (url.includes('/usage/quota')) {
+      return Promise.resolve({ data: [] });
+    }
+    return Promise.resolve({ data: [] });
+  });
+
+  return render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+    wrapper: ({ children }) => (
+      <AllProvidersWrapperDefault options={{ use_brokerv2: false }}>
+        {children}
+      </AllProvidersWrapperDefault>
+    ),
+  });
+};
+
 describe('Usage', () => {
   let user;
 
@@ -36,6 +75,8 @@ describe('Usage', () => {
     user = userEvent.setup();
 
     vi.clearAllMocks();
+    mockDateTimePickerProps = null;
+    axios.isCancel = vi.fn().mockReturnValue(false);
     vi.mocked(useParams).mockReturnValue({
       userToEdit: 'user1',
     });
@@ -221,6 +262,70 @@ describe('Usage', () => {
 
     // Once the failed request is handled, loading should stop and the
     // Refresh Data button should reappear.
+    await waitFor(() => screen.findByRole('button', { name: /Refresh Data/i }));
+  });
+
+  it('shows an error message when the initial usage fetch itself fails with a non-cancel error', async () => {
+    axios.isCancel = vi.fn().mockReturnValue(false);
+    axios.get.mockImplementation((url) => {
+      if (url.includes('/usage/quota')) {
+        return Promise.resolve({ data: [] });
+      }
+      return Promise.reject(new Error('initial fetch boom'));
+    });
+
+    const setAlertMsg = vi.fn();
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: ({ children }) => (
+        <AlertContext.Provider value={['', setAlertMsg]}>
+          <AllProvidersWrapperDefault options={{ use_brokerv2: false }}>
+            {children}
+          </AllProvidersWrapperDefault>
+        </AlertContext.Provider>
+      ),
+    });
+
+    await waitFor(() => screen.findByText('Show Invitees?'));
+
+    await waitFor(() =>
+      expect(setAlertMsg).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Problems fetching usage information: initial fetch boom',
+        ),
+      ),
+    );
+
+    // The initial fetch's catch block always resets isLoading, regardless of
+    // which branch (cancel vs. non-cancel) was taken.
+    await waitFor(() => screen.findByRole('button', { name: /Refresh Data/i }));
+  });
+
+  it('shows a cancellation message when the initial usage fetch itself is canceled', async () => {
+    axios.isCancel = vi.fn().mockReturnValue(true);
+    axios.get.mockImplementation((url) => {
+      if (url.includes('/usage/quota')) {
+        return Promise.resolve({ data: [] });
+      }
+      return Promise.reject(new Error('canceled'));
+    });
+
+    const setAlertMsg = vi.fn();
+    render(getUsageComponent({ userToEditRoles: ['admin'] }), {
+      wrapper: ({ children }) => (
+        <AlertContext.Provider value={['', setAlertMsg]}>
+          <AllProvidersWrapperDefault options={{ use_brokerv2: false }}>
+            {children}
+          </AllProvidersWrapperDefault>
+        </AlertContext.Provider>
+      ),
+    });
+
+    await waitFor(() => screen.findByText('Show Invitees?'));
+
+    await waitFor(() =>
+      expect(setAlertMsg).toHaveBeenCalledWith('Request canceled by the user.'),
+    );
+
     await waitFor(() => screen.findByRole('button', { name: /Refresh Data/i }));
   });
 
@@ -721,5 +826,153 @@ describe('Usage', () => {
     );
 
     expect(axios.get).toHaveBeenCalledTimes(12);
+  });
+
+  describe('date range picker handling', () => {
+    beforeEach(async () => {
+      renderUsageForDateTests();
+      await waitFor(() => screen.findByText('Show Invitees?'));
+      expect(mockDateTimePickerProps).toBeTruthy();
+    });
+
+    it('caps a newly added end date to now when it falls in the future', () => {
+      const start = dayjs().subtract(10, 'day').toDate();
+
+      // First clear the end date, simulating the user having picked only a
+      // start date so far (dateRange[1] becomes falsy).
+      act(() => {
+        mockDateTimePickerProps.onChange([start, null]);
+      });
+      expect(mockDateTimePickerProps.value[1]).toBeNull();
+
+      // Now pick an end date far in the future.
+      const futureEnd = dayjs().add(5, 'day').toDate();
+      act(() => {
+        mockDateTimePickerProps.onChange([start, futureEnd]);
+      });
+
+      const cappedEnd = mockDateTimePickerProps.value[1];
+      expect(cappedEnd).toBeInstanceOf(Date);
+      expect(cappedEnd.getTime()).toBeLessThan(futureEnd.getTime());
+      expect(cappedEnd.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(cappedEnd.getTime()).toBeGreaterThan(Date.now() - 5000);
+    });
+
+    it('sets the exact end of day when an end date is added for the first time in the past', () => {
+      const start = dayjs().subtract(10, 'day').toDate();
+
+      act(() => {
+        mockDateTimePickerProps.onChange([start, null]);
+      });
+      expect(mockDateTimePickerProps.value[1]).toBeNull();
+
+      const pastEnd = dayjs().subtract(3, 'day').hour(10).toDate();
+      act(() => {
+        mockDateTimePickerProps.onChange([start, pastEnd]);
+      });
+
+      const expected = dayjs(pastEnd).endOf('day').toDate();
+      expect(mockDateTimePickerProps.value[1].getTime()).toBe(
+        expected.getTime(),
+      );
+    });
+
+    it('updates the end date to end-of-day when the user changes the calendar day of the end date', () => {
+      // Initial dateRange[1] is "now" (today), so picking an end date on a
+      // different day should trigger the "calendar day changed" branch.
+      const start = dayjs().subtract(10, 'day').toDate();
+      const newEnd = dayjs().subtract(2, 'day').hour(9).toDate();
+
+      act(() => {
+        mockDateTimePickerProps.onChange([start, newEnd]);
+      });
+
+      const expected = dayjs(newEnd).endOf('day').toDate();
+      expect(mockDateTimePickerProps.value[1].getTime()).toBe(
+        expected.getTime(),
+      );
+    });
+
+    it('caps the end time to now when adjusting the time slider past the current time on the same day', () => {
+      // Same calendar day as the initial "now" end date, but a time later
+      // than "now" -> should be capped to "now" rather than end-of-day.
+      const start = dayjs().subtract(10, 'day').toDate();
+      const newEnd = dayjs().endOf('day').toDate();
+
+      act(() => {
+        mockDateTimePickerProps.onChange([start, newEnd]);
+      });
+
+      const value = mockDateTimePickerProps.value[1];
+      expect(value.getTime()).toBeLessThan(newEnd.getTime());
+      expect(value.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(value.getTime()).toBeGreaterThan(Date.now() - 5000);
+    });
+
+    it('keeps the exact time selection when adjusting the time slider within the past on the same day', () => {
+      // Same calendar day as the initial "now" end date, and the time is
+      // still in the past -> the user's exact selection should be kept as-is.
+      const start = dayjs().subtract(10, 'day').toDate();
+      const newEnd = dayjs().startOf('day').toDate();
+
+      act(() => {
+        mockDateTimePickerProps.onChange([start, newEnd]);
+      });
+
+      const value = mockDateTimePickerProps.value;
+      expect(value[0]).toBe(start);
+      expect(value[1]).toBe(newEnd);
+    });
+
+    it('updates the selected date range and refetches when the dropdown closes with a changed range', async () => {
+      const callsBefore = axios.get.mock.calls.filter(
+        (call) => call[0] === 'testserver/usage/',
+      ).length;
+
+      const newStart = dayjs().subtract(20, 'day').toDate();
+      const newEnd = dayjs().subtract(1, 'day').toDate();
+
+      act(() => {
+        mockDateTimePickerProps.onChange([newStart, newEnd]);
+      });
+      act(() => {
+        mockDateTimePickerProps.onDropdownClose();
+      });
+
+      const expectedEnd = dayjs(newEnd).endOf('day').toDate();
+
+      await waitFor(() => {
+        const usageCalls = axios.get.mock.calls.filter(
+          (call) => call[0] === 'testserver/usage/',
+        );
+        expect(usageCalls.length).toBeGreaterThan(callsBefore);
+      });
+
+      const lastCall = axios.get.mock.calls
+        .filter((call) => call[0] === 'testserver/usage/')
+        .pop();
+      expect(lastCall[1].params.from_datetime).toBe(newStart.toISOString());
+      expect(lastCall[1].params.to_datetime).toBe(expectedEnd.toISOString());
+    });
+
+    it('does not change the selected date range when the dropdown closes without any changes', async () => {
+      const callsBefore = axios.get.mock.calls.filter(
+        (call) => call[0] === 'testserver/usage/',
+      ).length;
+
+      act(() => {
+        mockDateTimePickerProps.onDropdownClose();
+      });
+
+      // Allow any potential microtask/effect queue to flush.
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      const callsAfter = axios.get.mock.calls.filter(
+        (call) => call[0] === 'testserver/usage/',
+      ).length;
+      expect(callsAfter).toBe(callsBefore);
+    });
   });
 });

@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import LoginForm from '../components/LoginForm';
@@ -437,6 +437,22 @@ describe('LoginForm', () => {
       await user.click(screen.getByRole('button', { name: 'Register' }));
       await screen.findByText('The password does not match.');
       expect(axios.post).not.toHaveBeenCalled();
+    });
+
+    it('ignores a direct form submission when the invitation code is not yet valid', async () => {
+      // The Register submit button is disabled while the invitation code
+      // hasn't been validated, but the form can still receive a native
+      // submit event (e.g. pressing Enter). handleRegistration must guard
+      // against this and do nothing.
+      renderLoginForm();
+      await user.click(screen.getByRole('link', { name: 'Register' }));
+      const form = document.querySelector('form.form-signin');
+      fireEvent.submit(form);
+
+      expect(axios.post).not.toHaveBeenCalled();
+      expect(
+        screen.getByRole('heading', { name: 'Register' }),
+      ).toBeInTheDocument();
     });
 
     it('registers and then logs the user in', async () => {
@@ -1099,6 +1115,61 @@ describe('LoginForm', () => {
         'Problems retrieving configuration of identity provider: ghost_provider. Error message: provider lookup failed.',
       );
     });
+
+    it('registers directly with an LDAP identity provider discovered on submit', async () => {
+      // Neither the initial ldapConfig nor OAuthConfig contain this
+      // provider, so getIdentityProviderInfo must fall back to fetching it
+      // directly by name and recognize it as an LDAP provider.
+      axios.get.mockImplementation((url, config) => {
+        if (url === '/api/auth/providers' && config?.params?.name != null) {
+          return Promise.resolve({
+            status: 200,
+            data: [
+              {
+                name: 'discovered_ldap',
+                label: 'Discovered LDAP',
+                is_ldap_identity_provider: true,
+              },
+            ],
+          });
+        }
+        if (url === '/api/auth/providers') {
+          return Promise.resolve({ status: 200, data: [] });
+        }
+        if (url === '/api/auth/password-policy') {
+          return Promise.resolve({
+            status: 200,
+            data: { min_password_length: 8 },
+          });
+        }
+        if (url === `/api/users/invitation/${INVITATION_CODE}`) {
+          return Promise.resolve({
+            status: 200,
+            data: { identity_provider: 'discovered_ldap' },
+          });
+        }
+        return Promise.reject(new Error('not found: ' + url));
+      });
+      axios.post.mockResolvedValueOnce({ data: {} });
+
+      renderLoginForm();
+      await user.click(screen.getByRole('link', { name: 'Register' }));
+      await user.type(
+        screen.getByPlaceholderText('Invitation code'),
+        INVITATION_CODE,
+      );
+      await user.type(
+        await screen.findByPlaceholderText('Username'),
+        'newuser',
+      );
+      await user.click(screen.getByRole('button', { name: 'Register' }));
+
+      await screen.findByText('Registration successful, you can log in now!');
+      expect(axios.post).toHaveBeenCalledWith(
+        '/api/users/',
+        expect.any(FormData),
+      );
+    });
   });
 
   describe('two-step OAuth registration', () => {
@@ -1266,6 +1337,71 @@ describe('LoginForm', () => {
       expect(screen.getByPlaceholderText('Invitation code')).toHaveValue(
         INVITATION_CODE,
       );
+    });
+
+    it('shows a generic error when completing the pending registration fails unexpectedly', async () => {
+      sessionStorage.setItem(
+        'registrationData',
+        JSON.stringify({
+          username: 'pendinguser2',
+          invitationCode: INVITATION_CODE,
+          invitationCodeIdentityProvider: 'company_oauth',
+        }),
+      );
+      mockOAuthTokenToEmit = { jwt: 'oauthjwt2', isOAuthToken: true };
+      axios.post.mockImplementation((url) => {
+        if (url === '/api/users/') {
+          return Promise.reject({
+            response: { status: 500, data: { message: 'boom' } },
+          });
+        }
+        return Promise.reject(new Error('unexpected post ' + url));
+      });
+
+      renderLoginForm();
+      await user.click(await screen.findByText('Simulate OAuth Token'));
+
+      await screen.findByText(
+        'Some error occurred while trying to connect to the Engine Server. Please try again later.',
+      );
+      expect(
+        screen.getByRole('heading', { name: 'Register' }),
+      ).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Invitation code')).toHaveValue(
+        INVITATION_CODE,
+      );
+    });
+
+    it('shows a password field error when completing the pending registration fails with a password error', async () => {
+      sessionStorage.setItem(
+        'registrationData',
+        JSON.stringify({
+          username: 'pendinguser3',
+          invitationCode: INVITATION_CODE,
+          invitationCodeIdentityProvider: 'gams_engine',
+        }),
+      );
+      mockOAuthTokenToEmit = { jwt: 'oauthjwt3', isOAuthToken: true };
+      axios.post.mockImplementation((url) => {
+        if (url === '/api/users/') {
+          return Promise.reject({
+            response: {
+              status: 400,
+              data: {
+                message: 'Registration failed.',
+                errors: { password: 'Password too weak.' },
+              },
+            },
+          });
+        }
+        return Promise.reject(new Error('unexpected post ' + url));
+      });
+
+      renderLoginForm();
+      await user.click(await screen.findByText('Simulate OAuth Token'));
+
+      await screen.findByText('Registration failed.');
+      expect(screen.getByText('Password too weak.')).toBeInTheDocument();
     });
 
     it('registers directly with an already-available OAuth token and logs in afterwards', async () => {
@@ -1442,6 +1578,139 @@ describe('LoginForm', () => {
       await waitFor(() =>
         expect(axios.post).toHaveBeenCalledWith(
           '/api/auth/ldap-providers/company_ldap/login',
+          expect.objectContaining({ username: 'admin' }),
+        ),
+      );
+    });
+
+    it('shows an error when a provider named in the URL cannot be found at all', async () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          search: '?provider=ghost_provider',
+          replace: vi.fn(),
+          origin: 'http://localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+      axios.get.mockImplementation((url, config) => {
+        if (url === '/api/auth/providers' && config?.params?.name != null) {
+          return Promise.reject({
+            response: { data: { message: 'lookup failed' } },
+          });
+        }
+        if (url === '/api/auth/providers') {
+          return Promise.resolve({ status: 200, data: [] });
+        }
+        if (url === '/api/auth/password-policy') {
+          return Promise.resolve({
+            status: 200,
+            data: { min_password_length: 8 },
+          });
+        }
+        return Promise.reject(new Error('not found: ' + url));
+      });
+
+      renderLoginForm();
+      await screen.findByText(
+        'Problems retrieving configuration of identity provider: ghost_provider. Error message: lookup failed.',
+      );
+    });
+
+    it('hands off to OAuth2Login for an OAuth provider named in the URL but not yet fetched', async () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          search: '?provider=discovered_oauth2',
+          replace: vi.fn(),
+          origin: 'http://localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+      axios.get.mockImplementation((url, config) => {
+        if (url === '/api/auth/providers' && config?.params?.name != null) {
+          return Promise.resolve({
+            status: 200,
+            data: [
+              {
+                name: 'discovered_oauth2',
+                label: 'Discovered OAuth2',
+                oauth2: { web_ui_client_id: 'cid', scopes: [] },
+              },
+            ],
+          });
+        }
+        if (url === '/api/auth/providers') {
+          return Promise.resolve({ status: 200, data: [] });
+        }
+        if (url === '/api/auth/password-policy') {
+          return Promise.resolve({
+            status: 200,
+            data: { min_password_length: 8 },
+          });
+        }
+        return Promise.reject(new Error('not found: ' + url));
+      });
+
+      renderLoginForm();
+
+      await waitFor(() =>
+        expect(OAuth2Login).toHaveBeenCalledWith(
+          expect.objectContaining({
+            loginConfig: expect.objectContaining({
+              name: 'discovered_oauth2',
+            }),
+          }),
+          undefined,
+        ),
+      );
+    });
+
+    it('pre-selects an LDAP provider named in the URL but only found on a direct lookup', async () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          search: '?provider=discovered_ldap2',
+          replace: vi.fn(),
+          origin: 'http://localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+      axios.get.mockImplementation((url, config) => {
+        if (url === '/api/auth/providers' && config?.params?.name != null) {
+          return Promise.resolve({
+            status: 200,
+            data: [
+              {
+                name: 'discovered_ldap2',
+                label: 'Discovered LDAP2',
+                is_ldap_identity_provider: true,
+              },
+            ],
+          });
+        }
+        if (url === '/api/auth/providers') {
+          return Promise.resolve({ status: 200, data: [] });
+        }
+        if (url === '/api/auth/password-policy') {
+          return Promise.resolve({
+            status: 200,
+            data: { min_password_length: 8 },
+          });
+        }
+        return Promise.reject(new Error('not found: ' + url));
+      });
+      axios.post.mockResolvedValue({ data: { token: 'ldap2jwt' } });
+
+      renderLoginForm();
+      await screen.findByText('Discovered LDAP2');
+      await user.type(screen.getByPlaceholderText('Username'), 'admin');
+      await user.type(screen.getByPlaceholderText('Password'), 'secret');
+      await user.click(screen.getByRole('button', { name: 'Login' }));
+
+      await waitFor(() =>
+        expect(axios.post).toHaveBeenCalledWith(
+          '/api/auth/ldap-providers/discovered_ldap2/login',
           expect.objectContaining({ username: 'admin' }),
         ),
       );
