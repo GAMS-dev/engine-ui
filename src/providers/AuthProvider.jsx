@@ -1,7 +1,28 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useMemo } from 'react';
 import axios from 'axios';
 import memoize from 'memoize';
 import AuthContext from '../contexts/AuthContext';
+
+// Compares by resolved origin (not a raw string prefix) so a lookalike host
+// like `https://<server>.attacker.tld` can't be mistaken for `server` and
+// have the bearer token attached/treated as a same-server response.
+const isSameServerUrl = (url, server) => {
+  if (!url || !server) {
+    return false;
+  }
+  const requestUrl = new URL(url, window.location.origin);
+  const serverUrl = new URL(server, window.location.origin);
+  if (requestUrl.origin !== serverUrl.origin) {
+    return false;
+  }
+  const serverPath = serverUrl.pathname.endsWith('/')
+    ? serverUrl.pathname
+    : `${serverUrl.pathname}/`;
+  return (
+    requestUrl.pathname === serverUrl.pathname ||
+    requestUrl.pathname.startsWith(serverPath)
+  );
+};
 
 const AuthProvider = (props) => {
   const [login, setLogin] = useState(
@@ -11,45 +32,52 @@ const AuthProvider = (props) => {
 
   const [interceptor, setInterceptor] = useState(false);
 
-  const refreshToken = memoize(
-    async () => {
-      try {
-        const loginData = JSON.parse(localStorage.getItem('login'));
-        const { refreshTokenData } = loginData;
+  // Memoized on `login` (not recreated every render) so its internal cache
+  // actually dedupes concurrent refresh calls, and so it doesn't force the
+  // interceptor-registration effect below to re-run on every render.
+  const refreshToken = useMemo(
+    () =>
+      memoize(
+        async () => {
+          try {
+            const loginData = JSON.parse(localStorage.getItem('login'));
+            const { refreshTokenData } = loginData;
 
-        const params = new URLSearchParams();
-        params.append('grant_type', 'refresh_token');
-        params.append('refresh_token', refreshTokenData.refreshToken);
-        params.append('client_id', refreshTokenData.clientId);
-        const res = await axios.post(
-          refreshTokenData.refreshTokenEndpoint,
-          params,
-        );
+            const params = new URLSearchParams();
+            params.append('grant_type', 'refresh_token');
+            params.append('refresh_token', refreshTokenData.refreshToken);
+            params.append('client_id', refreshTokenData.clientId);
+            const res = await axios.post(
+              refreshTokenData.refreshTokenEndpoint,
+              params,
+            );
 
-        if (res.data?.access_token == null) {
-          throw new Error('Invalid response when trying to refresh token');
-        }
+            if (res.data?.access_token == null) {
+              throw new Error('Invalid response when trying to refresh token');
+            }
 
-        const newLogin = { ...login };
-        newLogin.jwt = res.data.access_token;
+            const newLogin = { ...login };
+            newLogin.jwt = res.data.access_token;
 
-        if (res.data.refresh_token != null) {
-          newLogin.refreshTokenData.refreshToken = res.data.refresh_token;
-        }
+            if (res.data.refresh_token != null) {
+              newLogin.refreshTokenData.refreshToken = res.data.refresh_token;
+            }
 
-        localStorage.setItem('login', JSON.stringify(newLogin));
+            localStorage.setItem('login', JSON.stringify(newLogin));
 
-        setLogin(newLogin);
+            setLogin(newLogin);
 
-        return newLogin;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    },
-    {
-      maxAge: 20000,
-    },
+            return newLogin;
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
+        },
+        {
+          maxAge: 20000,
+        },
+      ),
+    [login, setLogin],
   );
 
   useLayoutEffect(() => {
@@ -63,7 +91,7 @@ const AuthProvider = (props) => {
       setInterceptor([
         axios.interceptors.request.use(
           (config) => {
-            if (config.url.startsWith(login.server)) {
+            if (isSameServerUrl(config.url, login.server)) {
               config.headers.Authorization = 'Bearer ' + login.jwt;
             }
             return config;
@@ -78,8 +106,7 @@ const AuthProvider = (props) => {
             let _error = error;
             if (
               !axios.isCancel(error) &&
-              (login.server.startsWith('/') ||
-                error.request.responseURL.startsWith(login.server))
+              isSameServerUrl(error.request.responseURL, login.server)
             ) {
               if (error?.response?.status === 401) {
                 const config = error.config;
@@ -89,7 +116,7 @@ const AuthProvider = (props) => {
                   if (result != null) {
                     config.headers = {
                       ...config.headers,
-                      Authorization: `Bearer ${result.accessToken}`,
+                      Authorization: `Bearer ${result.jwt}`,
                     };
                     return axios(config);
                   }
