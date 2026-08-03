@@ -223,6 +223,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
         setSubmissionErrorMsg(
           `An error occurred fetching instances. Error message: ${getResponseError(err)}.`,
         );
+        setInstancesLoaded(true);
         return;
       }
     };

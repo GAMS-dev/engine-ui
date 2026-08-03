@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
+import selectEvent from 'react-select-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 
 import JobSubmissionForm from '../components/JobSubmissionForm';
@@ -9,7 +10,9 @@ import axios from 'axios';
 
 vi.mock('axios');
 
-// Mock FileDropZone to render a simple file input so we can easily test file uploads
+// Mock FileDropZone to render a simple file input so we can easily test file uploads.
+// `multiple` defaults to true (unless explicitly false, as for the hypercube file drop
+// zone) so tests can exercise multi-file uploads for the model/data drop zones.
 vi.mock('../components/FileDropZone', () => ({
   __esModule: true,
   default: ({ onDrop, label, multiple }) => (
@@ -18,7 +21,7 @@ vi.mock('../components/FileDropZone', () => ({
       <input
         id={`mock-dropzone-${label}`}
         type="file"
-        multiple={multiple}
+        multiple={multiple !== false}
         onChange={(e) => onDrop(Array.from(e.target.files))}
       />
     </div>
@@ -713,5 +716,342 @@ describe('JobSubmissionForm', () => {
         screen.getByText(/Problems posting job\. Error message: boom\./i),
       ).toBeInTheDocument(),
     );
+  });
+
+  it('shows an error and stops loading instances when fetching instance data fails', async () => {
+    mockAxiosGet({
+      'testserver/usage/pools/admin': () =>
+        Promise.reject(new Error('instance service down')),
+    });
+
+    const { container } = render(<JobSubmissionForm />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/An error occurred fetching instances/i),
+      ).toBeInTheDocument(),
+    );
+    // The instances-loading spinner (ClipLoader) must stop, not spin forever.
+    expect(
+      container.querySelector('#labelsWrapperContent > span'),
+    ).not.toBeInTheDocument();
+    // The main form still renders (isLoading is a separate flag from instancesLoaded).
+    expect(screen.getByText(/Submit Job/i)).toBeInTheDocument();
+  });
+
+  it('resets the memory and workspace request fields to a valid empty state when cleared', async () => {
+    mockAxiosGet();
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use raw resource requests\?/i));
+
+    const memInput = screen.getByLabelText(/Required Memory Units/i);
+    await user.type(memInput, '512');
+    expect(memInput.className).not.toContain('is-invalid');
+    await user.clear(memInput);
+    expect(memInput).toHaveValue(null);
+    expect(memInput.className).not.toContain('is-invalid');
+
+    const wsInput = screen.getByLabelText(/Required Workspace Size/i);
+    await user.type(wsInput, '256');
+    expect(wsInput.className).not.toContain('is-invalid');
+    await user.clear(wsInput);
+    expect(wsInput).toHaveValue(null);
+    expect(wsInput.className).not.toContain('is-invalid');
+  });
+
+  it('appends toleration and node selector labels when using raw resource requests', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use raw resource requests\?/i));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await user.type(screen.getByLabelText(/Tolerations/i), 't1,t2');
+    await user.type(screen.getByLabelText(/Node Selectors/i), 'n1,n2');
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.getAll('labels')).toEqual(
+      expect.arrayContaining([
+        'tolerations=t1',
+        'tolerations=t2',
+        'node_selectors=n1',
+        'node_selectors=n2',
+      ]),
+    );
+  });
+
+  it('zips a non-zip data file before submitting', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    const dataInput = screen.getByLabelText(
+      /Drop data files here \(optional\)/i,
+    );
+    const dataFile = new File(['data content'], 'data.txt', {
+      type: 'text/plain',
+    });
+    await user.upload(dataInput, dataFile);
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    const submittedData = formData.get('data');
+    expect(submittedData).toBeTruthy();
+    expect(submittedData.name).toBe('data.zip');
+  });
+
+  it('shows an error and stops submitting when data zipping fails because too many files were provided', async () => {
+    mockAxiosGet();
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    const dataInput = screen.getByLabelText(
+      /Drop data files here \(optional\)/i,
+    );
+    const tooManyFiles = Array.from(
+      { length: 201 },
+      (_, i) => new File(['x'], `f${i}.txt`, { type: 'text/plain' }),
+    );
+    await user.upload(dataInput, tooManyFiles);
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Problems posting job as data could not be zipped/i),
+      ).toBeInTheDocument(),
+    );
+    expect(axios.post).not.toHaveBeenCalled();
+    // isSubmitting was reset back to false, so the submit button is re-enabled.
+    expect(screen.getByRole('button', { name: /Submit Job/i })).toBeEnabled();
+  });
+
+  it('includes selected access groups in the submission', async () => {
+    mockAxiosGet({
+      'testserver/namespaces/test_namespace/user-groups': () =>
+        Promise.resolve({
+          status: 200,
+          data: [{ label: 'group1' }, { label: 'group2' }],
+        }),
+    });
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText(/Select access groups/i),
+      ).toBeInTheDocument(),
+    );
+    await selectEvent.select(
+      screen.getByLabelText(/Select access groups/i),
+      'group1',
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.getAll('access_groups')).toEqual(['group1']);
+  });
+
+  it('includes the inex_string field when result filtering is enabled', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+
+    await user.click(screen.getByLabelText(/Filter results/i));
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('inex_string')).toContain('include');
+  });
+
+  it('selects a different instance and includes it in the submitted labels', async () => {
+    mockAxiosGet({
+      'testserver/usage/instances/admin': () =>
+        Promise.resolve({
+          status: 200,
+          data: {
+            instances_inherited_from: null,
+            instances_available: [
+              {
+                label: 'test',
+                cpu_request: 1,
+                memory_request: 100,
+                workspace_request: 100,
+                node_selectors: [],
+                tolerations: [],
+                multiplier: 1,
+                multiplier_idle: 1,
+              },
+              {
+                label: 'test2',
+                cpu_request: 2,
+                memory_request: 200,
+                workspace_request: 200,
+                node_selectors: [],
+                tolerations: [],
+                multiplier: 2,
+                multiplier_idle: 2,
+              },
+            ],
+          },
+        }),
+    });
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await selectEvent.select(
+      screen.getByLabelText(/Select Instance/i),
+      /test2/,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.getAll('labels')).toEqual(
+      expect.arrayContaining(['instance=test2']),
+    );
+  });
+
+  it('changes the namespace via the selector and submits under the new namespace', async () => {
+    mockAxiosGet({
+      'testserver/namespaces/': () =>
+        Promise.resolve({
+          status: 200,
+          data: [
+            {
+              name: 'test_namespace',
+              permissions: [{ username: 'admin', permission: 7 }],
+            },
+            {
+              name: 'other_namespace',
+              permissions: [{ username: 'admin', permission: 7 }],
+            },
+          ],
+        }),
+      'testserver/namespaces/other_namespace': () =>
+        Promise.resolve({ status: 200, data: [] }),
+    });
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await selectEvent.select(
+      screen.getByLabelText(/Select a Namespace/i),
+      'other_namespace',
+    );
+
+    await waitFor(() =>
+      expect(screen.getByLabelText(/Use a Registered Model\?/i)).toBeDisabled(),
+    );
+
+    const modelInput = screen.getByLabelText(/Drop static model files here/i);
+    const modelFile = new File(['* dummy'], 'mymodel.gms', {
+      type: 'text/plain',
+    });
+    await user.upload(modelInput, modelFile);
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('namespace')).toBe('other_namespace');
+  });
+
+  it('selects a different registered model (exercising the sorted options list)', async () => {
+    mockAxiosGet({
+      'testserver/namespaces/test_namespace': () =>
+        Promise.resolve({
+          status: 200,
+          data: [{ name: 'zebra_model.zip' }, { name: 'alpha_model.zip' }],
+        }),
+    });
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await selectEvent.select(
+      screen.getByLabelText(/Select a Model/i),
+      'alpha_model.zip',
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('model')).toBe('alpha_model.zip');
+  });
+
+  it('changes and submits a different priority', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, {
+      wrapper: ({ children }) => (
+        <AllProvidersWrapperDefault
+          options={{
+            in_kubernetes: false,
+            serverConfig: { job_priorities_access: 'ENABLED' },
+          }}
+        >
+          {children}
+        </AllProvidersWrapperDefault>
+      ),
+    });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await selectEvent.select(screen.getByLabelText(/^Priority$/i), 'high');
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('priority')).toBe('high');
   });
 });

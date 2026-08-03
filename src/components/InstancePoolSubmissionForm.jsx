@@ -101,6 +101,13 @@ const InstancePoolSubmissionForm = () => {
         </div>
       ) : isLoading ? (
         <ClipLoader />
+      ) : availableInstances.length === 0 ? (
+        <div
+          className="invalid-feedback text-center"
+          style={{ display: 'block' }}
+        >
+          No instances available to create a pool with.
+        </div>
       ) : (
         <form
           className="m-auto"
