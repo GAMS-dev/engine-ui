@@ -10,11 +10,6 @@ if [ -z "${BASE_URL+x}" ]; then
   export BASE_URL=/
 fi
 
-if [ "$DISABLE_REQUEST_LIMIT" = "true" ]; then
-  echo "DISABLE_REQUEST_LIMIT is set to true, disabling request limiting"
-  sed -i '/^limit_req/d' /etc/nginx/conf.d/default.conf
-fi
-
 RUNTIME_CONFIG_DIR="/tmp/engine-ui-config"
 mkdir -p "$RUNTIME_CONFIG_DIR"
 cat >"$RUNTIME_CONFIG_DIR/env-config.js" <<EOF

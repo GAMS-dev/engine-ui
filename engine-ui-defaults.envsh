@@ -9,3 +9,14 @@ if [ -z "${ENGINE_HTTPS_PORT+x}" ]; then
   echo "ENGINE_HTTPS_PORT is unset, using default 443"
   export ENGINE_HTTPS_PORT=443
 fi
+
+# An empty limit_req_zone key means nginx never rate-limits the request, so
+# this lets the nginx config templates express DISABLE_REQUEST_LIMIT without
+# needing to mutate the rendered config file at boot (which would require a
+# writable filesystem).
+if [ "$DISABLE_REQUEST_LIMIT" = "true" ]; then
+  echo "DISABLE_REQUEST_LIMIT is set to true, disabling request limiting"
+  export LIMIT_REQ_KEY='""'
+else
+  export LIMIT_REQ_KEY='$binary_remote_addr'
+fi
