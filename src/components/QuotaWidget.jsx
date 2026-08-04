@@ -63,7 +63,7 @@ const QuotaWidget = ({ isVisible, className }) => {
               title: 'Volume quota',
               icon: <Cpu size={14} />,
               text: ': unlimited\n',
-              val: '',
+              className: '',
             },
             {
               key: 'disk',
@@ -77,7 +77,11 @@ const QuotaWidget = ({ isVisible, className }) => {
       } catch (err) {
         if (!axios.isCancel(err)) {
           setData([
-            `Problems fetching quota data. Error message: ${getResponseError(err)}`,
+            {
+              key: 'error',
+              text: `Problems fetching quota data. Error message: ${getResponseError(err)}`,
+              className: '',
+            },
           ]);
         }
       }

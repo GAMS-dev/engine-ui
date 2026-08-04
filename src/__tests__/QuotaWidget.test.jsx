@@ -35,4 +35,25 @@ describe('QuotaWidget', () => {
     });
     await waitFor(() => screen.findByText(/Quotas/));
   });
+
+  it('shows the error message (with no stray "undefined" class) when fetching quota fails', async () => {
+    axios.mockImplementation((params) => {
+      switch (params.url) {
+        case 'testserver/usage/quota':
+          return Promise.reject(new Error('boom'));
+        default:
+          return Promise.reject(new Error('not found'));
+      }
+    });
+
+    render(<QuotaWidget />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+
+    const errorSpan = await screen.findByText(
+      /Problems fetching quota data\. Error message: boom/,
+    );
+    expect(errorSpan).toBeInTheDocument();
+    expect(errorSpan.className).not.toMatch(/undefined/);
+  });
 });
