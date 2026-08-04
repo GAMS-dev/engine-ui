@@ -1,4 +1,4 @@
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import selectEvent from 'react-select-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
@@ -146,18 +146,21 @@ describe('DefaultInstanceSelector', () => {
     await waitFor(() => screen.findByText('Default instance'));
     await screen.findByText(/TestInstance \(3 vCPU/);
 
-    await selectEvent.select(
-      screen.getByLabelText('Default instance'),
-      'Test2 (2 vCPU, 100 MiB RAM, 6¢/s)',
-    );
+    await act(async () => {
+      await selectEvent.select(
+        screen.getByLabelText('Default instance'),
+        'Test2 (2 vCPU, 100 MiB RAM, 6¢/s)',
+      );
+    });
 
-    await waitFor(() => expect(axios.put).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalledTimes(1);
+      expect(screen.getByText(/Test2 \(2 vCPU/)).toBeInTheDocument();
+    });
     expect(axios.put).toHaveBeenCalledWith(
       'testserver/usage/instances/admin/default',
       { default_label: 'Test2' },
     );
-
-    await screen.findByText(/Test2 \(2 vCPU/);
     expect(alertMsgMock).not.toHaveBeenCalled();
   });
 
@@ -185,17 +188,19 @@ describe('DefaultInstanceSelector', () => {
     await waitFor(() => screen.findByText('Default instance'));
     await screen.findByText(/TestInstance \(3 vCPU/);
 
-    await selectEvent.select(
-      screen.getByLabelText('Default instance'),
-      'Test2 (2 vCPU, 100 MiB RAM, 6¢/s)',
-    );
+    await act(async () => {
+      await selectEvent.select(
+        screen.getByLabelText('Default instance'),
+        'Test2 (2 vCPU, 100 MiB RAM, 6¢/s)',
+      );
+    });
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(alertMsgMock).toHaveBeenCalledWith(
         'Some error occurred while trying to update default instance. Error message: boom.',
-      ),
-    );
-    // The optimistic value is not applied when the request fails.
-    expect(screen.getByText(/TestInstance \(3 vCPU/)).toBeInTheDocument();
+      );
+      // The optimistic value is not applied when the request fails.
+      expect(screen.getByText(/TestInstance \(3 vCPU/)).toBeInTheDocument();
+    });
   });
 });

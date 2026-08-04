@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { AllProvidersWrapperDefault } from './utils/testUtils.jsx';
@@ -236,12 +236,12 @@ describe('StreamEntryView', () => {
     );
 
     // Second poll returns no new data - content is unchanged.
-    await vi.advanceTimersByTimeAsync(1500);
+    await act(() => vi.advanceTimersByTimeAsync(1500));
     await waitFor(() => expect(axios.delete).toHaveBeenCalledTimes(2));
     expect(screen.getByRole('textbox')).toHaveValue('first ');
 
     // Third poll appends its new data onto the existing content.
-    await vi.advanceTimersByTimeAsync(1500);
+    await act(() => vi.advanceTimersByTimeAsync(1500));
     await waitFor(() => expect(axios.delete).toHaveBeenCalledTimes(3));
     expect(screen.getByRole('textbox')).toHaveValue('first second');
   });

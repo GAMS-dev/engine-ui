@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { useContext } from 'react';
@@ -123,7 +123,13 @@ describe('AuthProvider', () => {
       response: { status: 401 },
     };
 
-    const result = await responseRejected(error);
+    // responseRejected is invoked directly here (not via a real request or
+    // user interaction), so its internal setLogin/setState calls need an
+    // explicit act() wrapper.
+    let result;
+    await act(async () => {
+      result = await responseRejected(error);
+    });
 
     expect(axios.post).toHaveBeenCalledWith(
       'https://idp.example.com/token',

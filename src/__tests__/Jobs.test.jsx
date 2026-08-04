@@ -82,7 +82,7 @@ describe('Jobs', () => {
     )[0];
 
     expect(minimizeButton).toBeInTheDocument();
-    user.click(minimizeButton);
+    await user.click(minimizeButton);
 
     const maximizeButtonsNew = await screen.findAllByRole('button', {
       name: /expand tag column/i,

@@ -4,6 +4,7 @@ import {
   screen,
   fireEvent,
   within,
+  act,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
@@ -1134,7 +1135,10 @@ describe('AuthProviderForm', () => {
     });
     await waitFor(() => screen.findByText(/Add New Identity Provider/));
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // The debounce timer's own state update needs to happen inside act().
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    });
 
     expect(
       screen.getByLabelText(/asserts as its Issuer Identifier/),
@@ -1388,8 +1392,11 @@ describe('AuthProviderForm', () => {
 
     // let the automatic discovery debounce settle (it fails and reverts to
     // manual) before manually overriding the discovery mode below, so the
-    // debounce doesn't clobber our manual selection afterwards.
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // debounce doesn't clobber our manual selection afterwards. The
+    // debounce's own state update needs to happen inside act().
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    });
 
     await selectEvent.select(
       screen.getByLabelText('Auto discovery endpoint'),

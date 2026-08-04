@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import selectEvent from 'react-select-event';
@@ -976,10 +976,12 @@ describe('JobSubmissionForm', () => {
 
     await waitFor(() => screen.findByText(/Submit Job/));
 
-    await selectEvent.select(
-      screen.getByLabelText(/Select a Namespace/i),
-      'other_namespace',
-    );
+    await act(async () => {
+      await selectEvent.select(
+        screen.getByLabelText(/Select a Namespace/i),
+        'other_namespace',
+      );
+    });
 
     await waitFor(() =>
       expect(screen.getByLabelText(/Use a Registered Model\?/i)).toBeDisabled(),
