@@ -61,7 +61,7 @@
     "vitest-canvas-mock": "^1.1.4"
   },
   "overrides": {
-    "brace-expansion": "^5.0.8"
+    "brace-expansion": "^5.0.9"
   },
   "browserslist": {
     "production": [
