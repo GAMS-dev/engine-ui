@@ -10,6 +10,10 @@ export default mergeConfig(
       css: true,
       clearMocks: true,
       mockReset: true,
+      // The default 5000ms is tuned for a fast local machine; CI runners
+      // are often slower/more contended, so give tests more headroom there
+      // to avoid flaky timeouts on otherwise-correct, just-slower tests.
+      testTimeout: 15000,
       deps: {
         optimizer: {
           web: {
