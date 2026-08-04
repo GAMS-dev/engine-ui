@@ -133,7 +133,7 @@ const NamespaceQuotaUpdateForm = () => {
                     const val = parseInt(e.target.value);
                     if (isNaN(val) || !isFinite(val)) {
                       setValidQuota(false);
-                      setQuota(val);
+                      setQuota(e.target.value);
                       return;
                     }
                     setValidQuota(true);

@@ -110,6 +110,8 @@ describe('NamespaceQuotaUpdateForm', () => {
     fireEvent.change(quotaInput, { target: { value: '.5' } });
 
     expect(quotaInput).toHaveClass('is-invalid');
+    // The field must keep showing exactly what was typed, not NaN.
+    expect(quotaInput).toHaveValue(0.5);
 
     fireEvent.click(screen.getByRole('button', { name: 'Update Quota' }));
 
