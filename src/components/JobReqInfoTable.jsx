@@ -253,6 +253,14 @@ const JobReqInfoTable = (props) => {
                   ))}
             </td>
           </tr>
+          {job.priority != null && (
+            <tr>
+              <th>Priority</th>
+              <td>
+                {job.priority.charAt(0).toUpperCase() + job.priority.slice(1)}
+              </td>
+            </tr>
+          )}
         </tbody>
         <thead className="table-light">
           <tr>

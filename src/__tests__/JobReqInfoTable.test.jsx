@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
@@ -77,6 +77,23 @@ describe('JobReqInfoTable', () => {
     await waitFor(() =>
       screen.findByText('asd123 (1 vCPU, 100 MiB RAM, 1¢/s)'),
     );
+  });
+
+  it('does not show a Priority row when job.priority is null', async () => {
+    render(<JobReqInfoTable job={baseJob()} />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText('Data Provided'));
+    expect(screen.queryByText('Priority')).not.toBeInTheDocument();
+  });
+
+  it('shows the capitalized Priority row when job.priority is set', async () => {
+    render(<JobReqInfoTable job={baseJob({ priority: 'medium' })} />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    const label = await waitFor(() => screen.findByText('Priority'));
+    const row = label.closest('tr');
+    expect(within(row).getByText('Medium')).toBeInTheDocument();
   });
 
   it('shows the HC badge and hides text/stream entries for hypercube jobs', async () => {

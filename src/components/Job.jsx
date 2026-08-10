@@ -46,6 +46,7 @@ const Job = () => {
       'token',
       'tag',
       'queue_position',
+      'priority',
     ];
     if (serverInfo.in_kubernetes === true) {
       fields.push('labels{*}');
