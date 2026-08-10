@@ -20,3 +20,12 @@ if [ "$DISABLE_REQUEST_LIMIT" = "true" ]; then
 else
   export LIMIT_REQ_KEY='$binary_remote_addr'
 fi
+
+if [ -z "${BASE_URL+x}" ]; then
+  echo "BASE_URL is unset, using default /"
+  export BASE_URL=/
+fi
+case "$BASE_URL" in
+  */) ;;
+  *) export BASE_URL="$BASE_URL/" ;;
+esac
