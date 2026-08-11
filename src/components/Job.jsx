@@ -20,7 +20,7 @@ const Job = () => {
   const [{ jwt, server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const [serverInfo] = useContext(ServerInfoContext);
-  const [invalidUserMessage, setInvalidUserMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
@@ -63,7 +63,7 @@ const Job = () => {
             cancelToken: source.token,
           });
           if (jobData.data.results.length === 0) {
-            setInvalidUserMessage(
+            setErrorMessage(
               'Problems fetching Hypercube job information. Please try again later.',
             );
             setIsLoading(false);
@@ -72,7 +72,7 @@ const Job = () => {
           jobData = jobData.data.results[0];
         } catch (err) {
           if (!axios.isCancel(err)) {
-            setInvalidUserMessage(
+            setErrorMessage(
               `Problems fetching Hypercube job information. Error message: ${getResponseError(err)}`,
             );
             setIsLoading(false);
@@ -92,7 +92,7 @@ const Job = () => {
           jobData = jobData.data;
         } catch (err) {
           if (!axios.isCancel(err)) {
-            setInvalidUserMessage(
+            setErrorMessage(
               `Problems fetching job information. Error message: ${getResponseError(err)}`,
             );
             setIsLoading(false);
@@ -174,10 +174,10 @@ const Job = () => {
     <>
       {isLoading ? (
         <ClipLoader />
-      ) : invalidUserMessage !== '' ? (
+      ) : errorMessage !== '' ? (
         <div className="alert alert-danger mt-3">
           <p>
-            <strong>{invalidUserMessage}</strong>
+            <strong>{errorMessage}</strong>
           </p>
         </div>
       ) : (
