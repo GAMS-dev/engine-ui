@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 
 export const InexJSONSelector = (props) => {
   const { onChangeHandler, label, inexObject } = props;

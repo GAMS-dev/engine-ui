@@ -13,9 +13,10 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useOutletContext } from 'react-router';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { ClipLoader } from 'react-spinners';
 import { mergeSortedArrays } from '../util/util';
+import { useSystemTheme } from '../util/theme';
 import { JobTokenLink } from './JobTokenLink';
 import Table from './Table';
 import TimeDiffDisplay from './TimeDiffDisplay';
@@ -35,6 +36,11 @@ ChartJS.register(
 
 const UsageTimeline = () => {
   const { data, startDate, endDate } = useOutletContext();
+  const isDarkTheme = useSystemTheme() === 'dark';
+  const totalLineColor = isDarkTheme ? '#e8e9eb' : '#000000';
+  const overflowSeriesColor = isDarkTheme
+    ? 'rgba(255,255,255,0.2)'
+    : 'rgba(0,0,0,0.2)';
   const [aggregated, setAggregated] = useState(true);
   const availableWeightingOptions = [
     { value: true, label: 'Jobs weighted with multiplier' },
@@ -386,9 +392,9 @@ const UsageTimeline = () => {
         chartDataTmp[usernames[i]] = {
           label: usernames[i],
           backgroundColor:
-            i < chartColors.length ? chartColors[i] : 'rgba(0,0,0,0.2)',
+            i < chartColors.length ? chartColors[i] : overflowSeriesColor,
           borderColor:
-            i < chartColors.length ? chartColors[i] : 'rgba(0,0,0,0.2)',
+            i < chartColors.length ? chartColors[i] : overflowSeriesColor,
           fill: true,
           stepped: true,
           data: seriesData,
@@ -413,8 +419,8 @@ const UsageTimeline = () => {
       setAggregatedChartData([
         {
           label: 'Total',
-          backgroundColor: '#000000',
-          borderColor: '#000000',
+          backgroundColor: totalLineColor,
+          borderColor: totalLineColor,
           stepped: true,
           fill: true,
           data: aggregatedChartDataTmp,
@@ -451,7 +457,7 @@ const UsageTimeline = () => {
       setIsLoading(false);
     };
     computeChartData();
-  }, [data, selectedWeightingOption]);
+  }, [data, selectedWeightingOption, totalLineColor, overflowSeriesColor]);
 
   return (
     <div className="mt-3">

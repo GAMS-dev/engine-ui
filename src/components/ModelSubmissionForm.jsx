@@ -3,7 +3,7 @@ import { Navigate, useParams } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { zipAsync, getResponseError } from '../util/util';
 import InexJSONSelector from './InexJSONSelector';
 import SubmitButton from './SubmitButton';

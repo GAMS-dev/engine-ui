@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { Button } from 'react-bootstrap';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 

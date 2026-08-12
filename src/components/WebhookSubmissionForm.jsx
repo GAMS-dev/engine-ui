@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState, useContext } from 'react';
 import { Navigate } from 'react-router';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import { getResponseError } from '../util/util';

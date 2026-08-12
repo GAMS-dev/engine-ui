@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import AuthContext from '../contexts/AuthContext';
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import {
   formatInstancesSelectInput,
   getInstanceData,

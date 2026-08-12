@@ -246,6 +246,13 @@ body {
     flex-wrap: nowrap;
     overflow-x: auto;
   }
+
+  // The sidebar becomes a horizontal tab bar on mobile, so the active
+  // indicator moves from the left edge (vertical layout) to the bottom
+  // edge (horizontal layout).
+  .sidebar .nav-link.active {
+    box-shadow: inset 0 -3px 0 $primary;
+  }
 }
 
 @media only screen and (min-width: 768px) {
@@ -485,4 +492,98 @@ body {
   outline: inherit;
   display: flex;
   align-items: center;
+}
+
+// Dark mode (follows the OS setting, see index.html/util/theme.js). Bootstrap's
+// own components already adapt via its body-bg/color/border CSS variables; the
+// overrides below only cover our custom classes and the handful of literal
+// bg-light/bg-white/text-dark usages, which Bootstrap deliberately keeps fixed
+// since those utilities represent a specific color rather than a themed surface.
+[data-bs-theme='dark'] {
+  .auth-page {
+    background: linear-gradient(180deg, #1a1c20 0%, #14161a 100%);
+  }
+
+  .form-signin {
+    background-color: #2b2f36;
+  }
+
+  // .sidebar/.nav-top also carry the bg-light class (overridden below),
+  // this just darkens their borders (hardcoded, not theme-variable-driven).
+  .sidebar {
+    border-right-color: #3f4550 !important;
+    border-top-color: #3f4550 !important;
+  }
+
+  .nav-top {
+    border-bottom-color: #3f4550 !important;
+  }
+
+  .info-header {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .badge.bg-secondary,
+  .badge.text-bg-secondary {
+    background-color: #5b6270 !important;
+  }
+
+  // A handful of literal light surfaces (CreateAuthTokenForm's generated-token
+  // box and its readonly input, UserLink's "me" badge) and their text-dark
+  // pairing, plus plain `badge text-dark` with no background (JobRespInfoTable's
+  // process status, UsageTimelines' duration badges) sitting on the now-dark
+  // page/table background.
+  .bg-light,
+  .bg-white {
+    background-color: #2b2f36 !important;
+  }
+
+  .text-dark {
+    color: #e8e9eb !important;
+  }
+
+  // Hardcoded (not CSS-variable-driven) muted grays that read fine on a white
+  // sidebar but are too dim against the new dark surface. Excludes .active,
+  // which has equal specificity and would otherwise lose to source order.
+  .sidebar .nav-link:not(.active),
+  .sidebar .btn-link,
+  .nav-top .btn-link,
+  .dropdown-item-static {
+    color: #9aa0aa;
+  }
+
+  .sidebar .nav-link:not(.active):hover,
+  .sidebar .btn-link:hover,
+  .nav-top .btn-link:hover,
+  .dropdown-item-static:hover {
+    color: #9aa0aa;
+  }
+
+  // UserLink's plain username link inside tables, hardcoded to black.
+  .table-link {
+    color: #e8e9eb !important;
+  }
+
+  // btn-outline-secondary's color/border (e.g. Refresh, Show Active) is a
+  // literal #6c757d, which is too low-contrast against the dark page/card bg.
+  .btn-outline-secondary {
+    --bs-btn-color: #a3a8b3;
+    --bs-btn-border-color: #5a5f69;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #5a5f69;
+    --bs-btn-hover-border-color: #5a5f69;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #5a5f69;
+    --bs-btn-active-border-color: #5a5f69;
+    --bs-btn-disabled-color: #6c7280;
+    --bs-btn-disabled-border-color: #4a4f59;
+  }
+
+  // FileDropZone's colors are inline styles (driven by drag state), so they
+  // need !important to win; border-color is left alone since drag-state
+  // colors (active/accept/reject) are also set inline and would be clobbered.
+  .file-dropzone {
+    background-color: #2b2f36 !important;
+    color: #8a8f99 !important;
+  }
 }

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import AuthContext from '../contexts/AuthContext';
 import { Alert, Form } from 'react-bootstrap';

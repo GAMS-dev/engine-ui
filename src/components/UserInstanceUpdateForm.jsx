@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { Navigate, useParams } from 'react-router';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';

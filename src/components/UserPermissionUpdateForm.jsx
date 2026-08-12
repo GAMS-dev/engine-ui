@@ -3,7 +3,7 @@ import { Navigate, useParams } from 'react-router';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { getResponseError } from '../util/util';
 import NamespacePermissionSelector from './NamespacePermissionSelector';
 import SubmitButton from './SubmitButton';

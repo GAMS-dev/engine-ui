@@ -18,15 +18,15 @@ const baseStyle = {
 };
 
 const activeStyle = {
-  borderColor: '#2196f3',
+  borderColor: '#f39619',
 };
 
 const acceptStyle = {
-  borderColor: '#00e676',
+  borderColor: '#198754',
 };
 
 const rejectStyle = {
-  borderColor: '#ff1744',
+  borderColor: '#dc3545',
 };
 
 const FileDropZone = ({ label, onDrop, multiple = true }) => {
@@ -57,7 +57,7 @@ const FileDropZone = ({ label, onDrop, multiple = true }) => {
 
   return (
     <>
-      <div {...getRootProps({ style })}>
+      <div className="file-dropzone" {...getRootProps({ style })}>
         <input {...getInputProps()} />
         <p>{label}</p>
       </div>

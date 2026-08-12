@@ -40,7 +40,7 @@ const App = () => {
     <React.Fragment>
       <Router basename={getBaseUrl()}>
         <ServerInfoProvider>
-          <MantineProvider theme={mantineTheme}>
+          <MantineProvider theme={mantineTheme} defaultColorScheme="auto">
             <Routes>
               <Route path="/login" element={<LoginForm />} />
               <Route

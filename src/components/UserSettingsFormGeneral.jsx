@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import DefaultInstanceSelector from './DefaultInstanceSelector';
 import { useOutletContext } from 'react-router';
 import ServerInfoContext from '../contexts/ServerInfoContext';

@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import axios from 'axios';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';

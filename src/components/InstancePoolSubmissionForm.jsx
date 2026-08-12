@@ -3,7 +3,7 @@ import { Navigate } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import {
   formatInstancesSelectInput,
   getInstanceData,

@@ -3,7 +3,7 @@ import 'chartjs-adapter-date-fns';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useOutletContext } from 'react-router';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { ClipLoader } from 'react-spinners';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import computeTimes from '../util/calculateQuota.js';

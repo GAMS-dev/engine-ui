@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
 import { getResponseError } from '../util/util';

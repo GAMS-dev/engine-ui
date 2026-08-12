@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useContext } from 'react';
 import { useEffect } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import { getResponseError } from '../util/util';
@@ -152,7 +152,7 @@ export const NamespacePermissionSelector = ({
           style={
             highlight === true
               ? {
-                  background: '#f8f9fa',
+                  background: 'var(--bs-tertiary-bg)',
                   padding: '10px',
                 }
               : {}

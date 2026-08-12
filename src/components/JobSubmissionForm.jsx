@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { Navigate } from 'react-router';
 import { Button, Collapse } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';

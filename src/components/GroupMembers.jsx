@@ -1,5 +1,5 @@
 import { useEffect, useContext, useState } from 'react';
-import Select from 'react-select';
+import Select from './ThemedSelect';
 import { RefreshCw, Users } from 'lucide-react';
 import { Modal, Button } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';
