@@ -147,7 +147,7 @@ const LoginForm = ({ showRegistrationForm }) => {
         if (reponse.data.length === 1) {
           setLogin({
             jwt,
-            SERVER_NAME,
+            server: SERVER_NAME,
             roles: reponse.data[0].roles,
             username: reponse.data[0].username,
             isOAuthToken: token?.isOAuthToken,
@@ -909,7 +909,7 @@ const LoginForm = ({ showRegistrationForm }) => {
             <></>
           ) : (
             <OAuth2Login
-              SERVER_NAME={SERVER_NAME}
+              server={SERVER_NAME}
               loginConfig={OAuthLoginConfig}
               setAuthToken={setOAuthToken}
               setErrorMsg={setOAuthErrorMsg}
