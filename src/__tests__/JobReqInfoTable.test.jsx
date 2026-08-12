@@ -74,9 +74,8 @@ describe('JobReqInfoTable', () => {
     render(<JobReqInfoTable job={jobInfo} inKubernetes={true} />, {
       wrapper: AllProvidersWrapperDefault,
     });
-    await waitFor(() =>
-      screen.findByText('asd123 (1 vCPU, 100 MiB RAM, 1¢/s)'),
-    );
+    await waitFor(() => screen.findByText('asd123'));
+    expect(screen.getByText('1 vCPU, 100 MiB RAM, 1¢/s')).toBeInTheDocument();
   });
 
   it('does not show a Priority row when job.priority is null', async () => {

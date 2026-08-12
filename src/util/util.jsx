@@ -182,8 +182,14 @@ const getInstanceData = async (server, username) => {
     defaultInheritedFrom: defaultInstanceData.data.default_inherited_from,
   };
 };
-const formatInstanceSpecs = (instance, multiplierUnit) =>
-  `${instance.label} (${instance.cpu_request} vCPU, ${formatDecimal(instance.memory_request)} MiB RAM, ${formatDecimal(instance.multiplier)}${multiplierUnit})`;
+const formatInstanceSpecsParts = (instance, multiplierUnit) => ({
+  label: instance.label,
+  specs: `${instance.cpu_request} vCPU, ${formatDecimal(instance.memory_request)} MiB RAM, ${formatDecimal(instance.multiplier)}${multiplierUnit}`,
+});
+const formatInstanceSpecs = (instance, multiplierUnit) => {
+  const { label, specs } = formatInstanceSpecsParts(instance, multiplierUnit);
+  return `${label} (${specs})`;
+};
 const formatInstancesSelectInput = (instances, multiplierUnit) => {
   return instances
     .filter((instance) => instance.cancelling !== true)
@@ -268,5 +274,6 @@ export {
   getQuotaWarningMessage,
   formatDurationString,
   formatInstanceSpecs,
+  formatInstanceSpecsParts,
   formatDecimal,
 };

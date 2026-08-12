@@ -7,7 +7,7 @@ import DownloadLink from './DownloadLink';
 import TimeDisplay from './TimeDisplay';
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import SubmitButton from './SubmitButton';
-import { formatInstanceSpecs, getResponseError } from '../util/util';
+import { formatInstanceSpecsParts, getResponseError } from '../util/util';
 import axios from 'axios';
 import { Edit3 } from 'lucide-react';
 import { UserLink } from './UserLink';
@@ -121,7 +121,7 @@ const JobReqInfoTable = (props) => {
               return el;
             }
             const elTmp = el;
-            elTmp[1] = formatInstanceSpecs(
+            elTmp[1] = formatInstanceSpecsParts(
               {
                 label: elTmp[1],
                 cpu_request: cpuRequest?.length === 2 ? cpuRequest[1] : '',
@@ -334,7 +334,11 @@ const JobReqInfoTable = (props) => {
             <th>Arguments</th>
             <td>
               {job.arguments.map((c) => (
-                <span key={c} className="badge bg-secondary m-1">
+                <span
+                  key={c}
+                  className="badge bg-secondary m-1 badge-clip"
+                  title={c}
+                >
                   {c}
                 </span>
               ))}
@@ -438,10 +442,12 @@ const JobReqInfoTable = (props) => {
                     return (
                       <span
                         key="instance"
-                        className="badge bg-info m-1"
+                        className="badge bg-info m-1 text-start lh-base"
+                        style={{ whiteSpace: 'normal' }}
                         title={el[2]}
                       >
-                        {el[1]}
+                        <div className="fw-bold">{el[1].label}</div>
+                        <div>{el[1].specs}</div>
                       </span>
                     );
                   } else if (el[0] === 'multiplier') {
