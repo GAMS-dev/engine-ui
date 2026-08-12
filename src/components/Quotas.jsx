@@ -6,6 +6,7 @@ import { useOutletContext } from 'react-router';
 import Select from './ThemedSelect';
 import { ClipLoader } from 'react-spinners';
 import UserSettingsContext from '../contexts/UserSettingsContext';
+import { useChartTheme } from '../util/chartTheme';
 import computeTimes from '../util/calculateQuota.js';
 import { formatDecimal } from '../util/util.jsx';
 import { JobTokenLink } from './JobTokenLink.jsx';
@@ -67,6 +68,7 @@ const Quotas = () => {
     startDate: calcStartDate,
     endDate: calcEndTime,
   } = useOutletContext();
+  useChartTheme();
   const [userSettings] = useContext(UserSettingsContext);
   const quotaFormattingFn = userSettings.quotaFormattingFn;
 
@@ -415,28 +417,38 @@ const Quotas = () => {
 
   return (
     <div className="App">
-      <div className="form-group mt-3 mb-3">
-        <label htmlFor="aggregateDropdownInput">Aggregate</label>
-        <Select
-          id="aggregateDropdown"
-          inputId="aggregateDropdownInput"
-          isClearable={false}
-          value={availableAggregateTypes.find(
-            (type) => type.value === selectedAggregateType,
-          )}
-          isSearchable={true}
-          onChange={(selected) => setSelectedAggregateType(selected.value)}
-          options={availableAggregateTypes}
-        />
+      <div className="row align-items-end mb-2">
+        <div className="form-group mt-2 mb-2 col-md-4 col-lg-3 col-12">
+          <label htmlFor="aggregateDropdownInput">Aggregate</label>
+          <Select
+            id="aggregateDropdown"
+            inputId="aggregateDropdownInput"
+            isClearable={false}
+            value={availableAggregateTypes.find(
+              (type) => type.value === selectedAggregateType,
+            )}
+            isSearchable={true}
+            onChange={(selected) => setSelectedAggregateType(selected.value)}
+            options={availableAggregateTypes}
+          />
+        </div>
+        {!isLoading && (
+          <div className="col-md-8 col-lg-9 col-12 mt-2 mb-2 d-flex justify-content-md-end">
+            <div className="usage-total-card">
+              <h2 className="usage-total-value">
+                Total: {quotaFormattingFn(totalUsage)}{' '}
+              </h2>
+              <p className="usage-total-hint">
+                This total is an estimate. Actual cost may be higher.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
       {isLoading ? (
         <ClipLoader />
       ) : (
         <>
-          <h2 className="text-end">Total: {quotaFormattingFn(totalUsage)} </h2>
-          <p className="text-muted small text-end mb-2">
-            This total is an estimate. Actual cost may be higher.
-          </p>
           {truncateWarning !== '' && (
             <div className="alert alert-warning" role="alert">
               {truncateWarning}
@@ -459,11 +471,18 @@ const Quotas = () => {
                         (numCharts === 3 ? '4' : '12') +
                         ' col-lg-12 col-md-6 col-sm-' +
                         (12 / numCharts).toString() +
-                        ' col-12'
+                        ' col-12 mb-2'
                       }
                     >
-                      <h3>Users</h3>
-                      <Pie data={userChartData} />
+                      <div className="chart-card">
+                        <h3 className="chart-card-title">Users</h3>
+                        <div className="chart-card-canvas">
+                          <Pie
+                            data={userChartData}
+                            options={{ maintainAspectRatio: false }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   ) : null}
                   {numInstances > 1 ? (
@@ -473,11 +492,18 @@ const Quotas = () => {
                         (numCharts === 3 ? '4' : '12') +
                         ' col-lg-12 col-md-6 col-sm-' +
                         (12 / numCharts).toString() +
-                        ' col-12'
+                        ' col-12 mb-2'
                       }
                     >
-                      <h3>Instances</h3>
-                      <Pie data={instanceChartData} />
+                      <div className="chart-card">
+                        <h3 className="chart-card-title">Instances</h3>
+                        <div className="chart-card-canvas">
+                          <Pie
+                            data={instanceChartData}
+                            options={{ maintainAspectRatio: false }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   ) : null}
                   {numPools > 1 ? (
@@ -487,11 +513,18 @@ const Quotas = () => {
                         (numCharts === 3 ? '4' : '12') +
                         ' col-lg-12 col-md-6 col-sm-' +
                         (12 / numCharts).toString() +
-                        ' col-12'
+                        ' col-12 mb-2'
                       }
                     >
-                      <h3>Pools *</h3>
-                      <Pie data={poolLabelChartData} />
+                      <div className="chart-card">
+                        <h3 className="chart-card-title">Pools *</h3>
+                        <div className="chart-card-canvas">
+                          <Pie
+                            data={poolLabelChartData}
+                            options={{ maintainAspectRatio: false }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -506,7 +539,7 @@ const Quotas = () => {
                 ' col-md-12 col-12'
               }
             >
-              <h3>Jobs</h3>
+              <h5 className="usage-section-title">Jobs</h5>
               <div data-testid="tableJobs">
                 <Table
                   data={tableDataJobs}
@@ -516,7 +549,7 @@ const Quotas = () => {
                   idFieldName={'unique_id'}
                 />
               </div>
-              <h3>Idle Pool Times</h3>
+              <h5 className="usage-section-title mt-3">Idle Pool Times</h5>
               <div data-testid="tableIdlePool">
                 <Table
                   data={tableDataPools}
@@ -528,7 +561,11 @@ const Quotas = () => {
               </div>
             </div>
           </div>
-          {numPools > 1 ? <div>* includes Idle Times</div> : null}
+          {numPools > 1 ? (
+            <div className="text-body-secondary small">
+              * includes Idle Times
+            </div>
+          ) : null}
         </>
       )}
     </div>

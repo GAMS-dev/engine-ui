@@ -168,342 +168,348 @@ const JobReqInfoTable = (props) => {
 
   return (
     <>
-      <table className="table table-sm table-fixed">
-        <thead className="table-dark">
-          <tr>
-            <th colSpan="2" className="text-center">
-              Request
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Token</th>
-            <td>
-              <small>
-                {job.token}
-                {isHcJob && (
-                  <sup>
-                    <span className="badge rounded-pill bg-primary ms-1">
-                      HC
-                    </span>
-                  </sup>
-                )}
-              </small>
-            </td>
-          </tr>
-          <tr>
-            <th>Tag</th>
-            <td>
-              <input
-                type="text"
-                className="table-form-control"
-                id="jobTag"
-                value={tmpJobTag}
-                disabled={jobTagUpdating}
-                onBlur={() => {
-                  if (preventUpdateTagRef.current) {
-                    preventUpdateTagRef.current = false;
-                  } else {
-                    updateJobTag({ key: 'Enter' });
-                  }
-                }}
-                onChange={(e) => setTmpJobTag(e.target.value)}
-                onKeyDown={updateJobTag}
-              />
-            </td>
-          </tr>
-          <tr>
-            <th>Submitted by</th>
-            <td>
-              <UserLink user={job.user} />
-            </td>
-          </tr>
-          <tr>
-            <th>Submitted at</th>
-            <td>
-              <TimeDisplay time={job.submitted_at} />
-            </td>
-          </tr>
-          <tr>
-            <th>Namespace</th>
-            <td>{job.namespace}</td>
-          </tr>
-          <tr>
-            <th>
-              Access groups
-              <button
-                className="btn btn-sm ms-1"
-                onClick={() => setShowEditAccessGroupsDialog(true)}
-              >
-                <Edit3 size={18} />
-              </button>
-            </th>
-            <td>
-              {job.access_groups == null || job.access_groups.length === 0
-                ? '-'
-                : job.access_groups.map((group) => (
-                    <Link
-                      key={group}
-                      className="badge bg-secondary me-1"
-                      to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}
-                    >
-                      {group}
-                    </Link>
-                  ))}
-            </td>
-          </tr>
-          {job.priority != null && (
+      <div className="table-card">
+        <table className="table table-sm table-fixed">
+          <thead className="table-header-primary">
             <tr>
-              <th>Priority</th>
+              <th colSpan="2" className="text-center">
+                Request
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Token</th>
               <td>
-                {job.priority.charAt(0).toUpperCase() + job.priority.slice(1)}
+                <small>
+                  {job.token}
+                  {isHcJob && (
+                    <sup>
+                      <span className="badge rounded-pill bg-primary ms-1">
+                        HC
+                      </span>
+                    </sup>
+                  )}
+                </small>
               </td>
             </tr>
-          )}
-        </tbody>
-        <thead className="table-light">
-          <tr>
-            <th colSpan="2" className="text-center">
-              Model Information
-              {props.location && props.location.state}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Model</th>
-            <td>
-              {job.is_temporary_model ? (
-                <span>
-                  {job.model} &nbsp;
+            <tr>
+              <th>Tag</th>
+              <td>
+                <input
+                  type="text"
+                  className="table-form-control"
+                  id="jobTag"
+                  value={tmpJobTag}
+                  disabled={jobTagUpdating}
+                  onBlur={() => {
+                    if (preventUpdateTagRef.current) {
+                      preventUpdateTagRef.current = false;
+                    } else {
+                      updateJobTag({ key: 'Enter' });
+                    }
+                  }}
+                  onChange={(e) => setTmpJobTag(e.target.value)}
+                  onKeyDown={updateJobTag}
+                />
+              </td>
+            </tr>
+            <tr>
+              <th>Submitted by</th>
+              <td>
+                <UserLink user={job.user} />
+              </td>
+            </tr>
+            <tr>
+              <th>Submitted at</th>
+              <td>
+                <TimeDisplay time={job.submitted_at} />
+              </td>
+            </tr>
+            <tr>
+              <th>Namespace</th>
+              <td>{job.namespace}</td>
+            </tr>
+            <tr>
+              <th>
+                Access groups
+                <button
+                  className="btn btn-sm ms-1"
+                  onClick={() => setShowEditAccessGroupsDialog(true)}
+                >
+                  <Edit3 size={18} />
+                </button>
+              </th>
+              <td>
+                {job.access_groups == null || job.access_groups.length === 0
+                  ? '-'
+                  : job.access_groups.map((group) => (
+                      <Link
+                        key={group}
+                        className="badge bg-secondary me-1"
+                        to={`/groups/${encodeURIComponent(job.namespace)}/${encodeURIComponent(group)}`}
+                      >
+                        {group}
+                      </Link>
+                    ))}
+              </td>
+            </tr>
+            {job.priority != null && (
+              <tr>
+                <th>Priority</th>
+                <td>
+                  {job.priority.charAt(0).toUpperCase() + job.priority.slice(1)}
+                </td>
+              </tr>
+            )}
+          </tbody>
+          <thead className="table-header-secondary">
+            <tr>
+              <th colSpan="2" className="text-center">
+                Model Information
+                {props.location && props.location.state}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Model</th>
+              <td>
+                {job.is_temporary_model ? (
+                  <span>
+                    {job.model} &nbsp;
+                    <span
+                      className="badge bg-secondary"
+                      title="Temporary models are provided with the job, they cannot be downloaded"
+                    >
+                      Temporary
+                    </span>
+                  </span>
+                ) : job.model_consistent === true ? (
+                  <DownloadLink
+                    url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/models/${encodeURIComponent(job.model)}`}
+                    filename={`${job.model}.zip`}
+                    className="badge bg-secondary"
+                  >
+                    {job.model}
+                  </DownloadLink>
+                ) : (
                   <span
                     className="badge bg-secondary"
-                    title="Temporary models are provided with the job, they cannot be downloaded"
+                    title="The model used for this job no longer exists or was updated after submission"
                   >
-                    Temporary
+                    {job.model}
                   </span>
-                </span>
-              ) : job.model_consistent === true ? (
-                <DownloadLink
-                  url={`${server}/namespaces/${encodeURIComponent(job.namespace)}/models/${encodeURIComponent(job.model)}`}
-                  filename={`${job.model}.zip`}
-                  className="badge bg-secondary"
-                >
-                  {job.model}
-                </DownloadLink>
-              ) : (
-                <span
-                  className="badge bg-secondary"
-                  title="The model used for this job no longer exists or was updated after submission"
-                >
-                  {job.model}
-                </span>
-              )}
-            </td>
-          </tr>
-          <tr>
-            <th>Data Provided</th>
-            <td>{job.is_data_provided ? 'Yes' : 'No'}</td>
-          </tr>
-        </tbody>
-        <thead className="table-light">
-          <tr>
-            <th colSpan="2" className="text-center">
-              GAMS Call Related
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {!job.is_temporary_model && (
-            <tr>
-              <td colSpan="2">
-                <div
-                  className="alert alert-info"
-                  role="alert"
-                  style={{ fontSize: '10pt' }}
-                >
-                  The arguments provided with the model are not mentioned here.
-                  Therefore the list of arguments shown here may not be
-                  complete! See the GAMS log for a complete list of arguments.
-                </div>
+                )}
               </td>
             </tr>
-          )}
-          <tr>
-            <th>Arguments</th>
-            <td>
-              {job.arguments.map((c) => (
-                <span
-                  key={c}
-                  className="badge bg-secondary m-1 badge-clip"
-                  title={c}
-                >
-                  {c}
-                </span>
-              ))}
-              {job.arguments.length === 0 && '-'}
-            </td>
-          </tr>
-        </tbody>
-        <thead className="table-light">
-          <tr>
-            <th colSpan="2" className="text-center">
-              Result Related
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Standard output filename</th>
-            <td>{job.stdout_filename || '-'}</td>
-          </tr>
-          {!isHcJob && (
-            <>
+            <tr>
+              <th>Data Provided</th>
+              <td>{job.is_data_provided ? 'Yes' : 'No'}</td>
+            </tr>
+          </tbody>
+          <thead className="table-header-secondary">
+            <tr>
+              <th colSpan="2" className="text-center">
+                GAMS Call Related
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {!job.is_temporary_model && (
               <tr>
-                <th>Text Entries</th>
-                <td>
-                  {job.text_entries.length > 0
-                    ? job.text_entries.map((c) => (
+                <td colSpan="2">
+                  <div
+                    className="alert alert-info"
+                    role="alert"
+                    style={{ fontSize: '10pt' }}
+                  >
+                    The arguments provided with the model are not mentioned
+                    here. Therefore the list of arguments shown here may not be
+                    complete! See the GAMS log for a complete list of arguments.
+                  </div>
+                </td>
+              </tr>
+            )}
+            <tr>
+              <th>Arguments</th>
+              <td>
+                {job.arguments.map((c) => (
+                  <span
+                    key={c}
+                    className="badge bg-secondary m-1 badge-clip"
+                    title={c}
+                  >
+                    {c}
+                  </span>
+                ))}
+                {job.arguments.length === 0 && '-'}
+              </td>
+            </tr>
+          </tbody>
+          <thead className="table-header-secondary">
+            <tr>
+              <th colSpan="2" className="text-center">
+                Result Related
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Standard output filename</th>
+              <td>{job.stdout_filename || '-'}</td>
+            </tr>
+            {!isHcJob && (
+              <>
+                <tr>
+                  <th>Text Entries</th>
+                  <td>
+                    {job.text_entries.length > 0
+                      ? job.text_entries.map((c) => (
+                          <span
+                            key={c.entry_name}
+                            className="badge bg-secondary m-1"
+                          >
+                            {c.entry_name}
+                          </span>
+                        ))
+                      : '-'}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Stream Entries</th>
+                  <td>
+                    {job.stream_entries.length > 0
+                      ? job.stream_entries.map((c) => (
+                          <span key={c} className="badge bg-secondary m-1">
+                            {c}
+                          </span>
+                        ))
+                      : '-'}
+                  </td>
+                </tr>
+              </>
+            )}
+            {jobLabels && (
+              <tr>
+                <th>Resources</th>
+                <td style={{ minHeight: '20px' }}>
+                  {jobLabels.map((el) => {
+                    if (el[0] === 'cpu_request') {
+                      return (
                         <span
-                          key={c.entry_name}
+                          key="cpu_request"
                           className="badge bg-secondary m-1"
+                          title="CPU Request"
                         >
-                          {c.entry_name}
-                        </span>
-                      ))
-                    : '-'}
-                </td>
-              </tr>
-              <tr>
-                <th>Stream Entries</th>
-                <td>
-                  {job.stream_entries.length > 0
-                    ? job.stream_entries.map((c) => (
-                        <span key={c} className="badge bg-secondary m-1">
-                          {c}
-                        </span>
-                      ))
-                    : '-'}
-                </td>
-              </tr>
-            </>
-          )}
-          {jobLabels && (
-            <tr>
-              <th>Resources</th>
-              <td style={{ minHeight: '20px' }}>
-                {jobLabels.map((el) => {
-                  if (el[0] === 'cpu_request') {
-                    return (
-                      <span
-                        key="cpu_request"
-                        className="badge bg-secondary m-1"
-                        title="CPU Request"
-                      >
-                        {formatLabel(el)}
-                      </span>
-                    );
-                  } else if (el[0] === 'memory_request') {
-                    return (
-                      <span
-                        key="memory_request"
-                        className="badge bg-secondary m-1"
-                        title="Memory Request"
-                      >
-                        {formatLabel(el)}
-                      </span>
-                    );
-                  } else if (el[0] === 'workspace_request') {
-                    return (
-                      <span
-                        key="workspace_request"
-                        className="badge bg-secondary m-1"
-                        title="Workspace Request"
-                      >
-                        {formatLabel(el)}
-                      </span>
-                    );
-                  } else if (el[0] === 'resource_warning') {
-                    if (el[1] === 'none') {
-                      return <span key="resource_warning"></span>;
-                    } else {
-                      return (
-                        <span
-                          key="resource_warning"
-                          className="badge bg-danger m-1"
-                          title="Resource Warning"
-                        >
-                          {`Out of ${el[1].replaceAll('_', ' ')}`}
+                          {formatLabel(el)}
                         </span>
                       );
+                    } else if (el[0] === 'memory_request') {
+                      return (
+                        <span
+                          key="memory_request"
+                          className="badge bg-secondary m-1"
+                          title="Memory Request"
+                        >
+                          {formatLabel(el)}
+                        </span>
+                      );
+                    } else if (el[0] === 'workspace_request') {
+                      return (
+                        <span
+                          key="workspace_request"
+                          className="badge bg-secondary m-1"
+                          title="Workspace Request"
+                        >
+                          {formatLabel(el)}
+                        </span>
+                      );
+                    } else if (el[0] === 'resource_warning') {
+                      if (el[1] === 'none') {
+                        return <span key="resource_warning"></span>;
+                      } else {
+                        return (
+                          <span
+                            key="resource_warning"
+                            className="badge bg-danger m-1"
+                            title="Resource Warning"
+                          >
+                            {`Out of ${el[1].replaceAll('_', ' ')}`}
+                          </span>
+                        );
+                      }
+                    } else if (el[0] === 'instance') {
+                      return (
+                        <span
+                          key="instance"
+                          className="badge bg-info m-1 text-start lh-base"
+                          style={{ whiteSpace: 'normal' }}
+                          title={el[2]}
+                        >
+                          <div className="fw-bold">{el[1].label}</div>
+                          <div>{el[1].specs}</div>
+                        </span>
+                      );
+                    } else if (el[0] === 'multiplier') {
+                      return (
+                        <span
+                          key="multiplier"
+                          className="badge bg-secondary m-1"
+                          title="Multiplier"
+                        >
+                          {`${el[1]}${userSettings.multiplierUnit}`}
+                        </span>
+                      );
+                    } else if (Array.isArray(el[1])) {
+                      return el[1].map((arrayEl, arrayIdx) => {
+                        return (
+                          <span
+                            key={el[0] + arrayIdx}
+                            className={`badge bg-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
+                            title={
+                              el[0] === 'tolerations'
+                                ? 'Toleration'
+                                : 'Node Selector'
+                            }
+                          >
+                            {`${arrayEl.key}=${arrayEl.value}`}
+                          </span>
+                        );
+                      });
                     }
-                  } else if (el[0] === 'instance') {
                     return (
-                      <span
-                        key="instance"
-                        className="badge bg-info m-1 text-start lh-base"
-                        style={{ whiteSpace: 'normal' }}
-                        title={el[2]}
-                      >
-                        <div className="fw-bold">{el[1].label}</div>
-                        <div>{el[1].specs}</div>
+                      <span key={el[0]} className="badge bg-secondary m-1">
+                        {el[1]}
                       </span>
                     );
-                  } else if (el[0] === 'multiplier') {
-                    return (
+                  }) || '-'}
+                </td>
+              </tr>
+            )}
+            <tr>
+              <th>Job Dependencies</th>
+              <td>
+                {!job.dep_tokens || job.dep_tokens.length === 0
+                  ? '-'
+                  : job.dep_tokens.map((t) => (
                       <span
-                        key="multiplier"
+                        key={t}
+                        title={t}
                         className="badge bg-secondary m-1"
-                        title="Multiplier"
                       >
-                        {`${el[1]}${userSettings.multiplierUnit}`}
+                        <small>
+                          <Link to={'/jobs/' + t} style={{ color: '#fff' }}>
+                            {t.split('-')[0]}
+                          </Link>
+                        </small>
                       </span>
-                    );
-                  } else if (Array.isArray(el[1])) {
-                    return el[1].map((arrayEl, arrayIdx) => {
-                      return (
-                        <span
-                          key={el[0] + arrayIdx}
-                          className={`badge bg-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
-                          title={
-                            el[0] === 'tolerations'
-                              ? 'Toleration'
-                              : 'Node Selector'
-                          }
-                        >
-                          {`${arrayEl.key}=${arrayEl.value}`}
-                        </span>
-                      );
-                    });
-                  }
-                  return (
-                    <span key={el[0]} className="badge bg-secondary m-1">
-                      {el[1]}
-                    </span>
-                  );
-                }) || '-'}
+                    ))}
               </td>
             </tr>
-          )}
-          <tr>
-            <th>Job Dependencies</th>
-            <td>
-              {!job.dep_tokens || job.dep_tokens.length === 0
-                ? '-'
-                : job.dep_tokens.map((t) => (
-                    <span key={t} title={t} className="badge bg-secondary m-1">
-                      <small>
-                        <Link to={'/jobs/' + t} style={{ color: '#fff' }}>
-                          {t.split('-')[0]}
-                        </Link>
-                      </small>
-                    </span>
-                  ))}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
       <Modal
         show={showEditAccessGroupsDialog}
         onHide={handleCloseEditAccessGroupsDialog}

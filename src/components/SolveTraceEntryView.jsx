@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
-import { useSystemTheme } from '../util/theme';
+import { useChartTheme } from '../util/chartTheme';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -29,7 +29,7 @@ const SolveTraceEntryView = (props) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [refresh, setRefresh] = useState(0);
   const { token } = useParams();
-  const dualBoundColor = useSystemTheme() === 'dark' ? '#c9cdd3' : '#272932';
+  const dualBoundColor = useChartTheme() === 'dark' ? '#c9cdd3' : '#272932';
 
   useEffect(() => {
     const fetchStreamEntry = async () => {

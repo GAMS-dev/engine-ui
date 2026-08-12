@@ -360,25 +360,23 @@ const Usage = () => {
   return (
     <>
       <div>
-        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <div className="h2">
-            <div className="h6 m-1">
-              Remaining Quota:{' '}
-              {remainingQuota === -Infinity ? (
-                <ClipLoader size={12} />
-              ) : (
-                remainingQuota
-              )}
-            </div>
+        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-2 border-bottom">
+          <div className="fw-semibold">
+            Remaining Quota:{' '}
+            {remainingQuota === -Infinity ? (
+              <ClipLoader size={12} />
+            ) : (
+              remainingQuota
+            )}
           </div>
           <div className="d-flex gap-2">
             {isLoading ? (
-              <button className="btn btn-danger" onClick={handleCancel}>
+              <button className="btn btn-sm btn-danger" onClick={handleCancel}>
                 <i className="bi bi-x-circle me-1"></i> Cancel
               </button>
             ) : (
               <button
-                className="btn btn-secondary"
+                className="btn btn-sm btn-secondary"
                 onClick={() => {
                   setDataLoaded(false);
                   setData([]);
@@ -390,48 +388,52 @@ const Usage = () => {
             )}
           </div>
         </div>
-        <div className="row mb-4">
-          <DateTimePicker
-            type="range"
-            label="Pick Data Range"
-            maxDate={new Date()}
-            leftSection={<Calendar size={18} />}
-            leftSectionPointerEvents="none"
-            value={dateRange}
-            onChange={handleDateChange}
-            onDropdownClose={() => {
-              const newDateRange = [
-                dayjs(dateRange[0]).toDate(),
-                dayjs(dateRange[1]).toDate(),
-              ];
-              if (
-                newDateRange[0]?.getTime() !==
-                  selectedDateRange[0]?.getTime() ||
-                newDateRange[1]?.getTime() !== selectedDateRange[1]?.getTime()
-              ) {
-                setSelectedDateRange(newDateRange);
-              }
-            }}
-          />
-        </div>
-        {userToEditRoles?.some((role) =>
-          ['admin', 'inviter'].includes(role),
-        ) && (
-          <div className="col-sm-6 mb-4">
-            <label>
-              Show Invitees?
+        <div className="d-flex flex-wrap align-items-end gap-3 mb-2">
+          <div style={{ minWidth: '280px' }}>
+            <DateTimePicker
+              type="range"
+              label="Pick Data Range"
+              size="sm"
+              maxDate={new Date()}
+              leftSection={<Calendar size={16} />}
+              leftSectionPointerEvents="none"
+              value={dateRange}
+              onChange={handleDateChange}
+              onDropdownClose={() => {
+                const newDateRange = [
+                  dayjs(dateRange[0]).toDate(),
+                  dayjs(dateRange[1]).toDate(),
+                ];
+                if (
+                  newDateRange[0]?.getTime() !==
+                    selectedDateRange[0]?.getTime() ||
+                  newDateRange[1]?.getTime() !== selectedDateRange[1]?.getTime()
+                ) {
+                  setSelectedDateRange(newDateRange);
+                }
+              }}
+            />
+          </div>
+          {userToEditRoles?.some((role) =>
+            ['admin', 'inviter'].includes(role),
+          ) && (
+            <div className="form-check mb-2">
               <input
                 name="showinvitees"
                 type="checkbox"
-                className="ms-2"
+                className="form-check-input"
+                id="showinvitees"
                 checked={recursive}
                 onChange={(e) => {
                   setRecursive(e.target.checked);
                 }}
               />
-            </label>
-          </div>
-        )}
+              <label className="form-check-label" htmlFor="showinvitees">
+                Show Invitees?
+              </label>
+            </div>
+          )}
+        </div>
         {!isLoading && !dataLoaded && requiresConfirmation && (
           <div className="w-100 px-4 py-3">
             <Alert

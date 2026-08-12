@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
-import { Bell, FileText, Download, Trash2 } from 'lucide-react';
+import { Bell, FileText, Download, Trash2, Info } from 'lucide-react';
 import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import DownloadLink from './DownloadLink';
 import StreamEntryView from './StreamEntryView';
@@ -73,253 +73,269 @@ const JobRespInfoTable = (props) => {
 
   return (
     <>
-      <table className="table table-sm table-fixed">
-        <thead className="table-dark">
-          <tr>
-            <th colSpan="2" className="text-center">
-              Result
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Status</th>
-            <td>
-              <span>
-                {jobStatus in statusCodes ? statusCodes[jobStatus] : jobStatus}
-              </span>
-              <small>
-                {jobStatus === 0 &&
-                queuePosition != null &&
-                queuePosition !== -1
-                  ? ` (queue position: ${queuePosition})`
-                  : ''}
-              </small>
-            </td>
-          </tr>
-          <tr>
-            <th>
-              Timing
-              <span className="ms-1">
-                <OverlayTrigger
-                  placement="bottom"
-                  overlay={
-                    <Tooltip id="tooltip">
-                      Receive push notifications when job finishes
-                    </Tooltip>
-                  }
-                >
-                  <Link to="/settings/notifications" className="btn btn-sm">
-                    <Bell size={18} />
-                  </Link>
-                </OverlayTrigger>
-              </span>
-            </th>
-            <td>
-              {job.user.deleted ? (
-                <span className="badge bg-danger">
-                  Timing information not available.
+      <div className="table-card">
+        <table className="table table-sm table-fixed">
+          <thead className="table-header-primary">
+            <tr>
+              <th colSpan="2" className="text-center">
+                Result
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Status</th>
+              <td>
+                <span>
+                  {jobStatus in statusCodes
+                    ? statusCodes[jobStatus]
+                    : jobStatus}
                 </span>
-              ) : (
-                <JobTimingInfoBar
-                  token={job.token}
-                  isHcJob={isHcJob}
-                  jobOwner={job.user.username}
-                  setRefreshJob={setRefreshJob}
-                  setJobStatus={setJobStatus}
-                  setQueuePosition={setQueuePosition}
-                />
-              )}
-            </td>
-          </tr>
-          {isHcJob ? (
-            <>
-              <tr>
-                <th>Progress</th>
-                <td>{`${job.finished}/${job.job_count} (${job.successfully_finished} successful)`}</td>
-              </tr>
-              {isActiveJob(jobStatus) && (
-                <tr>
-                  <th>Terminate Job</th>
-                  <td>
-                    <TerminateJobButton
-                      token={isHcJob ? `hc:${job.token}` : job.token}
-                      setRefresh={setRefreshJob}
-                      server={server}
-                      status={jobStatus}
-                    />
-                  </td>
-                </tr>
-              )}
-            </>
-          ) : (
-            <>
-              <tr>
-                <th>Process Status</th>
-                <td>
-                  {job.process_status != null ? (
-                    <span
-                      className={`badge ${job.process_status === 0 ? 'text-dark' : 'bg-danger'}`}
+                <small>
+                  {jobStatus === 0 &&
+                  queuePosition != null &&
+                  queuePosition !== -1
+                    ? ` (queue position: ${queuePosition})`
+                    : ''}
+                </small>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Timing
+                <span className="ms-1 align-middle d-inline-block">
+                  <OverlayTrigger
+                    placement="bottom"
+                    overlay={
+                      <Tooltip id="tooltip">
+                        Receive push notifications when job finishes
+                      </Tooltip>
+                    }
+                  >
+                    <Link
+                      to="/settings/notifications"
+                      className="btn btn-sm p-1 lh-1"
                     >
-                      {GAMSRcMap[job.process_status] != null
-                        ? `${GAMSRcMap[job.process_status]} (${job.process_status})`
-                        : job.process_status}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-              </tr>
-              {jobStatus >= 10 && (
+                      <Bell size={18} />
+                    </Link>
+                  </OverlayTrigger>
+                </span>
+              </th>
+              <td>
+                {job.user.deleted ? (
+                  <span className="d-inline-flex align-items-center gap-1 text-body-secondary">
+                    <Info size={14} />
+                    Timing information not available.
+                  </span>
+                ) : (
+                  <JobTimingInfoBar
+                    token={job.token}
+                    isHcJob={isHcJob}
+                    jobOwner={job.user.username}
+                    setRefreshJob={setRefreshJob}
+                    setJobStatus={setJobStatus}
+                    setQueuePosition={setQueuePosition}
+                  />
+                )}
+              </td>
+            </tr>
+            {isHcJob ? (
+              <>
                 <tr>
-                  <th>Text Entries</th>
-                  <td>
-                    {job.text_entries && job.text_entries.length > 0 ? (
-                      <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
-                        <select
-                          className="form-control form-control-sm form-select"
-                          name="text-entry"
-                          id="text-entry"
-                          value={textEntry}
-                          onChange={(e) => setTextEntry(e.target.value)}
-                        >
-                          {job.text_entries.map((e) => (
-                            <option key={e.entry_name} value={e.entry_name}>
-                              {e.entry_name}
-                            </option>
-                          ))}
-                        </select>
-                        &nbsp;
-                        {textEntry && (
-                          <DownloadLink
-                            url={`${server}/jobs/${encodeURIComponent(job.token)}/text-entry?entry_name=${encodeURIComponent(textEntry)}`}
-                            filename={textEntry}
-                            jsonSubkey="entry_value"
-                          >
-                            <FileText size={18} />
-                          </DownloadLink>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="badge bg-danger">
-                        {job.result_exists
-                          ? 'No text entries.'
-                          : 'Job results were deleted.'}
-                      </span>
-                    )}
-                  </td>
+                  <th>Progress</th>
+                  <td>{`${job.finished}/${job.job_count} (${job.successfully_finished} successful)`}</td>
                 </tr>
-              )}
-              {isActiveJob(jobStatus) && jobStatus !== 0 && (
-                <>
-                  <tr>
-                    <th>Stream Entries</th>
-                    <td>
-                      <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
-                        <select
-                          className="form-control form-control-sm form-select"
-                          name="stream-entry"
-                          id="stream-entry"
-                          value={streamEntry}
-                          onChange={(e) => setStreamEntry(e.target.value)}
-                        >
-                          {job.stream_entries
-                            .concat(job.stdout_filename)
-                            .map((e) => (
-                              <option key={e} value={e}>
-                                {e}
-                              </option>
-                            ))}
-                        </select>
-                        &nbsp;
-                        <StreamEntryView
-                          server={server}
-                          streamEntry={streamEntry}
-                          setRefreshJob={setRefreshJob}
-                          isStdOut={streamEntry === job.stdout_filename}
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                {isActiveJob(jobStatus) && (
                   <tr>
                     <th>Terminate Job</th>
                     <td>
                       <TerminateJobButton
-                        token={job.token}
+                        token={isHcJob ? `hc:${job.token}` : job.token}
                         setRefresh={setRefreshJob}
                         server={server}
                         status={jobStatus}
                       />
                     </td>
                   </tr>
-                </>
-              )}
-              {jobStatus > 0 && solveTraceEntries.length > 0 && (
+                )}
+              </>
+            ) : (
+              <>
                 <tr>
-                  <th>Solve Trace</th>
+                  <th>Process Status</th>
                   <td>
-                    <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
-                      <select
-                        className="form-control form-control-sm form-select"
-                        name="solve-trace"
-                        id="solve-trace"
-                        value={solveTraceEntry}
-                        onChange={(e) => setSolveTraceEntry(e.target.value)}
-                      >
-                        {solveTraceEntries.map((e) => (
-                          <option key={e} value={e}>
-                            {e}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <SolveTraceEntryView
-                      server={server}
-                      solveTraceEntry={solveTraceEntry}
-                      setRefreshJob={setRefreshJob}
-                      jobFinished={jobStatus >= 10}
-                    />
+                    {job.process_status != null ? (
+                      job.process_status === 0 ? (
+                        <span>
+                          {GAMSRcMap[job.process_status] != null
+                            ? `${GAMSRcMap[job.process_status]} (${job.process_status})`
+                            : job.process_status}
+                        </span>
+                      ) : (
+                        <span className="badge bg-danger">
+                          {GAMSRcMap[job.process_status] != null
+                            ? `${GAMSRcMap[job.process_status]} (${job.process_status})`
+                            : job.process_status}
+                        </span>
+                      )
+                    ) : (
+                      '-'
+                    )}
                   </td>
                 </tr>
-              )}
-            </>
-          )}
-          {(jobStatus >= 10 || (isHcJob && jobStatus === -3)) && (
-            <tr>
-              <th>Result ZIP</th>
-              <td>
-                {job.result_exists ? (
-                  <div className="d-flex flex-wrap gap-2">
-                    <DownloadLink
-                      url={
-                        isHcJob
-                          ? `${server}/hypercube/${encodeURIComponent(job.token)}/result`
-                          : `${server}/jobs/${encodeURIComponent(job.token)}/result`
-                      }
-                      filename="results.zip"
-                      className="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1"
-                    >
-                      <Download size={14} />
-                      Download
-                    </DownloadLink>
-                    <button
-                      className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
-                      onClick={() => setShowRemoveConfirmDialog(true)}
-                    >
-                      <Trash2 size={14} />
-                      Delete Results
-                    </button>
-                  </div>
-                ) : (
-                  <span className="badge bg-danger">
-                    Job results were deleted.
-                  </span>
+                {jobStatus >= 10 && (
+                  <tr>
+                    <th>Text Entries</th>
+                    <td>
+                      {job.text_entries && job.text_entries.length > 0 ? (
+                        <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
+                          <select
+                            className="form-control form-control-sm form-select"
+                            name="text-entry"
+                            id="text-entry"
+                            value={textEntry}
+                            onChange={(e) => setTextEntry(e.target.value)}
+                          >
+                            {job.text_entries.map((e) => (
+                              <option key={e.entry_name} value={e.entry_name}>
+                                {e.entry_name}
+                              </option>
+                            ))}
+                          </select>
+                          &nbsp;
+                          {textEntry && (
+                            <DownloadLink
+                              url={`${server}/jobs/${encodeURIComponent(job.token)}/text-entry?entry_name=${encodeURIComponent(textEntry)}`}
+                              filename={textEntry}
+                              jsonSubkey="entry_value"
+                            >
+                              <FileText size={18} />
+                            </DownloadLink>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="d-inline-flex align-items-center gap-1 text-body-secondary">
+                          <Info size={14} />
+                          {job.result_exists
+                            ? 'No text entries.'
+                            : 'Job results were deleted.'}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
                 )}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                {isActiveJob(jobStatus) && jobStatus !== 0 && (
+                  <>
+                    <tr>
+                      <th>Stream Entries</th>
+                      <td>
+                        <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
+                          <select
+                            className="form-control form-control-sm form-select"
+                            name="stream-entry"
+                            id="stream-entry"
+                            value={streamEntry}
+                            onChange={(e) => setStreamEntry(e.target.value)}
+                          >
+                            {job.stream_entries
+                              .concat(job.stdout_filename)
+                              .map((e) => (
+                                <option key={e} value={e}>
+                                  {e}
+                                </option>
+                              ))}
+                          </select>
+                          &nbsp;
+                          <StreamEntryView
+                            server={server}
+                            streamEntry={streamEntry}
+                            setRefreshJob={setRefreshJob}
+                            isStdOut={streamEntry === job.stdout_filename}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Terminate Job</th>
+                      <td>
+                        <TerminateJobButton
+                          token={job.token}
+                          setRefresh={setRefreshJob}
+                          server={server}
+                          status={jobStatus}
+                        />
+                      </td>
+                    </tr>
+                  </>
+                )}
+                {jobStatus > 0 && solveTraceEntries.length > 0 && (
+                  <tr>
+                    <th>Solve Trace</th>
+                    <td>
+                      <div className="mb-3 d-flex flex-row align-items-center flex-wrap">
+                        <select
+                          className="form-control form-control-sm form-select"
+                          name="solve-trace"
+                          id="solve-trace"
+                          value={solveTraceEntry}
+                          onChange={(e) => setSolveTraceEntry(e.target.value)}
+                        >
+                          {solveTraceEntries.map((e) => (
+                            <option key={e} value={e}>
+                              {e}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <SolveTraceEntryView
+                        server={server}
+                        solveTraceEntry={solveTraceEntry}
+                        setRefreshJob={setRefreshJob}
+                        jobFinished={jobStatus >= 10}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </>
+            )}
+            {(jobStatus >= 10 || (isHcJob && jobStatus === -3)) && (
+              <tr>
+                <th>Result ZIP</th>
+                <td>
+                  {job.result_exists ? (
+                    <div className="d-flex flex-wrap gap-2">
+                      <DownloadLink
+                        url={
+                          isHcJob
+                            ? `${server}/hypercube/${encodeURIComponent(job.token)}/result`
+                            : `${server}/jobs/${encodeURIComponent(job.token)}/result`
+                        }
+                        filename="results.zip"
+                        className="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1"
+                      >
+                        <Download size={14} />
+                        Download
+                      </DownloadLink>
+                      <button
+                        className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                        onClick={() => setShowRemoveConfirmDialog(true)}
+                      >
+                        <Trash2 size={14} />
+                        Delete Results
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="d-inline-flex align-items-center gap-1 text-body-secondary">
+                      <Info size={14} />
+                      Job results were deleted.
+                    </span>
+                  )}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       <Modal
         show={showRemoveConfirmDialog}
         onHide={() => setShowRemoveConfirmDialog(false)}

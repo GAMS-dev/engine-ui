@@ -16,7 +16,7 @@ import { useOutletContext } from 'react-router';
 import Select from './ThemedSelect';
 import { ClipLoader } from 'react-spinners';
 import { mergeSortedArrays } from '../util/util';
-import { useSystemTheme } from '../util/theme';
+import { useChartTheme } from '../util/chartTheme';
 import { JobTokenLink } from './JobTokenLink';
 import Table from './Table';
 import TimeDiffDisplay from './TimeDiffDisplay';
@@ -36,7 +36,7 @@ ChartJS.register(
 
 const UsageTimeline = () => {
   const { data, startDate, endDate } = useOutletContext();
-  const isDarkTheme = useSystemTheme() === 'dark';
+  const isDarkTheme = useChartTheme() === 'dark';
   const totalLineColor = isDarkTheme ? '#e8e9eb' : '#000000';
   const overflowSeriesColor = isDarkTheme
     ? 'rgba(255,255,255,0.2)'
@@ -460,23 +460,26 @@ const UsageTimeline = () => {
   }, [data, selectedWeightingOption, totalLineColor, overflowSeriesColor]);
 
   return (
-    <div className="mt-3">
+    <div className="mt-2">
       <div className="row">
-        <div className="col-sm-6 mb-4">
-          <label>
-            Show disaggregated data?
+        <div className="col-sm-6 mb-2 d-flex align-items-center">
+          <div className="form-check">
             <input
               name="showAggregated"
               type="checkbox"
-              className="ms-2"
+              className="form-check-input"
+              id="showAggregated"
               checked={!aggregated}
               onChange={(e) => {
                 setAggregated(!e.target.checked);
               }}
             />
-          </label>
+            <label className="form-check-label" htmlFor="showAggregated">
+              Show disaggregated data?
+            </label>
+          </div>
         </div>
-        <div className="col-sm-6 mb-4">
+        <div className="col-sm-6 mb-2">
           <Select
             id="weighting_option"
             isClearable={false}

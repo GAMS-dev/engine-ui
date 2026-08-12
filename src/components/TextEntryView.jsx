@@ -80,7 +80,7 @@ const TextEntryView = ({ textEntries, server }) => {
     <form action="">
       <div className="mb-3">
         <table className="table table-sm">
-          <thead className="table-dark">
+          <thead className="table-header-primary">
             <tr>
               <th className="text-center">Text Entries</th>
             </tr>

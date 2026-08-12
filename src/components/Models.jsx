@@ -1,5 +1,13 @@
 import { useEffect, useContext, useState, useRef } from 'react';
-import { Send, Folder, RefreshCw, Trash2, Save, Users } from 'lucide-react';
+import {
+  Send,
+  Folder,
+  RefreshCw,
+  Trash2,
+  Save,
+  Users,
+  Search,
+} from 'lucide-react';
 import { Link, useNavigate, useLocation, useParams } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
@@ -40,6 +48,7 @@ const Models = () => {
   const [users, setUsers] = useState([]);
   const [namespace, setNamespace] = useState({ name: '', permission: 0 });
   const [availableNamespaces, setAvailableNamespaces] = useState([]);
+  const [nsFilter, setNsFilter] = useState('');
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showNsModal, setShowNsModal] = useState(false);
   const [showRemoveNsModal, setShowRemoveNsModal] = useState(false);
@@ -216,6 +225,9 @@ const Models = () => {
       refresh: refreshCnt + 1,
     }));
   };
+  const filteredNamespaces = availableNamespaces.filter((ns) =>
+    ns.name.toLowerCase().includes(nsFilter.trim().toLowerCase()),
+  );
   return (
     <>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -286,41 +298,63 @@ const Models = () => {
               </div>
             </div>
           </div>
-          <div className="namespace-list col-md-4 col-12 order-1 order-md-2 mt-1">
-            <ul
-              className="list-group"
-              id="list-tab"
-              role="tablist"
-              onClick={updateNamespace}
-            >
-              {availableNamespaces.length
-                ? availableNamespaces.map((ns) => (
-                    <li
-                      key={ns.name}
-                      data-ns={ns.name}
-                      data-permission={ns.permission}
-                      className={`list-group-item list-group-item-action${ns.name === namespace.name ? ' active' : ''}`}
-                    >
-                      {ns.name}
-                      {ns.name === namespace.name &&
-                        roles.find((role) => role === 'admin') !==
-                          undefined && (
-                          <span className="float-end">
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-danger"
-                              onClick={() => {
-                                setShowRemoveNsModal(true);
-                              }}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </span>
-                        )}
+          <div className="col-md-4 col-12 order-1 order-md-2 mt-1">
+            <div className="namespace-panel">
+              {availableNamespaces.length > 5 && (
+                <div className="namespace-search">
+                  <Search size={14} className="namespace-search-icon" />
+                  <input
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Filter namespaces..."
+                    value={nsFilter}
+                    onChange={(e) => setNsFilter(e.target.value)}
+                  />
+                </div>
+              )}
+              <ul
+                className="list-group namespace-list"
+                id="list-tab"
+                role="tablist"
+                onClick={updateNamespace}
+              >
+                {availableNamespaces.length ? (
+                  filteredNamespaces.length ? (
+                    filteredNamespaces.map((ns) => (
+                      <li
+                        key={ns.name}
+                        data-ns={ns.name}
+                        data-permission={ns.permission}
+                        className={`list-group-item list-group-item-action${ns.name === namespace.name ? ' active' : ''}`}
+                      >
+                        {ns.name}
+                        {ns.name === namespace.name &&
+                          roles.find((role) => role === 'admin') !==
+                            undefined && (
+                            <span className="float-end">
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-danger"
+                                onClick={() => {
+                                  setShowRemoveNsModal(true);
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </span>
+                          )}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="list-group-item text-body-secondary text-center">
+                      No namespaces match &quot;{nsFilter}&quot;
                     </li>
-                  ))
-                : 'No Namespace Found'}
-            </ul>
+                  )
+                ) : (
+                  'No Namespace Found'
+                )}
+              </ul>
+            </div>
           </div>
           <div className="col-md-8 col-12 order-4 mt-1">
             {availableNamespaces.length ? (

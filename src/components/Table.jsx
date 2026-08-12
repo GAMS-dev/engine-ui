@@ -229,59 +229,65 @@ const Table = (props) => {
   };
   return (
     <>
-      <table className="table summary-table table-striped">
-        <thead className="table-dark">
-          <tr>
-            {displayFields.map((e) => {
-              const colKey = e.field.split(',')[0];
-              return (
-                <th
-                  scope="col"
-                  key={e.field}
-                  data-field={e.field}
-                  data-sorter={e.sorter}
-                  style={e.sorter == null ? {} : { cursor: 'pointer' }}
-                  onClick={e.sorter == null ? undefined : sortCol}
-                >
-                  {e.column}
-                  {colKey === sortedCol &&
-                    (sortAsc ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}
-                  {onChange == null &&
-                    e.sorter != null &&
-                    ['alphabetical'].includes(e.sorter) && (
-                      <OverlayFilter
-                        width="12px"
-                        filterKey={colKey}
-                        resetFilter={refreshCount}
-                        onChange={filterCol}
-                      />
-                    )}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {noRows && isLoading === false ? (
-            onChange == null ? (
-              data
-                .slice(
-                  currentPage * rowsPerPage,
-                  currentPage * rowsPerPage + rowsPerPage,
-                )
-                .map(createRow)
-            ) : (
-              data.map(createRow)
-            )
-          ) : (
+      <div className="table-card">
+        <table className="table summary-table table-striped table-hover">
+          <thead className="table-header-primary">
             <tr>
-              <td colSpan={displayFields.length}>
-                {isLoading === true ? <ClipLoader /> : noDataMsg}
-              </td>
+              {displayFields.map((e) => {
+                const colKey = e.field.split(',')[0];
+                return (
+                  <th
+                    scope="col"
+                    key={e.field}
+                    data-field={e.field}
+                    data-sorter={e.sorter}
+                    style={e.sorter == null ? {} : { cursor: 'pointer' }}
+                    onClick={e.sorter == null ? undefined : sortCol}
+                  >
+                    {e.column}
+                    {colKey === sortedCol &&
+                      (sortAsc ? (
+                        <ArrowUp size={12} />
+                      ) : (
+                        <ArrowDown size={12} />
+                      ))}
+                    {onChange == null &&
+                      e.sorter != null &&
+                      ['alphabetical'].includes(e.sorter) && (
+                        <OverlayFilter
+                          width="12px"
+                          filterKey={colKey}
+                          resetFilter={refreshCount}
+                          onChange={filterCol}
+                        />
+                      )}
+                  </th>
+                );
+              })}
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {noRows && isLoading === false ? (
+              onChange == null ? (
+                data
+                  .slice(
+                    currentPage * rowsPerPage,
+                    currentPage * rowsPerPage + rowsPerPage,
+                  )
+                  .map(createRow)
+              ) : (
+                data.map(createRow)
+              )
+            ) : (
+              <tr>
+                <td colSpan={displayFields.length}>
+                  {isLoading === true ? <ClipLoader /> : noDataMsg}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       {noRows > 0 && (
         <>
           <small>

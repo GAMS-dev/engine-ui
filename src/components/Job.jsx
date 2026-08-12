@@ -171,6 +171,9 @@ const Job = () => {
     fetchJobInfo();
   }, [server, setAlertMsg]);
 
+  const hasTextEntriesPanel =
+    !isHcJob && job?.text_entries?.length > 0 && job?.status >= 10;
+
   return (
     <>
       {isLoading ? (
@@ -184,7 +187,9 @@ const Job = () => {
       ) : (
         <div className="mt-4">
           <div className="row">
-            <div className={`col-md-6 ${isHcJob ? '' : 'col-xl-4'}`}>
+            <div
+              className={`col-md-6 ${hasTextEntriesPanel ? 'col-xl-4' : ''}`}
+            >
               <JobReqInfoTable
                 job={job}
                 isHcJob={isHcJob}
@@ -192,7 +197,9 @@ const Job = () => {
                 setRefreshJob={setRefresh}
               />
             </div>
-            <div className={`col-md-6 ${isHcJob ? '' : 'col-xl-4'}`}>
+            <div
+              className={`col-md-6 ${hasTextEntriesPanel ? 'col-xl-4' : ''}`}
+            >
               <JobRespInfoTable
                 job={job}
                 statusCodes={statusCodes}
@@ -201,22 +208,16 @@ const Job = () => {
                 server={server}
               />
             </div>
-            {job.text_entries &&
-              job.text_entries.length > 0 &&
-              job.status >= 10 && (
-                <div className="col-md-12 col-xl-4">
-                  <TextEntryView
-                    textEntries={
-                      job.text_entries && job.text_entries.length > 0
-                        ? job.text_entries.sort((a, b) =>
-                            a.entry_name.localeCompare(b.entry_name),
-                          )
-                        : null
-                    }
-                    server={server}
-                  />
-                </div>
-              )}
+            {hasTextEntriesPanel && (
+              <div className="col-md-12 col-xl-4">
+                <TextEntryView
+                  textEntries={job.text_entries.sort((a, b) =>
+                    a.entry_name.localeCompare(b.entry_name),
+                  )}
+                  server={server}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
