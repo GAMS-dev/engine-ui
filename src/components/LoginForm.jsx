@@ -867,24 +867,29 @@ const LoginForm = ({ showRegistrationForm }) => {
                       >
                         {register ? 'Register' : 'Login'}
                       </SubmitButton>
-                      {register ? (
-                        <></>
-                      ) : (
-                        OAuthConfig.map((config, idx) => {
-                          return (
+                    </div>
+                    {!register && OAuthConfig.length > 0 && (
+                      <>
+                        <div className="d-flex align-items-center my-3">
+                          <hr className="flex-grow-1" />
+                          <span className="mx-2 text-muted small">or</span>
+                          <hr className="flex-grow-1" />
+                        </div>
+                        <div className="d-grid gap-2">
+                          {OAuthConfig.map((config, idx) => (
                             <button
                               key={`oauth_button_${idx}`}
                               type="button"
                               disabled={isSubmitting}
-                              className="btn btn-sm btn-secondary"
+                              className="btn btn-lg btn-outline-secondary"
                               onClick={() => setOAuthLoginConfig(config)}
                             >
                               {config.label}
                             </button>
-                          );
-                        })
-                      )}
-                    </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                     <div className="mt-2">
                       <small>
                         <Link
