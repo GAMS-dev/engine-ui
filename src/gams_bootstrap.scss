@@ -148,6 +148,13 @@ body {
 
 .table-link {
   color: #000;
+  text-decoration: underline;
+  /* Add this line */
+}
+
+/* Optional: Make the underline disappear when hovered for a nice effect */
+.table-link:hover {
+  text-decoration: none;
 }
 
 .sidebar .dropdown-item {
