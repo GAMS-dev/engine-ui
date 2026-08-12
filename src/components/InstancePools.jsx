@@ -1,7 +1,7 @@
 import { useEffect, useContext, useState } from 'react';
 import { Link } from 'react-router';
 import { Button, Modal } from 'react-bootstrap';
-import { Layers, RefreshCw } from 'react-feather';
+import { Layers, RefreshCw } from 'lucide-react';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import Table from './Table';
@@ -89,14 +89,12 @@ const InstancePools = () => {
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
             {instancePoolsEnabled ? (
-              <Link to="/pools/new">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-primary h-100"
-                >
-                  New Instance Pool
-                  <Layers width="12px" className="ms-2" />
-                </button>
+              <Link
+                to="/pools/new"
+                className="btn btn-sm btn-outline-primary h-100"
+              >
+                New Instance Pool
+                <Layers size={12} className="ms-2" />
               </Link>
             ) : (
               <></>
@@ -131,7 +129,7 @@ const InstancePools = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

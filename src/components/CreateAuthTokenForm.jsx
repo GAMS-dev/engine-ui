@@ -6,7 +6,7 @@ import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
 import { Button, Form, Alert, InputGroup } from 'react-bootstrap';
 import { DateTimePicker } from '@mantine/dates';
-import { Calendar } from 'react-feather';
+import { Calendar } from 'lucide-react';
 import dayjs from 'dayjs';
 
 const CreateAuthTokenForm = () => {

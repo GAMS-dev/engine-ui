@@ -9,7 +9,7 @@ import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import SubmitButton from './SubmitButton';
 import { formatInstanceSpecs, getResponseError } from '../util/util';
 import axios from 'axios';
-import { Edit3 } from 'react-feather';
+import { Edit3 } from 'lucide-react';
 import { UserLink } from './UserLink';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 

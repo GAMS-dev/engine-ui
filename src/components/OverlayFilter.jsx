@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { OverlayTrigger, Tooltip, FormControl } from 'react-bootstrap';
-import { Filter } from 'react-feather';
+import { Filter } from 'lucide-react';
 
 const OverlayFilter = (props) => {
   const { width, filterKey, onChange, resetFilter } = props;

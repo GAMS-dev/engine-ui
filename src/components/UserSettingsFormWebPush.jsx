@@ -14,7 +14,7 @@ import ParameterizedWebhookEventsSelector from './ParameterizedWebhookEventsSele
 import SubmitButton from './SubmitButton';
 import AlertContext from '../contexts/AlertContext';
 import { isMobileDevice } from '../util/util';
-import { Share } from 'react-feather';
+import { Share } from 'lucide-react';
 import ServerConfigContext from '../contexts/ServerConfigContext';
 import { useOutletContext } from 'react-router';
 

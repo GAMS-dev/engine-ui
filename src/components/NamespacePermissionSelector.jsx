@@ -7,7 +7,7 @@ import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import { getResponseError } from '../util/util';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Info } from 'react-feather';
+import { Info } from 'lucide-react';
 
 function generateDesc(name, perm, groups) {
   return `${name}${

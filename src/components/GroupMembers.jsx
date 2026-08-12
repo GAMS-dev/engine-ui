@@ -1,6 +1,6 @@
 import { useEffect, useContext, useState } from 'react';
 import Select from 'react-select';
-import { RefreshCw, Users } from 'react-feather';
+import { RefreshCw, Users } from 'lucide-react';
 import { Modal, Button } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
@@ -173,7 +173,7 @@ const GroupMembers = () => {
                 onClick={() => setShowAddMemberDialog(true)}
               >
                 Add Member
-                <Users width="12px" className="ms-2" />
+                <Users size={12} className="ms-2" />
               </button>
             )}
             <button
@@ -184,7 +184,7 @@ const GroupMembers = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

@@ -5,7 +5,7 @@ import AlertContext from '../contexts/AlertContext';
 import SubmitButton from './SubmitButton';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
-import { Clipboard } from 'react-feather';
+import { Clipboard } from 'lucide-react';
 
 const LicUpdateButton = (props) => {
   const { type, setLicenseExpiration } = props;

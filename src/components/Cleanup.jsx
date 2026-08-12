@@ -2,7 +2,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import { RefreshCw, Send } from 'react-feather';
+import { RefreshCw, Send } from 'lucide-react';
 import { ClipLoader } from 'react-spinners';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
@@ -268,7 +268,7 @@ const Cleanup = () => {
               onClick={() => setShowHousekeepingDialog(true)}
             >
               Run Housekeeping
-              <Send width="12px" className="ms-2" />
+              <Send size={12} className="ms-2" />
             </button>
             <button
               type="button"
@@ -278,7 +278,7 @@ const Cleanup = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

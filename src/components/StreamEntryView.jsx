@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useReducer } from 'react';
 import { useParams } from 'react-router';
 import axios from 'axios';
-import { Activity } from 'react-feather';
+import { Activity } from 'lucide-react';
 import { getResponseError } from '../util/util';
 import { Modal, Button } from 'react-bootstrap';
 

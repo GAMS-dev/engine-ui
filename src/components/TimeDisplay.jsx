@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ToggleLeft, ToggleRight } from 'react-feather';
+import { ToggleLeft, ToggleRight } from 'lucide-react';
 
 import moment from 'moment';
 

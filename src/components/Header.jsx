@@ -33,7 +33,7 @@ const Header = (props) => {
 
   return (
     <>
-      <header className="navbar navbar-expand-lg navbar-dark bg-secondary border-bottom border-primary fixed-top shadow">
+      <header className="navbar navbar-expand-lg navbar-dark bg-secondary border-bottom border-primary fixed-top shadow d-none d-md-flex">
         {isAdmin && expiresIn !== 0 && (
           <div
             className={`info-header ${expiresIn < 31 && !(licenseValid && expiresIn === null) ? 'text-error fw-bold' : 'text-light'}`}

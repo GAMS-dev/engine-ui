@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
-import { Bell, FileText } from 'react-feather';
+import { Bell, FileText, Download, Trash2 } from 'lucide-react';
 import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import DownloadLink from './DownloadLink';
 import StreamEntryView from './StreamEntryView';
@@ -289,7 +289,7 @@ const JobRespInfoTable = (props) => {
               <th>Result ZIP</th>
               <td>
                 {job.result_exists ? (
-                  <>
+                  <div className="d-flex flex-wrap gap-2">
                     <DownloadLink
                       url={
                         isHcJob
@@ -297,17 +297,19 @@ const JobRespInfoTable = (props) => {
                           : `${server}/jobs/${encodeURIComponent(job.token)}/result`
                       }
                       filename="results.zip"
-                      className="btn btn-sm btn-outline-info"
+                      className="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1"
                     >
+                      <Download size={14} />
                       Download
                     </DownloadLink>
                     <button
-                      className="btn btn-sm btn-outline-danger"
+                      className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
                       onClick={() => setShowRemoveConfirmDialog(true)}
                     >
+                      <Trash2 size={14} />
                       Delete Results
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <span className="badge bg-danger">
                     Job results were deleted.

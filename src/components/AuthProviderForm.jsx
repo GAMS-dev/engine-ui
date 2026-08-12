@@ -2,7 +2,7 @@ import { useEffect, useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import Select from 'react-select';
 import { Modal, Button } from 'react-bootstrap';
-import { Trash2 } from 'react-feather';
+import { Trash2 } from 'lucide-react';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import RemoveAuthProviderModal from './RemoveAuthProviderModal';
@@ -618,7 +618,7 @@ const AuthProviderForm = () => {
                         setShowRemoveAuthProviderModal(true);
                       }}
                     >
-                      <Trash2 width="14px" />
+                      <Trash2 size={14} />
                     </button>
                   </span>
                 </li>

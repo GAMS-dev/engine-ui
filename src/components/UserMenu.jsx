@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
-import { User } from 'react-feather';
+import { User } from 'lucide-react';
 import { Link } from 'react-router';
 import AuthContext from '../contexts/AuthContext';
 import QuotaWidget from './QuotaWidget';

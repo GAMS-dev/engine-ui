@@ -7,7 +7,7 @@ import {
   Settings,
   ExternalLink,
   Server,
-} from 'react-feather';
+} from 'lucide-react';
 import { useLocation } from 'react-router';
 import { Link } from 'react-router';
 import AuthContext from '../contexts/AuthContext';

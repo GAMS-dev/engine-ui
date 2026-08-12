@@ -19,7 +19,7 @@ import {
 import OAuth2Login from './OAuth2Login';
 import { ClipLoader } from 'react-spinners';
 import ShowHidePasswordInput from './ShowHidePasswordInput';
-import { Info } from 'react-feather';
+import { Info } from 'lucide-react';
 import { encryptRSA } from '../util/oauth';
 
 const SERVER_NAME = getEngineUrl();
@@ -639,7 +639,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     <>
       {inMaintenanceMode === true ? (
         <>
-          <div className="text-center d-flex h-100">
+          <div className="text-center d-flex h-100 auth-page">
             <form className="form-signin m-auto">
               <img
                 src={logo}
@@ -654,7 +654,7 @@ const LoginForm = ({ showRegistrationForm }) => {
           </div>
         </>
       ) : (
-        <div className="text-center d-flex h-100">
+        <div className="text-center d-flex h-100 auth-page">
           <form
             className="form-signin m-auto"
             onSubmit={(e) => {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import JSZip from 'jszip';
-import { Layers } from 'react-feather';
+import { Layers } from 'lucide-react';
 
 const getResponseError = (err) => {
   if (!navigator.onLine) {

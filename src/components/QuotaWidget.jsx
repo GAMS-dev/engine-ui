@@ -7,7 +7,7 @@ import {
   getResponseError,
 } from '../util/util';
 import { ClipLoader } from 'react-spinners';
-import { Cpu, HardDrive } from 'react-feather';
+import { Cpu, HardDrive } from 'lucide-react';
 import { quotaWarningThresholds } from '../util/constants';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 

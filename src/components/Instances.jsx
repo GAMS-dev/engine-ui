@@ -1,6 +1,6 @@
 import { useEffect, useContext, useState } from 'react';
 import { Link } from 'react-router';
-import { RefreshCw } from 'react-feather';
+import { RefreshCw } from 'lucide-react';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
@@ -92,13 +92,8 @@ const Instances = () => {
         <div></div>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
-            <Link to="update">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary h-100"
-              >
-                New Instance
-              </button>
+            <Link to="update" className="btn btn-sm btn-outline-primary h-100">
+              New Instance
             </Link>
             <button
               type="button"
@@ -108,7 +103,7 @@ const Instances = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

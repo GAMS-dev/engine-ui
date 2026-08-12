@@ -1,5 +1,5 @@
 import { useEffect, useContext, useState } from 'react';
-import { RefreshCw, Send } from 'react-feather';
+import { RefreshCw, Send } from 'lucide-react';
 import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
@@ -202,14 +202,9 @@ const Users = () => {
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
             {roles.length ? (
-              <Link to="/new-user">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-primary"
-                >
-                  Invite User
-                  <Send width="12px" className="ms-2" />
-                </button>
+              <Link to="/new-user" className="btn btn-sm btn-outline-primary">
+                Invite User
+                <Send size={12} className="ms-2" />
               </Link>
             ) : (
               <></>
@@ -222,7 +217,7 @@ const Users = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

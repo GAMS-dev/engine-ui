@@ -1,5 +1,5 @@
 import { useEffect, useContext, useState, useRef } from 'react';
-import { Send, Folder, RefreshCw, Trash2, Save, Users } from 'react-feather';
+import { Send, Folder, RefreshCw, Trash2, Save, Users } from 'lucide-react';
 import { Link, useNavigate, useLocation, useParams } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
@@ -239,17 +239,15 @@ const Models = () => {
                       }}
                     >
                       Add Namespace
-                      <Folder width="12px" className="ms-2" />
+                      <Folder size={12} className="ms-2" />
                     </button>
                     {namespace && namespace.name && (
-                      <Link to={`/quotas/${namespace.name}`}>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-primary"
-                        >
-                          Edit Quota
-                          <Save width="12px" className="ms-2" />
-                        </button>
+                      <Link
+                        to={`/quotas/${namespace.name}`}
+                        className="btn btn-sm btn-outline-primary"
+                      >
+                        Edit Quota
+                        <Save size={12} className="ms-2" />
                       </Link>
                     )}
                   </>
@@ -264,18 +262,14 @@ const Models = () => {
                       }}
                     >
                       Add Group
-                      <Users width="12px" className="ms-2" />
+                      <Users size={12} className="ms-2" />
                     </button>
                     <Link
                       to={`/models/${encodeURIComponent(namespace.name)}/new`}
+                      className="btn btn-sm btn-outline-primary"
                     >
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-primary"
-                      >
-                        Add Model
-                        <Send width="12px" className="ms-2" />
-                      </button>
+                      Add Model
+                      <Send size={12} className="ms-2" />
                     </Link>
                   </>
                 )}
@@ -287,7 +281,7 @@ const Models = () => {
                   }}
                 >
                   Refresh
-                  <RefreshCw width="12px" className="ms-2" />
+                  <RefreshCw size={12} className="ms-2" />
                 </button>
               </div>
             </div>
@@ -319,7 +313,7 @@ const Models = () => {
                                 setShowRemoveNsModal(true);
                               }}
                             >
-                              <Trash2 width="14px" />
+                              <Trash2 size={14} />
                             </button>
                           </span>
                         )}

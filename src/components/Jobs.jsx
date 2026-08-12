@@ -7,7 +7,7 @@ import {
   ToggleRight,
   Maximize2,
   Minimize2,
-} from 'react-feather';
+} from 'lucide-react';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import { Link, useLocation, useNavigate } from 'react-router';
@@ -269,23 +269,19 @@ const Jobs = () => {
         <h1 className="h2">Jobs</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
-            <Link to="/new-job">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary h-100"
-              >
-                New Job
-                <Send width="12px" className="ms-2" />
-              </button>
+            <Link
+              to="/new-job"
+              className="btn btn-sm btn-outline-primary h-100"
+            >
+              New Job
+              <Send size={12} className="ms-2" />
             </Link>
-            <Link to="/new-hc-job">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary h-100"
-              >
-                New Hypercube Job
-                <Layers width="12px" className="ms-2" />
-              </button>
+            <Link
+              to="/new-hc-job"
+              className="btn btn-sm btn-outline-primary h-100"
+            >
+              New Hypercube Job
+              <Layers size={12} className="ms-2" />
             </Link>
             <button
               type="button"
@@ -314,7 +310,7 @@ const Jobs = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

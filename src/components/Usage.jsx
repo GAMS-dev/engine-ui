@@ -15,7 +15,7 @@ import UserSettingsContext from '../contexts/UserSettingsContext';
 import { calcRemainingQuota, getResponseError } from '../util/util';
 import { DateTimePicker } from '@mantine/dates';
 import { ClipLoader } from 'react-spinners';
-import { Calendar } from 'react-feather';
+import { Calendar } from 'lucide-react';
 import dayjs from 'dayjs';
 
 const MAX_ITEMS_THRESHOLD = 1000;

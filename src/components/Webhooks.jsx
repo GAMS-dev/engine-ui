@@ -1,6 +1,6 @@
 import { useEffect, useContext, useState } from 'react';
 import { Link } from 'react-router';
-import { RefreshCw, ToggleLeft, ToggleRight } from 'react-feather';
+import { RefreshCw, ToggleLeft, ToggleRight } from 'lucide-react';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
@@ -160,13 +160,11 @@ const Webhooks = () => {
             (serverConfig.webhook_access === 'ADMIN_ONLY' &&
               roles &&
               roles.includes('admin')) ? (
-              <Link to="/webhooks/create">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-primary h-100"
-                >
-                  New Webhook
-                </button>
+              <Link
+                to="/webhooks/create"
+                className="btn btn-sm btn-outline-primary h-100"
+              >
+                New Webhook
               </Link>
             ) : (
               <></>
@@ -196,7 +194,7 @@ const Webhooks = () => {
               }}
             >
               Refresh
-              <RefreshCw width="12px" className="ms-2" />
+              <RefreshCw size={12} className="ms-2" />
             </button>
           </div>
         </div>

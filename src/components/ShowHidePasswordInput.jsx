@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'react-feather';
+import { Eye, EyeOff } from 'lucide-react';
 
 const ShowHidePasswordInput = ({
   value,
