@@ -7,6 +7,7 @@ import Select from './ThemedSelect';
 import { ClipLoader } from 'react-spinners';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import { useChartTheme } from '../util/chartTheme';
+import { CHART_COLORS, withAlpha } from '../util/chartColors';
 import computeTimes from '../util/calculateQuota.js';
 import { formatDecimal } from '../util/util.jsx';
 import { JobTokenLink } from './JobTokenLink.jsx';
@@ -14,6 +15,20 @@ import Table from './Table.jsx';
 import { UserLink } from './UserLink.jsx';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const PIE_OPTIONS = {
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      labels: {
+        boxWidth: 10,
+        boxHeight: 10,
+        padding: 6,
+        font: { size: 11 },
+      },
+    },
+  },
+};
 
 const COLUMN_DEFS = {
   user: {
@@ -126,7 +141,7 @@ const Quotas = () => {
     // Sort the array of objects based on decreasing time
     labelTimePairs.sort((a, b) => b.cost - a.cost);
 
-    const cutOff = 10;
+    const cutOff = CHART_COLORS.length;
     if (labelTimePairs.length > cutOff) {
       setTruncateWarning(
         (current) =>
@@ -145,28 +160,7 @@ const Quotas = () => {
         {
           label: '# of Votes',
           data: cost,
-          backgroundColor: [
-            'rgba(31,120,180,0.2)',
-            'rgba(51,160,44,0.2)',
-            'rgba(227,26,28,0.2)',
-            'rgba(255,127,0,0.2)',
-            'rgba(106,61,154,0.2)',
-            'rgba(177,89,40,0.2)',
-            'rgba(249,185,183,0.2)',
-            'rgba(173,169,183,0.2)',
-            'rgba(102,16,31,0.2)',
-            'rgba(196,90,179,0.2)',
-            'rgba(27,231,255,0.2)',
-            'rgba(76,159,112,0.2)',
-            'rgba(240,247,87,0.2)',
-            'rgba(158,109,66,0.2)',
-            'rgba(8,103,136,0.2)',
-            'rgba(224,202,60,0.2)',
-            'rgba(186,151,144,0.2)',
-            'rgba(235,69,17,0.2)',
-            'rgba(155,93,229,0.2)',
-            'rgba(71,250,26,0.2)',
-          ],
+          backgroundColor: CHART_COLORS.map((color) => withAlpha(color, 0.85)),
         },
       ],
     };
@@ -256,7 +250,7 @@ const Quotas = () => {
       {
         label: '# of Votes',
         data: [1],
-        backgroundColor: ['rgba(31,120,180,0.2)'],
+        backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
       },
     ],
   });
@@ -266,7 +260,7 @@ const Quotas = () => {
       {
         label: '# of Votes',
         data: [1],
-        backgroundColor: ['rgba(31,120,180,0.2)'],
+        backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
       },
     ],
   });
@@ -276,7 +270,7 @@ const Quotas = () => {
       {
         label: '# of Votes',
         data: [1],
-        backgroundColor: ['rgba(31,120,180,0.2)'],
+        backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
       },
     ],
   });
@@ -477,10 +471,7 @@ const Quotas = () => {
                       <div className="chart-card">
                         <h3 className="chart-card-title">Users</h3>
                         <div className="chart-card-canvas">
-                          <Pie
-                            data={userChartData}
-                            options={{ maintainAspectRatio: false }}
-                          />
+                          <Pie data={userChartData} options={PIE_OPTIONS} />
                         </div>
                       </div>
                     </div>
@@ -498,10 +489,7 @@ const Quotas = () => {
                       <div className="chart-card">
                         <h3 className="chart-card-title">Instances</h3>
                         <div className="chart-card-canvas">
-                          <Pie
-                            data={instanceChartData}
-                            options={{ maintainAspectRatio: false }}
-                          />
+                          <Pie data={instanceChartData} options={PIE_OPTIONS} />
                         </div>
                       </div>
                     </div>
@@ -521,7 +509,7 @@ const Quotas = () => {
                         <div className="chart-card-canvas">
                           <Pie
                             data={poolLabelChartData}
-                            options={{ maintainAspectRatio: false }}
+                            options={PIE_OPTIONS}
                           />
                         </div>
                       </div>

@@ -484,6 +484,7 @@ body {
   border: 1px solid var(--bs-border-color);
   border-radius: $border-radius;
   background-color: var(--bs-body-bg);
+  overflow: hidden;
 }
 
 .chart-card-title {
@@ -494,7 +495,7 @@ body {
 
 .chart-card-canvas {
   position: relative;
-  height: 160px;
+  height: 190px;
 }
 
 .usage-section-title {

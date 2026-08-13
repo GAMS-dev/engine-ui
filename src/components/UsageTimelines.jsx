@@ -17,6 +17,7 @@ import Select from './ThemedSelect';
 import { ClipLoader } from 'react-spinners';
 import { mergeSortedArrays } from '../util/util';
 import { useChartTheme } from '../util/chartTheme';
+import { CHART_COLORS, withAlpha } from '../util/chartColors';
 import { JobTokenLink } from './JobTokenLink';
 import Table from './Table';
 import TimeDiffDisplay from './TimeDiffDisplay';
@@ -272,48 +273,6 @@ const UsageTimeline = () => {
       );
       const chartDataTmp = {};
       const aggregatedChartDataTmp = [];
-      const chartColors = [
-        'rgba(31,120,180,0.2)',
-        'rgba(51,160,44,0.2)',
-        'rgba(227,26,28,0.2)',
-        'rgba(255,127,0,0.2)',
-        'rgba(106,61,154,0.2)',
-        'rgba(177,89,40,0.2)',
-        'rgba(249,185,183,0.2)',
-        'rgba(173,169,183,0.2)',
-        'rgba(102,16,31,0.2)',
-        'rgba(196,90,179,0.2)',
-        'rgba(27,231,255,0.2)',
-        'rgba(76,159,112,0.2)',
-        'rgba(240,247,87,0.2)',
-        'rgba(158,109,66,0.2)',
-        'rgba(8,103,136,0.2)',
-        'rgba(224,202,60,0.2)',
-        'rgba(186,151,144,0.2)',
-        'rgba(235,69,17,0.2)',
-        'rgba(155,93,229,0.2)',
-        'rgba(71,250,26,0.2)',
-        'rgba(56,97,140,0.2)',
-        'rgba(250,216,214,0.2)',
-        'rgba(55,61,32,0.2)',
-        'rgba(33,11,44,0.2)',
-        'rgba(216,17,89,0.2)',
-        'rgba(8,189,189,0.2)',
-        'rgba(53,255,105,0.2)',
-        'rgba(109,33,60,0.2)',
-        'rgba(220,247,99,0.2)',
-        'rgba(224,108,0,0.2)',
-        'rgba(233,215,88,0.2)',
-        'rgba(130,145,145,0.2)',
-        'rgba(232,153,141,0.2)',
-        'rgba(145,182,150,0.2)',
-        'rgba(113,73,85,0.2)',
-        'rgba(42,42,114,0.2)',
-        'rgba(0,255,197,0.2)',
-        'rgba(108,58,92,0.2)',
-        'rgba(139,30,63,0.2)',
-        'rgba(62,114,29,0.2)',
-      ];
       let chartEvents = {};
       // first, we build the array of events for each user
       const getEvents = (el, multiplier, wholeJobFinished) => {
@@ -392,9 +351,11 @@ const UsageTimeline = () => {
         chartDataTmp[usernames[i]] = {
           label: usernames[i],
           backgroundColor:
-            i < chartColors.length ? chartColors[i] : overflowSeriesColor,
+            i < CHART_COLORS.length
+              ? withAlpha(CHART_COLORS[i], 0.3)
+              : overflowSeriesColor,
           borderColor:
-            i < chartColors.length ? chartColors[i] : overflowSeriesColor,
+            i < CHART_COLORS.length ? CHART_COLORS[i] : overflowSeriesColor,
           fill: true,
           stepped: true,
           data: seriesData,
