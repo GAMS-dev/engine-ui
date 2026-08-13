@@ -60,10 +60,12 @@ describe('ServerInfoProvider', () => {
     expect(screen.getByTestId('brokerv2')).toHaveTextContent('false'); // since is_saas if false
     expect(screen.getByTestId('saas')).toHaveTextContent('false'); // since the hostname is testserver and not engine.gams.com
 
-    const cachedData = JSON.parse(localStorage.getItem('serverInfo'));
-    expect(cachedData.version).toBe('x.x.x');
-    expect(cachedData.use_brokerv2).toBe(false);
-    expect(cachedData.timestamp).toBeDefined();
+    await waitFor(() => {
+      const cachedData = JSON.parse(localStorage.getItem('serverInfo'));
+      expect(cachedData.version).toBe('x.x.x');
+      expect(cachedData.use_brokerv2).toBe(false);
+      expect(cachedData.timestamp).toBeDefined();
+    });
   });
 
   it('fetches server info when no valid cache exists (using SaaS domain)', async () => {
@@ -99,10 +101,12 @@ describe('ServerInfoProvider', () => {
     expect(screen.getByTestId('saas')).toHaveTextContent('true');
     expect(screen.getByTestId('brokerv2')).toHaveTextContent('true');
 
-    const cachedData = JSON.parse(localStorage.getItem('serverInfo'));
-    expect(cachedData.version).toBe('x.x.x');
-    expect(cachedData.use_brokerv2).toBe(true);
-    expect(cachedData.timestamp).toBeDefined();
+    await waitFor(() => {
+      const cachedData = JSON.parse(localStorage.getItem('serverInfo'));
+      expect(cachedData.version).toBe('x.x.x');
+      expect(cachedData.use_brokerv2).toBe(true);
+      expect(cachedData.timestamp).toBeDefined();
+    });
     vi.unstubAllGlobals();
   });
 

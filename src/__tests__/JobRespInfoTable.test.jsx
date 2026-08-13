@@ -256,7 +256,9 @@ describe('JobRespInfoTable', () => {
     await waitFor(() => expect(setRefreshJob).toHaveBeenCalled());
     const updaterFn = setRefreshJob.mock.calls[0][0];
     expect(updaterFn(3)).toBe(4);
-    expect(screen.queryByText('Please Confirm')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText('Please Confirm')).not.toBeInTheDocument(),
+    );
   });
 
   it('shows an alert if deleting job results fails', async () => {
