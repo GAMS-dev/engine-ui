@@ -298,7 +298,7 @@ const Models = () => {
               </div>
             </div>
           </div>
-          <div className="col-md-4 col-12 order-1 order-md-2 mt-1">
+          <div className="namespace-list-col col-md-4 col-12 order-1 order-md-2 mt-1">
             <div className="namespace-panel">
               {availableNamespaces.length > 5 && (
                 <div className="namespace-search">

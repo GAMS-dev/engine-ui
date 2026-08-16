@@ -281,9 +281,17 @@ body {
   }
 }
 
+// Without min-width: 0, a nowrap <li> inside this flex column can force the
+// whole row (and page) wider than the viewport instead of actually eliding,
+// since flex items default to a content-based minimum width.
+.namespace-list-col {
+  min-width: 0;
+}
+
 .namespace-list {
   max-height: 200px;
   overflow: auto;
+  min-width: 0;
 }
 
 @media only screen and (min-width: 768px) {
@@ -297,6 +305,12 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  // Bootstrap's .list-group is a flex-direction: column container, and
+  // overflow other than "visible" zeroes out a flex item's automatic
+  // minimum size. Without flex-shrink: 0, a long list crams every row into
+  // whatever space is left inside .namespace-list's max-height instead of
+  // scrolling, clipping each row's text down to a sliver.
+  flex-shrink: 0;
 }
 
 .namespace-panel {

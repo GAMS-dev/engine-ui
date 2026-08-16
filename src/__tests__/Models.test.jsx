@@ -324,6 +324,7 @@ describe('Models', () => {
       within(dialog).getByRole('button', { name: 'Remove Namespace' }),
     );
     await waitFor(() => expect(axios.delete).toHaveBeenCalled());
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await waitFor(() => expect(screen.queryByText('ns1')).toBeNull());
     expect(screen.getByText('ns2').closest('li')).toHaveClass('active');
   });
