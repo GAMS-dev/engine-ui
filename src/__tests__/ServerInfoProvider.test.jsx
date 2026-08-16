@@ -29,7 +29,16 @@ const DummyConsumer = () => {
 describe('ServerInfoProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    // Explicitly go through `window` rather than the bare `localStorage`
+    // global. In at least one environment (reproduced running the test
+    // suite inside the project's own CI container image) the bare
+    // identifier resolved to a different Storage instance than the one the
+    // rendered component actually reads/writes via its own `window`,
+    // making the two look completely disconnected: a spy on
+    // Storage.prototype.setItem saw zero calls, and getItem() never saw
+    // what the component wrote, even though the component's own rendered
+    // output proved the write must have already run.
+    window.localStorage.clear();
   });
 
   it('fetches server info when no valid cache exists', async () => {
@@ -61,7 +70,7 @@ describe('ServerInfoProvider', () => {
     expect(screen.getByTestId('saas')).toHaveTextContent('false'); // since the hostname is testserver and not engine.gams.com
 
     await waitFor(() => {
-      const cachedData = JSON.parse(localStorage.getItem('serverInfo'));
+      const cachedData = JSON.parse(window.localStorage.getItem('serverInfo'));
       expect(cachedData.version).toBe('x.x.x');
       expect(cachedData.use_brokerv2).toBe(false);
       expect(cachedData.timestamp).toBeDefined();
@@ -102,7 +111,7 @@ describe('ServerInfoProvider', () => {
     expect(screen.getByTestId('brokerv2')).toHaveTextContent('true');
 
     await waitFor(() => {
-      const cachedData = JSON.parse(localStorage.getItem('serverInfo'));
+      const cachedData = JSON.parse(window.localStorage.getItem('serverInfo'));
       expect(cachedData.version).toBe('x.x.x');
       expect(cachedData.use_brokerv2).toBe(true);
       expect(cachedData.timestamp).toBeDefined();
@@ -117,7 +126,7 @@ describe('ServerInfoProvider', () => {
       use_brokerv2: false,
       timestamp: new Date().getTime(),
     };
-    localStorage.setItem('serverInfo', JSON.stringify(validCache));
+    window.localStorage.setItem('serverInfo', JSON.stringify(validCache));
 
     render(
       <ServerInfoProvider>
