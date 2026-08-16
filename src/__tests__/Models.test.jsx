@@ -396,4 +396,42 @@ describe('Models', () => {
       expect(screen.getByText('No User Found')).toBeInTheDocument(),
     );
   });
+
+  it('renders a large number of namespaces without dropping any, supports filtering, and stays clickable', async () => {
+    const user = userEvent.setup();
+    const manyNamespaces = Array.from({ length: 50 }, (_, i) => ({
+      name: `ns-${String(i).padStart(2, '0')}`,
+      permissions: [{ username: 'admin', permission: 7 }],
+      disk_quota: null,
+    }));
+    axios.get.mockImplementation(
+      defaultMock({
+        'testserver/namespaces/': () =>
+          Promise.resolve(namespacesResponse({ data: manyNamespaces })),
+      }),
+    );
+
+    render(<Models />, { wrapper: AllProvidersWrapperDefault });
+
+    // all 50 namespaces should be rendered, not silently dropped/paginated
+    await waitFor(() => {
+      expect(screen.getAllByText(/^ns-\d{2}$/)).toHaveLength(50);
+    });
+
+    // a filter box only shows up once the list is long enough to need one,
+    // and it should narrow the list down correctly
+    const filterInput = screen.getByPlaceholderText('Filter namespaces...');
+    await user.type(filterInput, 'ns-4');
+    await waitFor(() => {
+      expect(screen.getAllByText(/^ns-4\d$/)).toHaveLength(10);
+    });
+    expect(screen.queryByText('ns-00')).toBeNull();
+
+    // the list should stay usable at this size: clicking a namespace still
+    // selects it
+    await user.click(screen.getByText('ns-42'));
+    await waitFor(() => {
+      expect(screen.getByText('ns-42').closest('li')).toHaveClass('active');
+    });
+  });
 });
