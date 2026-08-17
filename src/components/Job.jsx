@@ -1,4 +1,4 @@
-import { useEffect, useContext, useState } from 'react';
+import { useEffect, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
@@ -172,6 +172,16 @@ const Job = () => {
   const hasTextEntriesPanel =
     !isHcJob && job?.text_entries?.length > 0 && job?.status >= 10;
 
+  const sortedTextEntries = useMemo(
+    () =>
+      hasTextEntriesPanel
+        ? [...job.text_entries].sort((a, b) =>
+            a.entry_name.localeCompare(b.entry_name),
+          )
+        : null,
+    [hasTextEntriesPanel, job],
+  );
+
   return (
     <>
       {isLoading ? (
@@ -209,9 +219,7 @@ const Job = () => {
             {hasTextEntriesPanel && (
               <div className="col-md-12 col-xl-4">
                 <TextEntryView
-                  textEntries={job.text_entries.sort((a, b) =>
-                    a.entry_name.localeCompare(b.entry_name),
-                  )}
+                  textEntries={sortedTextEntries}
                   server={server}
                 />
               </div>
