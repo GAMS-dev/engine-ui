@@ -186,6 +186,75 @@ describe('UserInviteesTree', () => {
     });
   });
 
+  it("keeps each sibling's expand/collapse state tied to its own username rather than its position, when navigating to a different user reorders the list", async () => {
+    vi.mocked(axios.get).mockImplementation((url) => {
+      switch (url) {
+        case 'testserver/users/':
+          return Promise.resolve({
+            status: 200,
+            data: [
+              {
+                username: 'mainuser',
+                roles: ['admin'],
+                deleted: false,
+                inviter_name: null,
+              },
+              {
+                username: 'childA',
+                roles: ['user'],
+                deleted: false,
+                inviter_name: 'mainuser',
+              },
+              {
+                username: 'childB',
+                roles: ['user'],
+                deleted: false,
+                inviter_name: 'mainuser',
+              },
+              {
+                username: 'childA1',
+                roles: ['user'],
+                deleted: false,
+                inviter_name: 'childA',
+              },
+              {
+                username: 'childB1',
+                roles: ['user'],
+                deleted: false,
+                inviter_name: 'childB',
+              },
+            ],
+          });
+        default:
+          return Promise.reject(new Error('not found'));
+      }
+    });
+
+    // childA is the highlighted user, so it starts expanded (showing
+    // childA1) and childB starts collapsed (hiding childB1).
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'childA' });
+    const { rerender } = render(<UserInviteesTree />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText('childA1'));
+    expect(screen.queryByText('childB1')).toBeNull();
+
+    // Simulate navigating to childB's page: childB moves to the front of
+    // the sibling list and childA moves to the back.
+    vi.mocked(useParams).mockReturnValue({ userToEdit: 'childB' });
+    rerender(<UserInviteesTree />);
+    await waitFor(() => screen.findByText('childB'));
+
+    // Each node's own expand/collapse state must follow its username, not
+    // whichever position it now occupies - so childA (now second) should
+    // still show its own expanded state, and childB (now first) should
+    // still show its own collapsed state. Keying the sibling list by
+    // array index instead of username would swap these: whichever node is
+    // now first inherits the *other* node's old (expanded) state.
+    expect(screen.getByText('childA1')).toBeInTheDocument();
+    expect(screen.queryByText('childB1')).toBeNull();
+  });
+
   it('handles errors while retrieving', async () => {
     vi.mocked(axios.get).mockRejectedValue({
       response: {

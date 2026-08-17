@@ -67,9 +67,9 @@ const TreeNode = ({
 
       {isOpen && userTreeData[username] && (
         <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
-          {userTreeData[username].map((child, index) => (
+          {userTreeData[username].map((child) => (
             <TreeNode
-              key={index}
+              key={child.username}
               username={child.username}
               userRole={getUserRoleFromArray(child.roles)}
               userTreeData={userTreeData}
