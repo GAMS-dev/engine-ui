@@ -124,7 +124,7 @@ const Table = ({
     setCurrentPage(goToPage - 1);
   };
   const sortCol = (e) => {
-    if (!e.target.dataset.field) {
+    if (!e.target.dataset.field || data.length === 0) {
       return;
     }
     const field = e.target.dataset.field.split(',')[0];

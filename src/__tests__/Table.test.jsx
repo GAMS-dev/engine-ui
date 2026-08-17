@@ -303,6 +303,28 @@ describe('Table sorting', () => {
     expect(rows[2].textContent).toContain('Charlie');
   });
 
+  it('does not crash when a sortable column header is clicked on an empty table', async () => {
+    const user = userEvent.setup();
+    renderTable({
+      data: [],
+      noDataMsg: 'No data',
+      isLoading: false,
+      displayFields: displayFieldsAllSorters,
+    });
+
+    // the 'alphabetical-object' sorter reads data[0][field] to find which
+    // key to sort on, which throws when there are no rows to read from.
+    // userEvent.click (rather than fireEvent.click) is required here: React
+    // reports errors from event handlers via a queued reportError() call
+    // instead of throwing them synchronously out of the dispatch, so a bare
+    // fireEvent.click() would return normally even when the handler threw -
+    // only userEvent's awaited dispatch actually surfaces it as a failure.
+    const metaHeader = screen.getByRole('columnheader', { name: 'Meta' });
+    await user.click(metaHeader);
+
+    expect(screen.getByText('No data')).toBeInTheDocument();
+  });
+
   it('sorts alphabetically treating null values as coming first/last', async () => {
     const user = userEvent.setup();
     const dataWithNull = [
