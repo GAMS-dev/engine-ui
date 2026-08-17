@@ -16,6 +16,7 @@ import TimeDisplay from './TimeDisplay';
 import ModelActionsButtonGroup from './ModelActionsButtonGroup';
 import AddNamespaceModal from './AddNamespaceModal';
 import RemoveNamespaceModal from './RemoveNamespaceModal';
+import NamespaceQuotaUpdateForm from './NamespaceQuotaUpdateForm';
 import { getResponseError } from '../util/util';
 import axios from 'axios';
 import AddUserGroupModal from './AddUserGroupModal';
@@ -52,6 +53,7 @@ const Models = () => {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showNsModal, setShowNsModal] = useState(false);
   const [showRemoveNsModal, setShowRemoveNsModal] = useState(false);
+  const [showQuotaModal, setShowQuotaModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -225,6 +227,9 @@ const Models = () => {
       refresh: refreshCnt + 1,
     }));
   };
+  const handleUpdateQuota = () => {
+    setAlertMsg('success:Namespace quota successfully updated!');
+  };
   const filteredNamespaces = availableNamespaces.filter((ns) =>
     ns.name.toLowerCase().includes(nsFilter.trim().toLowerCase()),
   );
@@ -254,13 +259,16 @@ const Models = () => {
                       <Folder size={12} className="ms-2" />
                     </button>
                     {namespace && namespace.name && (
-                      <Link
-                        to={`/quotas/${namespace.name}`}
+                      <button
+                        type="button"
                         className="btn btn-sm btn-outline-primary"
+                        onClick={() => {
+                          setShowQuotaModal(true);
+                        }}
                       >
                         Edit Quota
                         <Save size={12} className="ms-2" />
-                      </Link>
+                      </button>
                     )}
                   </>
                 )}
@@ -541,6 +549,12 @@ const Models = () => {
         showDialog={showGroupModal}
         setShowDialog={setShowGroupModal}
         handleSuccess={() => setRefresh((cnt) => cnt + 1)}
+        namespace={namespace.name}
+      />
+      <NamespaceQuotaUpdateForm
+        showDialog={showQuotaModal}
+        setShowDialog={setShowQuotaModal}
+        handleSuccess={handleUpdateQuota}
         namespace={namespace.name}
       />
     </>

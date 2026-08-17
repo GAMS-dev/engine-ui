@@ -8,30 +8,14 @@ import axios from 'axios';
 
 vi.mock('axios');
 
-vi.mock('react-router', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    useParams: vi.fn(),
-  };
-});
-
-import { useParams } from 'react-router';
-
-const routes = [
-  { path: '/models/global', element: <p>navigated to models page</p> },
-];
-
-const AllProvidersWrapper = ({ children }) => (
-  <AllProvidersWrapperDefault options={{ routes: routes }}>
-    {children}
-  </AllProvidersWrapperDefault>
-);
-
 describe('NamespaceQuotaUpdateForm', () => {
+  let setShowDialog;
+  let handleSuccess;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useParams).mockReturnValue({ namespace: 'global' });
+    setShowDialog = vi.fn();
+    handleSuccess = vi.fn();
 
     axios.get.mockImplementation((url) => {
       switch (url) {
@@ -49,13 +33,40 @@ describe('NamespaceQuotaUpdateForm', () => {
       }
     });
   });
+
+  const renderForm = (overrides = {}) =>
+    render(
+      <NamespaceQuotaUpdateForm
+        showDialog={true}
+        setShowDialog={setShowDialog}
+        namespace="global"
+        handleSuccess={handleSuccess}
+        {...overrides}
+      />,
+      { wrapper: AllProvidersWrapperDefault },
+    );
+
   it('renders NamespaceQuotaUpdateForm correctly', async () => {
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapperDefault,
-    });
+    renderForm();
     await waitFor(() =>
       screen.findByText('Edit Disk Space Quota of Namespace: global'),
     );
+  });
+
+  it('does not fetch data or render when the dialog is closed', () => {
+    renderForm({ showDialog: false });
+    expect(axios.get).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText('Edit Disk Space Quota of Namespace: global'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('closes the dialog when Cancel is clicked', async () => {
+    renderForm();
+    await screen.findByRole('spinbutton');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(setShowDialog).toHaveBeenCalledWith(false);
   });
 
   it('displays the existing quota and disk usage when present', async () => {
@@ -75,9 +86,7 @@ describe('NamespaceQuotaUpdateForm', () => {
       }
     });
 
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapperDefault,
-    });
+    renderForm();
 
     const quotaInput = await screen.findByRole('spinbutton');
     expect(quotaInput).toHaveValue(5);
@@ -89,9 +98,7 @@ describe('NamespaceQuotaUpdateForm', () => {
   it('shows an error message when fetching the quota fails', async () => {
     axios.get.mockRejectedValue({ message: 'get failed' });
 
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapperDefault,
-    });
+    renderForm();
 
     await waitFor(() =>
       screen.findByText(
@@ -102,9 +109,7 @@ describe('NamespaceQuotaUpdateForm', () => {
   });
 
   it('marks the quota field invalid and blocks submission for non-integer input', async () => {
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapper,
-    });
+    renderForm();
 
     const quotaInput = await screen.findByRole('spinbutton');
     fireEvent.change(quotaInput, { target: { value: '.5' } });
@@ -120,9 +125,7 @@ describe('NamespaceQuotaUpdateForm', () => {
   });
 
   it('clears the invalid state and resets the quota when the field is emptied', async () => {
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapper,
-    });
+    renderForm();
 
     const quotaInput = await screen.findByRole('spinbutton');
     fireEvent.change(quotaInput, { target: { value: '.5' } });
@@ -134,15 +137,20 @@ describe('NamespaceQuotaUpdateForm', () => {
     expect(quotaInput).toHaveValue(null);
   });
 
-  it('submits an updated quota via PUT, shows success and navigates', async () => {
+  it('submits an updated quota via PUT, shows success and closes the dialog', async () => {
     const setAlertMsg = vi.fn();
     axios.put.mockResolvedValue({});
 
     render(
       <AlertContext.Provider value={['', setAlertMsg]}>
-        <NamespaceQuotaUpdateForm />
+        <NamespaceQuotaUpdateForm
+          showDialog={true}
+          setShowDialog={setShowDialog}
+          namespace="global"
+          handleSuccess={handleSuccess}
+        />
       </AlertContext.Provider>,
-      { wrapper: AllProvidersWrapper },
+      { wrapper: AllProvidersWrapperDefault },
     );
 
     const quotaInput = await screen.findByRole('spinbutton');
@@ -158,20 +166,14 @@ describe('NamespaceQuotaUpdateForm', () => {
       ),
     );
     expect(axios.delete).not.toHaveBeenCalled();
-    await waitFor(() =>
-      expect(setAlertMsg).toHaveBeenCalledWith(
-        'success:Namespace quota successfully updated!',
-      ),
-    );
-    await waitFor(() => screen.findByText('navigated to models page'));
+    await waitFor(() => expect(setShowDialog).toHaveBeenCalledWith(false));
+    expect(handleSuccess).toHaveBeenCalled();
   });
 
   it('submits a quota deletion via DELETE when the field is left empty', async () => {
     axios.delete.mockResolvedValue({});
 
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapper,
-    });
+    renderForm();
 
     await screen.findByRole('spinbutton');
 
@@ -183,15 +185,14 @@ describe('NamespaceQuotaUpdateForm', () => {
       ),
     );
     expect(axios.put).not.toHaveBeenCalled();
-    await waitFor(() => screen.findByText('navigated to models page'));
+    await waitFor(() => expect(setShowDialog).toHaveBeenCalledWith(false));
+    expect(handleSuccess).toHaveBeenCalled();
   });
 
   it('shows a submission error message and re-enables the form on failure', async () => {
     axios.put.mockRejectedValue({ message: 'put failed' });
 
-    render(<NamespaceQuotaUpdateForm />, {
-      wrapper: AllProvidersWrapper,
-    });
+    renderForm();
 
     const quotaInput = await screen.findByRole('spinbutton');
     fireEvent.change(quotaInput, { target: { value: '100' } });
@@ -205,5 +206,6 @@ describe('NamespaceQuotaUpdateForm', () => {
       ),
     );
     expect(submitButton).not.toBeDisabled();
+    expect(handleSuccess).not.toHaveBeenCalled();
   });
 });

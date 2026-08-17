@@ -169,7 +169,7 @@ describe('Models', () => {
       screen.getByRole('button', { name: /Add Namespace/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: /Edit Quota/ }),
+      screen.getByRole('button', { name: /Edit Quota/ }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Add Group/ }),
@@ -359,7 +359,7 @@ describe('Models', () => {
 
     await screen.findByRole('tab', { name: 'Groups', selected: true });
     expect(screen.queryByRole('button', { name: /Add Namespace/ })).toBeNull();
-    expect(screen.queryByRole('link', { name: /Edit Quota/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Edit Quota/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /Add Group/ })).toBeNull();
     expect(screen.queryByRole('link', { name: /Add Model/ })).toBeNull();
   });

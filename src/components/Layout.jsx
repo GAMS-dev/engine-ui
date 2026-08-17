@@ -11,7 +11,6 @@ import UserChangePassForm from './UserChangePassForm';
 import InstancePoolSubmissionForm from './InstancePoolSubmissionForm';
 import Job from './Job';
 import Models from './Models';
-import NamespaceQuotaUpdateForm from './NamespaceQuotaUpdateForm';
 import Users from './Users';
 import { Alert } from './Alert';
 import AlertContext from '../contexts/AlertContext';
@@ -131,13 +130,6 @@ const Layout = () => {
                         element={<Navigate to="general" replace />}
                       />
                     </Route>
-                    {roles && roles.includes('admin') && (
-                      <Route
-                        exact
-                        path="/quotas/:namespace"
-                        element={<NamespaceQuotaUpdateForm />}
-                      />
-                    )}
                     <Route path="/users" element={<Users />} />
                     <Route
                       path="/users/:userToEdit"
