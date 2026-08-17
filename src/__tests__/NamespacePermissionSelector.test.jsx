@@ -60,6 +60,35 @@ describe('NamespacePermissionSelector', () => {
     await waitFor(() => screen.findByText('Namespace'));
   });
 
+  it('does not mutate the namespacePermissions prop array while sorting it for display', async () => {
+    const namespacePermissions = [
+      { name: 'zebra', permission: 110 },
+      { name: 'alpha', permission: 110 },
+    ];
+    render(
+      <NamespacePermissionSelector
+        namespacePermissions={namespacePermissions}
+      />,
+      { wrapper: AllProvidersWrapperDefault },
+    );
+    await waitFor(() => screen.findByText('Namespace'));
+
+    // the dropdown itself should still display alphabetically sorted
+    const optionValues = screen
+      .getAllByRole('option')
+      .map((option) => option.value);
+    expect(optionValues).toEqual(['alpha', 'zebra']);
+
+    // but the array passed in by the parent (its own state) must be left
+    // exactly as given - Array.prototype.sort mutates and returns the same
+    // reference, which would otherwise reorder the parent's state without
+    // it ever calling setState.
+    expect(namespacePermissions.map((ns) => ns.name)).toEqual([
+      'zebra',
+      'alpha',
+    ]);
+  });
+
   it('should display the tooltip on hover', async () => {
     render(
       <NamespacePermissionSelector

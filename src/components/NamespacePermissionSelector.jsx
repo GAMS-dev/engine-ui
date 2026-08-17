@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useContext } from 'react';
 import { useEffect } from 'react';
+import { useMemo } from 'react';
 import Select from './ThemedSelect';
 import AuthContext from '../contexts/AuthContext';
 import AlertContext from '../contexts/AlertContext';
@@ -26,13 +27,30 @@ export const NamespacePermissionSelector = ({
   const [{ jwt, server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [nsId, setNsId] = useState(0);
+  // `namespacePermissions` is a prop (owned by the parent's state), so it
+  // must not be sorted in place - Array.prototype.sort mutates and returns
+  // the same reference, which would silently reorder the parent's state
+  // without it ever calling setState.
+  const sortedNamespacePermissions = useMemo(
+    () =>
+      namespacePermissions == null
+        ? []
+        : [...namespacePermissions].sort((a, b) =>
+            ('' + a.name).localeCompare(b.name),
+          ),
+    [namespacePermissions],
+  );
+  const [nsId, setNsId] = useState(() =>
+    namespacePermissions == null
+      ? 0
+      : namespacePermissions.findIndex(
+          (el) => el.name === sortedNamespacePermissions[0]?.name,
+        ),
+  );
   const [modifiedFlag, setModifiedFlag] = useState(false);
   const [selectedNamespace, setSelectedNamespace] = useState(
-    namespacePermissions != null && namespacePermissions.length > 0
-      ? namespacePermissions.sort((a, b) =>
-          ('' + a.name).localeCompare(b.name),
-        )[0].name
+    sortedNamespacePermissions.length > 0
+      ? sortedNamespacePermissions[0].name
       : '',
   );
   const [readAccess, setReadAccess] = useState(undefined);
@@ -169,13 +187,11 @@ export const NamespacePermissionSelector = ({
               onChange={updateSelectedNamespace}
               disabled={isLoading}
             >
-              {namespacePermissions
-                .sort((a, b) => ('' + a.name).localeCompare(b.name))
-                .map((ns) => (
-                  <option key={ns.name} value={ns.name}>
-                    {generateDesc(ns.name, ns.perm, ns.groups)}
-                  </option>
-                ))}
+              {sortedNamespacePermissions.map((ns) => (
+                <option key={ns.name} value={ns.name}>
+                  {generateDesc(ns.name, ns.perm, ns.groups)}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -209,7 +225,7 @@ export const NamespacePermissionSelector = ({
               id="cbReadAccess"
               checked={
                 readAccess === undefined
-                  ? (namespacePermissions[0].perm & 4) !== 0
+                  ? (namespacePermissions[nsId].perm & 4) !== 0
                   : readAccess
               }
               onChange={updateReadAccess}
@@ -228,7 +244,7 @@ export const NamespacePermissionSelector = ({
               id="cbWriteAccess"
               checked={
                 writeAccess === undefined
-                  ? (namespacePermissions[0].perm & 2) !== 0
+                  ? (namespacePermissions[nsId].perm & 2) !== 0
                   : writeAccess
               }
               onChange={updateWriteAccess}
@@ -247,7 +263,7 @@ export const NamespacePermissionSelector = ({
               id="cbExecuteAccess"
               checked={
                 execAccess === undefined
-                  ? (namespacePermissions[0].perm & 1) !== 0
+                  ? (namespacePermissions[nsId].perm & 1) !== 0
                   : execAccess
               }
               onChange={updateExecAccess}
