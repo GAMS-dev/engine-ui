@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import { getResponseError } from '../util/util';
@@ -13,6 +13,7 @@ const AddUserGroupModal = (props) => {
   const [submissionErrorMsg, setSubmissionErrorMsg] = useState('');
   const [groupLabel, setGroupLabel] = useState('');
   const [labelError, setLabelError] = useState('');
+  const groupLabelRef = useRef(null);
 
   const handleCloseDialog = () => {
     setGroupLabel('');
@@ -50,7 +51,11 @@ const AddUserGroupModal = (props) => {
   };
 
   return (
-    <Modal show={showDialog} onHide={handleCloseDialog}>
+    <Modal
+      show={showDialog}
+      onHide={handleCloseDialog}
+      onEntered={() => groupLabelRef.current?.focus()}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -74,6 +79,7 @@ const AddUserGroupModal = (props) => {
                 Group Label
               </label>
               <input
+                ref={groupLabelRef}
                 type="text"
                 className={'form-control' + (labelError ? ' is-invalid' : '')}
                 id="groupLabel"

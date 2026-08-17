@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import AuthContext from '../contexts/AuthContext';
 import { getResponseError } from '../util/util';
@@ -13,6 +13,7 @@ const AddNamespaceModal = (props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionErrorMsg, setSubmissionErrorMsg] = useState('');
   const [namespaceName, setNamespaceName] = useState('');
+  const namespaceNameRef = useRef(null);
 
   const handleCloseDialog = () => {
     setSubmissionErrorMsg('');
@@ -51,7 +52,11 @@ const AddNamespaceModal = (props) => {
   };
 
   return (
-    <Modal show={showDialog} onHide={handleCloseDialog}>
+    <Modal
+      show={showDialog}
+      onHide={handleCloseDialog}
+      onEntered={() => namespaceNameRef.current?.focus()}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -75,6 +80,7 @@ const AddNamespaceModal = (props) => {
                 Namespace Name
               </label>
               <input
+                ref={namespaceNameRef}
                 type="text"
                 className="form-control"
                 id="namespaceName"
