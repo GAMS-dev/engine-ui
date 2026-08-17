@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from 'react';
 import axios from 'axios';
-import { getResponseError } from '../util/util';
+import { getResponseError, getLocalStorageJSON } from '../util/util';
 import { getEngineUrl } from '../util/runtimeConfig';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 
@@ -8,7 +8,7 @@ const SERVER_NAME = getEngineUrl();
 
 const ServerInfoProvider = (props) => {
   const [serverInfo, setServerInfo] = useState(
-    JSON.parse(localStorage.getItem('serverInfo')) || false,
+    getLocalStorageJSON('serverInfo') || false,
   );
   const serverInfoState = [serverInfo, setServerInfo];
 

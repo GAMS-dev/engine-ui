@@ -2,6 +2,7 @@ import { useState, useLayoutEffect, useMemo } from 'react';
 import axios from 'axios';
 import memoize from 'memoize';
 import AuthContext from '../contexts/AuthContext';
+import { getLocalStorageJSON } from '../util/util';
 
 // Compares by resolved origin (not a raw string prefix) so a lookalike host
 // like `https://<server>.attacker.tld` can't be mistaken for `server` and
@@ -25,9 +26,7 @@ const isSameServerUrl = (url, server) => {
 };
 
 const AuthProvider = (props) => {
-  const [login, setLogin] = useState(
-    JSON.parse(localStorage.getItem('login')) || false,
-  );
+  const [login, setLogin] = useState(getLocalStorageJSON('login') || false);
   const loginState = [login, setLogin];
 
   const [interceptor, setInterceptor] = useState(false);

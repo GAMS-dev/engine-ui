@@ -155,4 +155,16 @@ describe('AuthProvider', () => {
     // An unrelated-origin 401 must not trigger our refresh/logout logic.
     expect(screen.getByTestId('login')).not.toHaveTextContent('false');
   });
+
+  it('falls back to a logged-out state instead of crashing when localStorage holds malformed JSON', () => {
+    localStorage.setItem('login', 'not valid json{');
+
+    render(
+      <AuthProvider>
+        <DummyConsumer />
+      </AuthProvider>,
+    );
+
+    expect(screen.getByTestId('login')).toHaveTextContent('false');
+  });
 });

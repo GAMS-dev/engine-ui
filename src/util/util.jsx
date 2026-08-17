@@ -243,6 +243,17 @@ const urlB64ToUint8Array = (base64String) => {
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
 };
+// Corrupted/malformed JSON in localStorage (a stale value from an older app
+// version, manual tampering, another script writing to the same key, ...)
+// would otherwise throw synchronously out of a provider's initial render,
+// whitescreening the whole app until the user manually clears storage.
+const getLocalStorageJSON = (key) => {
+  try {
+    return JSON.parse(localStorage.getItem(key));
+  } catch {
+    return null;
+  }
+};
 const isMobileDevice = function () {
   let check = false;
   (function (a) {
@@ -271,6 +282,7 @@ export {
   urlB64ToUint8Array,
   getRandomInt,
   isMobileDevice,
+  getLocalStorageJSON,
   getQuotaWarningMessage,
   formatDurationString,
   formatInstanceSpecs,

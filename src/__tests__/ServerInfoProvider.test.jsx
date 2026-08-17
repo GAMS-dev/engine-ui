@@ -158,4 +158,23 @@ describe('ServerInfoProvider', () => {
     });
     expect(screen.getByTestId('brokerv2')).toHaveTextContent('false');
   });
+
+  it('falls back to fetching fresh data instead of crashing when localStorage holds malformed JSON', async () => {
+    window.localStorage.setItem('serverInfo', 'not valid json{');
+    axios.get.mockImplementation((url) => {
+      if (url.includes('/version'))
+        return Promise.resolve({ data: { version: 'x.x.x' } });
+      if (url.includes('/configuration'))
+        return Promise.resolve({ data: { use_brokerv2: true } });
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(
+      <ServerInfoProvider>
+        <DummyConsumer />
+      </ServerInfoProvider>,
+    );
+
+    expect(await screen.findByTestId('version')).toHaveTextContent('x.x.x');
+  });
 });
