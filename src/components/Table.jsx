@@ -132,7 +132,7 @@ const Table = ({
     const asc = field === sortedCol && sortAsc ? 1 : -1;
     if (sorter === 'alphabetical') {
       setData(
-        data.sort((a, b) => {
+        [...data].sort((a, b) => {
           if (a[field] == null) {
             return -asc;
           }
@@ -144,13 +144,13 @@ const Table = ({
       );
     } else if (sorter === 'numerical') {
       setData(
-        data.sort((a, b) => {
+        [...data].sort((a, b) => {
           return a[field] > b[field] ? -asc : asc;
         }),
       );
     } else if (sorter === 'datetime') {
       setData(
-        data.sort((a, b) => {
+        [...data].sort((a, b) => {
           if (a[field] == null) {
             return asc;
           }
@@ -162,7 +162,7 @@ const Table = ({
       );
     } else if (sorter === 'alphabetical-array') {
       setData(
-        data.sort((a, b) => {
+        [...data].sort((a, b) => {
           if (a[field] == null) {
             return -asc;
           }
@@ -177,7 +177,7 @@ const Table = ({
     } else if (sorter === 'alphabetical-object') {
       const firstKey = Object.keys(data[0][field])[0];
       setData(
-        data.sort((a, b) => {
+        [...data].sort((a, b) => {
           if (a[field][firstKey] == null) {
             return -asc;
           }

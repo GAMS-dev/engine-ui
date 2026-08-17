@@ -157,20 +157,18 @@ const Users = () => {
           );
         }
         const reponses = await Promise.all(queries);
-        let userDataTmp = reponses[0].data.map((user) => {
-          const newUserInfo = user;
-          newUserInfo.id = newUserInfo.username;
-          newUserInfo.created = newUserInfo.invitation_time;
-          return newUserInfo;
-        });
+        let userDataTmp = reponses[0].data.map((user) => ({
+          ...user,
+          id: user.username,
+          created: user.invitation_time,
+        }));
         if (roles?.length > 0) {
           userDataTmp = userDataTmp.concat(
-            reponses[1].data.map((invitation) => {
-              const newInvitation = invitation;
-              newInvitation.id = newInvitation.token;
-              newInvitation.username = '';
-              return newInvitation;
-            }),
+            reponses[1].data.map((invitation) => ({
+              ...invitation,
+              id: invitation.token,
+              username: '',
+            })),
           );
         }
         setUsers(

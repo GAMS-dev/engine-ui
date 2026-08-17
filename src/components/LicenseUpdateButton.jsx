@@ -98,7 +98,9 @@ const LicUpdateButton = ({ type, setLicenseExpiration }) => {
       }
       setLicenseExpiration(expirationDate);
     } catch (err) {
-      console.error(getResponseError(err));
+      setAlertMsg(
+        `The license was updated, but the displayed expiration date could not be refreshed. Error message: ${getResponseError(err)}`,
+      );
     }
   };
 

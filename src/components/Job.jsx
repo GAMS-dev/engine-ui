@@ -118,17 +118,15 @@ const Job = () => {
           },
         );
         if (modelInfo.data.length === 1) {
-          const newJobData = jobData;
-          if (
-            Date.parse(newJobData.submitted_at) >
-            Date.parse(modelInfo.data[0].upload_date)
-          ) {
-            // TODO: we can get false positives here as the submission time is not the time the
-            // model is extracted. We should consider using the time the job was actually
-            // started (using the /usage endpoint)
-            newJobData.model_consistent = true;
-          }
-          setJob(newJobData);
+          // TODO: we can get false positives here as the submission time is not the time the
+          // model is extracted. We should consider using the time the job was actually
+          // started (using the /usage endpoint)
+          const modelConsistent =
+            Date.parse(jobData.submitted_at) >
+            Date.parse(modelInfo.data[0].upload_date);
+          setJob(
+            modelConsistent ? { ...jobData, model_consistent: true } : jobData,
+          );
         } else {
           setJob(jobData);
         }

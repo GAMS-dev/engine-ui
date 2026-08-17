@@ -166,11 +166,10 @@ const getInstanceData = async (server, username) => {
   const instancePoolData = await instancePoolDataPromise;
   const availableInstancesTmp = instanceData.data.instances_available
     .concat(
-      instancePoolData.data.instance_pools_available.map((el) => {
-        const newEl = el;
-        newEl['is_pool'] = true;
-        return newEl;
-      }),
+      instancePoolData.data.instance_pools_available.map((el) => ({
+        ...el,
+        is_pool: true,
+      })),
     )
     .sort((a, b) => ('' + a.label).localeCompare(b.label));
   return {

@@ -139,12 +139,11 @@ const Cleanup = () => {
       setTotalFileSize(reqDataTmp.total_length);
       setTotal(reqDataTmp.count);
       setDatasets(
-        reqDataTmp.results.map((el) => {
-          const newData = el;
-          newData.id = el.token;
-          newData.username = el.user.deleted ? '' : el.user.username;
-          return newData;
-        }),
+        reqDataTmp.results.map((el) => ({
+          ...el,
+          id: el.token,
+          username: el.user.deleted ? '' : el.user.username,
+        })),
       );
       setIsLoading(false);
     };

@@ -150,11 +150,7 @@ const Models = () => {
         nsReq.data
           .filter((ns) => ns.name === namespace.name)[0]
           .permissions.filter((user) => user.permission > 0)
-          .map((user) => {
-            const newUserInfo = user;
-            newUserInfo.id = newUserInfo.username;
-            return newUserInfo;
-          })
+          .map((user) => ({ ...user, id: user.username }))
           .sort((a, b) => ('' + a.username).localeCompare(b.username)),
       );
       setIsLoading(false);
@@ -176,11 +172,7 @@ const Models = () => {
       if (nsReq.data.length > 0) {
         setModels(
           nsReq.data
-            .map((model) => {
-              const newModel = model;
-              newModel.id = model.name;
-              return newModel;
-            })
+            .map((model) => ({ ...model, id: model.name }))
             .sort((a, b) => ('' + a.name).localeCompare(b.name)),
         );
         setIsLoading(false);

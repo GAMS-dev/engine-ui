@@ -55,12 +55,16 @@ const AuthProvider = (props) => {
               throw new Error('Invalid response when trying to refresh token');
             }
 
-            const newLogin = { ...login };
-            newLogin.jwt = res.data.access_token;
-
-            if (res.data.refresh_token != null) {
-              newLogin.refreshTokenData.refreshToken = res.data.refresh_token;
-            }
+            const newLogin = {
+              ...login,
+              jwt: res.data.access_token,
+              ...(res.data.refresh_token != null && {
+                refreshTokenData: {
+                  ...login.refreshTokenData,
+                  refreshToken: res.data.refresh_token,
+                },
+              }),
+            };
 
             localStorage.setItem('login', JSON.stringify(newLogin));
 
