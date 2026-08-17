@@ -7,7 +7,7 @@ import {
   getInstanceData,
   getResponseError,
 } from '../util/util';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import AlertContext from '../contexts/AlertContext';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 

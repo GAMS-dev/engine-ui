@@ -10,7 +10,7 @@ import {
   getResponseError,
 } from '../util/util';
 import SubmitButton from './SubmitButton';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 
 const InstancePoolSubmissionForm = () => {

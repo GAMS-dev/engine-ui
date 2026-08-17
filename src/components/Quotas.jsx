@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useOutletContext } from 'react-router';
 import Select from './ThemedSelect';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import { useChartTheme } from '../util/chartTheme';
 import { CHART_COLORS, withAlpha } from '../util/chartColors';

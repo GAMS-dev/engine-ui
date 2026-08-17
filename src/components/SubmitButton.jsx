@@ -1,4 +1,4 @@
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 
 const SubmitButton = ({
   isSubmitting,

@@ -3,7 +3,7 @@ import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { RefreshCw, Send } from 'lucide-react';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import UserSettingsContext from '../contexts/UserSettingsContext';

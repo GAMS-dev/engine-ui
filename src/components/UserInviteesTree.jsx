@@ -5,7 +5,7 @@ import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
 import { UserLink } from './UserLink';
 import { getResponseError } from '../util/util';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 
 const getUserRoleFromArray = (roles) => {
   if (roles == null || roles.length === 0) {

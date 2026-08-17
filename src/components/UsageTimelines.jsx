@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useOutletContext } from 'react-router';
 import Select from './ThemedSelect';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import { mergeSortedArrays } from '../util/util';
 import { useChartTheme } from '../util/chartTheme';
 import { CHART_COLORS, withAlpha } from '../util/chartColors';

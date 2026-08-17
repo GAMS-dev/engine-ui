@@ -14,7 +14,7 @@ import ServerInfoContext from '../contexts/ServerInfoContext';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import { calcRemainingQuota, getResponseError } from '../util/util';
 import { DateTimePicker } from '@mantine/dates';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import { Calendar } from 'lucide-react';
 import dayjs from 'dayjs';
 

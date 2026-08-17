@@ -5,7 +5,7 @@ import AlertContext from '../contexts/AlertContext';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import { UserLink } from './UserLink';
 
 const LicenseUpdateForm = () => {

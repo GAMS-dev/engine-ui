@@ -4,7 +4,7 @@ import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
 import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 
 const NamespaceQuotaUpdateForm = ({
   showDialog,

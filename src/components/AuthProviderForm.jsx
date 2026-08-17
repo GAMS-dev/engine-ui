@@ -8,7 +8,7 @@ import AuthContext from '../contexts/AuthContext';
 import RemoveAuthProviderModal from './RemoveAuthProviderModal';
 import { getResponseError } from '../util/util';
 import axios from 'axios';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import SubmitButton from './SubmitButton';
 import ShowHidePasswordInput from './ShowHidePasswordInput';
 import ServerConfigContext from '../contexts/ServerConfigContext';

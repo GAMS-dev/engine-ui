@@ -19,7 +19,7 @@ import {
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import InexJSONSelector from './InexJSONSelector';
 import SubmitButton from './SubmitButton';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 import FileDropZone from './FileDropZone';
 import UserSettingsContext from '../contexts/UserSettingsContext';

@@ -6,7 +6,7 @@ import {
   formatFileSize,
   getResponseError,
 } from '../util/util';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import { Cpu, HardDrive } from 'lucide-react';
 import { quotaWarningThresholds } from '../util/constants';
 import UserSettingsContext from '../contexts/UserSettingsContext';

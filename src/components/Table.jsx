@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import { Pagination, InputGroup, Button, Form } from 'react-bootstrap';
 import { FormControl } from 'react-bootstrap';
 import OverlayFilter from './OverlayFilter';

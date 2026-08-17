@@ -17,7 +17,7 @@ import {
   Modal,
 } from 'react-bootstrap';
 import OAuth2Login from './OAuth2Login';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 import ShowHidePasswordInput from './ShowHidePasswordInput';
 import { Info } from 'lucide-react';
 import { encryptRSA } from '../util/oauth';

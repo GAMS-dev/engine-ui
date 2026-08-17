@@ -7,7 +7,7 @@ import Select from './ThemedSelect';
 import { getResponseError } from '../util/util';
 import NamespacePermissionSelector from './NamespacePermissionSelector';
 import SubmitButton from './SubmitButton';
-import { ClipLoader } from 'react-spinners';
+import ClipLoader from './ThemedClipLoader';
 
 const UserPermissionUpdateForm = () => {
   const [{ jwt, server, roles, username }] = useContext(AuthContext);
