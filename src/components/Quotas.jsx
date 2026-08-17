@@ -1,10 +1,10 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContext, useEffect, useMemo, useState } from 'react';
+import ClipLoader from './ThemedClipLoader';
 import { Pie } from 'react-chartjs-2';
 import { useOutletContext } from 'react-router';
 import Select from './ThemedSelect';
-import ClipLoader from './ThemedClipLoader';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import { useChartTheme } from '../util/chartTheme';
 import { CHART_COLORS, withAlpha } from '../util/chartColors';
@@ -28,6 +28,17 @@ const PIE_OPTIONS = {
       },
     },
   },
+};
+
+const DEFAULT_CHART_DATA = {
+  labels: ['-'],
+  datasets: [
+    {
+      label: '# of Votes',
+      data: [1],
+      backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
+    },
+  ],
 };
 
 const COLUMN_DEFS = {
@@ -77,6 +88,57 @@ const COLUMN_DEFS = {
   },
 };
 
+function getChartData(label, ungroupedData) {
+  let groupedData;
+  let labels = [];
+  let cost = [];
+  if (label === 'usernames') {
+    groupedData = groupByUser(ungroupedData);
+    labels = groupedData.map((elem) => elem.user);
+    cost = groupedData.map((elem) => elem.cost);
+  } else if (label === 'instance') {
+    groupedData = groupByInstance(ungroupedData);
+    labels = groupedData.map((elem) => elem.instance);
+    cost = groupedData.map((elem) => elem.cost);
+  } else if (label === 'pool_label') {
+    groupedData = groupByPoolLabel(ungroupedData);
+    labels = groupedData.map((elem) => elem.pool_label);
+    cost = groupedData.map((elem) => elem.cost);
+  }
+
+  let labelTimePairs = labels.map((label, index) => ({
+    label,
+    cost: cost[index],
+  }));
+
+  // Sort the array of objects based on decreasing time
+  labelTimePairs.sort((a, b) => b.cost - a.cost);
+
+  const cutOff = CHART_COLORS.length;
+  const truncated = labelTimePairs.length > cutOff;
+  if (truncated) {
+    labelTimePairs = labelTimePairs.slice(0, cutOff);
+  }
+
+  // Extract the sorted labels and times separately
+  labels = labelTimePairs.map((pair) => pair.label);
+  cost = labelTimePairs.map((pair) => pair.cost);
+
+  return {
+    truncated,
+    chartData: {
+      labels: labels,
+      datasets: [
+        {
+          label: '# of Votes',
+          data: cost,
+          backgroundColor: CHART_COLORS.map((color) => withAlpha(color, 0.85)),
+        },
+      ],
+    },
+  };
+}
+
 const Quotas = () => {
   const {
     data,
@@ -87,15 +149,19 @@ const Quotas = () => {
   const [userSettings] = useContext(UserSettingsContext);
   const quotaFormattingFn = userSettings.quotaFormattingFn;
 
+  // computeTimes can be expensive for large usage datasets, so this stays a
+  // state+effect pair rather than a useMemo: a useMemo would run
+  // synchronously during render, with no chance for React to paint a
+  // loading state first, and the whole tab would just freeze until it
+  // finished instead of showing a spinner.
   const [ungroupedDataJobs, setUngroupedDataJobs] = useState([]);
   const [ungroupedDataPools, setUngroupedDataPools] = useState([]);
-  const [numUser, setNumUser] = useState([]);
+  const [numUser, setNumUser] = useState(0);
   const [numInstances, setNumInstances] = useState(0);
   const [numPools, setNumPools] = useState(0);
   const [numCharts, setNumCharts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // if data, calcStartDate, calcEndTime changes:
   useEffect(() => {
     setIsLoading(true);
     const dataTmp = computeTimes(data, calcStartDate, calcEndTime);
@@ -106,65 +172,12 @@ const Quotas = () => {
     setNumPools(dataTmp.num_pools);
 
     let numChartsTmp = 0;
-
     if (dataTmp.num_users > 1) numChartsTmp++;
     if (dataTmp.num_instances > 1) numChartsTmp++;
     if (dataTmp.num_pools > 1) numChartsTmp++;
-
     setNumCharts(numChartsTmp);
     setIsLoading(false);
   }, [data, calcStartDate, calcEndTime]);
-
-  function getChartData(label, ungroupedData) {
-    let groupedData;
-    let labels = [];
-    let cost = [];
-    if (label === 'usernames') {
-      groupedData = groupByUser(ungroupedData);
-      labels = groupedData.map((elem) => elem.user);
-      cost = groupedData.map((elem) => elem.cost);
-    } else if (label === 'instance') {
-      groupedData = groupByInstance(ungroupedData);
-      labels = groupedData.map((elem) => elem.instance);
-      cost = groupedData.map((elem) => elem.cost);
-    } else if (label === 'pool_label') {
-      groupedData = groupByPoolLabel(ungroupedData);
-      labels = groupedData.map((elem) => elem.pool_label);
-      cost = groupedData.map((elem) => elem.cost);
-    }
-
-    let labelTimePairs = labels.map((label, index) => ({
-      label,
-      cost: cost[index],
-    }));
-
-    // Sort the array of objects based on decreasing time
-    labelTimePairs.sort((a, b) => b.cost - a.cost);
-
-    const cutOff = CHART_COLORS.length;
-    if (labelTimePairs.length > cutOff) {
-      setTruncateWarning(
-        (current) =>
-          `${current} Only the ${cutOff} most used ${label} displayed in the chart. `,
-      );
-      labelTimePairs = labelTimePairs.slice(0, cutOff);
-    }
-
-    // Extract the sorted labels and times separately
-    labels = labelTimePairs.map((pair) => pair.label);
-    cost = labelTimePairs.map((pair) => pair.cost);
-
-    return {
-      labels: labels,
-      datasets: [
-        {
-          label: '# of Votes',
-          data: cost,
-          backgroundColor: CHART_COLORS.map((color) => withAlpha(color, 0.85)),
-        },
-      ],
-    };
-  }
 
   const displayFieldJobsUngrouped = useMemo(
     () => [
@@ -224,13 +237,6 @@ const Quotas = () => {
     [quotaFormattingFn],
   );
 
-  const [displayFieldsJobs, setDisplayFieldsJobs] = useState(
-    displayFieldJobsUngrouped,
-  );
-  const [displayFieldsPools, setDisplayFieldsPools] = useState(
-    displayFieldPoolsUngrouped,
-  );
-
   const availableAggregateTypes = [
     { value: '_', label: '_' },
     { value: 'username', label: 'User' },
@@ -241,138 +247,86 @@ const Quotas = () => {
   const [selectedAggregateType, setSelectedAggregateType] = useState(
     availableAggregateTypes[1].value,
   );
-  const [totalUsage, setTotalUsage] = useState(0);
-  const [tableDataJobs, setTableDataJobs] = useState([]);
-  const [tableDataPools, setTableDataPools] = useState([]);
-  const [userChartData, setUserChartData] = useState({
-    labels: ['-'],
-    datasets: [
-      {
-        label: '# of Votes',
-        data: [1],
-        backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
-      },
-    ],
-  });
-  const [instanceChartData, setInstanceChartData] = useState({
-    labels: ['-'],
-    datasets: [
-      {
-        label: '# of Votes',
-        data: [1],
-        backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
-      },
-    ],
-  });
-  const [poolLabelChartData, setPoolLabelChartData] = useState({
-    labels: ['-'],
-    datasets: [
-      {
-        label: '# of Votes',
-        data: [1],
-        backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
-      },
-    ],
-  });
 
-  const [truncateWarning, setTruncateWarning] = useState('');
+  const {
+    tableDataJobs,
+    tableDataPools,
+    totalUsage,
+    displayFieldsJobs,
+    displayFieldsPools,
+  } = useMemo(() => {
+    const sumCost = (arr) =>
+      arr.reduce(
+        (accumulator, currentValue) => accumulator + currentValue.cost,
+        0,
+      );
 
-  useEffect(() => {
-    if (selectedAggregateType === '_') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(
-        (el) => !['jobs'].includes(el.field),
-      );
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(
-        (el) => !['jobs'].includes(el.field),
-      );
-      setTableDataJobs(ungroupedDataJobs);
-      setTableDataPools(ungroupedDataPools);
-      let sumTmp = ungroupedDataJobs.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      sumTmp += ungroupedDataPools.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      setTotalUsage(sumTmp);
-      setDisplayFieldsJobs(displayFieldsTmpJob);
-      setDisplayFieldsPools(displayFieldsTmpPool);
-    } else if (selectedAggregateType === 'username') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(
-        (el) =>
-          ![
-            'instance',
-            'pool_label',
-            'multiplier',
-            'token,is_hypercube',
-          ].includes(el.field),
-      );
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(
-        (el) => !['instance', 'pool_label', 'multiplier'].includes(el.field),
-      );
-      setTableDataJobs(groupByUser(ungroupedDataJobs));
-      setTableDataPools(groupByUser(ungroupedDataPools));
-      let sumTmp = ungroupedDataJobs.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      sumTmp += ungroupedDataPools.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      setTotalUsage(sumTmp);
-      setDisplayFieldsJobs(displayFieldsTmpJob);
-      setDisplayFieldsPools(displayFieldsTmpPool);
+    if (selectedAggregateType === 'username') {
+      return {
+        tableDataJobs: groupByUser(ungroupedDataJobs),
+        tableDataPools: groupByUser(ungroupedDataPools),
+        totalUsage: sumCost(ungroupedDataJobs) + sumCost(ungroupedDataPools),
+        displayFieldsJobs: displayFieldJobsUngrouped.filter(
+          (el) =>
+            ![
+              'instance',
+              'pool_label',
+              'multiplier',
+              'token,is_hypercube',
+            ].includes(el.field),
+        ),
+        displayFieldsPools: displayFieldPoolsUngrouped.filter(
+          (el) => !['instance', 'pool_label', 'multiplier'].includes(el.field),
+        ),
+      };
     } else if (selectedAggregateType === 'instance') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(
-        (el) =>
-          !['user', 'pool_label', 'multiplier', 'token,is_hypercube'].includes(
-            el.field,
-          ),
-      );
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(
-        (el) => !['user', 'pool_label', 'multiplier'].includes(el.field),
-      );
-      setTableDataJobs(groupByInstance(ungroupedDataJobs));
-      setTableDataPools(groupByInstance(ungroupedDataPools));
-      let sumTmp = ungroupedDataJobs.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      sumTmp += ungroupedDataPools.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      setTotalUsage(sumTmp);
-      setDisplayFieldsJobs(displayFieldsTmpJob);
-      setDisplayFieldsPools(displayFieldsTmpPool);
+      return {
+        tableDataJobs: groupByInstance(ungroupedDataJobs),
+        tableDataPools: groupByInstance(ungroupedDataPools),
+        totalUsage: sumCost(ungroupedDataJobs) + sumCost(ungroupedDataPools),
+        displayFieldsJobs: displayFieldJobsUngrouped.filter(
+          (el) =>
+            ![
+              'user',
+              'pool_label',
+              'multiplier',
+              'token,is_hypercube',
+            ].includes(el.field),
+        ),
+        displayFieldsPools: displayFieldPoolsUngrouped.filter(
+          (el) => !['user', 'pool_label', 'multiplier'].includes(el.field),
+        ),
+      };
     } else if (selectedAggregateType === 'pool_label') {
-      const displayFieldsTmpJob = displayFieldJobsUngrouped.filter(
-        (el) =>
-          !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(
-            el.field,
-          ),
-      );
-      const displayFieldsTmpPool = displayFieldPoolsUngrouped.filter(
-        (el) => !['instance', 'user', 'multiplier'].includes(el.field),
-      );
-      setTableDataJobs(groupByPoolLabel(ungroupedDataJobs));
-      setTableDataPools(groupByPoolLabel(ungroupedDataPools));
-      let sumTmp2 = ungroupedDataJobs
-        .filter((el) => el.pool_label != null)
-        .reduce(
-          (accumulator, currentValue) => accumulator + currentValue.cost,
-          0,
-        );
-      sumTmp2 += ungroupedDataPools.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.cost,
-        0,
-      );
-      setTotalUsage(sumTmp2);
-      setDisplayFieldsJobs(displayFieldsTmpJob);
-      setDisplayFieldsPools(displayFieldsTmpPool);
+      return {
+        tableDataJobs: groupByPoolLabel(ungroupedDataJobs),
+        tableDataPools: groupByPoolLabel(ungroupedDataPools),
+        totalUsage:
+          sumCost(ungroupedDataJobs.filter((el) => el.pool_label != null)) +
+          sumCost(ungroupedDataPools),
+        displayFieldsJobs: displayFieldJobsUngrouped.filter(
+          (el) =>
+            !['instance', 'user', 'multiplier', 'token,is_hypercube'].includes(
+              el.field,
+            ),
+        ),
+        displayFieldsPools: displayFieldPoolsUngrouped.filter(
+          (el) => !['instance', 'user', 'multiplier'].includes(el.field),
+        ),
+      };
     }
+    // selectedAggregateType === '_' (ungrouped)
+    return {
+      tableDataJobs: ungroupedDataJobs,
+      tableDataPools: ungroupedDataPools,
+      totalUsage: sumCost(ungroupedDataJobs) + sumCost(ungroupedDataPools),
+      displayFieldsJobs: displayFieldJobsUngrouped.filter(
+        (el) => !['jobs'].includes(el.field),
+      ),
+      displayFieldsPools: displayFieldPoolsUngrouped.filter(
+        (el) => !['jobs'].includes(el.field),
+      ),
+    };
   }, [
     selectedAggregateType,
     ungroupedDataJobs,
@@ -381,32 +335,37 @@ const Quotas = () => {
     displayFieldPoolsUngrouped,
   ]);
 
-  useEffect(() => {
-    setTruncateWarning('');
-    let chartDataTmp;
-    if (numUser > 1) {
-      chartDataTmp = getChartData(
-        'usernames',
-        ungroupedDataJobs.concat(ungroupedDataPools),
-      );
-      setUserChartData(chartDataTmp);
-    }
+  const {
+    userChartData,
+    instanceChartData,
+    poolLabelChartData,
+    truncateWarning,
+  } = useMemo(() => {
+    const combinedData = ungroupedDataJobs.concat(ungroupedDataPools);
+    const metrics = [
+      { count: numUser, label: 'usernames', key: 'userChartData' },
+      { count: numInstances, label: 'instance', key: 'instanceChartData' },
+      { count: numPools, label: 'pool_label', key: 'poolLabelChartData' },
+    ];
 
-    if (numInstances > 1) {
-      chartDataTmp = getChartData(
-        'instance',
-        ungroupedDataJobs.concat(ungroupedDataPools),
-      );
-      setInstanceChartData(chartDataTmp);
-    }
+    const result = {
+      userChartData: DEFAULT_CHART_DATA,
+      instanceChartData: DEFAULT_CHART_DATA,
+      poolLabelChartData: DEFAULT_CHART_DATA,
+      truncateWarning: '',
+    };
 
-    if (numPools > 1) {
-      chartDataTmp = getChartData(
-        'pool_label',
-        ungroupedDataJobs.concat(ungroupedDataPools),
-      );
-      setPoolLabelChartData(chartDataTmp);
-    }
+    metrics.forEach(({ count, label, key }) => {
+      if (count > 1) {
+        const { chartData, truncated } = getChartData(label, combinedData);
+        result[key] = chartData;
+        if (truncated) {
+          result.truncateWarning += `Only the ${CHART_COLORS.length} most used ${label} displayed in the chart. `;
+        }
+      }
+    });
+
+    return result;
   }, [ungroupedDataJobs, ungroupedDataPools, numUser, numInstances, numPools]);
 
   return (
