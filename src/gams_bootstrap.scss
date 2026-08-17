@@ -517,6 +517,52 @@ body {
   color: var(--bs-emphasis-color);
 }
 
+.advanced-options-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: $border-radius;
+  font-weight: 500;
+  color: var(--bs-emphasis-color);
+  transition: $transition-base;
+}
+
+.advanced-options-toggle:hover {
+  background-color: rgba($primary, 0.08);
+  border-color: rgba($primary, 0.4);
+}
+
+.advanced-options-toggle[aria-expanded='true'] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.advanced-options-chevron {
+  color: var(--bs-secondary-color);
+  transition: transform 0.2s ease-in-out;
+}
+
+.advanced-options-chevron-open {
+  transform: rotate(180deg);
+}
+
+.advanced-options-panel {
+  padding: 1rem;
+  border: 1px solid var(--bs-border-color);
+  border-top: none;
+  border-bottom-right-radius: $border-radius;
+  border-bottom-left-radius: $border-radius;
+  background-color: var(--bs-body-bg);
+}
+
+.advanced-options-panel > :last-child {
+  margin-bottom: 0 !important;
+}
+
 .table-fixed {
   table-layout: fixed;
 }

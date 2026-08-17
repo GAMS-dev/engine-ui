@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import Select from './ThemedSelect';
 import { Navigate } from 'react-router';
-import { Button, Collapse } from 'react-bootstrap';
+import { Collapse } from 'react-bootstrap';
+import { ChevronDown } from 'lucide-react';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
@@ -765,17 +766,22 @@ const JobSubmissionForm = ({ newHcJob }) => {
             </div>
             <div className="col-md-6 col-12">
               <fieldset disabled={isSubmitting}>
-                <Button
-                  variant="link"
+                <button
+                  type="button"
+                  className="advanced-options-toggle"
                   onClick={() =>
                     setOpenAdvancedOptions((prevState) => !prevState)
                   }
                   aria-expanded={openAdvancedOptions}
                 >
-                  Advanced Options
-                </Button>
+                  <span>Advanced Options</span>
+                  <ChevronDown
+                    size={16}
+                    className={`advanced-options-chevron${openAdvancedOptions ? ' advanced-options-chevron-open' : ''}`}
+                  />
+                </button>
                 <Collapse in={openAdvancedOptions}>
-                  <div>
+                  <div className="advanced-options-panel">
                     <div className="mb-3">
                       <label htmlFor="clArgs" className="visually-hidden">
                         Command Line Arguments (comma-separated, optional)
