@@ -47,6 +47,7 @@ const Layout = () => {
   const [{ server, roles, username }] = useContext(AuthContext);
   const [serverInfo] = useContext(ServerInfoContext);
   const alertHook = useState('');
+  const [, setAlertMsg] = alertHook;
   const [licenseExpiration, setLicenseExpiration] = useState(null);
 
   useEffect(() => {
@@ -55,7 +56,9 @@ const Layout = () => {
       try {
         elReq = await axios.get(`${server}/licenses/engine`);
       } catch (err) {
-        console.error(getResponseError(err));
+        setAlertMsg(
+          `Problems fetching license information. Error message: ${getResponseError(err)}`,
+        );
         return;
       }
       let expirationDate = elReq.data.expiration_date;
@@ -68,7 +71,7 @@ const Layout = () => {
     if (roles.includes('admin')) {
       fetchEngineLicense();
     }
-  }, [serverInfo, server, roles, username]);
+  }, [serverInfo, server, roles, username, setAlertMsg]);
 
   return (
     <React.Fragment>
