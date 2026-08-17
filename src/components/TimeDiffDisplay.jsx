@@ -1,7 +1,7 @@
-const TimeDiffDisplay = (props) => {
-  const h = Math.floor(props.time / 3600);
-  const m = Math.floor((props.time % 3600) / 60);
-  const s = Math.floor((props.time % 3600) % 60);
+const TimeDiffDisplay = ({ time, classNames }) => {
+  const h = Math.floor(time / 3600);
+  const m = Math.floor((time % 3600) / 60);
+  const s = Math.floor((time % 3600) % 60);
 
   const hDisplay = h > 0 ? h + (h === 1 ? ' hour, ' : ' hours, ') : '';
   const mDisplay = m > 0 ? m + (m === 1 ? ' minute, ' : ' minutes, ') : '';
@@ -11,14 +11,14 @@ const TimeDiffDisplay = (props) => {
   if (timeDisplay.endsWith(', ')) {
     timeDisplay = timeDisplay.slice(0, -2);
   } else if (timeDisplay === ' ') {
-    if (isNaN(props.time)) {
+    if (isNaN(time)) {
       timeDisplay = 'NaN';
     } else {
       timeDisplay = '< 1 second';
     }
   }
 
-  return <span className={props.classNames}>{timeDisplay}</span>;
+  return <span className={classNames}>{timeDisplay}</span>;
 };
 
 export default TimeDiffDisplay;

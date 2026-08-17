@@ -5,8 +5,7 @@ import logo from '../assets/images/logo.svg';
 import ServerInfoContext from '../contexts/ServerInfoContext';
 import UserMenu from './UserMenu';
 
-const Header = (props) => {
-  const { licenseExpiration, isAdmin } = props;
+const Header = ({ licenseExpiration, isAdmin }) => {
   const [serverInfo] = useContext(ServerInfoContext);
   const [expiresIn, setExpiresIn] = useState(0);
   const [licenseValid, setLicenseValid] = useState(false);

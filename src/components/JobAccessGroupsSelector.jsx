@@ -5,11 +5,15 @@ import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import { getResponseError } from '../util/util';
 
-const JobAccessGroupsSelector = (props) => {
+const JobAccessGroupsSelector = ({
+  value,
+  onChange,
+  namespace,
+  groupWhitelist,
+  hideIfNoGroupsAvailable,
+}) => {
   const [{ jwt, server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
-
-  const { value, onChange, namespace, groupWhitelist } = props;
 
   const [availableUserGroups, setAvailableUserGroups] = useState([]);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -60,7 +64,7 @@ const JobAccessGroupsSelector = (props) => {
   return userGroupsLoaded === namespace ? (
     <div className="mb-3">
       {availableUserGroups.length === 0 ? (
-        props.hideIfNoGroupsAvailable === true ? (
+        hideIfNoGroupsAvailable === true ? (
           <></>
         ) : (
           'No groups available'

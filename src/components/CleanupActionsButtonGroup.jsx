@@ -1,7 +1,10 @@
-const HousekeepingActionsButtonGroup = (props) => {
-  const { token, type, username, setDataToRemove, setShowDeleteConfirmDialog } =
-    props;
-
+const HousekeepingActionsButtonGroup = ({
+  token,
+  type,
+  username,
+  setDataToRemove,
+  setShowDeleteConfirmDialog,
+}) => {
   const setDeleteId = () => {
     setDataToRemove([{ token: token, type: type, username: username }]);
     setShowDeleteConfirmDialog(true);

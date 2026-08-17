@@ -5,9 +5,12 @@ import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
 import axios from 'axios';
 
-const AddNamespaceModal = (props) => {
-  const { showDialog, setShowDialog, handleSuccess, existingNamespaces } =
-    props;
+const AddNamespaceModal = ({
+  showDialog,
+  setShowDialog,
+  handleSuccess,
+  existingNamespaces,
+}) => {
   const [{ server }] = useContext(AuthContext);
 
   const [isSubmitting, setIsSubmitting] = useState(false);

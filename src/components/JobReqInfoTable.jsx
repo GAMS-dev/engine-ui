@@ -13,11 +13,16 @@ import { Edit3 } from 'lucide-react';
 import { UserLink } from './UserLink';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 
-const JobReqInfoTable = (props) => {
+const JobReqInfoTable = ({
+  job,
+  isHcJob,
+  inKubernetes,
+  setRefreshJob,
+  location,
+}) => {
   const [{ server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
   const [userSettings] = useContext(UserSettingsContext);
-  const { job, isHcJob, inKubernetes, setRefreshJob } = props;
   const [jobLabels, setJobLabels] = useState(null);
   const [showEditAccessGroupsDialog, setShowEditAccessGroupsDialog] =
     useState(false);
@@ -267,7 +272,7 @@ const JobReqInfoTable = (props) => {
             <tr>
               <th colSpan="2" className="text-center">
                 Model Information
-                {props.location && props.location.state}
+                {location && location.state}
               </th>
             </tr>
           </thead>

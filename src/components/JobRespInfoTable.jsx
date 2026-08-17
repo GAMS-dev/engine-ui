@@ -12,8 +12,13 @@ import { isActiveJob, getResponseError } from '../util/util';
 import JobTimingInfoBar from './JobTimingInfoBar';
 import { Link } from 'react-router';
 
-const JobRespInfoTable = (props) => {
-  const { job, statusCodes, server, isHcJob, setRefreshJob } = props;
+const JobRespInfoTable = ({
+  job,
+  statusCodes,
+  server,
+  isHcJob,
+  setRefreshJob,
+}) => {
   let solveTraceEntries;
   const [jobStatus, setJobStatus] = useState(job.status);
   const [queuePosition, setQueuePosition] = useState(job.queue_position);

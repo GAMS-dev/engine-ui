@@ -4,9 +4,15 @@ import axios from 'axios';
 import { getResponseError } from '../util/util';
 import AlertContext from '../contexts/AlertContext';
 
-const GroupMemberActionsButtonGroup = (props) => {
-  const { id, namespace, server, username, me, label, setRefresh } = props;
-
+const GroupMemberActionsButtonGroup = ({
+  id,
+  namespace,
+  server,
+  username,
+  me,
+  label,
+  setRefresh,
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 

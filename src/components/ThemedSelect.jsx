@@ -37,14 +37,14 @@ const darkColors = {
   primary25: 'rgba(243, 150, 25, 0.35)',
 };
 
-const ThemedSelect = (props) => {
+const ThemedSelect = ({ theme, ...rest }) => {
   const systemTheme = useSystemTheme();
 
   return (
     <Select
-      {...props}
+      {...rest}
       theme={(base) => {
-        const withOverrides = props.theme ? props.theme(base) : base;
+        const withOverrides = theme ? theme(base) : base;
         return {
           ...withOverrides,
           colors: {

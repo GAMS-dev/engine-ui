@@ -7,18 +7,17 @@ import { Link } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import { useEffect } from 'react';
 
-const InstancePoolsActionsButtonGroup = (props) => {
-  const {
-    label,
-    server,
-    setRefresh,
-    isPool,
-    poolSize,
-    poolSizeCurrent,
-    poolIsCanceling,
-    instancePoolsEnabled,
-    hasPoolWritePerm,
-  } = props;
+const InstancePoolsActionsButtonGroup = ({
+  label,
+  server,
+  setRefresh,
+  isPool,
+  poolSize,
+  poolSizeCurrent,
+  poolIsCanceling,
+  instancePoolsEnabled,
+  hasPoolWritePerm,
+}) => {
   const [, setAlertMsg] = useContext(AlertContext);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);

@@ -23,8 +23,12 @@ ChartJS.register(
   Legend,
 );
 
-const SolveTraceEntryView = (props) => {
-  const { solveTraceEntry, server, setRefreshJob, jobFinished } = props;
+const SolveTraceEntryView = ({
+  solveTraceEntry,
+  server,
+  setRefreshJob,
+  jobFinished,
+}) => {
   const [data, setData] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [refresh, setRefresh] = useState(0);

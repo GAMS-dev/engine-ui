@@ -5,8 +5,12 @@ import SubmitButton from './SubmitButton';
 import { getResponseError } from '../util/util';
 import axios from 'axios';
 
-const RemoveNamespaceModal = (props) => {
-  const { showDialog, setShowDialog, handleSuccess, namespace } = props;
+const RemoveNamespaceModal = ({
+  showDialog,
+  setShowDialog,
+  handleSuccess,
+  namespace,
+}) => {
   const [{ server }] = useContext(AuthContext);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +62,7 @@ const RemoveNamespaceModal = (props) => {
           </div>
           <p>
             Are you sure you want to remove the namespace:{' '}
-            <code>{props.namespace}</code>?
+            <code>{namespace}</code>?
           </p>
           <p>
             This will also remove all the models registered in this namespace as

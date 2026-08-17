@@ -2,9 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { OverlayTrigger, Tooltip, FormControl } from 'react-bootstrap';
 import { Filter } from 'lucide-react';
 
-const OverlayFilter = (props) => {
-  const { width, filterKey, onChange, resetFilter } = props;
-
+const OverlayFilter = ({ width, filterKey, onChange, resetFilter }) => {
   const [showTT, setShowTT] = useState(false);
   const [filterVal, setFilterVal] = useState('');
   const target = useRef(null);

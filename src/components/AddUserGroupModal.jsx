@@ -5,8 +5,12 @@ import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
 import axios from 'axios';
 
-const AddUserGroupModal = (props) => {
-  const { showDialog, setShowDialog, handleSuccess, namespace } = props;
+const AddUserGroupModal = ({
+  showDialog,
+  setShowDialog,
+  handleSuccess,
+  namespace,
+}) => {
   const [{ server }] = useContext(AuthContext);
 
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from './ThemedSelect';
 
-export const InexJSONSelector = (props) => {
-  const { onChangeHandler, label, inexObject } = props;
-
+export const InexJSONSelector = ({ onChangeHandler, label, inexObject }) => {
   const [filterResults, setFilterResults] = useState(inexObject ? true : false);
   const [toggleIncludeExclude, setToggleIncludeExclude] = useState(
     inexObject && inexObject.type === 'exclude'

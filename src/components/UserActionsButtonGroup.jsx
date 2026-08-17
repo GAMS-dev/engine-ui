@@ -1,18 +1,17 @@
 import { useContext } from 'react';
 import AlertContext from '../contexts/AlertContext';
 
-const UserActionsButtonGroup = (props) => {
-  const {
-    id,
-    username,
-    userroles,
-    me,
-    isAdmin,
-    isInviter,
-    setUserToDelete,
-    setDeleteInvitation,
-    handleShowDeleteConfirmDialog,
-  } = props;
+const UserActionsButtonGroup = ({
+  id,
+  username,
+  userroles,
+  me,
+  isAdmin,
+  isInviter,
+  setUserToDelete,
+  setDeleteInvitation,
+  handleShowDeleteConfirmDialog,
+}) => {
   const [, setAlertMsg] = useContext(AlertContext);
 
   const showConfirmDialog = (e) => {

@@ -6,8 +6,12 @@ import { getResponseError } from '../util/util';
 import SubmitButton from './SubmitButton';
 import { ClipLoader } from 'react-spinners';
 
-const NamespaceQuotaUpdateForm = (props) => {
-  const { showDialog, setShowDialog, namespace, handleSuccess } = props;
+const NamespaceQuotaUpdateForm = ({
+  showDialog,
+  setShowDialog,
+  namespace,
+  handleSuccess,
+}) => {
   const [{ jwt, server }] = useContext(AuthContext);
 
   const [isLoading, setIsLoading] = useState(true);

@@ -9,30 +9,40 @@ import { getRandomInt } from '../util/util';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import { availableTablePageLengths } from '../util/constants';
 
-const Table = (props) => {
-  const { noDataMsg, isLoading, onChange, total, resetPageNumber } = props;
-
+const Table = ({
+  noDataMsg,
+  isLoading,
+  onChange,
+  total,
+  resetPageNumber,
+  idFieldName: initialIdFieldName,
+  displayFields: initialDisplayFields,
+  data: initialData,
+  sortedAsc,
+  sortedCol: initialSortedCol,
+  rowsPerPage: initialRowsPerPage,
+}) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [idFieldName, setIdFieldName] = useState(props.idFieldName);
-  const [displayFields, setDisplayFields] = useState(props.displayFields);
+  const [idFieldName, setIdFieldName] = useState(initialIdFieldName);
+  const [displayFields, setDisplayFields] = useState(initialDisplayFields);
   const [invalidPageNumber, setInvalidPageNumber] = useState(false);
   const [goToPage, setGoToPage] = useState(null);
-  const [dataRaw, setDataRaw] = useState([...props.data]);
-  const [data, setData] = useState([...props.data]);
-  const [sortAsc, setSortAsc] = useState(props.sortedAsc === true);
-  const [sortedCol, setSortedCol] = useState(props.sortedCol);
+  const [dataRaw, setDataRaw] = useState([...initialData]);
+  const [data, setData] = useState([...initialData]);
+  const [sortAsc, setSortAsc] = useState(sortedAsc === true);
+  const [sortedCol, setSortedCol] = useState(initialSortedCol);
   const [refreshCount, setRefreshCount] = useState(0);
 
   const [currentFilters, setCurrentFilters] = useState({});
 
   const [userSettings] = useContext(UserSettingsContext);
   const [noRows, setNoRows] = useState(
-    onChange == null ? props.data.length : total,
+    onChange == null ? initialData.length : total,
   );
   const [rowsPerPage, setRowsPerPage] = useState(
-    props.rowsPerPage == null
+    initialRowsPerPage == null
       ? parseInt(userSettings.tablePageLength, 10)
-      : props.rowsPerPage,
+      : initialRowsPerPage,
   );
   const [noPages, setNoPages] = useState(Math.ceil(noRows / rowsPerPage));
 
@@ -43,30 +53,30 @@ const Table = (props) => {
   }, [resetPageNumber]);
 
   useEffect(() => {
-    setData([...props.data]);
-    setDataRaw([...props.data]);
-    const newNoRows = onChange == null ? props.data.length : total;
+    setData([...initialData]);
+    setDataRaw([...initialData]);
+    const newNoRows = onChange == null ? initialData.length : total;
     setNoRows(newNoRows);
-    const newRowsPerPage = props.rowsPerPage
-      ? props.rowsPerPage
+    const newRowsPerPage = initialRowsPerPage
+      ? initialRowsPerPage
       : parseInt(userSettings.tablePageLength, 10);
     const newNoPages = Math.ceil(newNoRows / newRowsPerPage);
     setRowsPerPage(newRowsPerPage);
     setNoPages(newNoPages);
     setCurrentPage((current) => Math.max(0, Math.min(current, newNoPages - 1)));
-    setSortAsc(props.sortedAsc === true);
-    setSortedCol(props.sortedCol);
+    setSortAsc(sortedAsc === true);
+    setSortedCol(initialSortedCol);
     setCurrentFilters({});
-    setIdFieldName(props.idFieldName);
-    setDisplayFields(props.displayFields);
+    setIdFieldName(initialIdFieldName);
+    setDisplayFields(initialDisplayFields);
     setRefreshCount((prev) => prev + 1);
   }, [
-    props.data,
-    props.sortedAsc,
-    props.sortedCol,
-    props.idFieldName,
-    props.displayFields,
-    props.rowsPerPage,
+    initialData,
+    sortedAsc,
+    initialSortedCol,
+    initialIdFieldName,
+    initialDisplayFields,
+    initialRowsPerPage,
     onChange,
     total,
     userSettings,

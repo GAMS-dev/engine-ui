@@ -2,9 +2,7 @@ import { Link } from 'react-router';
 import DownloadLink from './DownloadLink';
 import TerminateJobButton from './TerminateJobButton';
 
-const JobActionsButtonGroup = (props) => {
-  const { token, status, server, setRefresh } = props;
-
+const JobActionsButtonGroup = ({ token, status, server, setRefresh }) => {
   return (
     <div className="btn-group">
       <Link to={'/jobs/' + token} className="btn btn-sm btn-outline-info">

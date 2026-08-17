@@ -6,8 +6,12 @@ import { getResponseError } from '../util/util';
 import axios from 'axios';
 import AlertContext from '../contexts/AlertContext';
 
-const RemoveAuthProviderModal = (props) => {
-  const { showDialog, setShowDialog, providerId, setRefreshProviders } = props;
+const RemoveAuthProviderModal = ({
+  showDialog,
+  setShowDialog,
+  providerId,
+  setRefreshProviders,
+}) => {
   const [{ server }] = useContext(AuthContext);
   const [, setAlertMsg] = useContext(AlertContext);
 

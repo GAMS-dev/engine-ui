@@ -5,9 +5,7 @@ import { getResponseError } from '../util/util';
 import axios from 'axios';
 import { Link } from 'react-router';
 
-const InstancesActionsButtonGroup = (props) => {
-  const { label, server, setRefresh } = props;
-
+const InstancesActionsButtonGroup = ({ label, server, setRefresh }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submissionErrorMsg, setSubmissionErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

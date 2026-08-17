@@ -4,9 +4,7 @@ import { Modal, Button } from 'react-bootstrap';
 import AlertContext from '../contexts/AlertContext';
 import { isActiveJob, getResponseError } from '../util/util';
 
-const TerminateJobButton = (props) => {
-  const { token, status, server, setRefresh } = props;
-
+const TerminateJobButton = ({ token, status, server, setRefresh }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const [, setAlertMsg] = useContext(AlertContext);
