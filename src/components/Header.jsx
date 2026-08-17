@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useContext } from 'react';
 import { Badge } from 'react-bootstrap';
 import { Link } from 'react-router';
 import logo from '../assets/images/logo.svg';
@@ -7,33 +7,21 @@ import UserMenu from './UserMenu';
 
 const Header = ({ licenseExpiration, isAdmin }) => {
   const [serverInfo] = useContext(ServerInfoContext);
-  const [expiresIn, setExpiresIn] = useState(0);
-  const [licenseValid, setLicenseValid] = useState(false);
 
-  useEffect(() => {
-    if (isAdmin) {
-      if (licenseExpiration === 'perpetual') {
-        setExpiresIn(null);
-        setLicenseValid(true);
-      } else if (licenseExpiration) {
-        setExpiresIn(
-          Math.ceil(
-            (Date.parse(licenseExpiration) - new Date()) /
-              (1000 * 60 * 60 * 24),
-          ),
-        );
-        setLicenseValid(true);
-      } else if (licenseExpiration === null) {
-        setExpiresIn(null);
-        setLicenseValid(false);
-      }
-    }
-  }, [licenseExpiration, isAdmin]);
+  const licenseValid =
+    isAdmin === true &&
+    (licenseExpiration === 'perpetual' || !!licenseExpiration);
+  const expiresIn =
+    isAdmin === true && licenseExpiration && licenseExpiration !== 'perpetual'
+      ? Math.ceil(
+          (Date.parse(licenseExpiration) - new Date()) / (1000 * 60 * 60 * 24),
+        )
+      : null;
 
   return (
     <>
       <header className="navbar navbar-expand-lg navbar-dark bg-secondary border-bottom border-primary fixed-top shadow d-none d-md-flex">
-        {isAdmin && expiresIn !== 0 && (
+        {isAdmin && (
           <div
             className={`info-header ${expiresIn < 31 && !(licenseValid && expiresIn === null) ? 'text-error fw-bold' : 'text-light'}`}
           >
