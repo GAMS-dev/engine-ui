@@ -77,16 +77,16 @@ const TextEntryView = ({ textEntries, server }) => {
   ]);
 
   return (
-    <form action="">
-      <div className="mb-3">
-        <table className="table table-sm">
-          <thead className="table-header-primary">
-            <tr>
-              <th className="text-center">Text Entries</th>
-            </tr>
-          </thead>
-        </table>
-        <div className="d-flex">
+    <form action="" className="table-card">
+      <table className="table table-sm">
+        <thead className="table-header-primary">
+          <tr>
+            <th className="text-center">Text Entries</th>
+          </tr>
+        </thead>
+      </table>
+      <div className="p-3">
+        <div className="mb-3">
           <select
             name="text_entry_sel"
             id="text_entry_sel"
@@ -100,25 +100,25 @@ const TextEntryView = ({ textEntries, server }) => {
             ))}
           </select>
         </div>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="exampleFormControlTextarea1">Value</label>
-        {truncationFlag && (
-          <div>
-            <small className="text-danger">
-              The text entry is too large to be displayed here and was truncated
-              to {viewCharLimit} characters. Download the text entry to see the
-              entire content.
-            </small>
-          </div>
-        )}
-        <textarea
-          className="form-control text-monospace nowrap"
-          id="exampleFormControlTextarea1"
-          rows="15"
-          value={teContent}
-          readOnly
-        ></textarea>
+        <div className="mb-0">
+          <label htmlFor="exampleFormControlTextarea1">Value</label>
+          {truncationFlag && (
+            <div>
+              <small className="text-danger">
+                The text entry is too large to be displayed here and was
+                truncated to {viewCharLimit} characters. Download the text entry
+                to see the entire content.
+              </small>
+            </div>
+          )}
+          <textarea
+            className="form-control text-monospace nowrap"
+            id="exampleFormControlTextarea1"
+            rows="15"
+            value={teContent}
+            readOnly
+          ></textarea>
+        </div>
       </div>
     </form>
   );
