@@ -181,8 +181,13 @@ body {
   vertical-align: middle;
 }
 
+// min-width: 0 overrides the flex item's default content-based minimum
+// width, so a wide table inside `main` scrolls within its own table-card
+// instead of forcing this column (and the whole page) wider than the
+// viewport.
 [role='main'] {
   padding-top: 77px;
+  min-width: 0;
 }
 
 .nav-block {
@@ -465,7 +470,13 @@ body {
   margin-top: 1rem;
   border: 1px solid var(--bs-border-color);
   border-radius: $border-radius;
-  overflow: hidden;
+  // Horizontal only: a table wider than its card (e.g. many columns on a
+  // narrow mobile screen) scrolls within the card instead of the card
+  // growing to fit it and pushing the whole page into horizontal scroll.
+  // Vertical stays hidden purely to keep the table's corners clipped to
+  // the card's border-radius.
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .table-card > .table {
