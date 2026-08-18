@@ -47,6 +47,7 @@ const Job = () => {
       'tag',
       'queue_position',
       'priority',
+      'resource_stats',
     ];
     if (serverInfo.in_kubernetes === true) {
       fields.push('labels{*}');

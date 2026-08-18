@@ -12,6 +12,7 @@ import axios from 'axios';
 import { Edit3 } from 'lucide-react';
 import { UserLink } from './UserLink';
 import UserSettingsContext from '../contexts/UserSettingsContext';
+import InstanceSizingBadges from './InstanceSizingBadges';
 
 const JobReqInfoTable = ({
   job,
@@ -489,6 +490,14 @@ const JobReqInfoTable = ({
                       </span>
                     );
                   }) || '-'}
+                </td>
+              </tr>
+            )}
+            {job.resource_stats != null && (
+              <tr>
+                <th>Instance Sizing</th>
+                <td>
+                  <InstanceSizingBadges resourceStats={job.resource_stats} />
                 </td>
               </tr>
             )}

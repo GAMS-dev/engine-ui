@@ -235,6 +235,35 @@ describe('JobReqInfoTable', () => {
     expect(screen.queryByText('Resources')).not.toBeInTheDocument();
   });
 
+  it('does not render the Instance Sizing row when resource_stats is absent', async () => {
+    render(<JobReqInfoTable job={baseJob()} />, {
+      wrapper: AllProvidersWrapperDefault,
+    });
+    await waitFor(() => screen.findByText('Request'));
+    expect(screen.queryByText('Instance Sizing')).not.toBeInTheDocument();
+  });
+
+  it('renders sizing badges when resource_stats is present', async () => {
+    render(
+      <JobReqInfoTable
+        job={baseJob({
+          resource_stats: {
+            cgroup_peak_memory_kilobytes: 600,
+            cgroup_memory_limit_kilobytes: 1000,
+            cgroup_cpu_usage_seconds: 80,
+            cgroup_cpu_limit_millicores: 1000,
+            cgroup_throttled_seconds: 0,
+            wall_time_seconds: 100,
+          },
+        })}
+      />,
+      { wrapper: AllProvidersWrapperDefault },
+    );
+    expect(await screen.findByText('Instance Sizing')).toBeInTheDocument();
+    expect(screen.getByText('Memory: Well-sized')).toBeInTheDocument();
+    expect(screen.getByText('CPU: Well-sized')).toBeInTheDocument();
+  });
+
   it('renders job dependencies as links', async () => {
     render(<JobReqInfoTable job={baseJob({ dep_tokens: ['abc-123'] })} />, {
       wrapper: AllProvidersWrapperDefault,
