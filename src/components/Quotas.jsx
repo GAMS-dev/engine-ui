@@ -34,7 +34,7 @@ const DEFAULT_CHART_DATA = {
   labels: ['-'],
   datasets: [
     {
-      label: '# of Votes',
+      label: 'Cost',
       data: [1],
       backgroundColor: [withAlpha(CHART_COLORS[0], 0.85)],
     },
@@ -130,7 +130,7 @@ function getChartData(label, ungroupedData) {
       labels: labels,
       datasets: [
         {
-          label: '# of Votes',
+          label: 'Cost',
           data: cost,
           backgroundColor: CHART_COLORS.map((color) => withAlpha(color, 0.85)),
         },
