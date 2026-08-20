@@ -51,7 +51,7 @@ describe('NamespacePermissionSelector', () => {
   it('renders NamespacePermissionSelector correctly', async () => {
     render(
       <NamespacePermissionSelector
-        namespacePermissions={[{ name: 'global', permission: 110 }]}
+        namespacePermissions={[{ name: 'global', perm: 6, maxPerm: 7 }]}
       />,
       {
         wrapper: AllProvidersWrapperDefault,
@@ -62,8 +62,8 @@ describe('NamespacePermissionSelector', () => {
 
   it('does not mutate the namespacePermissions prop array while sorting it for display', async () => {
     const namespacePermissions = [
-      { name: 'zebra', permission: 110 },
-      { name: 'alpha', permission: 110 },
+      { name: 'zebra', perm: 6, maxPerm: 7 },
+      { name: 'alpha', perm: 6, maxPerm: 7 },
     ];
     render(
       <NamespacePermissionSelector
@@ -92,7 +92,7 @@ describe('NamespacePermissionSelector', () => {
   it('should display the tooltip on hover', async () => {
     render(
       <NamespacePermissionSelector
-        namespacePermissions={[{ name: 'global', permission: 110 }]}
+        namespacePermissions={[{ name: 'global', perm: 6, maxPerm: 7 }]}
       />,
       {
         wrapper: AllProvidersWrapperDefault,
