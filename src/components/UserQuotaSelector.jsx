@@ -230,7 +230,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
       <div className="mb-3">
         <label htmlFor="quotaParallel">
           Parallel Quota (in {userSettings.multiplierUnit})
-          {isFinite(maxQuotas.parallel) && (
+          {maxQuotasInitialized && isFinite(maxQuotas.parallel) && (
             <Button
               onClick={() => {
                 setQuotaParallel(maxQuotas.parallel);
@@ -250,7 +250,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             id="quotaParallel"
             step="any"
             min="0"
-            max={isFinite(maxQuotas.parallel) ? maxQuotas.parallel : ''}
+            max={
+              maxQuotasInitialized && isFinite(maxQuotas.parallel)
+                ? maxQuotas.parallel
+                : ''
+            }
             value={quotaParallel}
             aria-describedby="quotaParallelInherited"
             onChange={(e) => {
@@ -296,7 +300,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
       <div className="mb-3">
         <label htmlFor="quotaVolume">
           Volume Quota (in {userSettings.quotaUnit})
-          {isFinite(maxQuotas.volume) && (
+          {maxQuotasInitialized && isFinite(maxQuotas.volume) && (
             <Button
               onClick={() => {
                 setQuotaVolume(maxQuotas.volume);
@@ -317,7 +321,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             step="any"
             min="0"
             max={
-              isFinite(maxQuotas.volume)
+              maxQuotasInitialized && isFinite(maxQuotas.volume)
                 ? maxQuotas.volume / userSettings.quotaConversionFactor
                 : ''
             }
@@ -373,7 +377,7 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
       <div className="mb-3">
         <label htmlFor="quotaDisk">
           Disk Space Quota (in MB)
-          {isFinite(maxQuotas.disk) && (
+          {maxQuotasInitialized && isFinite(maxQuotas.disk) && (
             <Button
               onClick={() => {
                 setQuotaDisk(maxQuotas.disk);
@@ -395,7 +399,11 @@ const UserQuotaSelector = ({ quotas, quotaData, userToEdit, setQuotas }) => {
             value={quotaDisk === '' ? '' : Math.round(quotaDisk / 1e3) / 1000}
             aria-describedby="quotaDiskInherited"
             min="0"
-            max={isFinite(maxQuotas.disk) ? maxQuotas.disk / 1e6 : '100000000'}
+            max={
+              maxQuotasInitialized && isFinite(maxQuotas.disk)
+                ? maxQuotas.disk / 1e6
+                : '100000000'
+            }
             onChange={(e) => {
               if (e.target.value == null || e.target.value === '') {
                 setValidQuotaDisk(true);

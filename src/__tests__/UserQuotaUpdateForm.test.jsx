@@ -27,6 +27,23 @@ const AllProvidersWrapper = ({ children }) => (
   </AllProvidersWrapperDefault>
 );
 
+// The "max" quota values are computed from the fetched quota data in a
+// useEffect that runs after the initial mount, whereas the "Parallel Quota"
+// label is present from the very first render. Waiting only for the label
+// (as `findByText` would) can resolve before that effect has committed, so
+// the max/"Set to max" values would still reflect their pre-computed
+// default (0) instead of the real binding quota - flaky depending on how
+// quickly the runtime flushes that effect relative to the test's next
+// synchronous assertion. Waiting for the max attribute to reach its real,
+// non-default value guarantees the effect has actually settled.
+const waitForQuotasReady = async () => {
+  await waitFor(() =>
+    expect(
+      screen.getByRole('spinbutton', { name: /parallel quota/i }),
+    ).toHaveAttribute('max', '10'),
+  );
+};
+
 describe('UserQuotaUpdateForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -88,14 +105,14 @@ describe('UserQuotaUpdateForm', () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
   });
 
   it('displays everything correctly', async () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
 
     const parallelSpinButton = screen.getByRole('spinbutton', {
       name: 'Parallel Quota (in ¢/s) Set to max',
@@ -151,7 +168,7 @@ describe('UserQuotaUpdateForm', () => {
       wrapper: AllProvidersWrapper,
     });
     // 1. Wait for the form to load (important if data is fetched)
-    await screen.findByText(/Parallel Quota/);
+    await waitForQuotasReady();
 
     // 2. Select the specific buttons
     // If "Set to max" is the text on the button, use that specifically.
@@ -188,7 +205,7 @@ describe('UserQuotaUpdateForm', () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
 
     const parallelSpinButton = screen.getByRole('spinbutton', {
       name: 'Parallel Quota (in ¢/s) Set to max',
@@ -225,7 +242,7 @@ describe('UserQuotaUpdateForm', () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
 
     const parallelSpinButton = screen.getByRole('spinbutton', {
       name: 'Parallel Quota (in ¢/s) Set to max',
@@ -268,7 +285,7 @@ describe('UserQuotaUpdateForm', () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
 
     const parallelSpinButton = screen.getByRole('spinbutton', {
       name: 'Parallel Quota (in ¢/s) Set to max',
@@ -307,7 +324,7 @@ describe('UserQuotaUpdateForm', () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
 
     const parallelSpinButton = screen.getByRole('spinbutton', {
       name: 'Parallel Quota (in ¢/s) Set to max',
@@ -362,7 +379,7 @@ describe('UserQuotaUpdateForm', () => {
       wrapper: AllProvidersWrapper,
     });
 
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
 
     const setMaxButtons = screen.getAllByRole('button', { name: 'Set to max' });
 
@@ -382,7 +399,7 @@ describe('UserQuotaUpdateForm', () => {
     render(<UserQuotaUpdateForm />, {
       wrapper: AllProvidersWrapper,
     });
-    await waitFor(() => screen.findByText(/Parallel Quota /));
+    await waitForQuotasReady();
     const parallelSpinButton = screen.getByRole('spinbutton', {
       name: 'Parallel Quota (in ¢/s) Set to max',
     });
