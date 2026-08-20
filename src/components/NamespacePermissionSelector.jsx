@@ -40,18 +40,18 @@ export const NamespacePermissionSelector = ({
           ),
     [namespacePermissions],
   );
-  const [nsId, setNsId] = useState(() =>
-    namespacePermissions == null
-      ? 0
-      : namespacePermissions.findIndex(
-          (el) => el.name === sortedNamespacePermissions[0]?.name,
-        ),
-  );
   const [modifiedFlag, setModifiedFlag] = useState(false);
   const [selectedNamespace, setSelectedNamespace] = useState(
     sortedNamespacePermissions.length > 0
       ? sortedNamespacePermissions[0].name
       : '',
+  );
+  const nsId = useMemo(
+    () =>
+      namespacePermissions == null
+        ? 0
+        : namespacePermissions.findIndex((el) => el.name === selectedNamespace),
+    [namespacePermissions, selectedNamespace],
   );
   const [readAccess, setReadAccess] = useState(undefined);
   const [writeAccess, setWriteAccess] = useState(undefined);
@@ -75,14 +75,11 @@ export const NamespacePermissionSelector = ({
         }));
         const availableGroupLabels = res.data.map((group) => group.label);
         setAvailableGroups(availableGroupsTmp);
-        const nsIdTmp = namespacePermissions.findIndex(
-          (el) => el.name === selectedNamespace,
-        );
         setSelectedGroups(() => {
-          if (namespacePermissions[nsIdTmp].groups == null) {
+          if (namespacePermissions[nsId].groups == null) {
             return [];
           }
-          return namespacePermissions[nsIdTmp].groups
+          return namespacePermissions[nsId].groups
             .filter((group) => availableGroupLabels.includes(group))
             .map((group) => ({ value: group, label: group }));
         });
@@ -105,6 +102,7 @@ export const NamespacePermissionSelector = ({
     setAlertMsg,
     namespacePermissions,
     setIsLoading,
+    nsId,
   ]);
 
   const updateNsPermissions = (permBit) => {
@@ -148,7 +146,6 @@ export const NamespacePermissionSelector = ({
     setReadAccess((namespacePermissions[newNsId].perm & 4) !== 0);
     setWriteAccess((namespacePermissions[newNsId].perm & 2) !== 0);
     setExecAccess((namespacePermissions[newNsId].perm & 1) !== 0);
-    setNsId(newNsId);
     setSelectedNamespace(e.target.value);
   };
   const updateReadAccess = (e) => {
