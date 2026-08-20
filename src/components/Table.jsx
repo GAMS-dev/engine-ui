@@ -328,7 +328,7 @@ const Table = ({
                   active={currentPage === i}
                   onClick={updateCurrentPage}
                 >
-                  {i + 1}
+                  {(i + 1).toLocaleString()}
                 </Pagination.Item>
               );
             })}
