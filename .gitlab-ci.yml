@@ -30,12 +30,12 @@ lint:
   stage: lint
   before_script: deno install --frozen
   script:
-    - SKIP='check-format, lint-files' pre-commit run --all-files
+    - SKIP='check-format, lint-files' prek run --all-files
     - deno task format:check
     # - deno task lint
     - deno run -A eslint-wrapper.ts --max-warnings 0 ./src
   variables:
-    PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
+    PREK_HOME: ${CI_PROJECT_DIR}/.cache/prek
     DENO_DIR: ${CI_PROJECT_DIR}/.cache/deno
   cache:
     - key:
@@ -43,6 +43,11 @@ lint:
           - deno.lock
       paths:
         - .cache/deno
+    - key:
+        files:
+          - .pre-commit-config.yaml
+      paths:
+        - .cache/prek
 
 test:
   image: $CI_REGISTRY_IMAGE/buildimage:latest

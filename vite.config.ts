@@ -9,11 +9,11 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api/v2': {
-        target: 'http://localhost:5000',
+        target: 'http://host.docker.internal:5000',
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:80',
+        target: 'http://host.docker.internal:80',
         changeOrigin: true,
       },
     },

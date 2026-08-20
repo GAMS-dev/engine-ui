@@ -5,4 +5,4 @@ RUN apt-get update && apt-get install --no-install-recommends -y curl unzip git
 RUN curl -fsSL https://deno.land/install.sh | sh -s v2.8.3
 ENV PATH="/root/.deno/bin:$PATH"
 
-RUN uv pip install --system pre-commit
+RUN uv pip install --system prek
