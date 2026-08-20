@@ -5,7 +5,7 @@ import { useSystemTheme } from '../util/theme';
 // light/dark preference, since react-select has no awareness of Bootstrap's
 // data-bs-theme attribute, and that uses our brand orange instead of
 // react-select's default blue for focus/selection states.
-const PRIMARY = '#f39619';
+const PRIMARY = 'var(--bs-primary, #f39619)';
 
 // Selected-option text color is drawn from `neutral0` (react-select assumes
 // it's always the lightest neutral), and the focused/hovered-but-unselected
