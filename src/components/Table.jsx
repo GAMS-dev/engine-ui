@@ -100,12 +100,6 @@ const Table = ({
   const gotoPreviousPage = () => {
     setCurrentPage(currentPage - 1);
   };
-  const updateCurrentPage = (e) => {
-    const newPage = parseInt(e.target.text, 10);
-    if (!isNaN(newPage)) {
-      setCurrentPage(newPage - 1);
-    }
-  };
   const createRow = (sub) => {
     return (
       <tr key={sub[idFieldName]}>
@@ -326,7 +320,7 @@ const Table = ({
                 <Pagination.Item
                   key={'p_' + i}
                   active={currentPage === i}
-                  onClick={updateCurrentPage}
+                  onClick={() => setCurrentPage(i)}
                 >
                   {(i + 1).toLocaleString()}
                 </Pagination.Item>
