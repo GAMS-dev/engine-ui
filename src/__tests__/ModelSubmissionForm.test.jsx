@@ -404,6 +404,125 @@ describe('ModelSubmissionForm', () => {
       expect(formData.get('delete_job_executable')).toBe('true');
     });
   });
+
+  describe('environment variables', () => {
+    beforeEach(() => {
+      vi.mocked(useParams).mockReturnValue({
+        modelname: undefined,
+        namespace: 'global',
+      });
+    });
+
+    const uploadZip = async () => {
+      const fileInput = screen.getByLabelText(/Drop model files here/i);
+      await user.upload(
+        fileInput,
+        new File(['a'.repeat(50)], 'model.zip', { type: 'application/zip' }),
+      );
+    };
+
+    it('submits the configured variables as an env JSON string', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel',
+      );
+      await uploadZip();
+      await user.click(
+        screen.getByRole('button', { name: /Add environment variable/i }),
+      );
+      await user.type(
+        screen.getByLabelText('Environment variable 1 name'),
+        'MY_VAR_1',
+      );
+      await user.type(
+        screen.getByLabelText('Environment variable 1 value'),
+        'test123',
+      );
+
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      expect(axios.mock.calls[0][0].data.get('env')).toBe(
+        '{"MY_VAR_1":"test123"}',
+      );
+    });
+
+    it('blocks submission while a variable is incomplete', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel',
+      );
+      await uploadZip();
+      await user.click(
+        screen.getByRole('button', { name: /Add environment variable/i }),
+      );
+      await user.type(
+        screen.getByLabelText('Environment variable 1 value'),
+        'orphaned',
+      );
+
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(/fix the environment variables/i),
+        ).toBeInTheDocument(),
+      );
+      expect(axios).not.toHaveBeenCalled();
+    });
+
+    it('populates the editor from an existing model’s env', async () => {
+      vi.mocked(useParams).mockReturnValue({
+        modelname: 'transport',
+        namespace: 'global',
+      });
+      axios.get.mockImplementation((url) => {
+        switch (url) {
+          case 'testserver/namespaces/global':
+            return Promise.resolve({
+              status: 200,
+              data: [
+                {
+                  name: 'transport',
+                  run: 'main.gms',
+                  arguments: [],
+                  text_entries: [],
+                  stream_entries: [],
+                  inex: '',
+                  env: { FROM_SERVER: 'yes' },
+                  protect_model_files: false,
+                },
+              ],
+            });
+          case 'testserver/namespaces/global/user-groups':
+            return Promise.resolve({ status: 200, data: [] });
+          default:
+            return Promise.reject(new Error('not found'));
+        }
+      });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      expect(screen.getByLabelText('Environment variable 1 name')).toHaveValue(
+        'FROM_SERVER',
+      );
+      expect(screen.getByLabelText('Environment variable 1 value')).toHaveValue(
+        'yes',
+      );
+    });
+  });
+
   describe('job_executable', () => {
     beforeEach(() => {
       vi.mocked(useParams).mockReturnValue({

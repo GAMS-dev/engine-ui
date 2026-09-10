@@ -3,6 +3,8 @@ import { Navigate, useParams } from 'react-router';
 import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Info } from 'lucide-react';
 import Select from './ThemedSelect';
 import {
   zipAsync,
@@ -12,6 +14,7 @@ import {
   stripFileExtension,
 } from '../util/util';
 import InexJSONSelector from './InexJSONSelector';
+import EnvironmentVariablesSelector from './EnvironmentVariablesSelector';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
 import FileDropZone from './FileDropZone';
@@ -34,6 +37,10 @@ const ModelSubmissionForm = () => {
   const [clArgs, setClArgs] = useState('');
   const [inexObject, setInexObject] = useState('');
   const [inexJSON, setInexJSON] = useState('');
+  const [initialEnv, setInitialEnv] = useState(null);
+  const [envJSON, setEnvJSON] = useState('');
+  // An invalid row is kept out of envJSON, so submission blocks on this.
+  const [envIsValid, setEnvIsValid] = useState(true);
   const [protectModelFiles, setProtectModelFiles] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,6 +98,7 @@ const ModelSubmissionForm = () => {
           setTextEntries(resModelData.data[0].text_entries.join(','));
           setStreamEntries(resModelData.data[0].stream_entries.join(','));
           setInexObject(resModelData.data[0].inex);
+          setInitialEnv(resModelData.data[0].env ?? null);
           setProtectModelFiles(
             resModelData.data[0].protect_model_files === true,
           );
@@ -139,6 +147,12 @@ const ModelSubmissionForm = () => {
   const handleModelSubmission = async () => {
     if (newModelName.toLowerCase().endsWith('.gms')) {
       setSubmissionErrorMsg("Model name must not end with '.gms'!");
+      return;
+    }
+    if (!envIsValid) {
+      setSubmissionErrorMsg(
+        'Please fix the environment variables highlighted below.',
+      );
       return;
     }
     let zipPromise;
@@ -203,6 +217,11 @@ const ModelSubmissionForm = () => {
     } else if (modelname) {
       modelSubmissionForm.append('delete_run', 'true');
     }
+    if (envJSON !== '') {
+      modelSubmissionForm.append('env', envJSON);
+    } else if (modelname) {
+      modelSubmissionForm.append('delete_env', 'true');
+    }
     // Derived from the run file rather than asked for separately.
     const jobExecutable = jobExecutableForRunFile(runName);
     if (jobExecutable !== '') {
@@ -249,6 +268,11 @@ const ModelSubmissionForm = () => {
     );
     setModelAdded(true);
   };
+  const handleEnvChange = useCallback((json, isValid) => {
+    setEnvJSON(json);
+    setEnvIsValid(isValid);
+  }, []);
+
   const updateModelFiles = useCallback(
     (acceptedFiles) => {
       setModelFiles([...acceptedFiles]);
@@ -355,6 +379,14 @@ const ModelSubmissionForm = () => {
               />
             </div>
             <div className="mb-3">
+              <EnvironmentVariablesSelector
+                idPrefix="modelEnv"
+                initialEnv={initialEnv}
+                disabled={isSubmitting}
+                onChange={handleEnvChange}
+              />
+            </div>
+            <div className="mb-3">
               <label htmlFor="textEntries" className="visually-hidden">
                 Text Entries (comma-separated)
               </label>
@@ -418,6 +450,22 @@ const ModelSubmissionForm = () => {
                 Should model files be protected from being overwritten by data
                 files?
               </label>
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id="protectModelFilesTooltip">
+                    <div>
+                      Data files sent with a job cannot overwrite this
+                      model&apos;s own files.
+                      <br />A job also cannot override the environment
+                      variables, executable, command line arguments or run file
+                      name registered here.
+                    </div>
+                  </Tooltip>
+                }
+              >
+                <Info size={16} className="info-tooltip-icon ms-2" />
+              </OverlayTrigger>
             </div>
           </fieldset>
           <div className="mt-3">

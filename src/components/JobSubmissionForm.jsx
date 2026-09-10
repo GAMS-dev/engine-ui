@@ -21,6 +21,7 @@ import {
 } from '../util/util';
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import InexJSONSelector from './InexJSONSelector';
+import EnvironmentVariablesSelector from './EnvironmentVariablesSelector';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
 import ServerInfoContext from '../contexts/ServerInfoContext';
@@ -54,6 +55,9 @@ const JobSubmissionForm = ({ newHcJob }) => {
   const [textEntries, setTextEntries] = useState('');
   const [streamEntries, setStreamEntries] = useState('');
   const [inexJSON, setInexJSON] = useState('');
+  const [envJSON, setEnvJSON] = useState('');
+  // An invalid row is kept out of envJSON, so submission blocks on this.
+  const [envIsValid, setEnvIsValid] = useState(true);
   const [jobDeps, setJobDeps] = useState('');
   const [jobTag, setJobTag] = useState('');
   const [validCpuReq, setValidCpuReq] = useState(true);
@@ -266,6 +270,12 @@ const JobSubmissionForm = ({ newHcJob }) => {
       setSubmissionErrorMsg('Please provide model files.');
       return;
     }
+    if (!envIsValid) {
+      setSubmissionErrorMsg(
+        'Please fix the environment variables under Advanced Options.',
+      );
+      return;
+    }
     setSubmissionErrorMsg('');
     setIsSubmitting(true);
     const jobSubmissionForm = new FormData();
@@ -350,6 +360,9 @@ const JobSubmissionForm = ({ newHcJob }) => {
     });
     if (inexJSON !== '') {
       jobSubmissionForm.append('inex_string', inexJSON);
+    }
+    if (envJSON !== '') {
+      jobSubmissionForm.append('env', envJSON);
     }
     if (serverInfo && serverInfo.in_kubernetes === true) {
       if (useRawRequests) {
@@ -450,6 +463,10 @@ const JobSubmissionForm = ({ newHcJob }) => {
   }, []);
   const updateHcFile = useCallback((acceptedFiles) => {
     setHcFile([...acceptedFiles][0]);
+  }, []);
+  const handleEnvChange = useCallback((json, isValid) => {
+    setEnvJSON(json);
+    setEnvIsValid(isValid);
   }, []);
 
   return (
@@ -802,6 +819,13 @@ const JobSubmissionForm = ({ newHcJob }) => {
                         autoComplete="on"
                         value={clArgs}
                         onChange={(e) => setClArgs(e.target.value)}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <EnvironmentVariablesSelector
+                        idPrefix="jobEnv"
+                        disabled={isSubmitting}
+                        onChange={handleEnvChange}
                       />
                     </div>
                     <div className="mb-3">

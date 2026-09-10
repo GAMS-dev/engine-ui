@@ -677,6 +677,76 @@ describe('JobSubmissionForm', () => {
     expect(axios.post.mock.calls[0][1].get('job_executable')).toBeNull();
   });
 
+  it('submits configured environment variables as an env JSON string', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+    await user.click(
+      screen.getByRole('button', { name: /Add environment variable/i }),
+    );
+    await user.type(
+      screen.getByLabelText('Environment variable 1 name'),
+      'MY_VAR_1',
+    );
+    await user.type(
+      screen.getByLabelText('Environment variable 1 value'),
+      'test123',
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(axios.post.mock.calls[0][1].get('env')).toBe(
+      '{"MY_VAR_1":"test123"}',
+    );
+  });
+
+  it('omits env entirely when no environment variables are configured', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(axios.post.mock.calls[0][1].get('env')).toBeNull();
+  });
+
+  it('blocks submission while an environment variable is incomplete', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+    await user.click(
+      screen.getByRole('button', { name: /Add environment variable/i }),
+    );
+    await user.type(
+      screen.getByLabelText('Environment variable 1 value'),
+      'orphaned',
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/fix the environment variables/i),
+      ).toBeInTheDocument(),
+    );
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
   it('skips zipping a single already-zipped model file', async () => {
     mockAxiosGet();
     axios.post.mockResolvedValue({ data: {} });
