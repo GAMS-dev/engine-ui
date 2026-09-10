@@ -4,7 +4,13 @@ import AlertContext from '../contexts/AlertContext';
 import AuthContext from '../contexts/AuthContext';
 import axios from 'axios';
 import Select from './ThemedSelect';
-import { zipAsync, getResponseError } from '../util/util';
+import {
+  zipAsync,
+  getResponseError,
+  jobExecutableForRunFile,
+  deriveRunFileName,
+  stripFileExtension,
+} from '../util/util';
 import InexJSONSelector from './InexJSONSelector';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
@@ -197,6 +203,13 @@ const ModelSubmissionForm = () => {
     } else if (modelname) {
       modelSubmissionForm.append('delete_run', 'true');
     }
+    // Derived from the run file rather than asked for separately.
+    const jobExecutable = jobExecutableForRunFile(runName);
+    if (jobExecutable !== '') {
+      modelSubmissionForm.append('job_executable', jobExecutable);
+    } else if (modelname) {
+      modelSubmissionForm.append('delete_job_executable', 'true');
+    }
     if (userGroups.length > 0) {
       for (let i = 0; i < userGroups.length; i++) {
         modelSubmissionForm.append('user_groups', userGroups[i].value);
@@ -239,12 +252,13 @@ const ModelSubmissionForm = () => {
   const updateModelFiles = useCallback(
     (acceptedFiles) => {
       setModelFiles([...acceptedFiles]);
-      const modelNameTmp = acceptedFiles[0].name.split('.')[0];
+      // Both from the same file: `trnsport.py` -> model `trnsport`.
+      const runFileName = deriveRunFileName(acceptedFiles.map((f) => f.name));
       if (newModelName === '') {
-        setNewModelName(modelNameTmp);
+        setNewModelName(stripFileExtension(runFileName));
       }
       if (runName === '') {
-        setRunName(`${modelNameTmp}.gms`);
+        setRunName(runFileName);
       }
     },
     [runName, newModelName],

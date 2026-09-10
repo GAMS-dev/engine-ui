@@ -526,6 +526,157 @@ describe('JobSubmissionForm', () => {
     expect(formData.get('run')).toBe('customname');
   });
 
+  it('pre-fills the main file from a dropped .py file, keeping its own extension', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['print(1)'], 'trnsport.py', { type: 'text/plain' }),
+    );
+
+    expect(screen.getByLabelText(/Name of the Main File/i)).toHaveValue(
+      'trnsport.py',
+    );
+  });
+
+  it('pre-fills the main file from a dropped .gms file', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['* dummy'], 'trnsport.gms', { type: 'text/plain' }),
+    );
+
+    expect(screen.getByLabelText(/Name of the Main File/i)).toHaveValue(
+      'trnsport.gms',
+    );
+  });
+
+  it('still guesses <name>.gms for a dropped archive it cannot look inside', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['a'.repeat(20)], 'trnsport.zip', { type: 'application/zip' }),
+    );
+
+    expect(screen.getByLabelText(/Name of the Main File/i)).toHaveValue(
+      'trnsport.gms',
+    );
+  });
+
+  it('strips the extension from the model name whatever it is, keeping the file name in run', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['* dummy'], 'anything.txt', { type: 'text/plain' }),
+    );
+    const nameInput = screen.getByLabelText(/Name of the Main File/i);
+    await user.clear(nameInput);
+    await user.type(nameInput, 'my.model.txt');
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('model')).toBe('my.model');
+    expect(formData.get('run')).toBe('my.model.txt');
+  });
+
+  it('omits run for the <model>.gms default Engine already assumes', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['* dummy'], 'trnsport.gms', { type: 'text/plain' }),
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('model')).toBe('trnsport');
+    expect(formData.get('run')).toBeNull();
+  });
+
+  it('sets job_executable=python for a .py main file', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['print(1)'], 'solve.py', { type: 'text/plain' }),
+    );
+    const nameInput = screen.getByLabelText(/Name of the Main File/i);
+    await user.clear(nameInput);
+    await user.type(nameInput, 'solve.py');
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.get('run')).toBe('solve.py');
+    expect(formData.get('job_executable')).toBe('python');
+    // The extension belongs in `run` only.
+    expect(formData.get('model')).toBe('solve');
+  });
+
+  it('leaves job_executable unset for a .gms main file, falling back to gams', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+
+    await user.upload(
+      screen.getByLabelText(/Drop static model files here/i),
+      new File(['* dummy'], 'mymodel.gms', { type: 'text/plain' }),
+    );
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(axios.post.mock.calls[0][1].get('job_executable')).toBeNull();
+  });
+
+  it('sends no job_executable when no run file is specified, as for a registered model', async () => {
+    mockAxiosGet();
+    axios.post.mockResolvedValue({ data: {} });
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(axios.post.mock.calls[0][1].get('job_executable')).toBeNull();
+  });
+
   it('skips zipping a single already-zipped model file', async () => {
     mockAxiosGet();
     axios.post.mockResolvedValue({ data: {} });

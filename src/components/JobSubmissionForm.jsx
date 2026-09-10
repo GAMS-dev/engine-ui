@@ -15,6 +15,9 @@ import {
   formatDurationString,
   calcRemainingQuota,
   formatFileSize,
+  jobExecutableForRunFile,
+  deriveRunFileName,
+  stripFileExtension,
 } from '../util/util';
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import InexJSONSelector from './InexJSONSelector';
@@ -272,10 +275,11 @@ const JobSubmissionForm = ({ newHcJob }) => {
     if (useRegisteredModel) {
       jobSubmissionForm.append('model', registeredModelName);
     } else {
-      if (modelName.endsWith('.gms')) {
-        jobSubmissionForm.append('model', modelName.slice(0, -4));
-      } else {
-        jobSubmissionForm.append('model', modelName);
+      // The model name is an identifier, so the extension travels in `run`
+      // instead - except for `<model>.gms`, which Engine already assumes.
+      const modelIdentifier = stripFileExtension(modelName);
+      jobSubmissionForm.append('model', modelIdentifier);
+      if (modelName !== `${modelIdentifier}.gms`) {
         jobSubmissionForm.append('run', modelName);
       }
       if (
@@ -287,6 +291,10 @@ const JobSubmissionForm = ({ newHcJob }) => {
       } else {
         jobSubmissionForm.append('model_data', modelFiles[0], 'model.zip');
       }
+    }
+    const jobExecutable = jobExecutableForRunFile(jobSubmissionForm.get('run'));
+    if (jobExecutable !== '') {
+      jobSubmissionForm.append('job_executable', jobExecutable);
     }
     if (modelData) {
       if (
@@ -430,7 +438,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
   const updateModelFiles = useCallback(
     (acceptedFiles) => {
       if (modelName === '') {
-        setModelName(`${acceptedFiles[0].name.split('.')[0]}.gms`);
+        setModelName(deriveRunFileName(acceptedFiles.map((f) => f.name)));
       }
       setModelFiles([...acceptedFiles]);
     },

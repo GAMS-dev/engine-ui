@@ -386,5 +386,118 @@ describe('ModelSubmissionForm', () => {
         ).toBeInTheDocument(),
       );
     });
+
+    it('submits deletion sentinels for env and job_executable when neither is set', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const formData = axios.mock.calls[0][0].data;
+      expect(formData.get('env')).toBeNull();
+      expect(formData.get('delete_env')).toBe('true');
+      // main.gms uses Engine's default, so none may linger on the model.
+      expect(formData.get('job_executable')).toBeNull();
+      expect(formData.get('delete_job_executable')).toBe('true');
+    });
+  });
+  describe('job_executable', () => {
+    beforeEach(() => {
+      vi.mocked(useParams).mockReturnValue({
+        modelname: undefined,
+        namespace: 'global',
+      });
+    });
+
+    const submitWithRunName = async (runName) => {
+      axios.mockResolvedValue({ data: {} });
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.type(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+        'mymodel',
+      );
+      await user.type(
+        screen.getByPlaceholderText(/Name of the main file/i),
+        runName,
+      );
+      await user.upload(
+        screen.getByLabelText(/Drop model files here/i),
+        new File(['a'.repeat(50)], 'model.zip', { type: 'application/zip' }),
+      );
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      return axios.mock.calls[0][0].data;
+    };
+
+    it('pre-fills the main file from a dropped .py file, keeping its own extension', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.upload(
+        screen.getByLabelText(/Drop model files here/i),
+        new File(['print(1)'], 'trnsport.py', { type: 'text/plain' }),
+      );
+
+      expect(screen.getByPlaceholderText(/Name of the main file/i)).toHaveValue(
+        'trnsport.py',
+      );
+      // The model itself is still named without the extension.
+      expect(
+        screen.getByPlaceholderText(/Identifier for the model/i),
+      ).toHaveValue('trnsport');
+    });
+
+    it('pre-fills the main file from a dropped .gms file', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.upload(
+        screen.getByLabelText(/Drop model files here/i),
+        new File(['* dummy'], 'trnsport.gms', { type: 'text/plain' }),
+      );
+
+      expect(screen.getByPlaceholderText(/Name of the main file/i)).toHaveValue(
+        'trnsport.gms',
+      );
+    });
+
+    it('submits a dropped .py file as the run file, with job_executable=python', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Add a model to namespace/i));
+
+      await user.upload(
+        screen.getByLabelText(/Drop model files here/i),
+        new File(['print(1)'], 'trnsport.py', { type: 'text/plain' }),
+      );
+      await user.click(screen.getByRole('button', { name: /Add Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const formData = axios.mock.calls[0][0].data;
+      expect(formData.get('run')).toBe('trnsport.py');
+      expect(formData.get('job_executable')).toBe('python');
+    });
+
+    it('sets job_executable=python for a .py run file', async () => {
+      const formData = await submitWithRunName('main.py');
+      expect(formData.get('run')).toBe('main.py');
+      expect(formData.get('job_executable')).toBe('python');
+    });
+
+    it('leaves job_executable unset for a .gms run file, falling back to gams', async () => {
+      const formData = await submitWithRunName('main.gms');
+      expect(formData.get('job_executable')).toBeNull();
+    });
+
+    it('recognises a .py run file regardless of case', async () => {
+      const formData = await submitWithRunName('Main.PY');
+      expect(formData.get('job_executable')).toBe('python');
+    });
   });
 });
