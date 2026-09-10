@@ -74,3 +74,15 @@ test:
           - deno.lock
       paths:
         - .cache/deno
+
+cors_test:
+  services:
+    - docker:24-dind
+  image: docker:24-cli
+  variables:
+    CORS_TEST_HOST: docker
+  stage: test
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - sh .ci/test-cors.sh
