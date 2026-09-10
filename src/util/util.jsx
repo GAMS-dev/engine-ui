@@ -242,6 +242,27 @@ const urlB64ToUint8Array = (base64String) => {
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
 };
+// '' means "leave job_executable unset", i.e. Engine's default: gams.
+const jobExecutableForRunFile = (runFileName) =>
+  (runFileName ?? '').trim().toLowerCase().endsWith('.py') ? 'python' : '';
+// `my.model.gms` -> `my.model`. A leading dot is not a separator, so a
+// dotfile keeps its whole name.
+const stripFileExtension = (fileName) => {
+  const name = fileName ?? '';
+  const lastDot = name.lastIndexOf('.');
+  return lastDot > 0 ? name.slice(0, lastDot) : name;
+};
+// Entry point to pre-fill from dropped files, extension kept verbatim.
+// .gms beats .py (a .py beside a model is usually a helper script); for
+// anything else (e.g. a zip we can't look inside) it guesses <name>.gms.
+const deriveRunFileName = (fileNames) => {
+  const named = (extension) => (name) => name.toLowerCase().endsWith(extension);
+  return (
+    fileNames.find(named('.gms')) ??
+    fileNames.find(named('.py')) ??
+    `${stripFileExtension(fileNames[0])}.gms`
+  );
+};
 // Corrupted/malformed JSON in localStorage (a stale value from an older app
 // version, manual tampering, another script writing to the same key, ...)
 // would otherwise throw synchronously out of a provider's initial render,
@@ -287,4 +308,7 @@ export {
   formatInstanceSpecs,
   formatInstanceSpecsParts,
   formatDecimal,
+  jobExecutableForRunFile,
+  deriveRunFileName,
+  stripFileExtension,
 };

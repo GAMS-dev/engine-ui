@@ -1,5 +1,10 @@
 import JSZip from 'jszip';
-import { zipAsync } from '../util/util.jsx';
+import {
+  zipAsync,
+  jobExecutableForRunFile,
+  deriveRunFileName,
+  stripFileExtension,
+} from '../util/util.jsx';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 declare global {
@@ -77,5 +82,80 @@ describe('zipAsync', () => {
       type: 'blob',
       platform: 'UNIX',
     });
+  });
+});
+
+describe('jobExecutableForRunFile', () => {
+  it.each([
+    ['solve.py', 'python'],
+    ['Solve.PY', 'python'],
+    ['  solve.py  ', 'python'],
+  ])('runs %s with python', (runFileName, expected) => {
+    expect(jobExecutableForRunFile(runFileName)).toBe(expected);
+  });
+
+  it.each([
+    ['trnsport.gms'],
+    ['model.zip'],
+    ['pyproject.toml'],
+    // A name that merely contains ".py" is not a Python entry point.
+    ['not.python.gms'],
+    [''],
+    [undefined],
+  ])(
+    'leaves %s to Engine’s default executable (gams)',
+    (runFileName?: string) => {
+      expect(jobExecutableForRunFile(runFileName)).toBe('');
+    },
+  );
+});
+
+describe('deriveRunFileName', () => {
+  it('keeps a dropped .py file as the run file rather than renaming it .gms', () => {
+    expect(deriveRunFileName(['trnsport.py'])).toBe('trnsport.py');
+  });
+
+  it('keeps a dropped .gms file as-is', () => {
+    expect(deriveRunFileName(['trnsport.gms'])).toBe('trnsport.gms');
+  });
+
+  it('prefers the .gms model when a Python helper script sits next to it', () => {
+    expect(deriveRunFileName(['plot.py', 'trnsport.gms'])).toBe('trnsport.gms');
+  });
+
+  it('picks the entry point out of a pile of data files, whatever the drop order', () => {
+    expect(deriveRunFileName(['data.inc', 'input.csv', 'trnsport.py'])).toBe(
+      'trnsport.py',
+    );
+  });
+
+  it('takes the first candidate when several of the same kind are dropped', () => {
+    expect(deriveRunFileName(['a.py', 'b.py'])).toBe('a.py');
+  });
+
+  it('falls back to <name>.gms for an archive, whose contents it cannot inspect', () => {
+    expect(deriveRunFileName(['trnsport.zip'])).toBe('trnsport.gms');
+    expect(deriveRunFileName(['my.model.zip'])).toBe('my.model.gms');
+  });
+
+  it('matches an extension regardless of case', () => {
+    expect(deriveRunFileName(['Trnsport.PY'])).toBe('Trnsport.PY');
+  });
+});
+
+describe('stripFileExtension', () => {
+  it.each([
+    ['trnsport.py', 'trnsport'],
+    ['trnsport.gms', 'trnsport'],
+    ['trnsport.zip', 'trnsport'],
+    // Only the final extension goes - the rest is part of the name.
+    ['my.model.gms', 'my.model'],
+    // Nothing to strip.
+    ['trnsport', 'trnsport'],
+    // A leading dot is not an extension separator.
+    ['.env', '.env'],
+    ['', ''],
+  ])('turns %s into the model name %s', (fileName, expected) => {
+    expect(stripFileExtension(fileName)).toBe(expected);
   });
 });
