@@ -696,6 +696,174 @@ body {
   align-items: center;
 }
 
+// EnvironmentVariablesSelector. All theme-variable driven, so the dark-mode
+// block below needs nothing for it.
+.env-vars-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.env-vars-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.9375rem;
+}
+
+// Info glyph opening a tooltip; the `help` cursor sets it apart from the
+// clickable icons beside it.
+.info-tooltip-icon {
+  color: var(--bs-secondary-color);
+  cursor: help;
+  flex-shrink: 0;
+}
+
+.env-vars-count {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--bs-secondary-color);
+}
+
+.env-vars-count-over {
+  color: var(--bs-danger);
+  font-weight: 600;
+}
+
+.env-vars-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.env-vars-row {
+  // Grid, not flex: the validation message wraps onto its own line below
+  // the pair and its remove button.
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.375rem;
+}
+
+.env-vars-pair {
+  display: grid;
+  // Names are short and conventional; values are the part worth reading.
+  grid-template-columns: minmax(0, 5fr) auto minmax(0, 7fr);
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.env-vars-equals {
+  color: var(--bs-secondary-color);
+  font-family: $font-family-monospace;
+  user-select: none;
+}
+
+.env-vars-error {
+  grid-column: 1 / -1;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--bs-form-invalid-color, var(--bs-danger));
+}
+
+.env-vars-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: $border-radius;
+  background: none;
+  color: var(--bs-secondary-color);
+  transition: $transition-base;
+}
+
+.env-vars-remove:hover:not(:disabled) {
+  color: var(--bs-danger);
+  border-color: rgba($danger, 0.35);
+  background-color: rgba($danger, 0.08);
+}
+
+.env-vars-remove:disabled {
+  opacity: 0.5;
+}
+
+.env-vars-add {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: $border-radius;
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+  font-size: 0.875rem;
+  transition: $transition-base;
+}
+
+.env-vars-add:hover:not(:disabled) {
+  background-color: rgba($primary, 0.08);
+  border-color: rgba($primary, 0.4);
+}
+
+.env-vars-add:disabled {
+  opacity: 0.65;
+}
+
+.env-vars-empty {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px dashed var(--bs-border-color);
+  border-radius: $border-radius;
+  background: none;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  text-align: left;
+  transition: $transition-base;
+}
+
+.env-vars-empty:hover:not(:disabled) {
+  border-color: rgba($primary, 0.5);
+  border-style: solid;
+  background-color: rgba($primary, 0.04);
+  color: var(--bs-emphasis-color);
+}
+
+.env-vars-empty-hint {
+  margin-left: auto;
+  padding-left: 0.75rem;
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
+
+.env-vars-notice {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color);
+}
+
+// Over the limit blocks submission, unlike the trimmed-paste note.
+.env-vars-notice-error {
+  color: var(--bs-form-invalid-color, var(--bs-danger));
+}
+
+@media (max-width: 575.98px) {
+  .env-vars-pair {
+    // Side by side, both fields would be a few characters wide.
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .env-vars-equals {
+    display: none;
+  }
+}
+
 // Dark mode (follows the OS setting, see index.html/util/theme.js). Bootstrap's
 // own components already adapt via its body-bg/color/border CSS variables; the
 // overrides below only cover our custom classes and the handful of literal
