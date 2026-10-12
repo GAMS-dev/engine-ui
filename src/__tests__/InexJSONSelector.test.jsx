@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import InexJSONSelector from '../components/InexJSONSelector';
@@ -13,5 +13,36 @@ describe('InexJSONSelector', () => {
         'Filter results (e.g. to reduce the size of the results archive)?',
       ),
     ).toBeInTheDocument();
+  });
+
+  it('pre-fills an include-only selector without the include/exclude toggle', async () => {
+    const onChange = vi.fn();
+    render(
+      <InexJSONSelector
+        idPrefix="input"
+        includeOnly={true}
+        inexObject={{
+          type: 'include',
+          files: ['*.gdx'],
+          globbing_enabled: false,
+        }}
+        onChangeHandler={onChange}
+      />,
+    );
+
+    expect(screen.queryByText(/Include or exclude files/i)).toBeNull();
+    expect(screen.getByDisplayValue('*.gdx')).toHaveAttribute(
+      'id',
+      'inputincludeFiles',
+    );
+    await waitFor(() =>
+      expect(onChange).toHaveBeenLastCalledWith(
+        JSON.stringify({
+          type: 'include',
+          files: ['*.gdx'],
+          globbing_enabled: false,
+        }),
+      ),
+    );
   });
 });

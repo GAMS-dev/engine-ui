@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Select from './ThemedSelect';
 
-export const InexJSONSelector = ({ onChangeHandler, label, inexObject }) => {
+export const InexJSONSelector = ({
+  onChangeHandler,
+  label,
+  inexObject,
+  idPrefix = '',
+  includeOnly = false,
+  filesPlaceholder,
+}) => {
   const [filterResults, setFilterResults] = useState(inexObject ? true : false);
   const [toggleIncludeExclude, setToggleIncludeExclude] = useState(
-    inexObject && inexObject.type === 'exclude'
+    inexObject && inexObject.type === 'exclude' && !includeOnly
       ? { value: 'exclude', label: 'exclude' }
       : { value: 'include', label: 'include' },
   );
@@ -61,9 +68,12 @@ export const InexJSONSelector = ({ onChangeHandler, label, inexObject }) => {
           className="form-check-input"
           checked={filterResults}
           onChange={(e) => setFilterResults(e.target.checked)}
-          id="filterResults"
+          id={`${idPrefix}filterResults`}
         />
-        <label className="form-check-label" htmlFor="filterResults">
+        <label
+          className="form-check-label"
+          htmlFor={`${idPrefix}filterResults`}
+        >
           {label
             ? label
             : 'Filter results (e.g. to reduce the size of the results archive)?'}
@@ -71,38 +81,47 @@ export const InexJSONSelector = ({ onChangeHandler, label, inexObject }) => {
       </div>
       {filterResults && (
         <React.Fragment>
-          <div className="mt-3 mb-3">
-            <label htmlFor="toggleIncludeExclude">
-              Include or exclude files from results archive?
-            </label>
-            <Select
-              inputId="toggleIncludeExclude"
-              isClearable={false}
-              value={toggleIncludeExclude}
-              isSearchable={true}
-              onChange={(selected) => setToggleIncludeExclude(selected)}
-              options={[
-                {
-                  value: 'include',
-                  label: 'include',
-                },
-                {
-                  value: 'exclude',
-                  label: 'exclude',
-                },
-              ]}
-            />
-          </div>
+          {!includeOnly && (
+            <div className="mt-3 mb-3">
+              <label htmlFor={`${idPrefix}toggleIncludeExclude`}>
+                Include or exclude files from results archive?
+              </label>
+              <Select
+                inputId={`${idPrefix}toggleIncludeExclude`}
+                isClearable={false}
+                value={toggleIncludeExclude}
+                isSearchable={true}
+                onChange={(selected) => setToggleIncludeExclude(selected)}
+                options={[
+                  {
+                    value: 'include',
+                    label: 'include',
+                  },
+                  {
+                    value: 'exclude',
+                    label: 'exclude',
+                  },
+                ]}
+              />
+            </div>
+          )}
           {toggleIncludeExclude.value === 'include' ? (
             <div className="mb-3">
-              <label htmlFor="includeFiles" className="visually-hidden">
-                Files to include in results (optional, comma-separated)
+              <label
+                htmlFor={`${idPrefix}includeFiles`}
+                className="visually-hidden"
+              >
+                {filesPlaceholder ??
+                  'Files to include in results (comma-separated, optional)'}
               </label>
               <input
                 type="text"
                 className="form-control"
-                id="includeFiles"
-                placeholder="Files to include in results (comma-separated, optional)"
+                id={`${idPrefix}includeFiles`}
+                placeholder={
+                  filesPlaceholder ??
+                  'Files to include in results (comma-separated, optional)'
+                }
                 autoComplete="on"
                 value={includeFiles}
                 onChange={(e) => setIncludeFiles(e.target.value)}
@@ -110,13 +129,16 @@ export const InexJSONSelector = ({ onChangeHandler, label, inexObject }) => {
             </div>
           ) : (
             <div className="mb-3">
-              <label htmlFor="excludeFiles" className="visually-hidden">
+              <label
+                htmlFor={`${idPrefix}excludeFiles`}
+                className="visually-hidden"
+              >
                 Files to exclude from results (optional, comma-separated)
               </label>
               <input
                 type="text"
                 className="form-control"
-                id="excludeFiles"
+                id={`${idPrefix}excludeFiles`}
                 placeholder="Files to exclude from results (comma-separated, optional)"
                 autoComplete="on"
                 value={excludeFiles}
@@ -130,9 +152,12 @@ export const InexJSONSelector = ({ onChangeHandler, label, inexObject }) => {
               className="form-check-input"
               checked={globbingEnabled}
               onChange={(e) => setGlobbingEnabled(e.target.checked)}
-              id="globbingEnabled"
+              id={`${idPrefix}globbingEnabled`}
             />
-            <label className="form-check-label" htmlFor="globbingEnabled">
+            <label
+              className="form-check-label"
+              htmlFor={`${idPrefix}globbingEnabled`}
+            >
               Enable globbing (<kbd>*</kbd>/<kbd>?</kbd> wildcard characters)?
             </label>
           </div>

@@ -226,6 +226,8 @@ describe('ModelSubmissionForm', () => {
       expect(formData.get('delete_text_entries')).toBeNull();
       expect(formData.get('delete_stream_entries')).toBeNull();
       expect(formData.get('delete_inex_file')).toBeNull();
+      expect(formData.get('input_inex_string')).toBeNull();
+      expect(formData.get('delete_input_inex')).toBeNull();
       expect(formData.get('delete_run')).toBeNull();
       expect(formData.get('delete_user_groups')).toBeNull();
       await waitFor(() =>
@@ -351,6 +353,77 @@ describe('ModelSubmissionForm', () => {
           'success:Model successfully updated!',
         ),
       );
+    });
+
+    it('submits the input INEX of a protected model', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      await user.click(screen.getByLabelText(/Restrict which files/i));
+      await user.type(
+        screen.getByPlaceholderText(/Files a job may provide/i),
+        '*.gdx, *.csv',
+      );
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const formData = axios.mock.calls[0][0].data;
+      expect(JSON.parse(formData.get('input_inex_string'))).toEqual({
+        type: 'include',
+        files: ['*.gdx', '*.csv'],
+        globbing_enabled: true,
+      });
+      expect(formData.get('delete_input_inex')).toBeNull();
+    });
+
+    it.each([
+      ['main.py', true],
+      ['main.gms', false],
+    ])(
+      'mentions the Python input default in the tooltip for run file %s: %s',
+      async (runFile, shown) => {
+        render(<ModelSubmissionForm />, {
+          wrapper: AllProvidersWrapperDefault,
+        });
+        await waitFor(() => screen.findByText(/Update model/i));
+
+        const runInput = screen.getByDisplayValue('main.gms');
+        await user.clear(runInput);
+        await user.type(runInput, runFile);
+        await user.hover(
+          screen
+            .getByLabelText(/protected from being overwritten/i)
+            .parentElement.querySelector('.info-tooltip-icon'),
+        );
+
+        await screen.findByText(/cannot overwrite this/i);
+        expect(screen.queryByText(/never receives/i) !== null).toBe(shown);
+      },
+    );
+
+    it('deletes the input INEX when model files are no longer protected', async () => {
+      axios.mockResolvedValue({ data: {} });
+
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      await user.click(screen.getByLabelText(/Restrict which files/i));
+      await user.type(
+        screen.getByPlaceholderText(/Files a job may provide/i),
+        '*.gdx',
+      );
+      await user.click(
+        screen.getByLabelText(/protected from being overwritten/i),
+      );
+      expect(screen.queryByLabelText(/Restrict which files/i)).toBeNull();
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      const formData = axios.mock.calls[0][0].data;
+      expect(formData.get('input_inex_string')).toBeNull();
+      expect(formData.get('delete_input_inex')).toBe('true');
     });
 
     it('appends the run argument when it differs from the derived default', async () => {

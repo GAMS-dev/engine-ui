@@ -37,6 +37,8 @@ const ModelSubmissionForm = () => {
   const [clArgs, setClArgs] = useState('');
   const [inexObject, setInexObject] = useState('');
   const [inexJSON, setInexJSON] = useState('');
+  const [inputInexObject, setInputInexObject] = useState('');
+  const [inputInexJSON, setInputInexJSON] = useState('');
   const [initialEnv, setInitialEnv] = useState(null);
   const [envJSON, setEnvJSON] = useState('');
   // An invalid row is kept out of envJSON, so submission blocks on this.
@@ -98,6 +100,7 @@ const ModelSubmissionForm = () => {
           setTextEntries(resModelData.data[0].text_entries.join(','));
           setStreamEntries(resModelData.data[0].stream_entries.join(','));
           setInexObject(resModelData.data[0].inex);
+          setInputInexObject(resModelData.data[0].input_inex);
           setInitialEnv(resModelData.data[0].env ?? null);
           setProtectModelFiles(
             resModelData.data[0].protect_model_files === true,
@@ -211,6 +214,11 @@ const ModelSubmissionForm = () => {
       modelSubmissionForm.append('inex_string', inexJSON);
     } else if (modelname) {
       modelSubmissionForm.append('delete_inex_file', 'true');
+    }
+    if (protectModelFiles && inputInexJSON !== '') {
+      modelSubmissionForm.append('input_inex_string', inputInexJSON);
+    } else if (modelname) {
+      modelSubmissionForm.append('delete_input_inex', 'true');
     }
     if (runName !== '' && runName !== `${newModelName}.gms`) {
       modelSubmissionForm.append('run', runName);
@@ -460,6 +468,13 @@ const ModelSubmissionForm = () => {
                       <br />A job also cannot override the environment
                       variables, executable, command line arguments or run file
                       name registered here.
+                      {jobExecutableForRunFile(runName) === 'python' && (
+                        <>
+                          <br />
+                          If no filter is set below, this model never receives
+                          *.py, *.pyc, *.so or *.pth files from a job.
+                        </>
+                      )}
                     </div>
                   </Tooltip>
                 }
@@ -467,6 +482,18 @@ const ModelSubmissionForm = () => {
                 <Info size={16} className="info-tooltip-icon ms-2" />
               </OverlayTrigger>
             </div>
+            {protectModelFiles && (
+              <div className="mt-3">
+                <InexJSONSelector
+                  idPrefix="input"
+                  includeOnly={true}
+                  label="Restrict which files of a job's data are extracted next to the model files?"
+                  filesPlaceholder="Files a job may provide, e.g. *.gdx (comma-separated)"
+                  inexObject={inputInexObject}
+                  onChangeHandler={setInputInexJSON}
+                />
+              </div>
+            )}
           </fieldset>
           <div className="mt-3">
             <SubmitButton isSubmitting={isSubmitting}>
