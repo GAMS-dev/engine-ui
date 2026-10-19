@@ -124,9 +124,13 @@ cache=$(header_value "Cache-Control" "$config")
 [ "$cache" = "no-store, max-age=0" ] ||
   fail "expected env-config.js to be uncached, got Cache-Control='$cache'"
 
-echo "- the page gets the mount path as its <base>"
-curl -s --max-time 5 "$BASE_URL$MOUNT_PATH" | grep -q "<base href=\"$MOUNT_PATH\">" ||
+echo "- the page gets the mount path as its <base> and is never cached"
+page=$(curl -s --max-time 5 -D - "$BASE_URL$MOUNT_PATH")
+printf '%s' "$page" | grep -q "<base href=\"$MOUNT_PATH\">" ||
   fail "expected <base href=\"$MOUNT_PATH\"> in the page"
+cache=$(header_value "Cache-Control" "$page")
+[ "$cache" = "no-store, max-age=0" ] ||
+  fail "expected the page to be uncached, got Cache-Control='$cache'"
 
 cleanup
 echo "All checks passed."
