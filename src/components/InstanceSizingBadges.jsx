@@ -1,3 +1,4 @@
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import {
   SIZING,
   computeCpuSizing,
@@ -69,24 +70,39 @@ function getCpuTooltip(cpuSizing) {
   return `${usage} ${advice}`;
 }
 
+const SizingBadge = ({ id, label, status, tooltip }) => (
+  <OverlayTrigger
+    placement="top"
+    overlay={(props) => (
+      <Tooltip id={id} {...props}>
+        {tooltip}
+      </Tooltip>
+    )}
+  >
+    <span tabIndex={0} className={`badge bg-${BADGE_VARIANT[status]}`}>
+      {`${label}: ${BADGE_LABEL[status]}`}
+    </span>
+  </OverlayTrigger>
+);
+
 const InstanceSizingBadges = ({ resourceStats }) => {
   const memorySizing = computeMemorySizing(resourceStats);
   const cpuSizing = computeCpuSizing(resourceStats);
 
   return (
     <div className="d-flex flex-wrap gap-1">
-      <span
-        className={`badge bg-${BADGE_VARIANT[memorySizing.status]}`}
-        title={getMemoryTooltip(memorySizing)}
-      >
-        {`Memory: ${BADGE_LABEL[memorySizing.status]}`}
-      </span>
-      <span
-        className={`badge bg-${BADGE_VARIANT[cpuSizing.status]}`}
-        title={getCpuTooltip(cpuSizing)}
-      >
-        {`CPU: ${BADGE_LABEL[cpuSizing.status]}`}
-      </span>
+      <SizingBadge
+        id="memorySizingTT"
+        label="Memory"
+        status={memorySizing.status}
+        tooltip={getMemoryTooltip(memorySizing)}
+      />
+      <SizingBadge
+        id="cpuSizingTT"
+        label="CPU"
+        status={cpuSizing.status}
+        tooltip={getCpuTooltip(cpuSizing)}
+      />
     </div>
   );
 };
