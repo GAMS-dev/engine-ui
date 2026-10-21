@@ -29,6 +29,8 @@ const ModelSubmissionForm = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [newModelName, setNewModelName] = useState('');
   const [runName, setRunName] = useState('');
+  // Set (and shown) only for an executable the run file can't imply.
+  const [customJobExecutable, setCustomJobExecutable] = useState(null);
   const [textEntries, setTextEntries] = useState('');
   const [streamEntries, setStreamEntries] = useState('');
   const [userGroups, setUserGroups] = useState([]);
@@ -96,6 +98,13 @@ const ModelSubmissionForm = () => {
               ? resModelData.data[0].run
               : `${modelname}.gms`,
           );
+          const loadedJobExecutable = resModelData.data[0].job_executable;
+          if (
+            loadedJobExecutable &&
+            !['gams', 'python'].includes(loadedJobExecutable)
+          ) {
+            setCustomJobExecutable(loadedJobExecutable);
+          }
           setClArgs(resModelData.data[0].arguments.join(','));
           setTextEntries(resModelData.data[0].text_entries.join(','));
           setStreamEntries(resModelData.data[0].stream_entries.join(','));
@@ -146,6 +155,10 @@ const ModelSubmissionForm = () => {
       fetchGroupData();
     }
   }, [server, modelname, namespace]);
+
+  // A custom executable if set, else derived from the run file.
+  const jobExecutable =
+    customJobExecutable?.trim() || jobExecutableForRunFile(runName);
 
   const handleModelSubmission = async () => {
     if (newModelName.toLowerCase().endsWith('.gms')) {
@@ -230,8 +243,6 @@ const ModelSubmissionForm = () => {
     } else if (modelname) {
       modelSubmissionForm.append('delete_env', 'true');
     }
-    // Derived from the run file rather than asked for separately.
-    const jobExecutable = jobExecutableForRunFile(runName);
     if (jobExecutable !== '') {
       modelSubmissionForm.append('job_executable', jobExecutable);
     } else if (modelname) {
@@ -372,6 +383,21 @@ const ModelSubmissionForm = () => {
                 onChange={(e) => setRunName(e.target.value)}
               />
             </div>
+            {customJobExecutable != null && (
+              <div className="mb-3">
+                <label htmlFor="jobExecutable" className="form-label">
+                  Job executable
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="jobExecutable"
+                  placeholder="Empty: derived from the main file"
+                  value={customJobExecutable}
+                  onChange={(e) => setCustomJobExecutable(e.target.value)}
+                />
+              </div>
+            )}
             <div className="mb-3">
               <label htmlFor="clArgs" className="visually-hidden">
                 Command Line Arguments (comma-separated)
@@ -468,7 +494,7 @@ const ModelSubmissionForm = () => {
                       <br />A job also cannot override the environment
                       variables, executable, command line arguments or run file
                       name registered here.
-                      {jobExecutableForRunFile(runName) === 'python' && (
+                      {jobExecutable === 'python' && (
                         <>
                           <br />
                           If no filter is set below, this model never receives

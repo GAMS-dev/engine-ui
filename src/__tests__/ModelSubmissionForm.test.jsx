@@ -460,6 +460,47 @@ describe('ModelSubmissionForm', () => {
       );
     });
 
+    const renderModelWith = async (overrides) => {
+      axios.get.mockImplementation((url) =>
+        url === 'testserver/namespaces/global'
+          ? Promise.resolve({ data: [{ ...modelResponse, ...overrides }] })
+          : Promise.resolve({ data: [] }),
+      );
+      axios.mockResolvedValue({ data: {} });
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+    };
+    const submittedForm = async () => {
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+      await waitFor(() => expect(axios).toHaveBeenCalled());
+      return axios.mock.calls[0][0].data;
+    };
+
+    it('shows and keeps a job_executable the run file cannot imply', async () => {
+      await renderModelWith({ job_executable: 'julia' });
+
+      const field = screen.getByLabelText('Job executable');
+      expect(field).toHaveValue('julia');
+      expect((await submittedForm()).get('job_executable')).toBe('julia');
+    });
+
+    it('derives job_executable from the run file once its field is cleared', async () => {
+      await renderModelWith({ job_executable: 'julia' });
+
+      await user.clear(screen.getByLabelText('Job executable'));
+      const formData = await submittedForm();
+      expect(formData.get('job_executable')).toBeNull();
+      expect(formData.get('delete_job_executable')).toBe('true');
+    });
+
+    it.each(['gams', 'python', null])(
+      'has no job_executable field for %s',
+      async (jobExecutable) => {
+        await renderModelWith({ job_executable: jobExecutable });
+        expect(screen.queryByLabelText('Job executable')).toBeNull();
+      },
+    );
+
     it('submits deletion sentinels for env and job_executable when neither is set', async () => {
       axios.mockResolvedValue({ data: {} });
 
