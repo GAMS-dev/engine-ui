@@ -67,9 +67,12 @@ describe('CreateAuthTokenForm', () => {
     const formData = axios.post.mock.calls[0][1];
     // No scopes selected and not readonly => empty scope string.
     expect(formData.get('scope')).toBe('');
-    // Default expiration is ~7 days from now.
-    expect(Number(formData.get('expires_in'))).toBeGreaterThan(604000);
-    expect(Number(formData.get('expires_in'))).toBeLessThanOrEqual(604800);
+    // Same clock time in 7 days, so DST-aware.
+    const now = new Date();
+    const sevenDays = (new Date(now).setDate(now.getDate() + 7) - now) / 1000;
+    const expiresIn = Number(formData.get('expires_in'));
+    expect(expiresIn).toBeGreaterThan(sevenDays - 800);
+    expect(expiresIn).toBeLessThanOrEqual(sevenDays);
 
     await screen.findByText('Your generated authentication token:');
     expect(
