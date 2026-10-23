@@ -1,9 +1,9 @@
 #!/bin/sh
 # End-to-end smoke test for engine.conf's CORS support (see
 # CORS_ALLOWED_ORIGINS/CORS_ALLOWED_ORIGIN_REGEX in engine-ui-defaults.envsh)
-# - builds the real production image and curls the running container with a
-# handful of Origin headers, rather than just checking the rendered nginx
-# config parses. Run from the repo root: sh .ci/test-cors.sh
+# and for serving the UI under a sub-path - builds the real production image
+# and curls the running container, rather than just checking the rendered
+# nginx config parses. Run from the repo root: sh .ci/test-cors.sh
 set -eu
 
 IMAGE_TAG="engine-ui-cors-test:local"
@@ -11,6 +11,8 @@ CONTAINER_NAME="engine-ui-cors-test"
 PORT=18080
 TEST_HOST="${CORS_TEST_HOST:-127.0.0.1}"
 BASE_URL="http://$TEST_HOST:$PORT"
+# Where the UI is mounted (mount_url and the UI's BASE_URL).
+MOUNT_PATH=/
 
 cleanup() {
   docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
@@ -43,12 +45,13 @@ run_container() {
     -e mount_api_url=/api \
     -e uwsgi_pass_url=127.0.0.1:9999 \
     -e root_url=/usr/share/nginx/engine \
-    -e mount_url=/ \
+    -e mount_url="$MOUNT_PATH" \
+    -e BASE_URL="$MOUNT_PATH" \
     "$@" \
     "$IMAGE_TAG" >/dev/null
 
   for _ in $(seq 1 30); do
-    if curl -fso /dev/null --max-time 2 "$BASE_URL/env-config.js"; then
+    if curl -fso /dev/null --max-time 2 "$BASE_URL${MOUNT_PATH}env-config.js"; then
       return 0
     fi
     sleep 0.5
@@ -109,5 +112,25 @@ acao=$(header_value "Access-Control-Allow-Origin" "$headers")
 [ -z "$acao" ] ||
   fail "expected CORS to be off by default, but got ACAO='$acao'"
 
+echo "=== Mounted under a sub-path ==="
+MOUNT_PATH=/engine-ui/
+run_container
+
+echo "- the runtime config is served (uncached) under the mount path"
+config=$(curl -s --max-time 5 -D - "$BASE_URL${MOUNT_PATH}env-config.js")
+printf '%s' "$config" | grep -q "BASE_URL: \"$MOUNT_PATH\"" ||
+  fail "expected the runtime env-config.js, got: $config"
+cache=$(header_value "Cache-Control" "$config")
+[ "$cache" = "no-store, max-age=0" ] ||
+  fail "expected env-config.js to be uncached, got Cache-Control='$cache'"
+
+echo "- the page gets the mount path as its <base> and is never cached"
+page=$(curl -s --max-time 5 -D - "$BASE_URL$MOUNT_PATH")
+printf '%s' "$page" | grep -q "<base href=\"$MOUNT_PATH\">" ||
+  fail "expected <base href=\"$MOUNT_PATH\"> in the page"
+cache=$(header_value "Cache-Control" "$page")
+[ "$cache" = "no-store, max-age=0" ] ||
+  fail "expected the page to be uncached, got Cache-Control='$cache'"
+
 cleanup
-echo "All CORS checks passed."
+echo "All checks passed."

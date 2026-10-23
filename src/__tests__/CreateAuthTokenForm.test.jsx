@@ -67,9 +67,12 @@ describe('CreateAuthTokenForm', () => {
     const formData = axios.post.mock.calls[0][1];
     // No scopes selected and not readonly => empty scope string.
     expect(formData.get('scope')).toBe('');
-    // Default expiration is ~7 days from now.
-    expect(Number(formData.get('expires_in'))).toBeGreaterThan(604000);
-    expect(Number(formData.get('expires_in'))).toBeLessThanOrEqual(604800);
+    // Same clock time in 7 days, so DST-aware.
+    const now = new Date();
+    const sevenDays = (new Date(now).setDate(now.getDate() + 7) - now) / 1000;
+    const expiresIn = Number(formData.get('expires_in'));
+    expect(expiresIn).toBeGreaterThan(sevenDays - 800);
+    expect(expiresIn).toBeLessThanOrEqual(sevenDays);
 
     await screen.findByText('Your generated authentication token:');
     expect(
@@ -86,26 +89,14 @@ describe('CreateAuthTokenForm', () => {
 
     const dateInput = document.querySelector('button[data-dates-input]');
     await user.click(dateInput);
-    // Selecting "today" moves the expiration far closer than the default
-    // 7-day offset, so the computed duration clamps down to minSeconds.
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    const today = new Date();
-    const label = `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
-    const todayButton = screen.getByRole('button', { name: label });
-    await user.click(todayButton);
+    // The calendar opens on the default's month, which may be next month.
+    if (!document.querySelector('button[data-today]')) {
+      await user.click(
+        document.querySelector('button[data-direction="previous"]'),
+      );
+    }
+    // Today is far closer than the default 7 days, so the duration clamps to minSeconds.
+    await user.click(document.querySelector('button[data-today]'));
 
     await user.click(
       screen.getByRole('button', { name: 'Create Authentication Token' }),
