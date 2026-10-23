@@ -22,6 +22,7 @@ import {
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import InexJSONSelector, { EMPTY_INEX_ERROR } from './InexJSONSelector';
 import EnvironmentVariablesSelector from './EnvironmentVariablesSelector';
+import useEnvVars from '../util/useEnvVars';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
 import ServerInfoContext from '../contexts/ServerInfoContext';
@@ -55,9 +56,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
   const [textEntries, setTextEntries] = useState('');
   const [streamEntries, setStreamEntries] = useState('');
   const [inexJSON, setInexJSON] = useState('');
-  const [envJSON, setEnvJSON] = useState('');
-  // An invalid row is kept out of envJSON, so submission blocks on this.
-  const [envIsValid, setEnvIsValid] = useState(true);
+  const [env, handleEnvChange] = useEnvVars();
   const [jobDeps, setJobDeps] = useState('');
   const [jobTag, setJobTag] = useState('');
   const [validCpuReq, setValidCpuReq] = useState(true);
@@ -271,7 +270,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
       setSubmissionErrorMsg('Please provide model files.');
       return;
     }
-    if (!envIsValid) {
+    if (!env.isValid) {
       setSubmissionErrorMsg(
         'Please fix the environment variables under Advanced Options.',
       );
@@ -366,8 +365,8 @@ const JobSubmissionForm = ({ newHcJob }) => {
     if (inexJSON !== '') {
       jobSubmissionForm.append('inex_string', inexJSON);
     }
-    if (envJSON !== '') {
-      jobSubmissionForm.append('env', envJSON);
+    if (env.json !== '') {
+      jobSubmissionForm.append('env', env.json);
     }
     if (serverInfo && serverInfo.in_kubernetes === true) {
       if (useRawRequests) {
@@ -468,10 +467,6 @@ const JobSubmissionForm = ({ newHcJob }) => {
   }, []);
   const updateHcFile = useCallback((acceptedFiles) => {
     setHcFile([...acceptedFiles][0]);
-  }, []);
-  const handleEnvChange = useCallback((json, isValid) => {
-    setEnvJSON(json);
-    setEnvIsValid(isValid);
   }, []);
 
   return (

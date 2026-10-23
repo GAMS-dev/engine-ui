@@ -15,6 +15,7 @@ import {
 } from '../util/util';
 import InexJSONSelector, { EMPTY_INEX_ERROR } from './InexJSONSelector';
 import EnvironmentVariablesSelector from './EnvironmentVariablesSelector';
+import useEnvVars from '../util/useEnvVars';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
 import FileDropZone from './FileDropZone';
@@ -42,9 +43,7 @@ const ModelSubmissionForm = () => {
   const [inputInexObject, setInputInexObject] = useState('');
   const [inputInexJSON, setInputInexJSON] = useState('');
   const [initialEnv, setInitialEnv] = useState(null);
-  const [envJSON, setEnvJSON] = useState('');
-  // An invalid row is kept out of envJSON, so submission blocks on this.
-  const [envIsValid, setEnvIsValid] = useState(true);
+  const [env, handleEnvChange] = useEnvVars();
   const [protectModelFiles, setProtectModelFiles] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -166,7 +165,7 @@ const ModelSubmissionForm = () => {
       setSubmissionErrorMsg("Model name must not end with '.gms'!");
       return;
     }
-    if (!envIsValid) {
+    if (!env.isValid) {
       setSubmissionErrorMsg(
         'Please fix the environment variables highlighted below.',
       );
@@ -243,8 +242,8 @@ const ModelSubmissionForm = () => {
     } else if (modelname) {
       modelSubmissionForm.append('delete_run', 'true');
     }
-    if (envJSON !== '') {
-      modelSubmissionForm.append('env', envJSON);
+    if (env.json !== '') {
+      modelSubmissionForm.append('env', env.json);
     } else if (modelname) {
       modelSubmissionForm.append('delete_env', 'true');
     }
@@ -292,10 +291,6 @@ const ModelSubmissionForm = () => {
     );
     setModelAdded(true);
   };
-  const handleEnvChange = useCallback((json, isValid) => {
-    setEnvJSON(json);
-    setEnvIsValid(isValid);
-  }, []);
 
   const updateModelFiles = useCallback(
     (acceptedFiles) => {
