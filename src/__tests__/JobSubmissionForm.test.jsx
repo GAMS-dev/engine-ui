@@ -1111,12 +1111,32 @@ describe('JobSubmissionForm', () => {
     await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
 
     await user.click(screen.getByLabelText(/Filter results/i));
+    await user.type(screen.getByPlaceholderText(/Files to include/i), '*.gdx');
 
     await user.click(screen.getByRole('button', { name: /Submit Job/i }));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     const formData = axios.post.mock.calls[0][1];
     expect(formData.get('inex_string')).toContain('include');
+  });
+
+  it('refuses to submit when result filtering is enabled without patterns', async () => {
+    mockAxiosGet();
+
+    render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+    await user.click(screen.getByLabelText(/Filter results/i));
+    await user.type(screen.getByPlaceholderText(/Files to include/i), ' , ');
+
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    expect(
+      await screen.findByText(/Enter at least one file pattern/),
+    ).toBeInTheDocument();
+    expect(axios.post).not.toHaveBeenCalled();
   });
 
   it('selects a different instance and includes it in the submitted labels', async () => {

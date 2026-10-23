@@ -378,6 +378,19 @@ describe('ModelSubmissionForm', () => {
       expect(formData.get('delete_input_inex')).toBeNull();
     });
 
+    it('refuses to submit a protected model with an empty input INEX', async () => {
+      render(<ModelSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Update model/i));
+
+      await user.click(screen.getByLabelText(/Restrict which files/i));
+      await user.click(screen.getByRole('button', { name: /Update Model/i }));
+
+      expect(
+        await screen.findByText(/Enter at least one file pattern/),
+      ).toBeInTheDocument();
+      expect(axios).not.toHaveBeenCalled();
+    });
+
     it.each([
       ['main.py', true],
       ['main.gms', false],

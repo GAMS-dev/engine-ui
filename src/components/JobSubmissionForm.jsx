@@ -20,7 +20,7 @@ import {
   stripFileExtension,
 } from '../util/util';
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
-import InexJSONSelector from './InexJSONSelector';
+import InexJSONSelector, { EMPTY_INEX_ERROR } from './InexJSONSelector';
 import EnvironmentVariablesSelector from './EnvironmentVariablesSelector';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
@@ -274,6 +274,10 @@ const JobSubmissionForm = ({ newHcJob }) => {
       setSubmissionErrorMsg(
         'Please fix the environment variables under Advanced Options.',
       );
+      return;
+    }
+    if (inexJSON === null) {
+      setSubmissionErrorMsg(EMPTY_INEX_ERROR);
       return;
     }
     setSubmissionErrorMsg('');

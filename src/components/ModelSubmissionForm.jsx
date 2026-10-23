@@ -13,7 +13,7 @@ import {
   deriveRunFileName,
   stripFileExtension,
 } from '../util/util';
-import InexJSONSelector from './InexJSONSelector';
+import InexJSONSelector, { EMPTY_INEX_ERROR } from './InexJSONSelector';
 import EnvironmentVariablesSelector from './EnvironmentVariablesSelector';
 import SubmitButton from './SubmitButton';
 import ClipLoader from './ThemedClipLoader';
@@ -169,6 +169,10 @@ const ModelSubmissionForm = () => {
       setSubmissionErrorMsg(
         'Please fix the environment variables highlighted below.',
       );
+      return;
+    }
+    if (inexJSON === null || (protectModelFiles && inputInexJSON === null)) {
+      setSubmissionErrorMsg(EMPTY_INEX_ERROR);
       return;
     }
     let zipPromise;

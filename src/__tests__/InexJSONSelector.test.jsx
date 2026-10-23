@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 import InexJSONSelector from '../components/InexJSONSelector';
@@ -44,5 +45,27 @@ describe('InexJSONSelector', () => {
         }),
       ),
     );
+  });
+
+  it.each([
+    ['', null],
+    [
+      ' a, ,b, ',
+      JSON.stringify({
+        type: 'include',
+        files: ['a', 'b'],
+        globbing_enabled: true,
+      }),
+    ],
+  ])('reports %j as %s', async (input, expected) => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<InexJSONSelector onChangeHandler={onChange} />);
+
+    await user.click(screen.getByLabelText(/Filter results/i));
+    if (input) {
+      await user.type(screen.getByPlaceholderText(/Files to include/i), input);
+    }
+    expect(onChange).toHaveBeenLastCalledWith(expected);
   });
 });

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Select from './ThemedSelect';
 
+export const EMPTY_INEX_ERROR =
+  'Enter at least one file pattern or uncheck the filter.';
+
 export const InexJSONSelector = ({
   onChangeHandler,
   label,
@@ -30,27 +33,21 @@ export const InexJSONSelector = ({
   );
 
   useEffect(() => {
-    if (filterResults) {
-      if (toggleIncludeExclude.value === 'include') {
-        onChangeHandler(
-          JSON.stringify({
-            type: 'include',
-            files: includeFiles.split(',').map((el) => el.trim()),
-            globbing_enabled: globbingEnabled,
-          }),
-        );
-      } else {
-        onChangeHandler(
-          JSON.stringify({
-            type: 'exclude',
-            files: excludeFiles.split(',').map((el) => el.trim()),
-            globbing_enabled: globbingEnabled,
-          }),
-        );
-      }
-    } else {
+    if (!filterResults) {
       onChangeHandler('');
+      return;
     }
+    const type = toggleIncludeExclude.value;
+    const files = (type === 'include' ? includeFiles : excludeFiles)
+      .split(',')
+      .map((el) => el.trim())
+      .filter(Boolean);
+    // null signals a filter without patterns, which forms must reject
+    onChangeHandler(
+      files.length
+        ? JSON.stringify({ type, files, globbing_enabled: globbingEnabled })
+        : null,
+    );
   }, [
     filterResults,
     toggleIncludeExclude,
@@ -112,7 +109,7 @@ export const InexJSONSelector = ({
                 className="visually-hidden"
               >
                 {filesPlaceholder ??
-                  'Files to include in results (comma-separated, optional)'}
+                  'Files to include in results (comma-separated)'}
               </label>
               <input
                 type="text"
@@ -120,7 +117,7 @@ export const InexJSONSelector = ({
                 id={`${idPrefix}includeFiles`}
                 placeholder={
                   filesPlaceholder ??
-                  'Files to include in results (comma-separated, optional)'
+                  'Files to include in results (comma-separated)'
                 }
                 autoComplete="on"
                 value={includeFiles}
@@ -133,13 +130,13 @@ export const InexJSONSelector = ({
                 htmlFor={`${idPrefix}excludeFiles`}
                 className="visually-hidden"
               >
-                Files to exclude from results (optional, comma-separated)
+                Files to exclude from results (comma-separated)
               </label>
               <input
                 type="text"
                 className="form-control"
                 id={`${idPrefix}excludeFiles`}
-                placeholder="Files to exclude from results (comma-separated, optional)"
+                placeholder="Files to exclude from results (comma-separated)"
                 autoComplete="on"
                 value={excludeFiles}
                 onChange={(e) => setExcludeFiles(e.target.value)}
