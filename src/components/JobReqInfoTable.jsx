@@ -7,9 +7,16 @@ import DownloadLink from './DownloadLink';
 import TimeDisplay from './TimeDisplay';
 import JobAccessGroupsSelector from './JobAccessGroupsSelector';
 import SubmitButton from './SubmitButton';
+import TooltipBadge from './TooltipBadge';
 import { formatInstanceSpecsParts, getResponseError } from '../util/util';
 import axios from 'axios';
 import { Edit3 } from 'lucide-react';
+
+const REQUEST_TOOLTIPS = {
+  cpu_request: 'CPU Request',
+  memory_request: 'Memory Request',
+  workspace_request: 'Workspace Request',
+};
 import { UserLink } from './UserLink';
 import UserSettingsContext from '../contexts/UserSettingsContext';
 import InstanceSizingBadges from './InstanceSizingBadges';
@@ -284,12 +291,13 @@ const JobReqInfoTable = ({
                 {job.is_temporary_model ? (
                   <span>
                     {job.model} &nbsp;
-                    <span
-                      className="badge bg-secondary"
-                      title="Temporary models are provided with the job, they cannot be downloaded"
+                    <TooltipBadge
+                      id="temporaryModelTT"
+                      className="bg-secondary"
+                      tooltip="Temporary models are provided with the job, they cannot be downloaded"
                     >
                       Temporary
-                    </span>
+                    </TooltipBadge>
                   </span>
                 ) : job.model_consistent === true ? (
                   <DownloadLink
@@ -300,12 +308,13 @@ const JobReqInfoTable = ({
                     {job.model}
                   </DownloadLink>
                 ) : (
-                  <span
-                    className="badge bg-secondary"
-                    title="The model used for this job no longer exists or was updated after submission"
+                  <TooltipBadge
+                    id="inconsistentModelTT"
+                    className="bg-secondary"
+                    tooltip="The model used for this job no longer exists or was updated after submission"
                   >
                     {job.model}
-                  </span>
+                  </TooltipBadge>
                 )}
               </td>
             </tr>
@@ -341,13 +350,14 @@ const JobReqInfoTable = ({
               <th>Arguments</th>
               <td>
                 {job.arguments.map((c) => (
-                  <span
+                  <TooltipBadge
                     key={c}
-                    className="badge bg-secondary m-1 badge-clip"
-                    title={c}
+                    id={`argTT-${c}`}
+                    className="bg-secondary m-1 badge-clip"
+                    tooltip={c}
                   >
                     {c}
-                  </span>
+                  </TooltipBadge>
                 ))}
                 {job.arguments.length === 0 && '-'}
               </td>
@@ -401,86 +411,71 @@ const JobReqInfoTable = ({
                 <th>Resources</th>
                 <td style={{ minHeight: '20px' }}>
                   {jobLabels.map((el) => {
-                    if (el[0] === 'cpu_request') {
+                    if (el[0] in REQUEST_TOOLTIPS) {
                       return (
-                        <span
-                          key="cpu_request"
-                          className="badge bg-secondary m-1"
-                          title="CPU Request"
+                        <TooltipBadge
+                          key={el[0]}
+                          id={`${el[0]}TT`}
+                          className="bg-secondary m-1"
+                          tooltip={REQUEST_TOOLTIPS[el[0]]}
                         >
                           {formatLabel(el)}
-                        </span>
-                      );
-                    } else if (el[0] === 'memory_request') {
-                      return (
-                        <span
-                          key="memory_request"
-                          className="badge bg-secondary m-1"
-                          title="Memory Request"
-                        >
-                          {formatLabel(el)}
-                        </span>
-                      );
-                    } else if (el[0] === 'workspace_request') {
-                      return (
-                        <span
-                          key="workspace_request"
-                          className="badge bg-secondary m-1"
-                          title="Workspace Request"
-                        >
-                          {formatLabel(el)}
-                        </span>
+                        </TooltipBadge>
                       );
                     } else if (el[0] === 'resource_warning') {
                       if (el[1] === 'none') {
                         return <span key="resource_warning"></span>;
                       } else {
                         return (
-                          <span
+                          <TooltipBadge
                             key="resource_warning"
-                            className="badge bg-danger m-1"
-                            title="Resource Warning"
+                            id="resourceWarningTT"
+                            className="bg-danger m-1"
+                            tooltip="Resource Warning"
                           >
                             {`Out of ${el[1].replaceAll('_', ' ')}`}
-                          </span>
+                          </TooltipBadge>
                         );
                       }
                     } else if (el[0] === 'instance') {
                       return (
-                        <span
+                        <TooltipBadge
                           key="instance"
-                          className="badge bg-info m-1 text-start lh-base"
+                          id="instanceTT"
+                          className="bg-info m-1 text-start lh-base"
                           style={{ whiteSpace: 'normal' }}
-                          title={el[2]}
+                          tooltip={el[2]}
                         >
                           <div className="fw-bold">{el[1].label}</div>
                           <div>{el[1].specs}</div>
-                        </span>
+                        </TooltipBadge>
                       );
                     } else if (el[0] === 'multiplier') {
                       return (
-                        <span
+                        <TooltipBadge
                           key="multiplier"
-                          className="badge bg-secondary m-1"
-                          title="Multiplier"
+                          id="multiplierTT"
+                          className="bg-secondary m-1"
+                          tooltip="Multiplier"
                         >
                           {`${el[1]}${userSettings.multiplierUnit}`}
-                        </span>
+                        </TooltipBadge>
                       );
                     } else if (Array.isArray(el[1])) {
                       return el[1].map((arrayEl, arrayIdx) => {
                         return (
-                          <span
+                          <TooltipBadge
                             key={el[0] + arrayIdx}
-                            className={`badge bg-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
-                            title={
+                            id={`${el[0]}${arrayIdx}TT`}
+                            className={`bg-${el[0] === 'tolerations' ? 'light' : 'info'} m-1`}
+                            tooltip={
                               el[0] === 'tolerations'
                                 ? 'Toleration'
                                 : 'Node Selector'
                             }
                           >
                             {`${arrayEl.key}=${arrayEl.value}`}
-                          </span>
+                          </TooltipBadge>
                         );
                       });
                     }
@@ -507,17 +502,19 @@ const JobReqInfoTable = ({
                 {!job.dep_tokens || job.dep_tokens.length === 0
                   ? '-'
                   : job.dep_tokens.map((t) => (
-                      <span
+                      <TooltipBadge
                         key={t}
-                        title={t}
-                        className="badge bg-secondary m-1"
+                        id={`depTT-${t}`}
+                        className="bg-secondary m-1"
+                        tooltip={t}
+                        tabIndex={-1}
                       >
                         <small>
                           <Link to={'/jobs/' + t} style={{ color: '#fff' }}>
                             {t.split('-')[0]}
                           </Link>
                         </small>
-                      </span>
+                      </TooltipBadge>
                     ))}
               </td>
             </tr>

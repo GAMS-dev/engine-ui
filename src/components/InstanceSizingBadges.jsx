@@ -1,4 +1,4 @@
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import TooltipBadge from './TooltipBadge';
 import {
   SIZING,
   computeCpuSizing,
@@ -71,18 +71,13 @@ function getCpuTooltip(cpuSizing) {
 }
 
 const SizingBadge = ({ id, label, status, tooltip }) => (
-  <OverlayTrigger
-    placement="top"
-    overlay={(props) => (
-      <Tooltip id={id} {...props}>
-        {tooltip}
-      </Tooltip>
-    )}
+  <TooltipBadge
+    id={id}
+    tooltip={tooltip}
+    className={`bg-${BADGE_VARIANT[status]}`}
   >
-    <span tabIndex={0} className={`badge bg-${BADGE_VARIANT[status]}`}>
-      {`${label}: ${BADGE_LABEL[status]}`}
-    </span>
-  </OverlayTrigger>
+    {`${label}: ${BADGE_LABEL[status]}`}
+  </TooltipBadge>
 );
 
 const InstanceSizingBadges = ({ resourceStats }) => {

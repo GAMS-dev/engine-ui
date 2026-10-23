@@ -142,15 +142,15 @@ describe('JobReqInfoTable', () => {
   });
 
   it('shows a warning badge when the model is inconsistent', async () => {
+    const user = userEvent.setup();
     render(
       <JobReqInfoTable
         job={baseJob({ is_temporary_model: false, model_consistent: false })}
       />,
       { wrapper: AllProvidersWrapperDefault },
     );
-    const modelEl = await screen.findByText('model1');
-    expect(modelEl).toHaveAttribute(
-      'title',
+    await user.hover(await screen.findByText('model1'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'The model used for this job no longer exists or was updated after submission',
     );
   });
@@ -201,6 +201,7 @@ describe('JobReqInfoTable', () => {
   });
 
   it('renders tolerations, node selectors and unknown labels when there is no instance', async () => {
+    const user = userEvent.setup();
     render(
       <JobReqInfoTable
         job={baseJob({
@@ -216,10 +217,10 @@ describe('JobReqInfoTable', () => {
     );
     const label = await screen.findByText('Resources');
     const row = label.closest('tr');
-    const toleration = within(row).getByText('a=b');
-    expect(toleration).toHaveAttribute('title', 'Toleration');
-    const nodeSelector = within(row).getByText('c=d');
-    expect(nodeSelector).toHaveAttribute('title', 'Node Selector');
+    await user.hover(within(row).getByText('a=b'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Toleration');
+    await user.hover(within(row).getByText('c=d'));
+    expect(await screen.findByText('Node Selector')).toBeInTheDocument();
     expect(within(row).getByText('hello')).toBeInTheDocument();
   });
 
