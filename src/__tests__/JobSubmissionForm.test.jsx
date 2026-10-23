@@ -526,6 +526,36 @@ describe('JobSubmissionForm', () => {
     expect(formData.get('run')).toBe('customname');
   });
 
+  it.each([
+    ['  solve.py  ', 'solve', 'solve.py', 'python'],
+    ['  solve.gms  ', 'solve', null, null],
+  ])(
+    'trims the main file name %j',
+    async (typed, model, run, jobExecutable) => {
+      mockAxiosGet();
+      axios.post.mockResolvedValue({ data: {} });
+
+      render(<JobSubmissionForm />, { wrapper: AllProvidersWrapperDefault });
+      await waitFor(() => screen.findByText(/Submit Job/));
+
+      await user.upload(
+        screen.getByLabelText(/Drop static model files here/i),
+        new File(['x'], 'model.txt', { type: 'text/plain' }),
+      );
+      const nameInput = screen.getByLabelText(/Name of the Main File/i);
+      await user.clear(nameInput);
+      await user.type(nameInput, typed);
+
+      await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+      await waitFor(() => expect(axios.post).toHaveBeenCalled());
+      const formData = axios.post.mock.calls[0][1];
+      expect(formData.get('model')).toBe(model);
+      expect(formData.get('run')).toBe(run);
+      expect(formData.get('job_executable')).toBe(jobExecutable);
+    },
+  );
+
   it('pre-fills the main file from a dropped .py file, keeping its own extension', async () => {
     mockAxiosGet();
     axios.post.mockResolvedValue({ data: {} });

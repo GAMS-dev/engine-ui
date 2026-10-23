@@ -741,6 +741,15 @@ describe('ModelSubmissionForm', () => {
       expect(formData.get('job_executable')).toBeNull();
     });
 
+    it.each([
+      ['  main.py  ', 'main.py', 'python'],
+      ['  mymodel.gms  ', null, null],
+    ])('trims the run file %j', async (typed, run, jobExecutable) => {
+      const formData = await submitWithRunName(typed);
+      expect(formData.get('run')).toBe(run);
+      expect(formData.get('job_executable')).toBe(jobExecutable);
+    });
+
     it('recognises a .py run file regardless of case', async () => {
       const formData = await submitWithRunName('Main.PY');
       expect(formData.get('job_executable')).toBe('python');

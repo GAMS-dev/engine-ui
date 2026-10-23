@@ -263,6 +263,7 @@ const JobSubmissionForm = ({ newHcJob }) => {
   }, [instance, remainingVolumeQuota]);
 
   const handleJobSubmission = async () => {
+    const runFile = modelName.trim();
     if (!validCpuReq || !validMemReq || !validWsReq) {
       return;
     }
@@ -291,10 +292,10 @@ const JobSubmissionForm = ({ newHcJob }) => {
     } else {
       // The model name is an identifier, so the extension travels in `run`
       // instead - except for `<model>.gms`, which Engine already assumes.
-      const modelIdentifier = stripFileExtension(modelName);
+      const modelIdentifier = stripFileExtension(runFile);
       jobSubmissionForm.append('model', modelIdentifier);
-      if (modelName !== `${modelIdentifier}.gms`) {
-        jobSubmissionForm.append('run', modelName);
+      if (runFile !== `${modelIdentifier}.gms`) {
+        jobSubmissionForm.append('run', runFile);
       }
       if (
         modelFiles.length > 1 ||

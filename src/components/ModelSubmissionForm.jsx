@@ -161,6 +161,7 @@ const ModelSubmissionForm = () => {
     customJobExecutable?.trim() || jobExecutableForRunFile(runName);
 
   const handleModelSubmission = async () => {
+    const runFile = runName.trim();
     if (newModelName.toLowerCase().endsWith('.gms')) {
       setSubmissionErrorMsg("Model name must not end with '.gms'!");
       return;
@@ -237,8 +238,8 @@ const ModelSubmissionForm = () => {
     } else if (modelname) {
       modelSubmissionForm.append('delete_input_inex', 'true');
     }
-    if (runName !== '' && runName !== `${newModelName}.gms`) {
-      modelSubmissionForm.append('run', runName);
+    if (runFile !== '' && runFile !== `${newModelName}.gms`) {
+      modelSubmissionForm.append('run', runFile);
     } else if (modelname) {
       modelSubmissionForm.append('delete_run', 'true');
     }
