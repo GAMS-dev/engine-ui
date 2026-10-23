@@ -1,5 +1,6 @@
 import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import { AllProvidersWrapperDefault } from './utils/testUtils';
 import axios from 'axios';
 
@@ -215,14 +216,15 @@ describe('Job', () => {
       ],
     });
 
+    const user = userEvent.setup();
     render(<Job />, {
       wrapper: AllProvidersWrapperDefault,
     });
 
     await waitFor(() => screen.findByText('ns1'));
     // model_consistent stays unset, so the model shows a warning badge instead of a download link
-    expect(screen.getByText('model1')).toHaveAttribute(
-      'title',
+    await user.hover(screen.getByText('model1'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'The model used for this job no longer exists or was updated after submission',
     );
   });
