@@ -4,7 +4,11 @@ import {
   computeCpuSizing,
   computeMemorySizing,
 } from '../util/resourceSizing';
-import { formatDecimal, formatDurationString } from '../util/util';
+import {
+  formatDecimal,
+  formatDurationString,
+  formatFileSize,
+} from '../util/util';
 
 const BADGE_VARIANT = {
   [SIZING.OVERSIZED]: 'info',
@@ -20,17 +24,10 @@ const BADGE_LABEL = {
   [SIZING.UNAVAILABLE]: 'Not available',
 };
 
-function formatKilobytes(kilobytes) {
-  if (kilobytes == null) {
-    return 'unknown';
-  }
-  if (kilobytes < 1024) {
-    return `${formatDecimal(kilobytes)} KB`;
-  }
-  if (kilobytes < 1024 * 1024) {
-    return `${formatDecimal(Math.round(kilobytes / 1024))} MB`;
-  }
-  return `${formatDecimal(Math.round(kilobytes / (1024 * 1024)))} GB`;
+function formatKibibytes(kibibytes) {
+  return kibibytes == null
+    ? 'unknown'
+    : formatFileSize(kibibytes * 1024, { binary: true, decimals: 1 });
 }
 
 function formatPercent(ratio) {
@@ -44,7 +41,7 @@ function getMemoryTooltip(memorySizing) {
   if (memorySizing.status === SIZING.UNAVAILABLE) {
     return 'Not enough data was recorded to judge memory sizing for this job.';
   }
-  const usage = `Peak usage: ${formatKilobytes(memorySizing.peakKilobytes)} of ${formatKilobytes(memorySizing.limitKilobytes)} available (${formatPercent(memorySizing.ratio)}).`;
+  const usage = `Peak usage: ${formatKibibytes(memorySizing.peakKilobytes)} of ${formatKibibytes(memorySizing.limitKilobytes)} available (${formatPercent(memorySizing.ratio)}).`;
   const advice = {
     [SIZING.OVERSIZED]:
       'This job used much less memory than it was given - a smaller instance would likely be enough.',

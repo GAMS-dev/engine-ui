@@ -4,6 +4,7 @@ import {
   jobExecutableForRunFile,
   deriveRunFileName,
   stripFileExtension,
+  formatFileSize,
 } from '../util/util.jsx';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -157,5 +158,18 @@ describe('stripFileExtension', () => {
     ['', ''],
   ])('turns %s into the model name %s', (fileName, expected) => {
     expect(stripFileExtension(fileName)).toBe(expected);
+  });
+});
+
+describe('formatFileSize', () => {
+  it.each([
+    [1500, {}, '1.50KB'],
+    [2.5e6, {}, '2.50MB'],
+    [999996, {}, '1.00MB'],
+    [1.45 * 1024 ** 3, { binary: true, decimals: 1 }, '1.4GiB'],
+    [1023.96 * 1024 ** 2, { binary: true, decimals: 1 }, '1.0GiB'],
+    [512 * 1024, { binary: true, decimals: 1 }, '512.0KiB'],
+  ])('formats %d with %j as %s', (size, options, expected) => {
+    expect(formatFileSize(size, options)).toBe(expected);
   });
 });

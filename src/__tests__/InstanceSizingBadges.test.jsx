@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import InstanceSizingBadges from '../components/InstanceSizingBadges';
 
@@ -69,5 +70,25 @@ describe('InstanceSizingBadges', () => {
     );
     expect(screen.getByText('Memory: Not available')).toBeInTheDocument();
     expect(screen.getByText('CPU: Not available')).toBeInTheDocument();
+  });
+
+  it('keeps one decimal for non-whole memory sizes, matching the percentage', async () => {
+    const user = userEvent.setup();
+    render(
+      <InstanceSizingBadges
+        resourceStats={{
+          cgroup_peak_memory_kilobytes: 1.5 * 1024 * 1024,
+          cgroup_memory_limit_kilobytes: 2 * 1024 * 1024,
+          cgroup_cpu_usage_seconds: 80,
+          cgroup_cpu_limit_millicores: 1000,
+          cgroup_throttled_seconds: 0,
+          wall_time_seconds: 100,
+        }}
+      />,
+    );
+    await user.hover(screen.getByText(/^Memory:/));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Peak usage: 1.5GiB of 2.0GiB available (75%).',
+    );
   });
 });

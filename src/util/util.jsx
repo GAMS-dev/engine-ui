@@ -136,19 +136,25 @@ const mergeSortedArrays = (arraysToMerge, comparisonFunction) => {
   return arraysToMerge[0];
 };
 
-const formatFileSize = (fileSize) => {
+// Unit is chosen after rounding.
+const formatFileSize = (fileSize, { binary = false, decimals = 2 } = {}) => {
   if (!Number.isFinite(fileSize)) {
     return new Intl.NumberFormat('en-US', { style: 'decimal' }).format(
       fileSize,
     );
   }
-  if (fileSize < 1e6) {
-    return `${(fileSize / 1e3).toFixed(2)}KB`;
+  const base = binary ? 1024 : 1e3;
+  const units = binary ? ['KiB', 'MiB', 'GiB'] : ['KB', 'MB', 'GB'];
+  let value = fileSize / base;
+  let unitIdx = 0;
+  while (
+    unitIdx < units.length - 1 &&
+    Number(value.toFixed(decimals)) >= base
+  ) {
+    value /= base;
+    unitIdx += 1;
   }
-  if (fileSize < 1e9) {
-    return `${(fileSize / 1e6).toFixed(2)}MB`;
-  }
-  return `${(fileSize / 1e9).toFixed(2)}GB`;
+  return `${value.toFixed(decimals)}${units[unitIdx]}`;
 };
 
 const getInstanceData = async (server, username) => {
