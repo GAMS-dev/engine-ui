@@ -15,6 +15,14 @@ export const parseEnvObject = (text) => {
   }
 };
 
+// Engine only takes strings; nested values keep their JSON form.
+export const envValueToString = (value) => {
+  if (value == null) {
+    return '';
+  }
+  return typeof value === 'object' ? JSON.stringify(value) : String(value);
+};
+
 // Pasted text as `[key, value]` pairs, or null when it's an ordinary value
 // that should paste normally. Takes a JSON object (so one job's env pastes
 // into the next) or `.env` lines, incl. `export `, `#` comments and quotes.
@@ -27,8 +35,8 @@ export const parseEnvText = (text) => {
     const parsed = parseEnvObject(trimmed);
     if (parsed) {
       return Object.entries(parsed).map(([key, value]) => [
-        String(key),
-        value == null ? '' : String(value),
+        key,
+        envValueToString(value),
       ]);
     }
     // Not JSON after all - read it as KEY=VALUE lines instead.

@@ -62,6 +62,18 @@ describe('EnvironmentVariablesSelector', () => {
     expect(lastEmit(onChange)).toEqual(['{"FOO":"bar"}', true]);
   });
 
+  it('seeds nested values as JSON', () => {
+    render(
+      <EnvironmentVariablesSelector
+        initialEnv={{ OPTS: { threads: 4 }, LIST: ['a', 'b'] }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(valueField(1)).toHaveValue('{"threads":4}');
+    expect(valueField(2)).toHaveValue('["a","b"]');
+  });
+
   it('seeds from a JSON string just as well as from an object', () => {
     const onChange = vi.fn();
     render(
@@ -281,6 +293,39 @@ describe('EnvironmentVariablesSelector', () => {
           true,
         ]),
       );
+    });
+
+    it('keeps the last value of a name the paste repeats', async () => {
+      const onChange = vi.fn();
+      render(<EnvironmentVariablesSelector onChange={onChange} />);
+
+      await user.click(
+        screen.getByRole('button', { name: /Add environment variable/i }),
+      );
+      nameField(1).focus();
+      await user.paste('FOO=1\nBAR=x\nFOO=2');
+
+      await waitFor(() =>
+        expect(lastEmit(onChange)).toEqual(['{"FOO":"2","BAR":"x"}', true]),
+      );
+      expect(screen.queryByLabelText('Environment variable 3 name')).toBeNull();
+    });
+
+    it('keeps nested JSON values as JSON rather than mangling them', async () => {
+      const onChange = vi.fn();
+      render(<EnvironmentVariablesSelector onChange={onChange} />);
+
+      await user.click(
+        screen.getByRole('button', { name: /Add environment variable/i }),
+      );
+      nameField(1).focus();
+      await user.paste(
+        '{ "GAMS_OPTS": {"threads": 4}, "SCENARIOS": ["base", "high"] }',
+      );
+
+      await waitFor(() => expect(valueField(1)).toHaveValue('{"threads":4}'));
+      expect(valueField(2)).toHaveValue('["base","high"]');
+      expect(lastEmit(onChange)[1]).toBe(true);
     });
 
     it('pastes an ordinary name normally, without trying to split it', async () => {

@@ -4,6 +4,7 @@ import { Info, Plus, X } from 'lucide-react';
 import {
   MAX_ENV_VARS,
   INVALID_ENV_KEY_CHARS,
+  envValueToString,
   parseEnvText,
   parseEnvObject,
 } from '../util/envVars';
@@ -53,7 +54,7 @@ const rowsFromEnv = (env) => {
     return [];
   }
   return Object.entries(source).map(([key, value]) =>
-    makeRow(String(key), value == null ? '' : String(value)),
+    makeRow(key, envValueToString(value)),
   );
 };
 
@@ -119,11 +120,9 @@ const EnvironmentVariablesSelector = ({
 
   const addRow = useCallback(() => {
     setNoticeMsg('');
-    setRows((prev) => {
-      const row = makeRow();
-      rowToFocusRef.current = row.id;
-      return [...prev, row];
-    });
+    const row = makeRow();
+    rowToFocusRef.current = row.id;
+    setRows((prev) => [...prev, row]);
   }, []);
 
   const removeRow = useCallback((id) => {
@@ -132,43 +131,41 @@ const EnvironmentVariablesSelector = ({
     setRows((prev) => prev.filter((row) => row.id !== id));
   }, []);
 
-  // A pasted name another row already carries updates that row in place
-  // (rather than making a duplicate for the user to resolve); the rest
-  // replace the row pasted into. `targetId` is null on the empty state,
-  // where there's nothing to replace and everything is appended.
+  // A name already present (in a row or earlier in this paste) is updated in
+  // place; the rest replace the row pasted into, or append if `targetId` is null.
   const applyPastedPairs = (targetId, pairs) => {
-    setRows((prev) => {
-      const copies = prev.map((row) => ({ ...row }));
-      const targetIdx =
-        targetId == null ? -1 : copies.findIndex((row) => row.id === targetId);
-      const before = targetIdx === -1 ? copies : copies.slice(0, targetIdx);
-      const after = targetIdx === -1 ? [] : copies.slice(targetIdx + 1);
-      const kept = [...before, ...after];
+    const copies = rows.map((row) => ({ ...row }));
+    const targetIdx =
+      targetId == null ? -1 : copies.findIndex((row) => row.id === targetId);
+    const before = targetIdx === -1 ? copies : copies.slice(0, targetIdx);
+    const after = targetIdx === -1 ? [] : copies.slice(targetIdx + 1);
+    const kept = [...before, ...after];
 
-      const pasted = [];
-      let dropped = 0;
-      pairs.forEach(([key, value]) => {
-        const existing = kept.find((row) => row.key.trim() === key);
-        if (existing) {
-          existing.value = value;
-          return;
-        }
-        const wouldCount =
-          kept.filter((row) => !isBlankRow(row)).length + pasted.length;
-        if (wouldCount >= MAX_ENV_VARS) {
-          dropped += 1;
-          return;
-        }
-        pasted.push(makeRow(key, value));
-      });
-
-      setNoticeMsg(
-        dropped > 0
-          ? `Only the first ${MAX_ENV_VARS} variables were kept - ${dropped} more didn't fit.`
-          : '',
+    const pasted = [];
+    let dropped = 0;
+    pairs.forEach(([key, value]) => {
+      const existing = [...kept, ...pasted].find(
+        (row) => row.key.trim() === key,
       );
-      return [...before, ...pasted, ...after];
+      if (existing) {
+        existing.value = value;
+        return;
+      }
+      const wouldCount =
+        kept.filter((row) => !isBlankRow(row)).length + pasted.length;
+      if (wouldCount >= MAX_ENV_VARS) {
+        dropped += 1;
+        return;
+      }
+      pasted.push(makeRow(key, value));
     });
+
+    setRows([...before, ...pasted, ...after]);
+    setNoticeMsg(
+      dropped > 0
+        ? `Only the first ${MAX_ENV_VARS} variables were kept - ${dropped} more didn't fit.`
+        : '',
+    );
   };
 
   const handlePaste = (event, rowId) => {
