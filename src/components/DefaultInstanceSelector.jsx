@@ -56,9 +56,12 @@ const DefaultInstanceSelector = ({ className }) => {
     }
     setIsSubmitting(true);
     try {
-      await axios.put(`${server}/usage/instances/${username}/default`, {
-        default_label: newDefaultInstance.value,
-      });
+      await axios.put(
+        `${server}/usage/instances/${encodeURIComponent(username)}/default`,
+        {
+          default_label: newDefaultInstance.value,
+        },
+      );
       setNewDefaultInstance(newDefaultInstance);
     } catch (err) {
       setAlertMsg(

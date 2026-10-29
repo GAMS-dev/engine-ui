@@ -231,13 +231,13 @@ const Usage = () => {
 
           const metadata = {
             job_usage: {
-              url: `${server}/v2/usage/${userToEdit}/jobs`,
+              url: `${server}/v2/usage/${encodeURIComponent(userToEdit)}/jobs`,
             },
             hypercube_job_usage: {
-              url: `${server}/v2/usage/${userToEdit}/hypercube`,
+              url: `${server}/v2/usage/${encodeURIComponent(userToEdit)}/hypercube`,
             },
             pool_usage: {
-              url: `${server}/v2/usage/${userToEdit}/pools`,
+              url: `${server}/v2/usage/${encodeURIComponent(userToEdit)}/pools`,
             },
           };
 

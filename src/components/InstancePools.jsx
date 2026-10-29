@@ -42,7 +42,7 @@ const InstancePools = () => {
       setIsLoading(true);
       try {
         const instancePoolData = await axios.get(
-          `${server}/usage/pools/${username}`,
+          `${server}/usage/pools/${encodeURIComponent(username)}`,
         );
         if (roles?.includes('inviter') === true) {
           const userInvitees = await axios.get(`${server}/users/`);
