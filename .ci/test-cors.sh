@@ -123,6 +123,9 @@ printf '%s' "$config" | grep -q "BASE_URL: \"$MOUNT_PATH\"" ||
 cache=$(header_value "Cache-Control" "$config")
 [ "$cache" = "no-store, max-age=0" ] ||
   fail "expected env-config.js to be uncached, got Cache-Control='$cache'"
+nosniff=$(header_value "X-Content-Type-Options" "$config")
+[ "$nosniff" = "nosniff" ] ||
+  fail "expected env-config.js to keep the server's security headers"
 
 echo "- the page gets the mount path as its <base> and is never cached"
 page=$(curl -s --max-time 5 -D - "$BASE_URL$MOUNT_PATH")
