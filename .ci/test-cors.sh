@@ -37,7 +37,7 @@ header_value() {
 # the deployment), so a nonexistent uwsgi upstream is fine: the CORS
 # headers are added at server level with `always`, so they land even on
 # the resulting 502.
-run_container() {
+start_container() {
   cleanup
   docker run -d --name "$CONTAINER_NAME" \
     -p "$PORT:8080" \
@@ -49,7 +49,10 @@ run_container() {
     -e BASE_URL="$MOUNT_PATH" \
     "$@" \
     "$IMAGE_TAG" >/dev/null
+}
 
+run_container() {
+  start_container "$@"
   for _ in $(seq 1 30); do
     if curl -fso /dev/null --max-time 2 "$BASE_URL${MOUNT_PATH}env-config.js"; then
       return 0
@@ -57,6 +60,17 @@ run_container() {
     sleep 0.5
   done
   fail "nginx never became ready"
+}
+
+# $1: variable name, $2: a value boot.sh must refuse to write into
+# env-config.js. The container has to exit on its own, with boot.sh's error.
+expect_rejected() {
+  start_container -e "$1=$2"
+  status=$(timeout 30 docker wait "$CONTAINER_NAME") ||
+    fail "container kept running with an unsafe $1"
+  [ "$status" != "0" ] || fail "container exited cleanly with an unsafe $1"
+  docker logs "$CONTAINER_NAME" 2>&1 | grep -q "$1 must not contain" ||
+    fail "expected boot.sh to reject the unsafe $1"
 }
 
 echo "Building the production image..."
@@ -134,6 +148,17 @@ printf '%s' "$page" | grep -q "<base href=\"$MOUNT_PATH\">" ||
 cache=$(header_value "Cache-Control" "$page")
 [ "$cache" = "no-store, max-age=0" ] ||
   fail "expected the page to be uncached, got Cache-Control='$cache'"
+
+echo "=== Unsafe runtime config values ==="
+echo "- a quote in ENGINE_URL stops the container"
+expect_rejected ENGINE_URL '/api";alert(1)//'
+echo "- a single quote in BASE_URL stops the container"
+expect_rejected BASE_URL "/engine-ui/'; return 200 'x"
+echo "- a backslash in BASE_URL stops the container"
+expect_rejected BASE_URL "/engine-ui\\"
+echo "- a line break in BASE_URL stops the container"
+expect_rejected BASE_URL '/engine-ui/
+'
 
 cleanup
 echo "All checks passed."
