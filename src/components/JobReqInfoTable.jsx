@@ -78,7 +78,7 @@ const JobReqInfoTable = ({
     try {
       setJobTagUpdating(true);
       await axios.put(
-        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/tag`,
+        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${encodeURIComponent(job.token)}/tag`,
         {
           tag: tmpJobTag,
         },
@@ -167,7 +167,7 @@ const JobReqInfoTable = ({
         newAccessGroupsForm.append('access_groups', group.value);
       });
       await axios.put(
-        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${job.token}/access-groups`,
+        `${server}/${isHcJob ? 'hypercube' : 'jobs'}/${encodeURIComponent(job.token)}/access-groups`,
         newAccessGroupsForm,
       );
       setRefreshJob((refresh) => refresh + 1);

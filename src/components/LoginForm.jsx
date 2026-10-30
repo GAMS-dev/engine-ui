@@ -518,7 +518,7 @@ const LoginForm = ({ showRegistrationForm }) => {
     const fetchInvitationCodeMetadata = async () => {
       try {
         const response = await axios.get(
-          `${SERVER_NAME}/users/invitation/${invitationCode}`,
+          `${SERVER_NAME}/users/invitation/${encodeURIComponent(invitationCode)}`,
         );
         if (response.data.identity_provider == null) {
           setLoginErrorMsg(
