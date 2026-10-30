@@ -122,7 +122,7 @@ describe('JobTimingInfoBar', () => {
     ).toBeInTheDocument();
   });
 
-  it('refreshes the queue position for a queued job outside of kubernetes', async () => {
+  it('refreshes the queue position for a queued job', async () => {
     axios.get.mockImplementation((url) => {
       switch (url) {
         case 'testserver/usage/':
@@ -162,13 +162,7 @@ describe('JobTimingInfoBar', () => {
         setQueuePosition={setQueuePosition}
         setJobStatus={setJobStatus}
       />,
-      {
-        wrapper: ({ children }) => (
-          <AllProvidersWrapperDefault options={{ in_kubernetes: false }}>
-            {children}
-          </AllProvidersWrapperDefault>
-        ),
-      },
+      { wrapper: AllProvidersWrapperDefault },
     );
 
     await waitFor(() => {

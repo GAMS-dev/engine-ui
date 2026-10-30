@@ -76,17 +76,16 @@ const JobSubmissionForm = ({ newHcJob }) => {
   const [tolerations, setTolerations] = useState('');
   const [nodeSelectors, setNodeSelectors] = useState('');
   const [instance, setInstance] = useState('');
-  const [priority, setPriority] = useState({
-    value: 'medium',
-    label: 'medium',
-  });
+  const [priority, setPriority] = useState(null);
   const [jobPosted, setJobPosted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accessGroups, setAccessGroups] = useState([]);
 
+  // in Engine K, only jobs in instance pools can have a priority
   const prioritiesEnabled =
-    serverInfo.in_kubernetes !== true &&
-    serverConfig.job_priorities_access === 'ENABLED';
+    serverConfig.job_priorities_access === 'ENABLED' &&
+    (serverInfo.in_kubernetes !== true ||
+      (!useRawRequests && instance?.isPool === true));
 
   useEffect(() => {
     const getData = async () => {
@@ -349,7 +348,8 @@ const JobSubmissionForm = ({ newHcJob }) => {
         { key: 'text_entries', value: textEntries },
         { key: 'stream_entries', value: streamEntries },
       ]);
-      if (prioritiesEnabled) {
+      // without a selection, the server assigns its default priority
+      if (prioritiesEnabled && priority != null) {
         jobSubmissionForm.append('priority', priority.value);
       }
     }
@@ -900,7 +900,8 @@ const JobSubmissionForm = ({ newHcJob }) => {
                         <label htmlFor="priority">Priority</label>
                         <Select
                           inputId="priority"
-                          isClearable={false}
+                          isClearable={true}
+                          placeholder="Default"
                           value={priority}
                           isSearchable={true}
                           onChange={(selected) => setPriority(selected)}

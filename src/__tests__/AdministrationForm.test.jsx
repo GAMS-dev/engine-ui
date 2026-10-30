@@ -13,4 +13,20 @@ describe('AdministrationForm', () => {
     });
     await waitFor(() => screen.findByText(/Administration/));
   });
+
+  it.each([true, false])(
+    'shows the job priorities toggle (in_kubernetes: %s)',
+    async (in_kubernetes) => {
+      render(<AdministrationForm />, {
+        wrapper: ({ children }) => (
+          <AllProvidersWrapperDefault options={{ in_kubernetes }}>
+            {children}
+          </AllProvidersWrapperDefault>
+        ),
+      });
+      expect(
+        await screen.findByRole('button', { name: /Enable job priorities/ }),
+      ).toBeInTheDocument();
+    },
+  );
 });

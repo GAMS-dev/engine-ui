@@ -201,6 +201,7 @@ const formatInstancesSelectInput = (instances, multiplierUnit) => {
     .map((instance) => ({
       value: instance.label,
       multiplier: instance.multiplier,
+      isPool: instance.is_pool === true,
       label:
         instance.is_pool === true ? (
           <>

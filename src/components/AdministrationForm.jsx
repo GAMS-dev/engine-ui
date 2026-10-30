@@ -25,9 +25,7 @@ const AdministrationForm = ({ setLicenseExpiration }) => {
           </div>
           <div className="btn-group">
             <UpdatePasswordPolicyButton />
-            {serverInfo.in_kubernetes !== true && (
-              <ToggleConfigOptionButton configKey="job_priorities_access" />
-            )}
+            <ToggleConfigOptionButton configKey="job_priorities_access" />
           </div>
         </div>
       </div>

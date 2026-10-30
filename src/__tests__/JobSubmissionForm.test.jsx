@@ -445,7 +445,7 @@ describe('JobSubmissionForm', () => {
     expect(formData.getAll('labels')).toEqual([]);
   });
 
-  it('shows and submits the priority selector when priorities are enabled', async () => {
+  it('shows the priority selector and leaves the default priority to the server', async () => {
     mockAxiosGet();
     axios.post.mockResolvedValue({ data: {} });
 
@@ -471,7 +471,7 @@ describe('JobSubmissionForm', () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     const formData = axios.post.mock.calls[0][1];
-    expect(formData.get('priority')).toBe('medium');
+    expect(formData.get('priority')).toBeNull();
   });
 
   it('submits an uploaded non-zip model file, deriving and slicing the .gms model name', async () => {
@@ -1326,5 +1326,64 @@ describe('JobSubmissionForm', () => {
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     const formData = axios.post.mock.calls[0][1];
     expect(formData.get('priority')).toBe('high');
+  });
+
+  const renderWithPrioritiesInKubernetes = () =>
+    render(<JobSubmissionForm />, {
+      wrapper: ({ children }) => (
+        <AllProvidersWrapperDefault
+          options={{ serverConfig: { job_priorities_access: 'ENABLED' } }}
+        >
+          {children}
+        </AllProvidersWrapperDefault>
+      ),
+    });
+
+  it('submits a priority for jobs in an instance pool in Kubernetes', async () => {
+    mockAxiosGet({
+      'testserver/usage/pools/admin': () =>
+        Promise.resolve({
+          status: 200,
+          data: {
+            instance_pools_available: [
+              {
+                label: 'my_pool',
+                instance: {
+                  cpu_request: 1,
+                  memory_request: 100,
+                  multiplier: 1,
+                },
+              },
+            ],
+          },
+        }),
+      'testserver/usage/instances/admin/default': () =>
+        Promise.resolve({
+          status: 200,
+          data: { default_instance: { label: 'my_pool' } },
+        }),
+    });
+    axios.post.mockResolvedValue({ data: {} });
+    renderWithPrioritiesInKubernetes();
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+    await user.click(screen.getByLabelText(/Use a Registered Model\?/i));
+    await selectEvent.select(screen.getByLabelText(/^Priority$/i), 'high');
+    await user.click(screen.getByRole('button', { name: /Submit Job/i }));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    const formData = axios.post.mock.calls[0][1];
+    expect(formData.getAll('labels')).toEqual(['instance=my_pool']);
+    expect(formData.get('priority')).toBe('high');
+  });
+
+  it('hides the priority selector for jobs outside instance pools in Kubernetes', async () => {
+    mockAxiosGet();
+    renderWithPrioritiesInKubernetes();
+
+    await waitFor(() => screen.findByText(/Submit Job/));
+    await user.click(screen.getByRole('button', { name: /Advanced Options/i }));
+    expect(screen.queryByText(/^Priority$/i)).not.toBeInTheDocument();
   });
 });

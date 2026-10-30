@@ -35,6 +35,8 @@ describe('JobRespInfoTable', () => {
     vi.clearAllMocks();
     axios.get.mockImplementation((url) => {
       switch (url) {
+        case 'testserver/jobs/token123':
+          return Promise.resolve({ status: 200, data: { queue_position: 2 } });
         case 'testserver/usage/':
           return Promise.resolve({
             status: 200,

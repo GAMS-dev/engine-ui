@@ -63,18 +63,13 @@ const JobTimingInfoBar = ({
         setAlertMsg('A problem occurred while retrieving job progress info.');
         return;
       }
-      if (data.status === 0 && serverInfo.in_kubernetes !== true) {
-        // refresh queue position
+      if (data.status === 0 && !isHcJob) {
+        // refresh queue position (Hypercube jobs have none)
         let jqReq;
         try {
           jqReq = await axios.get(
-            isHcJob
-              ? `${server}/hypercube/`
-              : `${server}/jobs/${encodeURIComponent(token)}`,
-            {
-              params: isHcJob ? { hypercube_token: token } : null,
-              headers: { 'X-Fields': 'queue_position' },
-            },
+            `${server}/jobs/${encodeURIComponent(token)}`,
+            { headers: { 'X-Fields': 'queue_position' } },
           );
         } catch (err) {
           console.error(
