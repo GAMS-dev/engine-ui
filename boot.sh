@@ -1,8 +1,8 @@
 #!/bin/sh
 
 if [ -z "${ENGINE_URL+x}" ]; then
-  echo "ENGINE_URL is unset, using default /api"
-  export ENGINE_URL=/api
+  export ENGINE_URL="${mount_api_url:-/api}"
+  echo "ENGINE_URL is unset, using default $ENGINE_URL"
 fi
 
 # Both go into JS string literals below, and BASE_URL also into the nginx

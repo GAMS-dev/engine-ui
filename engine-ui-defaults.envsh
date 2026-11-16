@@ -21,9 +21,14 @@ else
   export LIMIT_REQ_KEY='$binary_remote_addr'
 fi
 
+: "${mount_url:=/}"
+: "${mount_api_url:=${mount_url%/}/api}"
+: "${uwsgi_pass_url:=broker:5000}"
+export mount_url mount_api_url uwsgi_pass_url
+
 if [ -z "${BASE_URL+x}" ]; then
-  echo "BASE_URL is unset, using default /"
-  export BASE_URL=/
+  echo "BASE_URL is unset, using default $mount_url"
+  export BASE_URL="$mount_url"
 fi
 case "$BASE_URL" in
   */) ;;

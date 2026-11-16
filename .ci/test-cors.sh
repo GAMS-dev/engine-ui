@@ -33,10 +33,8 @@ header_value() {
 }
 
 # $@: extra `docker run -e ...` args, e.g. `-e CORS_ALLOWED_ORIGINS=...`.
-# The app-specific vars below aren't set anywhere in this repo (supplied by
-# the deployment), so a nonexistent uwsgi upstream is fine: the CORS
-# headers are added at server level with `always`, so they land even on
-# the resulting 502.
+# A nonexistent uwsgi upstream is fine: the CORS headers are added at server
+# level with `always`, so they land even on the resulting 502.
 start_container() {
   cleanup
   docker run -d --name "$CONTAINER_NAME" \
@@ -44,7 +42,6 @@ start_container() {
     -e ENGINE_HTTP_PORT=8080 \
     -e mount_api_url=/api \
     -e uwsgi_pass_url=127.0.0.1:9999 \
-    -e root_url=/usr/share/nginx/engine \
     -e mount_url="$MOUNT_PATH" \
     -e BASE_URL="$MOUNT_PATH" \
     "$@" \
