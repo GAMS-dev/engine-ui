@@ -1,7 +1,7 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@eslint/js@^10.0.1": "10.0.1_eslint@10.13.0",
+    "npm:@eslint/js@^10.0.1": "10.0.1_eslint@10.15.0",
     "npm:@mantine/core@^9.7.4": "9.7.4_@mantine+hooks@9.7.4_react@19.3.1_react-dom@19.3.1",
     "npm:@mantine/dates@^9.7.4": "9.7.4_@mantine+core@9.7.4_@mantine+hooks@9.7.4_dayjs@1.11.23_react@19.3.1_react-dom@19.3.1",
     "npm:@mantine/hooks@^9.7.4": "9.7.4_react@19.3.1",
@@ -11,7 +11,7 @@
     "npm:@types/node@^26.6.5": "26.6.5",
     "npm:@vitejs/plugin-react@^6.1.2": "6.1.2_vite@8.3.5_sass@1.106.1",
     "npm:@vitest/coverage-v8@^4.1.12": "4.1.12_vitest@4.1.12_@types+node@26.6.5_jsdom@30.1.3_vite@8.3.5",
-    "npm:axios@^1.21.0": "1.21.0",
+    "npm:axios@^1.21.1": "1.21.1",
     "npm:bootstrap@^5.3.8": "5.3.8_@popperjs+core@2.11.8",
     "npm:canvas@^3.2.3": "3.2.3",
     "npm:chart.js@^4.6.1": "4.6.1",
@@ -19,11 +19,11 @@
     "npm:chartjs-plugin-zoom@^2.2.0": "2.2.0_chart.js@4.6.1",
     "npm:date-fns@^4.4.0": "4.4.0",
     "npm:dayjs@^1.11.23": "1.11.23",
-    "npm:eslint-plugin-no-unsanitized@^4.1.5": "4.1.5_eslint@10.13.0",
-    "npm:eslint-plugin-react-hooks@^7.1.1": "7.1.1_eslint@10.13.0",
-    "npm:eslint-plugin-react-refresh@~0.5.7": "0.5.7_eslint@10.13.0",
-    "npm:eslint-plugin-react@^7.37.5": "7.37.5_eslint@10.12.0",
-    "npm:eslint@^10.13.0": "10.13.0",
+    "npm:eslint-plugin-no-unsanitized@^4.1.5": "4.1.5_eslint@10.15.0",
+    "npm:eslint-plugin-react-hooks@^7.1.1": "7.1.1_eslint@10.15.0",
+    "npm:eslint-plugin-react-refresh@~0.5.7": "0.5.7_eslint@10.15.0",
+    "npm:eslint-plugin-react@^7.37.5": "7.37.5_eslint@10.15.0",
+    "npm:eslint@^10.15.0": "10.15.0",
     "npm:globals@^17.13.0": "17.13.0",
     "npm:jsdom@^30.1.3": "30.1.3_canvas@3.2.3",
     "npm:jszip@^3.10.2": "3.10.2",
@@ -328,28 +328,22 @@
     "@emotion/weak-memoize@0.4.0": {
       "integrity": "sha512-snKqtPW01tN0ui7yu9rGv69aJXr/a/Ywvl11sUjNtEcRc+ng/mQriFL0wLXMef74iHa/EkftbDzU9F8iFbH+zg=="
     },
-    "@eslint-community/eslint-utils@4.10.1_eslint@10.12.0": {
+    "@eslint-community/eslint-utils@4.10.1_eslint@10.15.0": {
       "integrity": "sha512-cuadcxVFE8sDK6iWJbs8Sn0av2Nrh2QSGQhVlBW9AaAHqHwjWsZHT8LJ4hFGPh7ASBV2deFdM7H/DPjulmh8rg==",
       "dependencies": [
-        "eslint-visitor-keys@3.4.3"
-      ]
-    },
-    "@eslint-community/eslint-utils@4.10.1_eslint@10.13.0": {
-      "integrity": "sha512-cuadcxVFE8sDK6iWJbs8Sn0av2Nrh2QSGQhVlBW9AaAHqHwjWsZHT8LJ4hFGPh7ASBV2deFdM7H/DPjulmh8rg==",
-      "dependencies": [
-        "eslint@10.13.0",
+        "eslint",
         "eslint-visitor-keys@3.4.3"
       ]
     },
     "@eslint-community/regexpp@4.12.2": {
       "integrity": "sha512-EriSTlt5OC9/7SXkRSCAhfSxxoSUgBm33OH+IkwbdpgoqsSsUg7y3uh+IICI/Qg4BBWr3U2i39RpmycbxMq4ew=="
     },
-    "@eslint/config-array@0.23.5": {
-      "integrity": "sha512-Y3kKLvC1dvTOT+oGlqNQ1XLqK6D1HU2YXPc52NmAlJZbMMWDzGYXMiPRJ8TYD39muD/OTjlZmNJ4ib7dvSrMBA==",
+    "@eslint/config-array@0.23.6": {
+      "integrity": "sha512-WrTH7nioI9QPY4NZGnsywmecswJdgeq4BCM76qok9VgjTO29ZgUzUvcuJLVPYVQM4uDbaPBU0M33R9DIxI8X3w==",
       "dependencies": [
         "@eslint/object-schema",
         "debug",
-        "minimatch@10.2.6"
+        "minimatch@11.0.9"
       ]
     },
     "@eslint/config-helpers@0.7.0": {
@@ -364,13 +358,13 @@
         "@types/json-schema"
       ]
     },
-    "@eslint/js@10.0.1_eslint@10.13.0": {
+    "@eslint/js@10.0.1_eslint@10.15.0": {
       "integrity": "sha512-zeR9k5pd4gxjZ0abRoIaxdc7I3nDktoXZk2qOv9gCNWx3mVwEn32VRhyLaRsDiJjTs0xq/T8mfPtyuXu7GWBcA==",
       "dependencies": [
-        "eslint@10.13.0"
+        "eslint"
       ],
       "optionalPeers": [
-        "eslint@10.13.0"
+        "eslint"
       ]
     },
     "@eslint/object-schema@3.0.5": {
@@ -460,6 +454,9 @@
       "dependencies": [
         "@swc/helpers"
       ]
+    },
+    "@isaacs/nonrecursive-glob-match@1.1.0": {
+      "integrity": "sha512-GPm/Dbvk5RLmhRnxXIa7nTpK0xtl4E0wj0MslsuNiJ1FIROU+2+9lgUC/dgF7Ey4QCWhfEsgxilMRMCdHPfDfw=="
     },
     "@jridgewell/gen-mapping@0.3.13": {
       "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
@@ -1072,8 +1069,8 @@
         "possible-typed-array-names"
       ]
     },
-    "axios@1.21.0": {
-      "integrity": "sha512-YCzXMB53Q9PZBsh7yN7wtapit4WepwcHS2fP8QhGsBxSz5YtgYobV7GGlWlAJi+RxfU77GQTQi2DSLUma42EYA==",
+    "axios@1.21.1": {
+      "integrity": "sha512-6eI5Q/Y4u/Um9dDlsRoq5pY2rxnUTv+L4PpLitnbk/i4jb3MxLZ5CsN5Ih3IysbeRYK4pR+P7qfMsOQl9fwwFQ==",
       "dependencies": [
         "follow-redirects",
         "form-data",
@@ -1551,30 +1548,30 @@
     "escape-string-regexp@4.0.0": {
       "integrity": "sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA=="
     },
-    "eslint-plugin-no-unsanitized@4.1.5_eslint@10.13.0": {
+    "eslint-plugin-no-unsanitized@4.1.5_eslint@10.15.0": {
       "integrity": "sha512-MSB4hXPVFQrI8weqzs6gzl7reP2k/qSjtCoL2vUMSDejIIq9YL1ZKvq5/ORBXab/PvfBBrWO2jWviYpL+4Ghfg==",
       "dependencies": [
-        "eslint@10.13.0"
+        "eslint"
       ]
     },
-    "eslint-plugin-react-hooks@7.1.1_eslint@10.13.0": {
+    "eslint-plugin-react-hooks@7.1.1_eslint@10.15.0": {
       "integrity": "sha512-f2I7Gw6JbvCexzIInuSbZpfdQ44D7iqdWX01FKLvrPgqxoE7oMj8clOfto8U6vYiz4yd5oKu39rRSVOe1zRu0g==",
       "dependencies": [
         "@babel/core",
         "@babel/parser",
-        "eslint@10.13.0",
+        "eslint",
         "hermes-parser",
         "zod",
         "zod-validation-error"
       ]
     },
-    "eslint-plugin-react-refresh@0.5.7_eslint@10.13.0": {
+    "eslint-plugin-react-refresh@0.5.7_eslint@10.15.0": {
       "integrity": "sha512-XhJSzLljuYD4UjNuFGJu2v7aD3sqNVK12w5/DCUfrNfHWegZo2+TsavNx8MuxMwEquuFAzNbNfXKU0WoZ+YUIg==",
       "dependencies": [
-        "eslint@10.13.0"
+        "eslint"
       ]
     },
-    "eslint-plugin-react@7.37.5_eslint@10.12.0": {
+    "eslint-plugin-react@7.37.5_eslint@10.15.0": {
       "integrity": "sha512-Qteup0SqU15kdocexFNAJMvCJEfa2xUKNV4CC1xsVMrIIqEy3SQ/rqyxCWNzfrd3/ldy6HMlD2e0JDVpDg2qIA==",
       "dependencies": [
         "array-includes",
@@ -1583,7 +1580,7 @@
         "array.prototype.tosorted",
         "doctrine",
         "es-iterator-helpers",
-        "eslint@10.12.0",
+        "eslint",
         "estraverse",
         "hasown",
         "jsx-ast-utils",
@@ -1613,10 +1610,10 @@
     "eslint-visitor-keys@5.0.1": {
       "integrity": "sha512-tD40eHxA35h0PEIZNeIjkHoDR4YjjJp34biM0mDvplBe//mB+IHCqHDGV7pxF+7MklTvighcCPPZC7ynWyjdTA=="
     },
-    "eslint@10.12.0": {
-      "integrity": "sha512-npHjrHb2o4ehH3mE+YuxABR+0gyb0aVWCIolgJDArwCiHEIsonBm3ZKjel5b0U5+a+MbEvIyRCGCzD3eKKK2NA==",
+    "eslint@10.15.0": {
+      "integrity": "sha512-+5Wg4p+ze3sG1WErYgUO/3H1IQIfFBymVUA0Fo/XTeBOLS6UQIUekpSJ8sdRkn7O7wjh84b55w/roqavH2aScg==",
       "dependencies": [
-        "@eslint-community/eslint-utils@4.10.1_eslint@10.12.0",
+        "@eslint-community/eslint-utils",
         "@eslint-community/regexpp",
         "@eslint/config-array",
         "@eslint/config-helpers",
@@ -1643,43 +1640,7 @@
         "imurmurhash",
         "is-glob",
         "json-stable-stringify-without-jsonify",
-        "minimatch@10.2.6",
-        "natural-compare",
-        "optionator"
-      ],
-      "bin": true
-    },
-    "eslint@10.13.0": {
-      "integrity": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
-      "dependencies": [
-        "@eslint-community/eslint-utils@4.10.1_eslint@10.13.0",
-        "@eslint-community/regexpp",
-        "@eslint/config-array",
-        "@eslint/config-helpers",
-        "@eslint/core",
-        "@eslint/plugin-kit",
-        "@humanfs/node",
-        "@humanwhocodes/module-importer",
-        "@humanwhocodes/retry",
-        "@types/estree",
-        "ajv",
-        "cross-spawn",
-        "debug",
-        "escape-string-regexp",
-        "eslint-scope",
-        "eslint-visitor-keys@5.0.1",
-        "espree",
-        "esquery",
-        "esutils",
-        "fast-deep-equal",
-        "file-entry-cache",
-        "find-up",
-        "glob-parent",
-        "ignore",
-        "imurmurhash",
-        "is-glob",
-        "json-stable-stringify-without-jsonify",
-        "minimatch@10.2.6",
+        "minimatch@11.0.9",
         "natural-compare",
         "optionator"
       ],
@@ -1771,8 +1732,8 @@
     "flatted@3.4.4": {
       "integrity": "sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q=="
     },
-    "follow-redirects@1.16.1": {
-      "integrity": "sha512-FNvFGzoMLWmE6Yj9spb/zjd7yiNCHiAW9/Tg9CXrQ8wuu32HtlJOwWO11OJafl5FfY3DxTdQ0vj42zU1kvv5jg=="
+    "follow-redirects@1.16.3": {
+      "integrity": "sha512-toOSoqN6d51Wjf1aOFJYcoVv1aND9rj/CwjLU0Vz40oDuSpWDayCeKe4JpL5NL0WdFvoOOCI3BRo69HahjbR1A=="
     },
     "for-each@0.3.5": {
       "integrity": "sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==",
@@ -2452,9 +2413,10 @@
     "min-indent@1.0.1": {
       "integrity": "sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg=="
     },
-    "minimatch@10.2.6": {
-      "integrity": "sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==",
+    "minimatch@11.0.9": {
+      "integrity": "sha512-KCFkfyjqerNlSstjlhIGNXIKZGA/6O4V4RlhZ+Dsr621SPPw0mzlypE9D9ZOoPiVefHID+j7/XuMMlqfD/F60Q==",
       "dependencies": [
+        "@isaacs/nonrecursive-glob-match",
         "brace-expansion"
       ]
     },
@@ -3662,7 +3624,7 @@
         "npm:@types/node@^26.6.5",
         "npm:@vitejs/plugin-react@^6.1.2",
         "npm:@vitest/coverage-v8@^4.1.12",
-        "npm:axios@^1.21.0",
+        "npm:axios@^1.21.1",
         "npm:bootstrap@^5.3.8",
         "npm:canvas@^3.2.3",
         "npm:chart.js@^4.6.1",
@@ -3674,7 +3636,7 @@
         "npm:eslint-plugin-react-hooks@^7.1.1",
         "npm:eslint-plugin-react-refresh@~0.5.7",
         "npm:eslint-plugin-react@^7.37.5",
-        "npm:eslint@^10.13.0",
+        "npm:eslint@^10.15.0",
         "npm:globals@^17.13.0",
         "npm:jsdom@^30.1.3",
         "npm:jszip@^3.10.2",
