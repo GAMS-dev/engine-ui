@@ -5,7 +5,7 @@ RUN deno install --frozen
 COPY . .
 RUN deno task build
 
-FROM nginx/nginx-unprivileged:1.30-alpine
+FROM nginx/nginx-unprivileged:1.30-alpine-slim
 USER root
 COPY --from=builder /app/build /usr/share/nginx/engine
 RUN apk update && \
